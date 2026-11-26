@@ -4201,7 +4201,7 @@
           "ruleNames": ["sort_key_field"],
           "internal": false,
           "file": "src/spell/rules/lists/SortKeyField.ts",
-          "line": 14,
+          "line": 23,
           "purpose": "A field of what's being sorted, by its name alone (epic `data` P15).",
           "syntaxes": [
             {
@@ -4573,7 +4573,7 @@
           "ruleNames": ["list_sorted_by"],
           "internal": false,
           "file": "src/spell/rules/lists/ListSortedBy.ts",
-          "line": 27,
+          "line": 28,
           "purpose": "A list in order of something about each item (epic `data` P10).",
           "syntaxes": [
             {
@@ -8999,7 +8999,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 143,
+          "line": 154,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -9888,25 +9888,51 @@
           "aliases": ["statement"]
         },
         {
-          "className": "SortsAs",
-          "ruleNames": ["sorts_as"],
+          "className": "SortsByAnyField",
+          "ruleNames": ["sorts_by_any_field"],
           "internal": false,
-          "file": "src/spell/rules/places/SortsAs.ts",
-          "line": 14,
-          "purpose": "An order a web server has a name of its own for, sent as its sort.",
+          "file": "src/spell/rules/places/SortsByAnyField.ts",
+          "line": 26,
+          "purpose": "A web server's list sorts by any field, named in one question.",
           "syntaxes": [
             {
-              "syntax": "{type:subject_it} sorts ((descending:(newest|latest|highest|last) first)|(ascending:(oldest|earliest|lowest) first)) by {field:identifier} as {name:text} (,? with {param:text})?",
-              "example": "cookbook is a web server at \"https://cookbook.test\"\n\t- it sorts newest first by created-at as \"recency\", with \"order_by\"\n\t- it sorts oldest first by created-at as \"created_at\"",
+              "syntax": "{collection:plural_type} can be sorted by any field ,? with {param:text} {nested_statements}?",
+              "example": "cookbook is a web server at \"https://cookbook.test\"\n\t- recipes live at \"/api/recipes\"\n\t\t- recipes can be sorted by any field, with \"sort\"\n\t\t\t- newest first with \"order\" as \"desc\"\n\t\t\t- oldest first with \"order\" as \"asc\"",
               "outputs": {
                 "js": {
-                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://cookbook.test\",\n  sortedWith: \"order_by\",\n  sortOrders: [{\n    field: \"createdAt\",\n    descending: true,\n    as: \"recency\"\n  }, {\n    field: \"createdAt\",\n    descending: false,\n    as: \"created_at\"\n  }]\n})"
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://cookbook.test\",\n  collections: { recipes: {\n    at: \"/api/recipes\",\n    sorts: \"every field\",\n    sortedWith: \"sort\",\n    sortDirections: {\n      param: \"order\",\n      descending: \"desc\",\n      ascending: \"asc\"\n    }\n  } }\n})"
                 },
                 "ts": {
-                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://cookbook.test\",\n  sortedWith: \"order_by\",\n  sortOrders: [{\n    field: \"createdAt\",\n    descending: true,\n    as: \"recency\"\n  }, {\n    field: \"createdAt\",\n    descending: false,\n    as: \"created_at\"\n  }]\n})"
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://cookbook.test\",\n  collections: { recipes: {\n    at: \"/api/recipes\",\n    sorts: \"every field\",\n    sortedWith: \"sort\",\n    sortDirections: {\n      param: \"order\",\n      descending: \"desc\",\n      ascending: \"asc\"\n    }\n  } }\n})"
                 },
                 "py": {
-                  "code": "class Cookbook(Place):\n    pass\n\ncookbook = core.place(\n    Cookbook(),\n    {\n        \"name\": \"cookbook\",\n        \"kind\": \"web server\",\n        \"at\": \"https://cookbook.test\",\n        \"sorted_with\": \"order_by\",\n        \"sort_orders\": [\n            {\"field\": \"createdAt\", \"descending\": True, \"as_\": \"recency\"},\n            {\"field\": \"createdAt\", \"descending\": False, \"as_\": \"created_at\"},\n        ],\n    },\n)"
+                  "code": "class Cookbook(Place):\n    pass\n\ncookbook = core.place(\n    Cookbook(),\n    {\n        \"name\": \"cookbook\",\n        \"kind\": \"web server\",\n        \"at\": \"https://cookbook.test\",\n        \"collections\": {\n            \"recipes\": {\n                \"at\": \"/api/recipes\",\n                \"sorts\": \"every field\",\n                \"sorted_with\": \"sort\",\n                \"sort_directions\": {\"param\": \"order\", \"descending\": \"desc\", \"ascending\": \"asc\"},\n            },\n        },\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "NamedSorts",
+          "ruleNames": ["named_sorts"],
+          "internal": false,
+          "file": "src/spell/rules/places/NamedSorts.ts",
+          "line": 26,
+          "purpose": "The sorts a web server's list has names of its own for, each sent as its value.",
+          "syntaxes": [
+            {
+              "syntax": "{collection:plural_type} can be sorted by :? {nested_statements}",
+              "example": "cookbook is a web server at \"https://cookbook.test\"\n\t- recipes live at \"/api/recipes\"\n\t\t- it sorts with \"order_by\"\n\t\t- recipes can be sorted by:\n\t\t\t- \"creation\" as \"created_at\"\n\t\t\t- \"last cooked\" as \"recency\", by cooked-at",
+              "outputs": {
+                "js": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://cookbook.test\",\n  collections: { recipes: {\n    sortedWith: \"order_by\",\n    at: \"/api/recipes\",\n    sortOrders: [{\n      name: \"creation\",\n      as: \"created_at\",\n      field: \"createdAt\"\n    }, {\n      name: \"lastCooked\",\n      as: \"recency\",\n      field: \"cookedAt\"\n    }]\n  } }\n})"
+                },
+                "ts": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://cookbook.test\",\n  collections: { recipes: {\n    sortedWith: \"order_by\",\n    at: \"/api/recipes\",\n    sortOrders: [{\n      name: \"creation\",\n      as: \"created_at\",\n      field: \"createdAt\"\n    }, {\n      name: \"lastCooked\",\n      as: \"recency\",\n      field: \"cookedAt\"\n    }]\n  } }\n})"
+                },
+                "py": {
+                  "code": "class Cookbook(Place):\n    pass\n\ncookbook = core.place(\n    Cookbook(),\n    {\n        \"name\": \"cookbook\",\n        \"kind\": \"web server\",\n        \"at\": \"https://cookbook.test\",\n        \"collections\": {\n            \"recipes\": {\n                \"sorted_with\": \"order_by\",\n                \"at\": \"/api/recipes\",\n                \"sort_orders\": [\n                    {\"name\": \"creation\", \"as_\": \"created_at\", \"field\": \"createdAt\"},\n                    {\"name\": \"lastCooked\", \"as_\": \"recency\", \"field\": \"cookedAt\"},\n                ],\n            },\n        },\n    },\n)"
                 }
               }
             }
@@ -10504,7 +10530,7 @@
           "ruleNames": ["collection_at"],
           "internal": false,
           "file": "src/spell/rules/places/CollectionAt.ts",
-          "line": 42,
+          "line": 43,
           "purpose": "Where a place keeps a type's things, when it's not where anyone would look.",
           "syntaxes": [
             {
@@ -10718,6 +10744,48 @@
           "syntaxes": [
             {
               "syntax": "{type:subject_its} next page is in its {header:text} header"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SortsWith",
+          "ruleNames": ["sorts_with"],
+          "internal": false,
+          "file": "src/spell/rules/places/SortsWith.ts",
+          "line": 10,
+          "purpose": "What a web server calls its sort, said once, for a list's named sorts (`NamedSorts`).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} sorts with {param:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SortDirection",
+          "ruleNames": ["sort_direction"],
+          "internal": false,
+          "file": "src/spell/rules/places/SortsByAnyField.ts",
+          "line": 68,
+          "purpose": "One line under `jobs can be sorted by any field, with \"sort\"`, `- newest first with \"order\" as \"desc\"`.",
+          "syntaxes": [
+            {
+              "syntax": "((descending:newest first)|(ascending:oldest first)) with {param:text} as {value:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "NamedSort",
+          "ruleNames": ["named_sort"],
+          "internal": false,
+          "file": "src/spell/rules/places/NamedSorts.ts",
+          "line": 63,
+          "purpose": "One line of a `named_sorts` block, `- \"completion\" as \"recency\", by end time`.",
+          "syntaxes": [
+            {
+              "syntax": "{name:text} as {value:text} (, by {field:named_sort_field})?"
             }
           ],
           "aliases": ["statement"]
@@ -11075,6 +11143,16 @@
             }
           ],
           "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "NamedSortField",
+          "ruleNames": ["named_sort_field"],
+          "internal": false,
+          "file": "src/spell/rules/places/NamedSorts.ts",
+          "line": 93,
+          "purpose": "The field a `named_sort` line says, after its `, by`: every word to the line's end.",
+          "syntaxes": [],
+          "aliases": []
         },
         {
           "className": "SearchedFields",

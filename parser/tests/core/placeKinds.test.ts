@@ -112,14 +112,14 @@ describe("placeBehind(), a web server's list saying what it takes, under its own
     })
     const behind = webServerWith({
       filters: ["title"],
-      sortOrders: [{ field: "title", descending: false, as: "by_title" }],
+      sortOrders: [{ name: "alphabetical", field: "title", descending: false, as: "by_title" }],
       collections: {
         recipes: { at: "/recipes" },
         events: {
           at: "/events",
           filters: ["kind"],
           sortedWith: "order_by",
-          sortOrders: [{ field: "created", descending: true, as: "recency" }]
+          sortOrders: [{ name: "newest", field: "created", as: "recency" }]
         }
       }
     })

@@ -369,7 +369,7 @@ export class PlaceSpec {
         const unnamed = takes.orders.filter(({ field }) => field === undefined).map(({ as }) => `"${as}"`)
         if (unnamed.length) {
           this.notes.push(
-            `${path}'s "${name}" takes ${unnamed.join(" and ")}, which name${unnamed.length === 1 ? "s" : ""} no field:  say what each sorts by under its list's line, \`it sorts newest first by <field> as ${unnamed[0]}, with "${name}"\`.`
+            `${path}'s "${name}" takes ${unnamed.join(" and ")}, which name${unnamed.length === 1 ? "s" : ""} no field:  say what each sorts by under its list's line, in \`<things> can be sorted by:\`, \`- "<name>" as ${unnamed[0]}, by <field>\`.`
           )
         }
         continue

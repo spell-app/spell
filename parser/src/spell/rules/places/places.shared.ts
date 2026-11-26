@@ -192,6 +192,14 @@ export function filtersOf(saved: P.SavedPlace | undefined): "every field" | stri
 }
 
 /**
+ * The sorts what's saved in `saved` has names of its own for, at its place:  `measurements can be sorted by:` (`NamedSorts`).
+ * - Its list's own;  empty when no line says any.
+ */
+export function namedSortsOf(saved: P.SavedPlace | undefined): { name: string; as: string; field: string }[] {
+  return placeLinesOf(saved)?.collections?.[saved!.collection]?.sortOrders ?? []
+}
+
+/**
  * Is what's saved in `saved` found only by name, with no list of them all?
  * - e.g. `wiki pages are found at "/page/summary/{name}"` (epic `data` P27)
  */

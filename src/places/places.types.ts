@@ -885,6 +885,12 @@ export type Place = {
    * - Left out:  `describe()` says, for every list.
    */
   takes?(collection: string, query: ListQuery): ListHandled
+  /**
+   * The fields `sort` is in order of, as `collection`'s rows hold them:  a sort its list has a name for
+   * (`measurements can be sorted by:`) is its field, so `PlaceQuery` can sort what it read when the place didn't.
+   * - Left out:  each is a field already.
+   */
+  sortFieldsOf?(collection: string, sort: readonly SortField[]): SortField[]
   /** The rows of `collection` that `query` asks for. */
   list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer>
   /**

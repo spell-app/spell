@@ -410,13 +410,14 @@ export class CreatePlace extends TypeDeclaration<
     const { checkedEvery, searches, collections, filters } = CreatePlace.detailsOf(declaredBy)
     const collectionsKept = Object.fromEntries(
       Object.entries(collections ?? {})
-        .map(([name, { at, searches: own, searchedOnly, askedBy, filters: filtersOwn }]) => {
+        .map(([name, { at, searches: own, searchedOnly, askedBy, filters: filtersOwn, sortOrders }]) => {
           const kept: P.ImportedPlaceCollection = definedProps({
             at,
             searches: own,
             searchedOnly,
             askedBy,
-            filters: filtersOwn
+            filters: filtersOwn,
+            sortOrders
           })
           return [name, kept] as const
         })
@@ -615,7 +616,8 @@ function mergeDetail(
       filters,
       sorts,
       sortedWith,
-      sortOrders: orders
+      sortOrders: orders,
+      sortDirections
     }
   ] of Object.entries(collections ?? {})) {
     const held = ((into.collections ??= {})[name] ??= {})
@@ -624,6 +626,7 @@ function mergeDetail(
     if (sorts) held.sorts = sorts
     if (sortedWith !== undefined) held.sortedWith = sortedWith
     if (orders) held.sortOrders = [...(held.sortOrders ?? []), ...orders]
+    if (sortDirections) held.sortDirections = sortDirections
     if (at !== undefined) held.at = at
     if (fields) held.fields = { ...held.fields, ...fields }
     if (searchedOnly) held.searchedOnly = true

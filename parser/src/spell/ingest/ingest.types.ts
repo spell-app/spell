@@ -283,8 +283,8 @@ export type SearchSeen = {
  * What ONE list takes besides paging, said one step in under its `live at` line (epic `data` P56's way):
  * from its OpenAPI description's questions, or seen when it was asked.
  * - Each field by the source's name:  `job_id`.
- * - Written as `it filters by job-id and session-id`, `it sorts newest first by created-at as "created_at", with
- *   "order_by"`, `it searches names with "search"`:  lines a list already reads.
+ * - Written as `it filters by job-id and session-id`, `it sorts with "order_by"` and `jobs can be sorted by:` with a
+ *   `- "created at" as "created_at"` under it, `it searches names with "search"`:  lines a list already reads.
  */
 export type ListTakes = {
   /** The fields it filters by, each asked one value:  `?job_id=...`. */
@@ -300,6 +300,7 @@ export type ListTakes = {
    * - `field`:  the field it's in order of, when the value names one;  left out, nothing says which (a `recency`),
    *   and no line is written for it.
    * - `descending`:  newest first;  left out, not known yet, so no line is written till a verify tries it.
+   *   Found oldest first, no line either:  a named sort runs newest first only.
    */
   orders?: Array<{ as: string; field?: string; descending?: boolean }>
   /** Its search question, and the field a try found it searches:  no field, all of each thing, as far as it knows. */

@@ -471,10 +471,34 @@ a "recipe" is a thing
                 </td>
               </tr>
               <tr>
-                <td><code>it sorts newest first by created-at as "recency"</code></td>
+                <td><code>jobs can be sorted by any field, with "sort"</code></td>
                 <td>
-                  has a name of its own for one order: <code>sorted by its created at, newest first</code> sends
-                  <code>?sort=recency</code> (or its <code>with "order_by"</code> question). A line each way round
+                  one step in under its list's line: sorts that list by any field, <code>sorted by its name</code> sends
+                  <code>?sort=name</code>, newest first <code>?sort=-created_at</code>. The older
+                  <code>it sorts by every field with "sort"</code> still reads
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  under it, <code>- newest first with "order" as "desc"</code> and
+                  <code>- oldest first with "order" as "asc"</code>
+                </td>
+                <td>
+                  says which way round in a question of its own: <code>?sort=created_at&amp;order=desc</code>. A way round
+                  no line names is sorted by Spell, over what it read
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>it sorts with "order_by"</code>, then <code>jobs can be sorted by:</code> with one step in
+                  <code>- "completion" as "recency", by end time</code>
+                </td>
+                <td>
+                  names the sorts a list's server has values of its own for: <code>sorted by completion, newest first</code>
+                  sends <code>?order_by=recency</code>. Each runs newest first only; the other way round, Spell sorts what it
+                  read by its field. A sort's field is its value's (<code>"created_at"</code> is <code>created at</code>)
+                  unless <code>, by</code> says another; a name wins over a field of the same name. Beside
+                  <code>jobs can be sorted by any field, with "sort"</code>, the names go in its question
                 </td>
               </tr>
               <tr>

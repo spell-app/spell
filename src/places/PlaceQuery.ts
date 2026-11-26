@@ -103,7 +103,8 @@ export class PlaceQuery {
     }
 
     ////// What's left of the query
-    const ordered = isSorting ? rowsInOrder(rows, sort) : rows
+    // a sort its list has a name for, done here:  by its field (`Place.sortFieldsOf()`)
+    const ordered = isSorting ? rowsInOrder(rows, this.place.sortFieldsOf?.(this.collection, sort) ?? sort) : rows
     const sliced = isSlicing ? ordered.slice(start, end) : ordered
     return {
       rows: this.withSelection(sliced, handled),

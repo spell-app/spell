@@ -146,10 +146,15 @@ export type PlaceDetails = {
   /** What a web server calls a sort, when that isn't `sort`:  `it sorts by date with "order"`. */
   sortedWith?: string
   /**
-   * The orders a web server has a name of its own for, sent as its sort:  `it sorts newest first by created-at as "recency"`.
+   * The sorts a web server's list has names of its own for, sent as its sort:  `- "completion" as "recency", by end time`.
    * - SEE:  `RestPlaceProps.sortOrders`
    */
-  sortOrders?: readonly { field: string; descending: boolean; as: string }[]
+  sortOrders?: readonly { name: string; as: string; field: string; descending?: boolean }[]
+  /**
+   * How a web server's list is asked which way round a sort by any field goes:  `- newest first with "order" as "desc"`.
+   * - SEE:  `RestAsks.sortDirections`
+   */
+  sortDirections?: { param: string; descending?: string; ascending?: string }
   /** What a web server calls the fields it's asked for:  `it gives only the fields named in "fields"`. */
   fieldsNamedIn?: string
   /** It takes no writes:  `it is read only`. */
@@ -202,7 +207,10 @@ export type PlaceDetails = {
  * What a web server's lines say it's asked, for every list, or one step in under a list's `live at` line, for it alone:
  * `it filters by job-id`, `it sorts by created-at with "order_by"`, `it searches names with "search"`.
  */
-export type ListAsks = Pick<PlaceDetails, "filters" | "sorts" | "sortedWith" | "sortOrders" | "searches">
+export type ListAsks = Pick<
+  PlaceDetails,
+  "filters" | "sorts" | "sortedWith" | "sortOrders" | "sortDirections" | "searches"
+>
 
 /** What the place's paging lines say:  for every collection, or for one alone, under its `live at` line. */
 export type PagingDetails = Pick<
@@ -664,12 +672,13 @@ function restLinesForEveryCollection({ idColumn, rowsIn, nextPageIn }: PlaceDeta
  * What one list is asked, its own way, from the lines under its `live at` line:  `RestPlace`'s `RestCollection.asks`.
  * - Nothing for a list whose lines say none of it:  the place's lines hold.
  */
-function restAsksOf({ filters, sorts, sortedWith, sortOrders }: Omit<ListAsks, "searches">) {
+function restAsksOf({ filters, sorts, sortedWith, sortOrders, sortDirections }: Omit<ListAsks, "searches">) {
   const asks = {
     ...(filters && { filter: filters }),
     ...(sorts && { sort: sorts }),
     ...(sortedWith !== undefined && { sortedWith }),
-    ...(sortOrders && { sortOrders })
+    ...(sortOrders && { sortOrders }),
+    ...(sortDirections && { sortDirections })
   }
   return Object.keys(asks).length ? { asks } : {}
 }

@@ -18,7 +18,8 @@ const PLACE = (...reads: string[]) => [
   `\t- jobs live at "/api/jobs"`,
   `\t\t- it filters by status and session-id`,
   `\t\t- it sorts by created-at with "order_by"`,
-  `\t\t- it sorts newest first by created-at as "recency"`,
+  `\t\t- jobs can be sorted by:`,
+  `\t\t\t- "creation" as "recency", by created at`,
   `\t\t- it searches names with "search"`,
   `\t- notes live at "/api/notes"`,
   `a "job" is a thing:`,
@@ -45,7 +46,7 @@ describe("a list's own lines", () => {
     expect(jobs).toContain(`filters: ["status", "sessionId"]`)
     expect(jobs).toContain(`sorts: ["createdAt"]`)
     expect(jobs).toContain(`sortedWith: "order_by"`)
-    expect(jobs).toMatch(/sortOrders: \[\{\s*field: "createdAt",\s*descending: true,\s*as: "recency"\s*\}\]/)
+    expect(jobs).toMatch(/sortOrders: \[\{\s*name: "creation",\s*as: "recency",\s*field: "createdAt"\s*\}\]/)
     expect(code).not.toMatch(/^ {2}filters: /m)
   })
 
@@ -56,13 +57,14 @@ describe("a list's own lines", () => {
         `\tlos trabajos están en "/api/jobs"`,
         `\t\tfiltra por estado`,
         `\t\tordena por creado-en con "order_by"`,
-        `\t\tordena de más reciente a más antiguo por creado-en como "recency"`
+        `\t\tlos trabajos se pueden ordenar por:`,
+        `\t\t\t- "creación" como "recency", por creado en`
       ],
       "/A.es.spell"
     )
     expect(errors).toEqual([])
     expect(code).toMatch(
-      /trabajos: \{\s*filters: \["estado"\],\s*sorts: \["creadoEn"\],\s*sortedWith: "order_by",\s*sortOrders: \[\{\s*field: "creadoEn",\s*descending: true,\s*as: "recency"\s*\}\],\s*at: "\/api\/jobs"/
+      /trabajos: \{\s*filters: \["estado"\],\s*sorts: \["creadoEn"\],\s*sortedWith: "order_by",\s*at: "\/api\/jobs",\s*sortOrders: \[\{\s*name: "creación",\s*as: "recency",\s*field: "creadoEn"\s*\}\]/
     )
   })
 })

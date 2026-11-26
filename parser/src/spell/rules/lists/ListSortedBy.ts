@@ -11,6 +11,7 @@ import {
   readsAPropertyThatWaits,
   type ItemVariableData
 } from "./lists.shared"
+import { sortNameOf } from "./SortKeyField"
 
 /** What a sort key's code calls the item:  in spell, only `it` and `its` name it. */
 const ITEM_VARIABLE = "item"
@@ -159,6 +160,7 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
 /**
  * The field `key`, a sort's function, reads, when that's all it does:  `(item) => item.title`.
  * - `descending` when it reads it backwards, `newest first`:  `(item) => core.descending(item.sent)`.
+ * - A sort its place names (`sort_key_field`):  that name, `completion`, not the field it reads.
  */
 function fieldOfKey(key: P.ASTMethodDefinition): { field: string; descending: boolean } | undefined {
   const item = (key.args?.[0] as P.ASTVariableExpression | undefined)?.name
@@ -169,5 +171,7 @@ function fieldOfKey(key: P.ASTMethodDefinition): { field: string; descending: bo
   const descending = body instanceof P.ASTCoreMethodInvocation && body.methodName === "descending"
   if (descending) body = (body as P.ASTCoreMethodInvocation).args?.args?.[0]
   if (!(body instanceof P.ASTPropertyExpression) || !(body.object instanceof P.ASTVariableExpression)) return undefined
-  return body.object.name === item ? { field: body.property.value, descending } : undefined
+  if (body.object.name !== item) return undefined
+  // a sort its place has a name for goes by that name:  the place knows its field
+  return { field: sortNameOf(body) ?? body.property.value, descending }
 }

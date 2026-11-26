@@ -96,7 +96,9 @@ import { NextPageByNumber } from "./NextPageByNumber"
 import { NextPageByLastId } from "./NextPageByLastId"
 import { FiltersBy } from "./FiltersBy"
 import { SortsBy } from "./SortsBy"
-import { SortsAs } from "./SortsAs"
+import { NamedSort, NamedSortField, NamedSorts } from "./NamedSorts"
+import { SortsWith } from "./SortsWith"
+import { SortDirection, SortsByAnyField } from "./SortsByAnyField"
 import { GivesFieldsNamedIn } from "./GivesFieldsNamedIn"
 import { IsReadOnly } from "./IsReadOnly"
 import { RowsIn } from "./RowsIn"
@@ -862,27 +864,68 @@ placesEs.addRule(SortsBy, {
     }
   ]
 })
-placesEs.addRule(SortsAs, {
+placesEs.addRule(SortsWith, { syntax: "{type:subject_implied} ordena con {param:text}" })
+placesEs.addRule(SortDirection, {
   syntax:
-    "{type:subject_implied} ordena ((descending:de más reciente a más antiguo|de mas reciente a mas antiguo|de mayor a menor)|(ascending:de más antiguo a más reciente|de mas antiguo a mas reciente|de menor a mayor)) por {field:identifier} como {name:text} (,? con {param:text})?",
+    "((descending:de más reciente a más antiguo|de mas reciente a mas antiguo)|(ascending:de más antiguo a más reciente|de mas antiguo a mas reciente)) con {param:text} como {value:text}"
+})
+placesEs.addRule(SortsByAnyField, {
+  syntax: `${THE}? {collection:plural_type} se pueden ordenar por cualquier campo ,? con {param:text} {nested_statements}?`,
   tests: [
     {
       compileAs: "block",
       tests: [
         [
-          'recetario es un servidor web en "https://recetario.test"\n\t- ordena de más reciente a más antiguo por creado-en como "recency", con "order_by"',
+          'recetario es un servidor web en "https://recetario.test"\n\t- las recetas están en "/api/recipes"\n\t\t- las recetas se pueden ordenar por cualquier campo, con "sort"\n\t\t\t- de más reciente a más antiguo con "order" como "desc"',
           [
             "export class Recetario extends Place {}",
             "export const recetario = core.place(new Recetario(), {",
             '  name: "recetario",',
             '  kind: "web server",',
             '  at: "https://recetario.test",',
-            '  sortedWith: "order_by",',
-            "  sortOrders: [{",
-            '    field: "creadoEn",',
-            "    descending: true,",
-            '    as: "recency"',
-            "  }],",
+            "  collections: { recetas: {",
+            '    at: "/api/recipes",',
+            '    sorts: "every field",',
+            '    sortedWith: "sort",',
+            '    sortDirections: { param: "order", descending: "desc" }',
+            "  } },",
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(NamedSortField)
+placesEs.addRule(NamedSort, { syntax: "{name:text} como {value:text} (, por {field:named_sort_field})?" })
+placesEs.addRule(NamedSorts, {
+  syntax: `${THE}? {collection:plural_type} se pueden ordenar por :? {nested_statements}`,
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'recetario es un servidor web en "https://recetario.test"\n\t- las recetas están en "/api/recipes"\n\t\t- ordena con "order_by"\n\t\t- las recetas se pueden ordenar por:\n\t\t\t- "creación" como "created_at"\n\t\t\t- "última vez" como "recency", por cocinada-en',
+          [
+            "export class Recetario extends Place {}",
+            "export const recetario = core.place(new Recetario(), {",
+            '  name: "recetario",',
+            '  kind: "web server",',
+            '  at: "https://recetario.test",',
+            "  collections: { recetas: {",
+            '    sortedWith: "order_by",',
+            '    at: "/api/recipes",',
+            "    sortOrders: [{",
+            '      name: "creación",',
+            '      as: "created_at",',
+            '      field: "createdAt"',
+            "    }, {",
+            '      name: "últimaVez",',
+            '      as: "recency",',
+            '      field: "cocinadaEn"',
+            "    }]",
+            "  } },",
             '  unclearNumbers: ","',
             "})"
           ]

@@ -19,6 +19,7 @@ import {
   type PlaceErrorKind,
   type PlaceRow,
   type SelectingContext,
+  type SortField,
   type WriteAnswer,
   type WriteKind,
   type WriteQuestion
@@ -562,12 +563,13 @@ export class RestPlace extends WebPlace implements Place {
    * - Each by what `collection` takes, said under its own line (`RestCollection.asks`), else by what the place takes.
    * - A filter goes in parts:  each field it takes is sent, and `handled.filter` only when that's all of them.
    *   The engine checks the rest over what comes back:  the server's narrowed it.
-   * - A sort it has a name for goes as that name (`RestSortOrder`):  `?order_by=recency`.
+   * - A sort it has a name for goes as that name (`RestSortOrder`):  `?order_by=recency`, newest first only;
+   *   the other way round, the engine sorts by its field (`sortFieldsOf()`).
    */
   private paramsFor(collection: string, query: ListQuery, handled: ListHandled): Record<string, unknown> {
     const { filter = {}, search = {}, sort = [], select } = query
     const { select: canSelect, idOf } = this.capabilities
-    const { filter: canFilter, sort: canSort, sortParam, sortOrders } = this.asksOf(collection)
+    const { filter: canFilter, sort: canSort, sortParam, sortOrders, sortDirections } = this.asksOf(collection)
     const data: Record<string, unknown> = {}
     const filtering = Object.keys(filter)
     const { askedBy } = this.mappingOf(collection)
@@ -587,10 +589,9 @@ export class RestPlace extends WebPlace implements Place {
       data[searches.param] = searching[0]
       handled.search = true
     }
-    const named =
-      sort.length === 1
-        ? sortOrders.find(({ field, descending }) => field === sort[0]!.field && descending === !!sort[0]!.descending)
-        : undefined
+    const named = sort.length === 1 ? namedSortFor(sortOrders, sort[0]!) : undefined
+    // a sort it has a name for, asked the other way round:  by its field, if it sorts by that
+    const fields = this.sortFieldsOf(collection, sort)
     if (named) {
       data[sortParam] = named.as
       handled.sort = true
@@ -598,12 +599,20 @@ export class RestPlace extends WebPlace implements Place {
       sort.length &&
       canDoAll(
         canSort,
-        sort.map(({ field }) => field)
+        fields.map(({ field }) => field)
       )
     ) {
-      const order = sort.map(({ field, descending }) => `${descending ? "-" : ""}${this.wireName(collection, field)}`)
-      data[sortParam] = order.join(",")
-      handled.sort = true
+      // which way round in a question of its own:  only when it has a value for it, and every field goes that way
+      const way = sortDirections && wayAskedFor(sortDirections, fields)
+      if (!sortDirections) {
+        const order = fields.map(({ field, descending }) => `${descending ? "-" : ""}${this.wireName(collection, field)}`)
+        data[sortParam] = order.join(",")
+        handled.sort = true
+      } else if (way !== undefined) {
+        data[sortParam] = fields.map(({ field }) => this.wireName(collection, field)).join(",")
+        data[sortDirections.param] = way
+        handled.sort = true
+      }
     }
     if (select && canDoAll(canSelect, select)) {
       const versionField = this.versions && "field" in this.versions ? this.versions.field : undefined
@@ -627,14 +636,28 @@ export class RestPlace extends WebPlace implements Place {
     sort: FieldAbility
     sortParam: string
     sortOrders: readonly RestSortOrder[]
+    sortDirections: RestAsks["sortDirections"]
   } {
     const { asks } = this.mappingOf(collection)
     return {
       filter: asks?.filter ?? this.capabilities.filter,
       sort: asks?.sort ?? this.capabilities.sort,
       sortParam: asks?.sortedWith ?? this.params.sort,
-      sortOrders: [...(asks?.sortOrders ?? []), ...this.sortOrders]
+      sortOrders: [...(asks?.sortOrders ?? []), ...this.sortOrders],
+      sortDirections: asks?.sortDirections
     }
+  }
+
+  /**
+   * The fields `sort` is in order of, as `collection`'s rows hold them:  a sort it has a name for is its field
+   * (`RestSortOrder.field`);  a name wins over a field of the same name.
+   */
+  sortFieldsOf(collection: string, sort: readonly SortField[]): SortField[] {
+    const { sortOrders } = this.asksOf(collection)
+    return sort.map((each) => {
+      const named = sortOrders.find(({ name }) => name !== undefined && name === each.field)
+      return named ? { ...each, field: named.field } : each
+    })
   }
 
   /** Where a list of `collection` is asked for:  a search's own address, when it searched and has one (`RestSearch.at`). */
@@ -901,14 +924,44 @@ export type RestPlaceProps = WebPlaceProps & {
   sortOrders?: readonly RestSortOrder[]
 }
 
-/** An order a web server has a name of its own for:  `{ field: "createdAt", descending: true, as: "recency" }`. */
+/**
+ * A sort a web server has a name of its own for:  `{ name: "completion", as: "recency", field: "endTime" }`, said
+ * `- "completion" as "recency", by end time` under `measurements can be sorted by:`.
+ */
 export type RestSortOrder = {
+  /** What a read calls it:  a sort by this, as if it were a field, is this one.  Left out:  only by its field. */
+  name?: string
   /** The field it's in order of, by our name. */
   field: string
-  /** Newest, highest or last first. */
-  descending: boolean
-  /** What it's called, sent as the sort. */
+  /** Newest, highest or last first.  Left out:  newest first, the only way a named sort runs. */
+  descending?: boolean
+  /** What the server calls it, sent as the sort. */
   as: string
+}
+
+/**
+ * The value `directions` sends for the way round `fields` go:  `undefined` when they go different ways, or it has
+ * none for theirs.
+ */
+function wayAskedFor(
+  directions: NonNullable<RestAsks["sortDirections"]>,
+  fields: readonly SortField[]
+): string | undefined {
+  const ways = new Set(fields.map(({ descending }) => !!descending))
+  if (ways.size !== 1) return undefined
+  return ways.has(true) ? directions.descending : directions.ascending
+}
+
+/**
+ * The sort of `orders` that `asked` is:  by its name, whichever way a read asks it;  else by its field.
+ * - Only the way round it runs (`RestSortOrder.descending`):  the other way is the engine's.
+ * - A name wins over a field of the same name.
+ */
+function namedSortFor(orders: readonly RestSortOrder[], asked: SortField): RestSortOrder | undefined {
+  const runs = (order: RestSortOrder) => (order.descending ?? true) === !!asked.descending
+  const byName = orders.find(({ name }) => name !== undefined && name === asked.field)
+  if (byName) return runs(byName) ? byName : undefined
+  return orders.find((order) => order.field === asked.field && runs(order))
 }
 
 /**
@@ -925,6 +978,13 @@ export type RestAsks = {
   sortedWith?: string
   /** The orders it has a name of its own for. */
   sortOrders?: readonly RestSortOrder[]
+  /**
+   * How it's asked which way round a sort goes, in a question of its own:  `{ param: "order", descending: "desc",
+   * ascending: "asc" }`, said `- newest first with "order" as "desc"` under `jobs can be sorted by any field, with "sort"`.
+   * - Then each field goes as it is, `?sort=created_at&order=desc`, never `-created_at`.
+   * - A way round it has no value for isn't its:  the engine sorts.
+   */
+  sortDirections?: { param: string; descending?: string; ascending?: string }
 }
 
 /**

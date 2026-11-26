@@ -21,6 +21,7 @@ const ASK_DETAILS: ReadonlySet<string> = new Set<keyof ListAsks>([
   "sorts",
   "sortedWith",
   "sortOrders",
+  "sortDirections",
   "searches"
 ])
 
@@ -35,7 +36,7 @@ const ASK_DETAILS: ReadonlySet<string> = new Set<keyof ListAsks>([
  * - And, in the same place, how they page, when it isn't the place's way (epic `data` P56):  the place's own paging
  *   lines, `its next page is asked for with "take" and "skip"`, `it gives up to 100 at a time`, which win for them.
  * - And what that list is asked, when the place's lines don't say it for every list:  `it filters by job id`,
- *   `it sorts by created at with "order_by"`, `it sorts newest first by created at as "recency"`,
+ *   `it sorts by created at with "order_by"`, `it sorts with "order_by"`, `jobs can be sorted by:`,
  *   `it searches names with "search"`.  The list's own win for it;  the place's still hold for the rest.
  *   Every other kind of line there still speaks for the whole place.
  */

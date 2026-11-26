@@ -346,3 +346,22 @@ describe("rowsMatching()", () => {
     expect(rowsMatching(rows, { got: "" }).map(({ id }) => id)).toEqual(["2", "3"])
   })
 })
+
+describe("a sort its place has a name for, left to the engine", () => {
+  test("is sorted here by that sort's field:  `Place.sortFieldsOf()`", async () => {
+    const rows: PlaceRow[] = [
+      { id: "m-1", endTime: "2026-03-02" },
+      { id: "m-2", endTime: "2026-01-05" },
+      { id: "m-3", endTime: "2026-02-11" }
+    ]
+    const place = new PagedPlace(rows)
+    const named: Place = {
+      describe: () => place.describe(),
+      list: (collection, query, context) => place.list(collection, query, context),
+      sortFieldsOf: (_collection, sort) =>
+        sort.map((each) => (each.field === "completion" ? { ...each, field: "endTime" } : each))
+    }
+    const answer = await answerOf(named, { sort: [{ field: "completion" }] })
+    expect(answer.rows.map(({ id }) => id)).toEqual(["m-2", "m-3", "m-1"])
+  })
+})

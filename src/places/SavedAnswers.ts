@@ -89,8 +89,8 @@ export type SavedAsks = {
   search?: readonly string[]
   /** Its sort's question names:  `sort`, `order_by`.  Left out:  `sort`. */
   sort?: readonly string[]
-  /** The orders it has a name of its own for:  `recency`, newest first by created at (`RestSortOrder`). */
-  orders?: readonly { as: string; field: string; descending: boolean }[]
+  /** The sorts it has names of its own for:  `recency`, newest first by end time (`RestSortOrder`). */
+  orders?: readonly { as: string; field: string; descending?: boolean }[]
 }
 
 /**
@@ -147,7 +147,8 @@ function sortFieldsOf(sort: string, rows: readonly PlaceRow[], orders: NonNullab
   if (named) {
     const words = lettersOf(named.field)
     const field = Object.keys(rows[0] ?? {}).find((key) => lettersOf(key) === words) ?? named.field
-    return [{ field, descending: named.descending }]
+    // a named sort runs newest first, unless it says otherwise
+    return [{ field, descending: named.descending ?? true }]
   }
   return sort
     .split(",")

@@ -15,6 +15,7 @@ import {
   type PlaceConflict,
   type PlaceRow,
   type PlaceWriteFailure,
+  type RestAsks,
   type RestPlaceProps
 } from "spell/places"
 
@@ -1267,7 +1268,10 @@ describe("a list's own filters and sorts, under its line", () => {
             filter: ["status", "sessionId"],
             sort: ["createdAt"],
             sortedWith: "order_by",
-            sortOrders: [{ field: "createdAt", descending: true, as: "recency" }]
+            sortOrders: [
+              { name: "creation", as: "created_at", field: "createdAt" },
+              { name: "completion", as: "recency", field: "endTime" }
+            ]
           }
         },
         notes: { path: "/api/notes{/id}" }
@@ -1291,14 +1295,97 @@ describe("a list's own filters and sorts, under its line", () => {
     ])
   })
 
-  test("a sort it has a name for goes as that name, with the list's own question;  the other way round, by the field", async () => {
+  test("a sort it has a name for goes as its value, newest first, with the list's own question", async () => {
     const { place, asked } = asking()
+    const named = await place.list("jobs", { sort: [{ field: "completion", descending: true }] }, {})
+    expect(named.handled.sort).toBe(true)
+    // its field, that way round:  the same sort
     await place.list("jobs", { sort: [{ field: "createdAt", descending: true }] }, {})
-    await place.list("jobs", { sort: [{ field: "createdAt" }] }, {})
     expect(asked).toEqual([
       "https://jobs.test/api/jobs?order_by=recency",
       "https://jobs.test/api/jobs?order_by=created_at"
     ])
+  })
+
+  test("a named sort the other way round:  by its field, if the list sorts by it;  else left to the engine", async () => {
+    const { place, asked } = asking()
+    await place.list("jobs", { sort: [{ field: "creation" }] }, {})
+    const left = await place.list("jobs", { sort: [{ field: "completion" }] }, {})
+    expect(left.handled.sort).toBeUndefined()
+    expect(asked).toEqual(["https://jobs.test/api/jobs?order_by=created_at", "https://jobs.test/api/jobs"])
+    expect(place.sortFieldsOf("jobs", [{ field: "completion" }, { field: "name", descending: true }])).toEqual([
+      { field: "endTime" },
+      { field: "name", descending: true }
+    ])
+  })
+
+  test("a name wins over a field of the same name", async () => {
+    const asked: string[] = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      asked.push(`${input instanceof Request ? input.url : input}`)
+      return Response.json([])
+    })
+    const place = new RestPlace({
+      url: "https://jobs.test",
+      collections: {
+        jobs: {
+          path: "/api/jobs{/id}",
+          asks: { sort: "every field", sortOrders: [{ name: "name", as: "alphabetical", field: "title" }] }
+        }
+      }
+    })
+    await place.list("jobs", { sort: [{ field: "name", descending: true }] }, {})
+    await place.list("jobs", { sort: [{ field: "name" }] }, {})
+    expect(asked).toEqual(["https://jobs.test/api/jobs?sort=alphabetical", "https://jobs.test/api/jobs?sort=title"])
+  })
+
+  /** A place whose jobs sort by any field, with `asks`;  and the addresses it was asked. */
+  function sortingBy(asks: RestAsks) {
+    const asked: string[] = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      asked.push(`${input instanceof Request ? input.url : input}`)
+      return Response.json([])
+    })
+    const place = new RestPlace({
+      url: "https://jobs.test",
+      collections: { jobs: { path: "/api/jobs{/id}", fields: { createdAt: "created_at" }, asks } }
+    })
+    return { place, asked }
+  }
+
+  test("form 1, any field:  a field as it is, newest first `-field`", async () => {
+    const { place, asked } = sortingBy({ sort: "every field", sortedWith: "sort" })
+    await place.list("jobs", { sort: [{ field: "name" }] }, {})
+    await place.list("jobs", { sort: [{ field: "createdAt", descending: true }] }, {})
+    expect(asked).toEqual(["https://jobs.test/api/jobs?sort=name", "https://jobs.test/api/jobs?sort=-created_at"])
+  })
+
+  test("form 2, its direction lines:  the way round in its own question;  one it has no value for is the engine's", async () => {
+    const { place, asked } = sortingBy({
+      sort: "every field",
+      sortedWith: "sort",
+      sortDirections: { param: "order", descending: "desc", ascending: "asc" }
+    })
+    await place.list("jobs", { sort: [{ field: "createdAt", descending: true }] }, {})
+    await place.list("jobs", { sort: [{ field: "name" }] }, {})
+    expect(asked).toEqual([
+      "https://jobs.test/api/jobs?sort=created_at&order=desc",
+      "https://jobs.test/api/jobs?sort=name&order=asc"
+    ])
+    const newestOnly = sortingBy({ sort: "every field", sortDirections: { param: "order", descending: "desc" } })
+    expect(newestOnly.place.takes("jobs", { sort: [{ field: "name" }] })).toEqual({})
+    expect(newestOnly.place.takes("jobs", { sort: [{ field: "name", descending: true }] })).toEqual({ sort: true })
+  })
+
+  test("form 3, any field and named sorts:  a name goes as its value, a field as it is", async () => {
+    const { place, asked } = sortingBy({
+      sort: "every field",
+      sortedWith: "sort",
+      sortOrders: [{ name: "completion", as: "recency", field: "endTime" }]
+    })
+    await place.list("jobs", { sort: [{ field: "name" }] }, {})
+    await place.list("jobs", { sort: [{ field: "completion", descending: true }] }, {})
+    expect(asked).toEqual(["https://jobs.test/api/jobs?sort=name", "https://jobs.test/api/jobs?sort=recency"])
   })
 
   test("what it would do is known before it's asked:  `takes()`", () => {

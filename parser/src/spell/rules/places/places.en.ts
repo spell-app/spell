@@ -66,7 +66,9 @@ import { NextPageByNumber } from "./NextPageByNumber"
 import { NextPageByLastId } from "./NextPageByLastId"
 import { FiltersBy } from "./FiltersBy"
 import { SortsBy } from "./SortsBy"
-import { SortsAs } from "./SortsAs"
+import { NamedSort, NamedSortField, NamedSorts } from "./NamedSorts"
+import { SortsWith } from "./SortsWith"
+import { SortDirection, SortsByAnyField } from "./SortsByAnyField"
 import { GivesFieldsNamedIn } from "./GivesFieldsNamedIn"
 import { IsReadOnly } from "./IsReadOnly"
 import { WritesLike } from "./WritesLike"
@@ -925,31 +927,70 @@ places.addRule(SortsBy, {
     }
   ]
 })
-places.addRule(SortsAs, {
-  syntax:
-    "{type:subject_it} sorts ((descending:(newest|latest|highest|last) first)|(ascending:(oldest|earliest|lowest) first)) by {field:identifier} as {name:text} (,? with {param:text})?",
+places.addRule(SortsWith, { syntax: "{type:subject_it} sorts with {param:text}" })
+places.addRule(SortDirection, {
+  syntax: "((descending:newest first)|(ascending:oldest first)) with {param:text} as {value:text}"
+})
+places.addRule(SortsByAnyField, {
+  syntax: "{collection:plural_type} can be sorted by any field ,? with {param:text} {nested_statements}?",
   tests: [
     {
       compileAs: "block",
       tests: [
         [
-          'cookbook is a web server at "https://cookbook.test"\n\t- it sorts newest first by created-at as "recency", with "order_by"\n\t- it sorts oldest first by created-at as "created_at"',
+          'cookbook is a web server at "https://cookbook.test"\n\t- recipes live at "/api/recipes"\n\t\t- recipes can be sorted by any field, with "sort"\n\t\t\t- newest first with "order" as "desc"\n\t\t\t- oldest first with "order" as "asc"',
           [
             "export class Cookbook extends Place {}",
             "export const cookbook = core.place(new Cookbook(), {",
             '  name: "cookbook",',
             '  kind: "web server",',
             '  at: "https://cookbook.test",',
-            '  sortedWith: "order_by",',
-            "  sortOrders: [{",
-            '    field: "createdAt",',
-            "    descending: true,",
-            '    as: "recency"',
-            "  }, {",
-            '    field: "createdAt",',
-            "    descending: false,",
-            '    as: "created_at"',
-            "  }]",
+            "  collections: { recipes: {",
+            '    at: "/api/recipes",',
+            '    sorts: "every field",',
+            '    sortedWith: "sort",',
+            "    sortDirections: {",
+            '      param: "order",',
+            '      descending: "desc",',
+            '      ascending: "asc"',
+            "    }",
+            "  } }",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(NamedSortField)
+places.addRule(NamedSort, { syntax: "{name:text} as {value:text} (, by {field:named_sort_field})?" })
+places.addRule(NamedSorts, {
+  syntax: "{collection:plural_type} can be sorted by :? {nested_statements}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'cookbook is a web server at "https://cookbook.test"\n\t- recipes live at "/api/recipes"\n\t\t- it sorts with "order_by"\n\t\t- recipes can be sorted by:\n\t\t\t- "creation" as "created_at"\n\t\t\t- "last cooked" as "recency", by cooked-at',
+          [
+            "export class Cookbook extends Place {}",
+            "export const cookbook = core.place(new Cookbook(), {",
+            '  name: "cookbook",',
+            '  kind: "web server",',
+            '  at: "https://cookbook.test",',
+            "  collections: { recipes: {",
+            '    sortedWith: "order_by",',
+            '    at: "/api/recipes",',
+            "    sortOrders: [{",
+            '      name: "creation",',
+            '      as: "created_at",',
+            '      field: "createdAt"',
+            "    }, {",
+            '      name: "lastCooked",',
+            '      as: "recency",',
+            '      field: "cookedAt"',
+            "    }]",
+            "  } }",
             "})"
           ]
         ]

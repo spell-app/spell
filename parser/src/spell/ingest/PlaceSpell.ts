@@ -444,12 +444,15 @@ function ownPagingLines(
  * The lines one step in under a list's `live at` line saying what it takes besides paging (`ListTakes`):
  * - `it filters by job-id and session-id`
  * - `it sorts by title and cuisine with "_sort"`, the fields a try saw it sort by
- * - `it sorts newest first by created-at as "created_at", with "order_by"`, each order its sort question names, once
- *   it's known which way round (a verify tries it);  an order naming no field has no line
+ * - `it sorts with "order_by"`, then `jobs can be sorted by:` and one `- "created at" as "created_at"` under it for each
+ *   order its sort question names, once a verify found it runs newest first:  a named sort runs that way only.
+ *   Its name is its field's words, for a person to rename;  `, by <field>` only when its value isn't that field's name.
+ *   An order naming no field, or found running oldest first, has no line.
  * - `it searches names with "search"`, or `it searches everything with "search"` while no try found the field
  * - Never a field Spell leaves out, as no line could name it.
  */
-function ownTakesLines(collection: string, { takes, fields }: CollectionDescription): SpellLine[] {
+function ownTakesLines(collection: string, description: CollectionDescription): SpellLine[] {
+  const { takes, fields } = description
   if (!takes) return []
   const shown = (name: string) => (fields[name] && !fields[name]!.leftOut ? fields[name] : undefined)
   const wordsOf = (names: readonly string[]) => names.flatMap((name) => shown(name)?.words ?? [])
@@ -459,21 +462,27 @@ function ownTakesLines(collection: string, { takes, fields }: CollectionDescript
   if (filtered.length) {
     lines.push({ key: `takes:${collection}:filters`, text: `\tit filters by ${fieldsInLine(filtered)}` })
   }
+  const named = orders
+    .flatMap(({ as, field, descending }) => {
+      const about = field === undefined ? undefined : shown(field)
+      return about && descending ? [{ as, field: field!, words: about.words }] : []
+    })
+    // one name each:  the first order of a field is its name's
+    .filter((each, at, all) => all.findIndex(({ words }) => words === each.words) === at)
+  const asked = sortedWith && sortedWith !== "sort" ? sortedWith : undefined
+  // the question once, for the named sorts;  else on the line naming the fields it sorts by
+  if (named.length && asked) lines.push({ key: `takes:${collection}:sortedWith`, text: `\tit sorts with "${asked}"` })
   const sorted = wordsOf(sorts)
   if (sorted.length) {
-    const asked = sortedWith && sortedWith !== "sort" ? ` with "${sortedWith}"` : ""
-    lines.push({ key: `takes:${collection}:sorts`, text: `\tit sorts by ${fieldsInLine(sorted)}${asked}` })
+    const said = asked && !named.length ? ` with "${asked}"` : ""
+    lines.push({ key: `takes:${collection}:sorts`, text: `\tit sorts by ${fieldsInLine(sorted)}${said}` })
   }
-  for (const { as, field, descending } of orders) {
-    const about = field === undefined ? undefined : shown(field)
-    if (!about || descending === undefined) continue
-    const isDate = about.type === "date"
-    const way = descending ? (isDate ? "newest first" : "highest first") : isDate ? "oldest first" : "lowest first"
-    const asked = sortedWith && sortedWith !== "sort" ? `, with "${sortedWith}"` : ""
-    lines.push({
-      key: `takes:${collection}:order:${as}`,
-      text: `\tit sorts ${way} by ${fieldsInLine([about.words])} as "${as}"${asked}`
-    })
+  if (named.length) {
+    lines.push({ key: `takes:${collection}:named`, text: `\t${collectionWords(description)} can be sorted by:` })
+    for (const { as, field, words } of named) {
+      const by = as === field ? "" : `, by ${fieldsInLine([words])}`
+      lines.push({ key: `takes:${collection}:named:${as}`, text: `\t\t- "${words}" as "${as}"${by}` })
+    }
   }
   if (search) {
     const about = search.field === undefined ? undefined : shown(search.field)

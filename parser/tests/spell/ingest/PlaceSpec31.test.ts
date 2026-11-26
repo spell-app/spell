@@ -532,10 +532,12 @@ describe("what each list takes, from its description's questions, and tried by v
     expect(result.changes).toContain(`jobs:  "order_by=created_at" answered highest "created_at" first.`)
     const spell = texts.get("AcmeJobs.api.spell")!
     expect(spell).toMatch(
-      /^\tjobs live at "\/api\/jobs"\n\t\tit filters by status and owner\n\t\tit sorts newest first by created-at as "created_at", with "order_by"\n\t\tit searches names with "search"$/m
+      /^\tjobs live at "\/api\/jobs"\n\t\tit filters by status and owner\n\t\tit sorts with "order_by"\n\t\tjobs can be sorted by:\n\t\t\t- "created at" as "created_at"\n\t\tit searches names with "search"$/m
     )
     const { files } = parseSpellProject([{ path: "/AcmeJobs.api.spell", contents: spell }])
     expect(files[0]!.errors).toEqual([])
+    // what it wrote reads as the list's named sort
+    expect(files[0]!.compiled).toMatch(/sortOrders: \[\{\s*name: "createdAt",\s*as: "created_at",\s*field: "createdAt"\s*\}\]/)
   })
 
   test("a filter the server ignores is left off, and stays off when it's looked at again", async () => {

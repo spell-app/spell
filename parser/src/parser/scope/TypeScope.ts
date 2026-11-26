@@ -62,6 +62,8 @@ export type ImportedPlaceCollection = {
   askedBy?: string[]
   /** The fields this one filters by itself, said under its own line:  `it filters by job id`. */
   filters?: "every field" | string[]
+  /** The sorts it has names of its own for:  `{ name: "creation", as: "created_at", field: "createdAt" }`. */
+  sortOrders?: { name: string; as: string; field: string }[]
 }
 
 /** How a type's records are published, as `- it is published as "..."` says. */
