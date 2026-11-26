@@ -6,12 +6,12 @@ import {
   PrefStore,
   UIError,
   parseJSON,
-  parseJSON5,
   type $FetchParams,
   type PrefPlace,
   type PrefPlaceName
 } from "spell/util"
 import { MissingResourceError } from "spell/util/spell/ResponseErrors"
+import { parseJSON5 } from "spell/util/spell/parseJSON5"
 import { SP } from "spell/parser/spell"
 // Import directly:  the barrel would pull the group's models into this file's chunk
 import { localPerson } from "spell/app/spaces/models/projectGroups"

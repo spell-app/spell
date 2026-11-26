@@ -2,7 +2,7 @@
  * Barrel for `spell/util/spell` -- Spell's own utilities, flattened into `spell/util` by `../index.ts`.
  * - Grouped below by rough concern:  constants, app plumbing, language helpers, fetch / observable, DOM, tasks.
  * - A sub-folder, not beside the generic helpers:
- *   `ui` is published and bundles the generic files, and these pull in lodash, `chalk` and `pluralize`.
+ *   `ui` is published and bundles the generic files, and these pull in lodash and `pluralize`.
  *   - `string.ts` and `DOM.ts` also share a name with the generic `../string.ts` / `../dom.ts`,
  *     and macOS is case-insensitive.
  * - NOTE: files here import the generic helpers by deep path (`spell/util/class`), never the `spell/util` barrel:

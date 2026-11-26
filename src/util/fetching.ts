@@ -2,7 +2,7 @@
  * `fetch()` that answers only with an OK response, and what `Api` is asked and throws.
  * - The bottom of `Api` and `Sources`:  imports nothing, so a page's eager chunk can hold it without holding `Api`.
  * - GENERIC, like the files beside it:  Spell UI's runtime and the places both use it, by file (`spell/util/fetching`).
- * - Spell UI can't use the kit's `$fetch()`:  it would bring lodash and query-string into every page.
+ * - Spell UI can't use the kit's `$fetch()`:  it would bring lodash into every page.
  */
 
 ////////////////
@@ -51,6 +51,46 @@ export type FetchFailure = {
 /** `404 Not Found`:  a response's status and text, for a message. */
 export function answerOf(response: Response): string {
   return `${response.status} ${response.statusText}`.trim()
+}
+
+////////////////
+// ## A URL's query
+////////////////
+
+/** What `queryText()` writes:  each value as its text;  an array, its key once per item. */
+export type QueryData = Record<string, unknown>
+
+/** Options for `queryText()`. */
+export type QueryOptions = {
+  /** sort the keys, so the same data always makes the same address (a cache's key);  default `data`'s order */
+  sort?: boolean
+}
+
+/**
+ * `data` as a URL's query, without the `?`:  `{ q: "a b", tag: ["x", "y"] }` => `q=a%20b&tag=x&tag=y`.
+ * - each value as its text (`String()`), numbers and booleans too;  an empty string as `name=`
+ * - an array repeats its key, once per item
+ * - `undefined` and `null` are left out, in an array too
+ * - every key and value encoded as a URL's part, `!'()*` too, a space as `%20`
+ * - flat data only:  a nested object is written as its text
+ * - `$fetch()`'s and `Api`'s, the ONE writer of a query from data (the `query-string` package's `stringify()` before)
+ */
+export function queryText(data: QueryData, { sort = false }: QueryOptions = {}): string {
+  const names = Object.keys(data)
+  if (sort) names.sort()
+  const pairs: string[] = []
+  for (const name of names) {
+    const value = data[name]
+    for (const each of Array.isArray(value) ? value : [value]) {
+      if (each !== undefined && each !== null) pairs.push(`${uriPart(name)}=${uriPart(String(each))}`)
+    }
+  }
+  return pairs.join("&")
+}
+
+/** `text` encoded as a URL's part:  `encodeURIComponent()`, and `!'()*`, which it leaves as they are. */
+function uriPart(text: string): string {
+  return encodeURIComponent(text).replace(/[!'()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`)
 }
 
 ////////////////
