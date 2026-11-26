@@ -298,12 +298,6 @@
   color: var(--ui-text-muted);
   font-size: 13px;
 
-  .FootButtons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
   /*
    * Its book icon, name and line centred:  its words share one font, so they sit on one baseline all the same;
    * `ui-icon` is `display: contents`, so an `align-self` on it never reached the icon, which sat on the baseline
@@ -324,6 +318,13 @@
     &:focus-visible .name {
       text-decoration: underline;
     }
+  }
+
+  /* Show the introduction (while the hero's hidden) and Rearrange Home Screen, side by side */
+  .FootButtons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
   }
 
   @media (--ui-mobile) {
