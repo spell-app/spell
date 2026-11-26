@@ -385,7 +385,10 @@ export const spanishWords: SP.LanguageWords = {
     // una página bloqueada:  `su candado es bloqueado` (épica `notebook` P1)
     lock: ["candado"],
     // la imagen de una página o vista sin contenido (épica `mockup` P16)
-    thumbnail: ["miniatura"]
+    thumbnail: ["miniatura"],
+    // el icono de la pestaña mientras corre una app (épica `editor` P50)
+    icon: ["icono", "ícono"],
+    "icon color": ["color del icono", "color del ícono"]
   },
 
   builtInMemberValues: {

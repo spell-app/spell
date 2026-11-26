@@ -266,7 +266,7 @@ describe("SpellElement", () => {
      *   the space is half the row, and the segment starts where it ends.
      * - Written straight into the stack it always was;  inside a view with a box of its own it was 50% of nothing.
      */
-    describe("a share of a row it draws (`width=\"50%\"`) is a share of the row around it", () => {
+    describe('a share of a row it draws (`width="50%"`) is a share of the row around it', () => {
       /** A view drawing one `<ui-space width="50%">`, as the repro's `gap` does. */
       class Gap extends View {
         draw(): ReturnType<View["draw"]> {
@@ -283,9 +283,7 @@ describe("SpellElement", () => {
         }
         draw(): ReturnType<View["draw"]> {
           const space = (width: string) => () => [h("ui-space", { width, height: "2em" })]
-          return [() => core.drawIf(() => this.wide, space("50%"), space("25%"))] as unknown as ReturnType<
-            View["draw"]
-          >
+          return [() => core.drawIf(() => this.wide, space("50%"), space("25%"))] as unknown as ReturnType<View["draw"]>
         }
       }
 

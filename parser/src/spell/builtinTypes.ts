@@ -383,6 +383,30 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
           "- In the editor, VS Code or `<spell-viewer>`, it shows in the app's own area;  anywhere else in",
           "  `#spell-app-root`, which is added to the end of the page if there isn't one."
         )
+      },
+      {
+        words: "icon",
+        kind: "property",
+        datatype: "text",
+        stored: true,
+        declarable: true,
+        docstring: md(
+          "The icon its browser tab shows while it runs:  an icon's name, `rocket`, or a picture, `static/icon.png`.",
+          "- An icon's name is drawn in its `icon color`;  a picture keeps its own colours.",
+          "- When it stops, the tab shows its own icon again.",
+          '- Say it in its body:  `its icon is "rocket"`.'
+        )
+      },
+      {
+        words: "icon color",
+        kind: "property",
+        datatype: "text",
+        stored: true,
+        declarable: true,
+        docstring: md(
+          "The colour its tab's icon is drawn in, when its `icon` is an icon's name:  `green`, `red` ...",
+          '- Say it in its body:  `its icon color is "green"`.'
+        )
       }
     ]
   },

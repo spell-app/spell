@@ -583,4 +583,21 @@ export type SiteHost = {
    * - Rejects on a theme the host doesn't have.
    */
   themeTokens?(name: string, projectFolder?: string): Promise<string>
+  /**
+   * Show `icon` as the browser tab's icon while the program runs (epic `editor` P50):  what an app's
+   * `its icon is "rocket"` asks for, a site's too (`App.icon`, asked by `core.mountApp()`, again as it changes).
+   * - `undefined`:  the host's own icon back, as the app stops or says none.
+   * - Asked of every run's host, a program with no site too:  `core.siteHost` is the run's host.
+   * - None:  the tab is left alone (`<spell-viewer>`, VS Code).
+   * - NEVER throws:  an icon it can't show leaves the tab as it was.
+   */
+  showIcon?(icon: TabIcon | undefined): void
 }
+
+/**
+ * What a running app asks its host to show as its tab's icon (`SiteHost.showIcon()`):  ONE of
+ * - `name`:  an icon's name (`rocket`), as `<icon "rocket" />` names one, drawn in `color`
+ *   (one of Spell UI's, `green`, or any CSS colour;  none:  its own)
+ * - `address`:  a picture's address, a file of the project already found (`core.addressOfFile()`)
+ */
+export type TabIcon = { name: string; color?: string; address?: never } | { address: string; name?: never }
