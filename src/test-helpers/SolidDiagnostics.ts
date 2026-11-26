@@ -20,6 +20,7 @@ import { afterEach, beforeEach, vi } from "vite-plus/test"
  *     the fix Solid gives and its docs page
  *   - `expectRerunBudget()`:  at most so many re-runs, of every computation or of one by name
  *   - `capture()`:  the record itself, for a test that reads it
+ * - Or every test of a project:  `watchEveryTest()`, from a setup file (`watchSolid.ts`).
  * - The steps' console stays quiet:  Solid's dev build also prints each warning, and the record holds them.
  * - For every set's tests (`spell/test-helpers/SolidDiagnostics`, epic `solid-2-final` P22), in a browser project
  *   on Solid's dev build:  it knows only Solid.
