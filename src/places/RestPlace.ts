@@ -60,10 +60,15 @@ const REST_PAGE_SIZE = 100
 /** The answers that mean "someone got there first", on a place with versions. */
 const OUT_OF_DATE_STATUSES = new Set([409, 412, 428])
 
-/** What it can do, unless it's told otherwise:  a plain web server, read and written, and nothing else promised. */
+/**
+ * What it can do, unless it's told otherwise:  a plain web server, read and written, and nothing else promised.
+ * - `makesIds`:  a new thing goes with no id, and takes the one the server's answer names (epic `data` I62):
+ *   a server that kept the id it was sent would keep the browser's made-up one, `todo-vrkwtpbx`.
+ */
 const REST_CAPABILITIES: PlaceCapabilities = {
   kind: "web server",
   idOf: "id",
+  makesIds: true,
   filter: "none",
   sort: "none",
   select: "none",
@@ -625,7 +630,9 @@ export class RestPlace extends WebPlace implements Place {
       // which way round in a question of its own:  only when it has a value for it, and every field goes that way
       const way = sortDirections && wayAskedFor(sortDirections, fields)
       if (!sortDirections) {
-        const order = fields.map(({ field, descending }) => `${descending ? "-" : ""}${this.wireName(collection, field)}`)
+        const order = fields.map(
+          ({ field, descending }) => `${descending ? "-" : ""}${this.wireName(collection, field)}`
+        )
         data[sortParam] = order.join(",")
         handled.sort = true
       } else if (way !== undefined) {
