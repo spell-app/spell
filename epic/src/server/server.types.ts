@@ -326,6 +326,8 @@ export type EpicWorktree = {
   /** the phase under way */
   phase?: string
   agents?: number
+  /** a Claude session runs for it now (`RunningEpics.runningNames()`;  epic `epic-engine` J369) */
+  session?: boolean
   /** the turn it holds now (`Turns`):  `test`, `merge` */
   turn?: string
   /** its open issues, todos and questions, in words:  `3 issues, 1 todo open` */

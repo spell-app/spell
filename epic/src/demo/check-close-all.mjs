@@ -12,6 +12,9 @@
  *   - a click asks nothing (epic `epic-engine` I462):  both calls drawn ticked at once, before the server answers,
  *     the button gone;  then closed on the page;  the notice says so, with Undo
  *   - Undo puts them back, open to tick again;  the button counts 2 again
+ *   - held till Send, as his own ✓ on each (epic `epic-engine` J387), beside I1 ticked by hand:  Close all again, J1
+ *     and J2 stay in view, their ✓ pressed and their colour held as I1's, Send counting all three;  a second ✓ on J1
+ *     puts J1 alone back;  Send lets J2 go exactly as I1, grey
  *   - no page errors
  * - screenshots in outDir:  `close-all-light.png`, `close-all-dark.png`, `close-all-phone.png` (the Judgement calls
  *   title), `close-all-at-once.png`, `close-all-notice.png`
@@ -138,6 +141,67 @@ const approveFill = (page, id) =>
     return (review ?? root)?.querySelector('ui-button[data-action="approve"]')?.dataset.fill ?? ""
   }, id)
 
+/** Resolves once `test()` holds, polled;  throws after `ms`. */
+async function waitFor(test, ms = 10000) {
+  const until = Date.now() + ms
+  while (!test()) {
+    if (Date.now() > until) throw new Error(`waited ${ms / 1000}s:  ${test}`)
+    await new Promise((resolve) => setTimeout(resolve, 100))
+  }
+}
+
+/**
+ * Item `id` as drawn:  whether it has a box (`shown`, else what hides it), its state (its box's class word:  `old` is
+ * grey), its ✓'s fill.
+ */
+const drawnItem = (page, id) =>
+  page.evaluate((item) => {
+    const host = document.getElementById(item)
+    const root = host?.shadowRoot
+    const box = root?.querySelector("[part~='base']")
+    const state = ["attention", "progress", "open", "recent", "old"].find((name) => box?.classList.contains(name))
+    const review = root?.querySelector("epic-review")?.shadowRoot
+    const fill = (review ?? root)?.querySelector('ui-button[data-action="approve"]')?.dataset.fill ?? ""
+    let hiddenBy = ""
+    for (let node = host; node; node = node.parentElement ?? node.getRootNode()?.host) {
+      if (node.hasAttribute?.("data-epic-filtered")) hiddenBy = `${node.id || node.localName} filtered`
+      else if (node.matches?.(":state(hidden)")) hiddenBy = `${node.id || node.localName} hidden`
+    }
+    const shown = !!host && host.getBoundingClientRect().height > 0 && !hiddenBy
+    return { shown, hiddenBy, state, fill }
+  }, id)
+
+/** A click on item `id`'s ✓ (Approve), as his own:  scrolled to first, as its buttons draw near the screen. */
+async function clickApprove(page, id) {
+  await page.evaluate((item) => {
+    const host = document.getElementById(item)
+    host.closest("epic-section")?.setAttribute("open", "")
+    host.scrollIntoView({ block: "center" })
+  }, id)
+  await page.waitForFunction(
+    (item) => {
+      const root = document.getElementById(item).shadowRoot
+      return !!(root.querySelector("epic-review")?.shadowRoot ?? root).querySelector('ui-button[data-action="approve"]')
+    },
+    id,
+    { timeout: 5000 }
+  )
+  await page.evaluate((item) => {
+    const root = document.getElementById(item).shadowRoot
+    ;(root.querySelector("epic-review")?.shadowRoot ?? root).querySelector('ui-button[data-action="approve"]').click()
+  }, id)
+}
+
+/** The header's Send:  its state (`unsent` while anything waits for it) and its tooltip. */
+const sendState = (page) =>
+  page.evaluate(() => {
+    const send = document.querySelector("epic-page").shadowRoot.querySelector("epic-send-buttons")
+    return { state: send?.getAttribute("state") ?? "", tip: send?.getAttribute("send-tip") ?? "" }
+  })
+
+/** How many marks Send's tooltip says it sends (`Send 3 marks to Claude`):  0 when it names none. */
+const marksIn = (send) => Number(/Send (\d+) marks?/.exec(send.tip)?.[1] ?? 0)
+
 /** A shot of section `id`'s title row. */
 async function shootTitle(page, id, name) {
   const box = await page.evaluate((section) => {
@@ -226,6 +290,51 @@ try {
     (await words(page, "judgements")) === "Close 2 decided",
     `Undo:  the button back (${await words(page, "judgements")})`
   )
+
+  // held till Send (epic `epic-engine` J387):  "as if I had clicked each manually", so drawn exactly as his own ✓ on
+  // I1 (a fixed issue, ticked by hand):  in view, its ✓ pressed, its colour held from before the click (T145), counted
+  // in Send;  a second ✓ on one puts that one back;  Send lets the rest go, as it lets I1 go
+  const before2 = await drawnItem(page, "j2")
+  // what Send counts before:  J3's mark of his
+  const marksBefore = marksIn(await sendState(page))
+  await page.evaluate(() =>
+    document.querySelector("epic-section#judgements").shadowRoot.querySelector(".close-all").click()
+  )
+  await waitFor(() => ["j1", "j2"].every((id) => files.read(FILE).item(id).getAttribute("review-as") === "approve"))
+  await clickApprove(page, "i1")
+  await waitFor(() => files.read(FILE).item("i1").getAttribute("review-as") === "approve")
+  await page.waitForTimeout(800)
+  const single = await drawnItem(page, "i1")
+  check(single.shown && single.fill && single.fill !== "none", `I1, ticked by hand:  in view, its ✓ pressed (${single.fill})`)
+  for (const id of ["j1", "j2"]) {
+    const drawn = await drawnItem(page, id)
+    check(drawn.shown, `held:  ${id.toUpperCase()} still in view (${drawn.hiddenBy || "shown"})`)
+    check(drawn.fill === single.fill, `held:  ${id.toUpperCase()}'s ✓ pressed as I1's (${drawn.fill} / ${single.fill})`)
+    check(drawn.state === before2.state, `held:  ${id.toUpperCase()}'s colour held from before, as I1's (${drawn.state})`)
+  }
+  const counted = await sendState(page)
+  check(marksIn(counted) === marksBefore + 3, `held:  Send counts J1, J2 and I1 (${marksBefore} before;  ${counted.tip})`)
+
+  await clickApprove(page, "j1")
+  await waitFor(() => !files.read(FILE).item("j1").getAttribute("review-as"))
+  await page.waitForTimeout(800)
+  const back = await drawnItem(page, "j1")
+  check(back.shown && back.fill === "none", `a second ✓:  J1 back open, its ✓ not pressed (${back.fill})`)
+  check(files.read(FILE).item("j2").getAttribute("review-as") === "approve", "a second ✓ on J1:  J2 stays closed")
+  check((await drawnItem(page, "j2")).shown, "a second ✓ on J1:  J2 still in view")
+  const recounted = await sendState(page)
+  check(marksIn(recounted) === marksBefore + 2, `a second ✓ on J1:  Send counts J2 and I1 (${recounted.tip})`)
+
+  await page.locator('epic-page epic-send-buttons [part~="send"]').first().click()
+  await page.waitForTimeout(2500)
+  const [gone, goneSingle] = [await drawnItem(page, "j2"), await drawnItem(page, "i1")]
+  check(
+    gone.shown === goneSingle.shown && gone.state === goneSingle.state && gone.fill === goneSingle.fill,
+    `Send:  J2 let go as I1 is (J2 ${JSON.stringify(gone)}, I1 ${JSON.stringify(goneSingle)})`
+  )
+  check(gone.fill !== "dashed" && gone.state === "old", `Send:  J2 no longer pressed, grey (${gone.fill || "no ✓"}, ${gone.state})`)
+  check((await drawnItem(page, "j1")).shown, "Send:  J1, open again, stays")
+  check((await sendState(page)).state !== "unsent", `Send:  nothing left to send (${(await sendState(page)).state})`)
   await page.close()
 
   const dark = await open({ width: 1200, height: 900 }, "dark")
