@@ -117,6 +117,7 @@ export const APP_TEXTS = {
   paletteUnstar: "Take the star off {part}",
   paletteFavoriteTip:
     "{part}:  click it, then click in your app where you want it.  Or drag it there.  To unstar it, right-click it.",
+  paletteAddPart: "Add {part}",
   paletteAddView: "Add a View",
   paletteClearSearch: "Clear the search",
   partStepAdd: "Add {part}",

@@ -119,6 +119,7 @@ const APP_TEXTS_ES: AppTextPack = {
   paletteUnstar: "Quitar la estrella a {part}",
   paletteFavoriteTip:
     "{part}:  haz clic aquí y luego en tu aplicación, donde lo quieras.  O arrástralo hasta allí.  Para quitarle la estrella, haz clic derecho.",
+  paletteAddPart: "Añadir {part}",
   paletteAddView: "Añadir una vista",
   paletteClearSearch: "Borrar la búsqueda",
   partStepAdd: "Añadir {part}",
