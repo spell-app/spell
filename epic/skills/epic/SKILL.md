@@ -2117,6 +2117,9 @@ A NEW session takes this session's epic on, in this window, from its page;  this
   - first from the prompt hook;  then again at a break point (Owen, 2026-11-19:  "ok to show it again at the end of a
     phase, significant chunk of work, after a merge"):  `epic phase ... done`, `epic merge` and `epic agents done`
     print it last, at most once every 15 minutes;  an agent that sees it passes it on in its report
+- The old session is retitled `🗄️ <epic> (replaced)` by itself once its tab has closed (epic `epic-engine` T175):
+  nothing finds it for the epic again, nor does it listen to the page (I488);  `epic session retire [--dry-run]`
+  retitles any left over from before.
 - In Codex:  nothing to hand off:  start a new Codex session in the epic's worktree, run `epic guide`, then
   `$epic resume <name>`.
 

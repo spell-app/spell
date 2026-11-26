@@ -4,7 +4,7 @@ import { SRV } from "spell/server"
 
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { SessionFolders } from "spell/epic/config/SessionFolders"
-import type { RunningSession } from "spell/epic/command/command.types"
+import { isSupersededTitle, type RunningSession } from "spell/epic/command/command.types"
 import { Sessions } from "spell/epic/command/Sessions"
 import { bareTitle } from "spell/epic/list/RunningEpics"
 import type { GearAsk } from "spell/epic/review/review.types"
@@ -172,12 +172,16 @@ export class InboxMonitor {
    * - its title, without its icon, when an epic page has that name (`🚧 seo` -> `seo`)
    * - else the worktree its folder is in, when an epic page has that name
    * - an epic page only:  not a saga page, nor a name with no page
+   * - never a session a `/epic fresh` replaced (`🗄️ seo (replaced)`, `isSupersededTitle()`;  epic `epic-engine`
+   *   I488):  its worktree is still the epic's, but the new session listens, not it
    */
   epicOf(session: RunningSession): MonitoredEpic | undefined {
     const cwd = session.cwd
     if (!cwd) return undefined
+    const recorded = SessionFolders.recordTitle(session, this.sessions.home)
+    if (isSupersededTitle(recorded)) return undefined
     const files = new PlanDocFiles({ root: cwd })
-    const title = bareTitle(SessionFolders.recordTitle(session, this.sessions.home))
+    const title = bareTitle(recorded)
     const worktree = EpicConfig.of(cwd).worktreeNameOf(cwd)
     for (const name of [title, worktree]) {
       if (!name || !EPIC_NAME.test(name)) continue
