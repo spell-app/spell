@@ -176,3 +176,107 @@ describe("a sort a page holds, by itself", () => {
     expect(core.nextSort(core.sort("name", true), "date")).toEqual({ by: "date", descending: false })
   })
 })
+
+describe("a read of a paged server sorted by a sort a page holds", () => {
+  /** 200 rows, served 20 at a time by `limit` and `offset`, newest first when asked for `created_at`. */
+  const PAGED = `lab is a web server at "https://lab.test"
+	it is read only
+	it gives up to 20 at a time
+	its next page is asked for with "limit" and "offset"
+	measurements live at "/measurements"
+		it sorts with "order_by"
+		measurements can be sorted by:
+			- "created at" as "created_at"
+		it searches names with "search"
+
+a "measurement" is a thing
+	it lives in lab
+	its "name" is text
+	its "created at" is a number
+`
+  const MANY = Array.from({ length: 200 }, (_, at) => ({ id: `${at + 1}`, name: `m${at + 1}`, created_at: at + 1 }))
+
+  /** `rows` read on a screen whose `measurement order` is `created at, newest first`:  what the server was asked. */
+  async function pagedScreen(rows: string) {
+    const asked: string[] = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      const url = new URL(`${input instanceof Request ? input.url : input}`)
+      asked.push(`${url.pathname}${url.search}`)
+      const search = url.searchParams.get("search") ?? ""
+      let all = MANY.filter((row) => row.name.includes(search))
+      if (url.searchParams.get("order_by") === "created_at") all = [...all].sort((a, b) => b.created_at - a.created_at)
+      const offset = Number(url.searchParams.get("offset") ?? 0)
+      const limit = Number(url.searchParams.get("limit") ?? 20)
+      return Response.json(all.slice(offset, offset + limit))
+    })
+    core.resetRuntime()
+    const contents = `${PAGED}
+a "lab screen" is a view
+	its "search" is text
+	its "measurement order" is a sort:  created at, newest first
+	its "rows" is ${rows}
+	to draw it
+		<for measurement in its rows><text>{its name};</text></for>
+
+set screen to a new lab screen
+`
+    const { screen } = runSpellFiles([{ path: "/T.spell", contents }], { registered: true })("screen") as {
+      screen: Record<string, unknown>
+    }
+    const element = page.document.createElement("div")
+    page.document.body.appendChild(element)
+    const dispose = render(() => core.drawThing(screen) as never, element)
+    await settled()
+    const shown = () => element.textContent?.replace(/\s+/g, " ").trim().split(";").filter(Boolean) ?? []
+    return { screen, asked, shown, dispose: () => (dispose(), element.remove()) }
+  }
+
+  test("its first 50 where its name includes the search:  three pages asked, sorted by the server, no more", async () => {
+    const { asked, shown, dispose } = await pagedScreen(
+      "the first 50 measurements where its name includes the search sorted by the measurement order"
+    )
+    try {
+      expect(shown()).toHaveLength(50)
+      expect(shown()[0]).toBe("m200")
+      expect(asked).toEqual([
+        "/measurements?order_by=created_at&limit=20&offset=0",
+        "/measurements?order_by=created_at&limit=20&offset=20",
+        "/measurements?order_by=created_at&limit=20&offset=40"
+      ])
+    } finally {
+      dispose()
+    }
+  })
+
+  test("a sort it can't do:  its first three pages read, and their first 50 sorted here", async () => {
+    const { screen, asked, shown, dispose } = await pagedScreen(
+      "the first 50 measurements where its name includes the search sorted by the measurement order"
+    )
+    try {
+      asked.length = 0
+      screen.measurementOrder = core.sort("name", true)
+      await settled()
+      expect(asked).toEqual([
+        "/measurements?limit=20&offset=0",
+        "/measurements?limit=20&offset=20",
+        "/measurements?limit=20&offset=40"
+      ])
+      // m1 ... m50, by name, last first
+      expect(shown()[0]).toBe("m9")
+      expect(shown()).toHaveLength(50)
+    } finally {
+      dispose()
+    }
+  })
+
+  test("its first 50:  one page of 50 asked", async () => {
+    const { asked, shown, dispose } = await pagedScreen("the first 50 measurements sorted by the measurement order")
+    try {
+      expect(shown()).toHaveLength(50)
+      expect(shown()[0]).toBe("m200")
+      expect(asked).toEqual(["/measurements?order_by=created_at&limit=50&offset=0"])
+    } finally {
+      dispose()
+    }
+  })
+})

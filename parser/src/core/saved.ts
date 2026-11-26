@@ -836,6 +836,20 @@ class ProgramPlaces {
     return ways.length === 1 ? ways[0] : undefined
   }
 
+  /**
+   * Does `Class`'s place sort a read of it by all of `sort` itself, so its pages come in that order
+   * (`SavedRead.firstPage()`)?
+   * - Call after `load()`.
+   */
+  sortsItself(Class: SavedClass, sort: readonly SortField[]): boolean {
+    const { collection, behind } = this.placeFor(Class)
+    if (behind.takes) return !!behind.takes(collection, { sort: [...sort] }).sort
+    return this.folder!.canDoAll(
+      behind.describe().sort,
+      sort.map(({ field }) => field)
+    )
+  }
+
   /** Does `behind` sort `collection` by `asked` itself:  its list's own say (`Place.takes()`), else what it describes. */
   private takesSort(behind: PlaceBehind, collection: string, asked: SortField): boolean {
     if (behind.takes) return !!behind.takes(collection, { sort: [asked] }).sort
@@ -1357,9 +1371,17 @@ class SavedRead {
    */
   async firstPage(): Promise<List> {
     this.isIdle = false
-    if (!this.answered && !this.query.sort?.length) this.readsPagesWhenDrawn = true
+    // a sort its place does itself comes a page at a time, in order:  only one it can't do reads every page first
+    if (!this.answered && this.query.sort?.length) await this.program.load()
+    if (!this.answered && this.comesInOrder()) this.readsPagesWhenDrawn = true
     await (this.answered ??= this.start())
     return this.list
+  }
+
+  /** Do its pages come in the order it asks for:  no sort, or one its place does itself?  - Call after `load()`. */
+  private comesInOrder(): boolean {
+    const { sort } = this.query
+    return !sort?.length || this.program.sortsItself(this.Class, sort)
   }
 
   /**

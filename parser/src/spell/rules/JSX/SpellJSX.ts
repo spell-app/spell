@@ -381,7 +381,8 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       methodName: "sortShown",
       args: [
         read.object as P.ASTExpression,
-        new P.ASTStringLiteral(match, { value: JSON.stringify(read.property.value) })
+        // as compiled code names it:  `measurement order` is `measurementOrder`
+        new P.ASTStringLiteral(match, { value: JSON.stringify(P.JSWriter.instance.nameOf(`${read.property.value}`)) })
       ]
     })
     const sort = new P.ASTJSXAttribute(match, { name: PAGE_SORT_ATTRIBUTE, value: shown })
