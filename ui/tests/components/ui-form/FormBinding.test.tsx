@@ -277,4 +277,31 @@ describe("<ui-tabs name> in a bound form", () => {
     await userEvent.click(buttons[0]!)
     await expect.poll(() => thing.tab).toBe("one")
   })
+
+  it("a name of two words binds the property its words name, as compiled code spells it:  `inventory shows`", async () => {
+    // a thing whose property is a getter and setter on its class, as compiled Spell's are
+    class Shown {
+      private held = "two"
+      get inventoryShows(): string {
+        return this.held
+      }
+      set inventoryShows(value: string) {
+        this.held = value
+      }
+    }
+    const thing = new Shown()
+    const host = await ElementFixture.render<DOMFormElement & { value: unknown }>(
+      `<ui-form><form><ui-tabs name="inventory shows" aria-label="Tabs"><ui-tab label="One" value="one">1</ui-tab>` +
+        `<ui-tab label="Two" value="two">2</ui-tab></ui-tabs></form></ui-form>`
+    )
+    await ElementFixture.settle(host)
+    host.value = thing
+    await settle()
+    const tabs = host.querySelector("ui-tabs") as Control
+    await expect.poll(() => tabs.value).toBe("two")
+    const buttons = [...tabs.shadowRoot!.querySelectorAll<HTMLElement>("[role=tab]")]
+    await userEvent.click(buttons[0]!)
+    await expect.poll(() => thing.inventoryShows).toBe("one")
+    expect(Object.keys(thing)).not.toContain("inventory shows")
+  })
 })

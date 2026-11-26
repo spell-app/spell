@@ -115,6 +115,23 @@ export function declaredFieldNamed(Class: Function | undefined, words: string): 
   return undefined
 }
 
+/**
+ * The property of `Class`'s things that `words` names, however it's spelled:  a declared field (`declaredFieldNamed()`),
+ * else one worked out each time it's read, a getter on its class:  `last outcome` => `lastOutcome`.
+ * - `undefined` when it has neither.
+ */
+export function propertyNamed(Class: Function | undefined, words: string): string | undefined {
+  const field = declaredFieldNamed(Class, words)
+  if (field !== undefined || !Class) return field
+  const wanted = wordsOf(words)
+  for (let at = Class.prototype as object | null; at && at !== Object.prototype; at = Object.getPrototypeOf(at)) {
+    for (const name of Object.getOwnPropertyNames(at)) {
+      if (name !== "constructor" && wordsOf(name) === wanted) return name
+    }
+  }
+  return undefined
+}
+
 /** A name as its letters and digits alone, lower case:  `created at`, `createdAt`, `created_at` => `createdat`. */
 function wordsOf(name: string): string {
   return name.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "")
@@ -585,8 +602,9 @@ export const collectionOtherMethods = defineCoreModule({
 
   /**
    * `collection`, sorted by `sort`, a sort a page holds:  `the scores sorted by the order`, a list kept here.
-   * - Its `by` is a field of the items, however it's spelled (`created at` => `createdAt`);  a read of a place hands
-   *   a sort its place has a name for to the place (`core.savedThingsSortedBy()`).
+   * - Its `by` is a property of the items, however it's spelled (`created at` => `createdAt`), a field or one worked
+   *   out each time it's read (`last outcome` => `lastOutcome`);  a read of a place hands a sort its place has a name
+   *   for to the place (`core.savedThingsSortedBy()`).
    * - `field`:  the field to sort by, when the caller knows it better (a named sort's own field);  else `by`'s.
    * - No sort, or none of the items has that field:  as it was.
    */
@@ -599,7 +617,7 @@ export const collectionOtherMethods = defineCoreModule({
     let key = field
     if (key === undefined) {
       core.forEach(collection, (item) => {
-        key ??= declaredFieldNamed((item as object | undefined)?.constructor, sort.by)
+        key ??= propertyNamed((item as object | undefined)?.constructor, sort.by)
       })
     }
     key ??= sort.by

@@ -249,6 +249,31 @@ describe("a sort a page holds, by itself", () => {
     expect(core.sortedByValue(rows, undefined)).toBe(rows)
   })
 
+  test("`core.sortedByValue()`:  by a worked-out property of two words, `last outcome`, as compiled code names it", () => {
+    const contents = `a "run" is a thing
+	its "name" is text
+	its "outcomes" is a list of text
+	its "last outcome" is
+		the last item in its outcomes
+`
+    const { Run } = runSpellFiles([{ path: "/R.spell", contents }])("Run") as {
+      Run: new () => { name: string; outcomes: string[]; lastOutcome: unknown }
+    }
+    const runs = [
+      ["b", ["ok", "failed"]],
+      ["a", ["passed"]],
+      ["c", ["completed"]]
+    ].map(([name, outcomes]) => {
+      const run = new Run()
+      run.name = name as string
+      for (const outcome of outcomes as string[]) core.append(run.outcomes, outcome)
+      return run
+    })
+    expect(runs.map((run) => run.lastOutcome)).toEqual(["failed", "passed", "completed"])
+    const sorted = core.sortedByValue(runs, core.sort("last outcome"))
+    expect(sorted.map((run) => run.name)).toEqual(["c", "b", "a"])
+  })
+
   test("`core.nextSort()`:  the same flips, another starts smallest first when nothing says otherwise", () => {
     expect(core.nextSort(core.sort("name"), "name")).toEqual({ by: "name", descending: true })
     expect(core.nextSort(core.sort("name", true), "date")).toEqual({ by: "date", descending: false })
