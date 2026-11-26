@@ -81,6 +81,20 @@ describe("ProjectBuild", () => {
   put(join(importerFolder, "Importer.spell"), 'print "imports"\n')
   const importerId = locationForDiskPath(join(importerFolder, SP.PROJECT_FILE))!.projectId
   const importerCompiled = SP.SpellLocation.getFileLocation(importerId, `Importer${SP.COMPILED_JS_SUFFIX}`)
+  // one importing a library THROUGH another project:  it imports the importer
+  const throughFolder = join(root, "projects", "Through")
+  put(
+    join(throughFolder, SP.PROJECT_FILE),
+    JSON.stringify({
+      imports: [
+        { path: importerId, active: true },
+        { path: "/Through.spell", active: true }
+      ]
+    })
+  )
+  put(join(throughFolder, "Through.spell"), 'print "through"\n')
+  const throughId = locationForDiskPath(join(throughFolder, SP.PROJECT_FILE))!.projectId
+  const throughCompiled = SP.SpellLocation.getFileLocation(throughId, `Through${SP.COMPILED_JS_SUFFIX}`)
 
   beforeEach(() => {
     vi.spyOn(console, "log").mockImplementation(() => {})
@@ -90,6 +104,7 @@ describe("ProjectBuild", () => {
     vi.restoreAllMocks()
     rmSync(compiled.serverPath, { force: true })
     rmSync(importerCompiled.serverPath, { force: true })
+    rmSync(throughCompiled.serverPath, { force: true })
   })
   afterAll(() => rmSync(root, { recursive: true, force: true }))
 
@@ -171,6 +186,20 @@ describe("ProjectBuild", () => {
     await vi.waitFor(() => expect(spawn).toHaveBeenCalledTimes(2))
     expect(spawn).toHaveBeenLastCalledWith(process.execPath, [build.cli, "compile", importerId], expect.anything())
     put(importerCompiled.serverPath, "export {}\n")
+    children[1]!.exit(0)
+    expect(await waiting).toBe(true)
+  })
+
+  test("while the startup compile runs:  a project importing a library THROUGH another project waits for it too", async () => {
+    const { spawn, children } = spawnStub()
+    const build = new ProjectBuild({ root, spawn, warmsSites: false }).start()
+    const waiting = build.untilBuilt(throughCompiled)
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(spawn).toHaveBeenCalledOnce()
+    children[0]!.exit(0)
+    await vi.waitFor(() => expect(spawn).toHaveBeenCalledTimes(2))
+    expect(spawn).toHaveBeenLastCalledWith(process.execPath, [build.cli, "compile", throughId], expect.anything())
+    put(throughCompiled.serverPath, "export {}\n")
     children[1]!.exit(0)
     expect(await waiting).toBe(true)
   })

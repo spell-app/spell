@@ -32,7 +32,8 @@ import { SitePagesBuild } from "./SitePagesBuild"
  *   A request for a built file that isn't there (`/spaces/<project>/<file>`) compiles its project AT ONCE,
  *   `spell compile <projectId>`, beside anything else running, then goes on to be served (epic `editor` P45, Q89):
  *   - never waiting behind the startup compile, except a project that imports one of the projects it compiles
- *     (`STARTUP_PROJECTS`):  that one waits for it first, so two compiles never write the same library at once
+ *     (`STARTUP_PROJECTS`), itself or through another project:  that one waits for it first, so two compiles never
+ *     write the same library at once
  *   - one compile per project at a time:  a second request for it waits on the first's
  *   - at most `timeout` ms in all;  then it's served as it is (a 404), while the compile carries on
  *   - only a project that's there (it has a project file):  an unknown one 404s at once
@@ -433,15 +434,26 @@ function kitSpell(root: string): string | undefined {
 }
 
 /**
- * Does the project whose project file is `projectFile` import a project in any of `groups`, e.g. `@spell/library`?
+ * Does the project whose project file is `projectFile` import a project in any of `groups`, e.g. `@spell/library`,
+ * itself or through another project it imports, at any depth?
  * - Its project file's `imports`:  another project's entry is its address, a file's starts with `/`.
- * - A file that can't be read imports nothing.
+ * - Each project imported is read once (`seen`):  two projects importing each other end.
+ * - A file that can't be read, or a project that isn't there, imports nothing.
  */
-function importsAny(projectFile: string, groups: string[]): boolean {
+function importsAny(projectFile: string, groups: string[], seen = new Set<string>()): boolean {
+  if (seen.has(projectFile)) return false
+  seen.add(projectFile)
+  let imports: Array<{ path?: string }>
   try {
-    const { imports = [] } = readJSON5File<{ imports?: Array<{ path?: string }> }>(projectFile)
-    return imports.some(({ path = "" }) => groups.some((group) => path.startsWith(`${group}/`)))
+    imports = readJSON5File<{ imports?: Array<{ path?: string }> }>(projectFile).imports ?? []
   } catch {
     return false
   }
+  const projects = imports.map(({ path = "" }) => path).filter((path) => SP.SpellLocation.isAddress(path))
+  if (projects.some((path) => groups.some((group) => path.startsWith(`${group}/`)))) return true
+  return projects.some((path) => {
+    const projectId = SP.SpellProject.projectIdForImport(path)
+    const imported = projectFileIn(SP.SpellLocation.getProjectLocation(projectId).serverPath)
+    return !!imported && importsAny(imported, groups, seen)
+  })
 }

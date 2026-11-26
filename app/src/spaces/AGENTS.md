@@ -887,12 +887,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     compiles its project AT ONCE, beside anything else compiling, then serves it (`projectBuild.builtFirst()`;
     epic `editor` P45, Q89).
     - One compile per project at a time, waiting at most `COMPILE_WAIT_MS`.
-    - Only a project importing one of Spell's libraries waits for the startup compile first:
-      two compiles never write one library at once.
+    - Only a project importing one of Spell's libraries, itself or through another project, waits for the startup
+      compile first:  two compiles never write one library at once.
   - The route module starts `spell compile --stale --all @spell/library` as the page server starts, in the
     background:  the libraries alone (Q88), which other projects import and VS Code reads the schemas of.
     - Every example and guide compiles the first time a page asks for it:  the demo pages, App UI's live
       examples, the Spell UI site (`/components/ui/`, about 14 s the first time).
+    - A site with no whole build opens PAGE BY PAGE (epic `editor` P46):  its frame first, then each page the first
+      time it's asked for, by ONE `spell compile --pages` the page server keeps running ([SitePagesBuild.ts](server/node/routes/SitePagesBuild.ts),
+      started as the startup compile ends, gone after 10 minutes unused);  each kept in `__pages/` beside the site's
+      build, with its own fingerprints ([SitePages.ts](server/node/projects/SitePages.ts)), so editing a page compiles only it.
   - A build is out of date by what's in its files, never their dates (Q90):  a FINGERPRINT beside it,
     `<Project>.fingerprint.json`, hashes its files, its imports' declarations and the compiler (the cli's
     `staleBecause()`).
@@ -903,7 +907,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     `build-step`, `SPACES.BuildStep`):  `reading`, then `compiling` and `checking` as `spell compile` prints them
     (`SPELL_COMPILE_STEPS=1`), then `built` or `mistakes`.
     - The runner's waiting box says them (`<SpellAppRunner>`):  the run page and every `<spell-viewer>`.
-    - So does the editor's loading screen, which stays while one is under way (`PageLoading.step()`).
+    - So does the editor's loading screen, for the project it opens and those it imports, with its own steps
+      around them:  "Opening Solitaire…", "Checking your code…", "Starting it…";  it stays until the project runs,
+      60 s at most (`stepsOnLoadingScreen()`, `editor.opening`;  epic `editor` T176).
   - A child process, the checkout's own `spell compile`:  it compiles as the CLI does,
     and the page server keeps serving pages meanwhile.
 

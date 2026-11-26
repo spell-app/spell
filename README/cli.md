@@ -687,6 +687,7 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | `spell compile --target <name>` | compiles to this target too, e.g. `ts/solid`;  default:  the project file's `"targets"` |
 | `spell compile --force` | recompiles the projects it imports too, even those already compiled |
 | `spell compile --stale` | only the projects that are out of date, and the same for what they import;  the rest say "up to date" |
+| `spell compile --pages` | keeps running, and compiles a site page by page:  its frame first, then each page the first time it's asked for, read from standard input;  the page server's helper, not one you type |
 | `spell lint --json` | the errors as a JSON list |
 | `spell lint --fix` | puts right what it can:  each line still written the old way, as `spell upgrade` does (`parts` => `slots`;  a note after a line's code, `// x`, moved to the line under it, `-- x`), then the project file's `spellVersion`;  a page's `<text>` just before an example => its `description=`, which plain `spell lint` warns of as `description-before-example`;  and the editor pages (drops gone properties, adds new ones, fixes controls that don't fit) |
 | `spell upgrade --dry-run` | lists what it would change, and changes nothing |
@@ -712,6 +713,9 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 - Nothing to run by hand in a fresh checkout:
   the page server runs `spell compile --stale --all @spell/library` as it starts, the libraries alone,
   and the spaces routes compile a project the moment a page asks for a built file of it that's missing.
+  - A site with no whole build opens page by page (epic `editor` P46):  its frame first, about 1.5 s for the Spell UI
+    site, then each page the first time it's asked for, about 0.1 s, by one `spell compile --pages` the page server
+    keeps running;  each kept in `__pages/` beside the site's build, so editing a page compiles only it.
 - `watch` rebuilds a watched project when one it imports changes.
   - It watches each project's folder, its `.spell` files, CSS and project file;
     it ignores `*.spell.js` and `*.scopes.js`.
