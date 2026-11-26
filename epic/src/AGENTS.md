@@ -1547,6 +1547,9 @@ In `tools/`:
     - Nested ones stack below their parents'.
     - The runtime sets the top-level `offset`s.
   - Folding:  folds are remembered per page;  a link's unfold isn't.
+    - A RELOAD never unfolds the block its `#hash` names (`EpicFold.followHash()`, epic `epic-engine` I494):  that
+      hash is the page's own, written as the reader scrolled, not a link;  a block they folded stays folded
+      ("0. While you were out" opened at every reload, its `#away` in the address)
     - A live reload for new code puts back EVERY fold as it was, items and a link's unfolds too
       (`keepFoldsForReload()`, `sessionStorage`;  epic `epic-engine` I23).
     - An epic page (`body.plan-doc`) starts EVERY section folded that the reader hasn't opened or closed:
