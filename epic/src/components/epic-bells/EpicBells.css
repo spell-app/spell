@@ -5,7 +5,7 @@
  * - Colours are the page's (`--epic-*`, declared by `<epic-page>` above it), Spell UI's without a page.
  * - Spacing on a 4px grid.
  * - Public tokens (`--epic-bells-*`) are never declared here:  read through private aliases.
- *   - `--epic-bells-width` (640px):  the dialog's width, at most the window less 32px
+ *   - none yet:  its width is the modal's own (`size="small"`)
  */
 
 @layer ui.components.epic-bells.types, ui.components.epic-bells.content;
@@ -25,7 +25,6 @@
   }
 
   .bells {
-    --_epic-bells-width: var(--epic-bells-width, 640px);
     /* the page's colours (`<epic-page>` declares them);  Spell UI's, and its text mixed down, without one */
     --_epic-bells-ink: var(--epic-ink, var(--ui-text-color, CanvasText));
     --_epic-bells-muted: var(
@@ -41,7 +40,7 @@
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
-    width: min(var(--_epic-bells-width), calc(100vw - 32px));
+    width: 100%;
     max-height: min(85dvh, 880px);
     min-width: 0;
     overflow: hidden;
@@ -131,8 +130,12 @@
 
   .switch,
   .cost {
-    margin-top: 0;
     align-self: start;
+  }
+
+  /* the toggle's knob centred on the title's first line:  measured 1.3px low without it */
+  .switch {
+    margin-top: -1px;
   }
 
   .words {

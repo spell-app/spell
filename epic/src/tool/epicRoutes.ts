@@ -65,6 +65,14 @@
  *   - gathered when asked, from the epic pages' skeletons;  a read, so no token
  *   - from the epic folder the server serves (`ContentRouteContext`'s `content`, the epic server's), else `root`'s:
  *     so a demo server (`DemoServer`) answers from its copies (epic `epic-engine` I45)
+ *
+ * BELLS & WHISTLES (epic `epic-engine` P86):  the switches of the steps epic work runs by itself, `<epic-bells>`' dialog
+ * - `GET /api/epics/settings` -- answers `{ values, view }` (`BellsAnswer`):  the settings' `bells` group as merged now,
+ *   and each step with whether it runs now (`Bells`);  a read, so no token
+ * - `POST /api/epics/settings` `{ values }` -- saves the group as `values` says, what differs only, into YOUR file
+ *   (`~/.spell/epic_settings.json5`, `Bells.save()`);  answers `{ values, view }` after it
+ *   - 400:  no `values`, or a value that won't do (the refusal's words)
+ * - one set for every epic:  the org's file under it, from the epic folder the server serves
  */
 import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
@@ -79,6 +87,9 @@ import type { ContentRouteContext } from "spell/epic/list/runningRoutes"
 // the routes `<epic-cards>` and `<epic-card>` ask:  their families' types files (data only)
 import { SAGA_EPICS_API } from "spell/epic/components/epic-cards/EpicCards.types"
 import { MANAGE_API } from "spell/epic/components/epic-list/EpicList.types"
+import { BELLS_API, type BellsAnswer } from "spell/epic/components/epic-bells/EpicBells.types"
+import type { BellsValues } from "spell/epic/bells"
+import { Bells } from "spell/epic/config/Bells"
 
 import { EpicLifecycle, editFavorites } from "./EpicLifecycle"
 import { EpicTests, TESTS_API } from "./EpicTests"
@@ -141,6 +152,22 @@ const epicRoutes: RouteModule = {
       await lifecycle().remove(nameIn(request.body))
       reply.json({})
     })
+    router.get(BELLS_API, (_request, reply) => {
+      reply.noStore().json(bellsAnswer(content ?? EpicConfig.contentOf(root)))
+    })
+    router.post(BELLS_API, guard.writeCheck, body, (request, reply) => {
+      const { values } = (request.body ?? {}) as { values?: unknown }
+      if (typeof values !== "object" || values === null || Array.isArray(values))
+        throw new SRV.HttpError(400, "send { values }:  the settings' bells group")
+      const where = content ?? EpicConfig.contentOf(root)
+      try {
+        Bells.save(values as BellsValues, { content: where })
+      } catch (error) {
+        if (error instanceof TypeError) throw new SRV.HttpError(400, error.message)
+        throw error
+      }
+      reply.json(bellsAnswer(where))
+    })
     router.get(SAGA_EPICS_API, (request, reply) => {
       const saga = String(request.query.saga ?? "")
       if (!Sagas.isId(saga)) throw new SRV.HttpError(400, `not a saga's id:  "${saga}"`)
@@ -182,6 +209,11 @@ export function epicName(title: string): string {
 
 /** The first words `/epic` takes as a verb, never an epic's name:  `EPIC_VERBS`, the one list. */
 const RESERVED = new Set<string>(EPIC_VERBS)
+
+/** Bells & Whistles' answer, from epic folder `content`:  the `bells` group and each step as it runs now. */
+function bellsAnswer(content: string): BellsAnswer {
+  return { values: Bells.values({ content }), view: Bells.view({ content }) }
+}
 
 /**
  * Star (`favorite`) or unstar epic `name` in checkout `root`'s favourites (`FAVORITES_FILE`, in its epic folder);

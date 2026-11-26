@@ -198,6 +198,7 @@ export class EpicBells extends E.UIComponent<EpicBellsVocabulary> {
         ref={(modal: HTMLElement) => this.adoptModal(modal)}
         class="bells-modal"
         part={this.partForName("base")}
+        size="small"
         closedby="closerequest"
         aria-label={this.translationForKey("heading")}
       >

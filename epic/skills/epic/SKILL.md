@@ -397,7 +397,8 @@ NO plan mode, ever, for an epic (epic `epic-engine` P33;  2026-10-24).
      ([the coherence skill](../coherence/SKILL.md), its "epic" form, steps 2-4).
      - Its findings go into the Overview as it's written (step 2):  the plan uses the mechanism that exists, said in
        plain words where it's chosen;  a real choice between two good ways is a question (step 3), "(coherence)".
-     - Skipped in a repo with no catalog (`agents/coherence/`), in one line.
+     - Skipped in a repo with no catalog (`agents/coherence/`), in one line;  and while `bells.reuseCheckPlan` is off
+       ("Bells & Whistles", below).
 2. Write the OVERVIEW, by hand, in the skeleton's `#overview` (shape:  "4. Fill the doc"):
    - the summary, `<epic-summary>`:  two sentences
    - numbered sub-sections (structure, code, flows):  what will become guides
@@ -670,6 +671,57 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
 - `epic merge` and `epic worktree merge-main` take their own turn (`epic turns`):  one merge at a time on the machine,
   each saying who has it while it waits.
 
+### Bells & Whistles:  steps the person may switch off
+
+The epic page's gear has BELLS & WHISTLES (epic `epic-engine` P86):  an on / off switch for each step epic work runs by
+itself, and a Token burn slider that holds the costly ones off for now.  One set for every epic, in the person's own
+epic settings.
+- Before each step below, ask `epic settings bells.<key>`:  it prints `on`, or `off` and why (the slider, their
+  switch).
+- OFF:  skip the step, and say so in ONE line where it would have shown, `<its title>:  off in Bells & Whistles` (a
+  phase's Done list, the reply, the item's card), so a skipped review never looks like a clean one.
+- `epic settings bells` lists them all, with their titles and costs;  never change one yourself:  they're the person's.
+- The code reads its own (`Bells.isOn()`):  the title check and item scoring (`epic add`), the "On it" line and the
+  fresh hint (the prompt hook), waking a session and passing it a Send (the hub), opening a chat for a Send nobody hears,
+  saving the epic pages at a turn's end, merge-main's rename step, the hourly sweep, the behind-main notice.
+- The skill's own, each with its key:
+
+| Step | Key |
+| --- | --- |
+| the coherence review at kickoff (step 3) | `bells.reuseCheckPlan` |
+| the coherence review of the build plans (step 4b) | `bells.reuseCheckPhases` |
+| a helper for bigger epic page edits | `bells.pageEditHelper` |
+| building in helpers (above) | `bells.helpersBuild` |
+| resuming cut-off agents ("After a restart") | `bells.restartHelpers` |
+| the finishing pass's sweep for drift bugs | `bells.finalTidy` |
+| the designer review (5, step 4) | `bells.designReview` |
+| the plan check (5, step 4) | `bells.planCheck` |
+| an agent's alignment scan of what it changed | `bells.alignmentCheck` |
+| trying a manual test yourself before asking the person | `bells.handChecksFirst` |
+| `epic voice check` on text people see | `bells.plainWordsCheck` |
+| an agent's unit tests before it merges | `bells.checksBeforeMerge` |
+| the last agent's full suite | `bells.fullTestRun` |
+| the parser's speed test | `bells.speedTest` |
+| rebuilding the VS Code extension | `bells.editorAddOns` |
+| the editor's Solid warnings after a merge | `bells.editorWarnings` |
+| stopping a stalled test run (`--stall`) | `bells.stopStuckTests` |
+| rewriting a phase's notes in plain words (Doc Review) | `bells.plainPhaseNotes` |
+| writing the epic's guide (Doc Review) | `bells.epicGuide` |
+| fixing the READMEs (Doc Review) | `bells.fixReadmes` |
+| `/docs-check` of the guides' links and pictures | `bells.checkGuides` |
+| the changelog entry | `bells.changelog` |
+| merging an agent's work into `main` at once | `bells.mergeEachHelper` |
+| merging `main` into the worktree | `bells.mergeMain` |
+| rebuilding generated files after a merge | `bells.remakeBuiltFiles` |
+| installing packages a merge changed | `bells.installPackages` |
+| carrying the person's uncommitted edits on `main` into the branch first | `bells.keepOwnEdits` |
+| `/epic tidy`'s reset of items marked working that nobody works on | `bells.clearStuckItems` |
+| answering an item's Add Details and Clarify | `bells.itemRequests` |
+| the waiter for the person's notes to agents (`epic agents wait`) | `bells.watchAgentNotes` |
+| rebuilding a page's bundles by hand (`spell bundle`) | `bells.refreshPages` |
+
+In Codex:  the same keys;  a step Codex does itself rather than in an agent is still the step.
+
 ### After a restart
 
 A restart of VS Code (or a window reload) ends every background agent with the session that started them
@@ -869,12 +921,13 @@ Until a `/back:  ...` message (or `epic focus status` says off):
      The scan:  `Alignment` (`spell/test-helpers/Alignment`), one item drawn more than half a pixel off its row or column.
 4. The reviews before the phase closes.
    - A phase that changed a page or an element (a docs page, a component, the editor app):  the DESIGNER review first
-     ([the designer skill](../designer/SKILL.md);  epic `epic-engine` P24, Q12).
+     ([the designer skill](../designer/SKILL.md);  epic `epic-engine` P24, Q12), unless `bells.designReview` is off:
+     then the Done list says `Design review:  off in Bells & Whistles`.
      - It fixes the obvious things itself, and asks about the bigger ones with before / after pictures on a details page.
      - Its shots list every row whose items don't line up (epic `epic-engine` P83):  each one fixed in its component,
        or marked as meant (`data-align="free: <why>"`), before the phase closes.
      - Its fixes go in the phase's Done;  what it asks about waits on the person, as calm issues.
-   - Every phase:  the PLAN CHECK (epic `epic-engine` P72;  the idea borrowed from superpowers' spec review, MIT):
+   - Every phase, unless `bells.planCheck` is off (then a Done line saying so):  the PLAN CHECK (epic `epic-engine` P72;  the idea borrowed from superpowers' spec review, MIT):
      a `plan-check` agent, named and listed `<name>-p<N>-check`, given the epic, the phase and the phase's diff
      (its commits, or `git diff <base>` when not committed yet).
      - In Codex:  its custom agent `plan-check` (`epic plugin install --codex`), else follow its agent file's steps yourself.
