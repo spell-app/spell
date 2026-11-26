@@ -472,7 +472,7 @@ export class EditorServer {
     // a build from before the run page has none, and runs it in the editor
     web.fallback.use((request, reply, next) => {
       if (request.method !== "GET") return next()
-      const page = editorPageFor(request.path, orgGroupFolders())
+      const page = editorPageFor(request.originalUrl, orgGroupFolders())
       const file = existsSync(join(dir, page)) ? page : "index.html"
       return reply.set("Cache-Control", "no-cache").sendFile(join(dir, file))
     })

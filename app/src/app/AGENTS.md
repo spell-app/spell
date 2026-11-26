@@ -58,6 +58,11 @@ and in the app's build folder, `app/` at the app folder's root.
       editor's own `spell-runtime.js`;  a site keeps its address in the page's (`RunSiteHost`)
     - the editor's own switch from Edit to Run stays on the editor's page:  live edits and the game in progress carry
       over
+      - and so does a reload of the editor's tab in Run (a browser Reload, vite's, Spell restarting;  epic `editor`
+        I364):  the editor notes its address in the tab's session storage as it goes, and `run.html`'s first script,
+        finding it, asks for the editor with `?editor`, which `editorPageFor()` answers ([editorTab.ts](editorTab.ts))
+    - one loading screen until it's whole (I364):  the page's colour and Spell's hat over everything, until the app is
+      drawn and every Spell UI element in it styled (`:state(ready)`), or the waiting box shows;  8 s at most
     - a phone opening `/edit/<project>` goes there before the editor downloads (`index.html`'s first script):
       a phone only runs
     - the static build keeps its Run in the editor:  a host sends `index.html` for every address
