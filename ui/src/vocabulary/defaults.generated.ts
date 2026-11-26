@@ -1523,7 +1523,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "direction", kind: "valueOnly", group: "layout", values: ["horizontal"] },
     { name: "equal-width", kind: "keyOnly", group: "layout" },
     { name: "wrapping", kind: "keyOnly", group: "layout" },
-    { name: "stackable", kind: "keyOnly", group: "layout" },
+    { name: "stackable", kind: "keyOrValueAndKey", group: "layout", values: ["tablet"] },
     {
       name: "appearance",
       kind: "multiple",
