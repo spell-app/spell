@@ -90,8 +90,8 @@ import { SharedComments } from "./SharedComments"
  *       - a press holds it 5 minutes (`countdown: true`, epic `epic-engine` I181):  dated when it goes (`stamped()`),
  *         so no Send before then carries it (`heldMarks`);  then the page sends it, with whatever else is unsent
  *       - `epic inbox apply` moves the page on a stage
- *     - a phase's Defer, while the phases are agreed (P29):  `{ action: "defer" }`, applied by moving the phase after
- *       the others, still to do
+ *     - a phase's Defer (P29;  its gear's since T169):  `{ action: "defer" }`, applied by moving the phase after
+ *       the others, still to do;  its Remove (T169):  `{ action: "remove" }`, applied by taking it off the page
  *     - a CHANGE MARK's buttons (`<epic-change id="ch3">`, epic `epic-engine` P30), under its id (`CHANGE_ID`):
  *       `{ action: "accept" }` (the change stands:  `inbox apply` marks it `accepted`, the orange goes, its chip
  *       stays) or `{ action: "reopen" }` (`inbox apply` reopens the question it names;  the mark stays orange)
@@ -1713,7 +1713,8 @@ export const INBOX_VERSION = 1
  * - `new`:  a new todo or question Owen asks for from the page (`setNew()`, epic `airplane` P2), under its own key
  * - `test`:  a test's answer from the page's test run (epic `epic-engine` P4):  `result`, maybe `note` and `shot`
  * - `accept`:  `<epic-stage-button>` (epic `epic-engine` P29):  the stage it ends (`stage`), under `STAGE_ID`
- * - `defer`:  a phase's Defer while the phases are agreed (P29):  after the others, still to do
+ * - `defer`:  a phase's Defer (P29;  its gear's "Defer this phase" since T169):  after the others, still to do
+ * - `remove`:  a phase's "Remove this phase" (its gear, epic `epic-engine` T169):  never started, taken off the page
  * - `accept` with no `stage`, and `reopen`:  a change mark's buttons (`<epic-change>`, P30), under its id
  * - `seen`:  an update block's Seen (`<epic-update id="up3">`, epic `epic-engine` I168), under its id
  * - `hold`:  an accepted phase's thumbs up un-clicked (epic `epic-engine` I218):  its plan waits for Accept again
@@ -1735,6 +1736,7 @@ export const ACTIONS = [
   "accept",
   "defer",
   "move",
+  "remove",
   "reopen",
   "seen",
   "hold",

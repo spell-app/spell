@@ -162,9 +162,11 @@ The person writing in this session mid-run means they're awake:  bedtime mode en
 - Go back to the root rules.
 
 Everything else stands:
+- each step Bells & Whistles switches (epic `epic-engine` P86) only while `epic settings bells.<key>` says `on`;  off,
+  one line saying so (`<its title>:  off in Bells & Whistles`), as in a session
 - the repo's own rules (its `AGENTS.md`) and the person's standing ones;  in spell-app, say:
-  - its VS Code extension rebuilt after each stage
-  - the parser speed test, only on its hot path (the epic skill's three test tiers, "The session answers;  agents
+  - its VS Code extension rebuilt after each stage (`bells.editorAddOns`)
+  - the parser speed test, only on its hot path (`bells.speedTest`) (the epic skill's three test tiers, "The session answers;  agents
     build")
   - the three logs:
     `agents/PAPERCUTS.md`, `SUSPECTED-BUGS.md`, `CODE-DEBT.md`, in the epic folder (`epic config contentFolder`)

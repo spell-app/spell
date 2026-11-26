@@ -3,6 +3,7 @@ import { delimiter, dirname, join } from "node:path"
 
 import { DataFile } from "spell/server/DataFile"
 import { ClaudePrint } from "spell/epic/command/ClaudePrint"
+import { Bells } from "spell/epic/config/Bells"
 import { EpicHome } from "spell/epic/config/EpicHome"
 
 import { PlanDocError, ShortTitle } from "./planDoc.types"
@@ -46,7 +47,7 @@ export class TitleReader {
 
   constructor({
     ask = claudeReader,
-    skipReason = defaultSkipReason,
+    skipReason = () => defaultSkipReason("titleCheck"),
     warn = (line) => void process.stderr.write(`${line}\n`),
     suggestionsFile = join(EpicHome.folder(), SUGGESTIONS_FILE),
     now = Date.now
@@ -281,12 +282,15 @@ function claudeReader({ system, text }: TitleRequest): TitleVerdict {
 }
 
 /**
- * Why the default reader can't run here, or `undefined` when it can.
+ * Why the default reader can't run here, or `undefined` when it can:  the title check's, and item scoring's
+ * (`ItemJudge`), each by its own switch, `step`.
  * - a test runner (`VITEST`):  quietly, so no test's output changes
+ * - its switch off in Bells & Whistles (`Bells.isOn()`, epic `epic-engine` P86):  said once
  * - no `claude` on the `PATH` (CI, Codex):  said once
  */
-export function defaultSkipReason(): TitleSkip {
+export function defaultSkipReason(step: "titleCheck" | "itemScoring"): TitleSkip {
   if (process.env.VITEST) return { why: "a test run", quiet: true }
+  if (!Bells.isOn(step)) return { why: "off in Bells & Whistles" }
   return hasClaude(process.env.PATH ?? "") ? undefined : { why: "no claude on the PATH" }
 }
 

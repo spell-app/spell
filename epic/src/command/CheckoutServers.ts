@@ -12,6 +12,7 @@ import type { OrphanServer, ServerProcess } from "spell/server/page/prune"
 import { isProcessAlive } from "spell/server/Heartbeat"
 import { RealPath } from "spell/server/RealPath"
 
+import { Bells } from "spell/epic/config/Bells.ts"
 import { EpicHome } from "spell/epic/config/EpicHome.ts"
 
 /****************
@@ -97,6 +98,8 @@ export class CheckoutServers {
     ran: boolean
     stopped: OrphanServer[]
   } {
+    // Close leftover programs off in Bells & Whistles (epic `epic-engine` P86):  no sweep
+    if (!Bells.isOn("closeLeftovers")) return { ran: false, stopped: [] }
     const stamp = join(home, CheckoutServers.STAMP)
     const last = Date.parse(readText(stamp).trim())
     if (now - last < CheckoutServers.INTERVAL_MS) return { ran: false, stopped: [] }

@@ -7,6 +7,7 @@ import { basename, dirname, join, matchesGlob, relative, resolve } from "node:pa
 import { findUp } from "spell/util/node/findUp"
 import { Git } from "spell/server/Git"
 import { pathInside } from "spell/server/RealPath"
+import { Bells } from "spell/epic/config/Bells"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 
 import { BaseBranch } from "./BaseBranch"
@@ -529,10 +530,12 @@ export class MainMerge {
    * - `{}` when there's no kit (`kitRoot`), nothing to read, or nothing renamed
    * - NEVER throws:  the merge is committed;  a kit with no `ui rename` (older), or a failure, is one line
    *   (`renameSkipped`)
+   * - off in Bells & Whistles (`bells.renameOldNames`, epic `epic-engine` P86):  that line says so
    */
   renameOldNames(): Pick<MergeMainReport, "renamed" | "renameSkipped"> {
     const { root, rename, kitRoot } = this
     if (!rename.length || !kitRoot) return {}
+    if (!Bells.isOn("renameOldNames", { cwd: root })) return { renameSkipped: Bells.offLine("renameOldNames") }
     const command = rename.slice(0, 4).join(" ")
     try {
       const files = this.renameFiles()

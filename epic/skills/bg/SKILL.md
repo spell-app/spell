@@ -121,6 +121,10 @@ The task, word for word:
   folder's unit tests in its turn, `cd <folder> && epic turns run test -- yarn test:unit`;  after merging, the full
   suite (`epic turns run test -- yarn test`, at the kit's root) only when `epic agents last <full name>` exits 0, what
   it finds an issue.
+  - Bells & Whistles (epic `epic-engine` P86):  before each of these steps, `epic settings bells.<key>` says `on` or
+    `off`;  off, skip it and say so in one line, `<its title>:  off in Bells & Whistles` (`epic settings bells` lists
+    the titles):  merging `main` in, `bells.mergeMain`;  the unit tests before merging, `bells.checksBeforeMerge`;
+    the full suite, `bells.fullTestRun`;  merging your work into `main`, `bells.mergeEachHelper`.
 - In an epic, once your work is done and checked, merge it into `main` YOURSELF, at once, when it merges cleanly:
   commit by path, `epic worktree merge-main --as <full name>`, unit tests, `epic merge <epic>`, mark the item fixed;  it
   can't, say why in your report and on the item (the same section;  under `/bedtime` too).
@@ -157,7 +161,9 @@ a button whose popover holds a row per agent, each with a note box.
 - The person types there to STEER an agent mid-task
   (P3 of epic `skillz`;  [agentRoutes.ts](https://github.com/spell-app/spell/blob/main/epic/src/tools/agentRoutes.ts)).
 - The note waits in the list, untold, until this session passes it on.
-- The waiter:  `epic agents wait`, with Bash `run_in_background: true`.
+- The waiter:  `epic agents wait`, with Bash `run_in_background: true`;  unless `epic settings bells.watchAgentNotes` says
+  `off` (Bells & Whistles, epic `epic-engine` P86):  then none, and one line, `Watch for notes to helpers:  off in Bells
+  & Whistles`.
   - ONE per session, while any agent this session started runs.
   - Its exit wakes the session, by its code:
   - 0:  it printed the untold notes, `skillz-aaa:  <note>` each.  Per note:

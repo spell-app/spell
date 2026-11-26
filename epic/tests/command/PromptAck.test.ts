@@ -10,6 +10,7 @@ import { join } from "node:path"
 import { afterAll, beforeEach, expect, test } from "vite-plus/test"
 
 import { BUSY_BEFORE_MS, PromptAck } from "spell/epic/command/PromptAck"
+import { LayeredSettings } from "spell/epic/config/LayeredSettings"
 
 const home = mkdtempSync(join(tmpdir(), "prompt-ack-home-"))
 const repo = mkdtempSync(join(tmpdir(), "prompt-ack-repo-"))
@@ -79,4 +80,16 @@ test("a failing summary:  no line, and the prompt goes on", () => {
     }
   })
   expect(throwing.answer({ prompt: MESSAGE, cwd: repo, session_id: "s1" }, { now: NOW })).toBeNull()
+})
+
+test("its switch off in Bells & Whistles:  no line, and the log says why", () => {
+  record("busy", NOW - 60_000)
+  LayeredSettings.set("bells.promptAck", false)
+  try {
+    expect(ack().whyNot({ prompt: MESSAGE, cwd: repo, session_id: "s1" }, { status: "busy", forMs: 60_000 })).toBe(
+      "Quick reply while busy:  off in Bells & Whistles"
+    )
+  } finally {
+    LayeredSettings.set("bells.promptAck", undefined)
+  }
 })

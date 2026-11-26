@@ -805,7 +805,8 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 ## Changelog
 
 - [The changelog](spell.epics/guides/changelog.html):  what the repos shipped, newest first.
-- MUST be kept up to date by every `/isolate` and `/epic`:
+- MUST be kept up to date by every `/isolate` and `/epic`, unless `epic settings bells.changelog` says `off`
+  (Bells & Whistles, the epic page's gear;  epic `epic-engine` P86):
   - `/epic`:  at its Doc Review, add the entry to "2. In worktrees".
     When it merges into `main`, move it under its month in "3. Merged into main".
   - `/isolate done`:  before merging into `main`, add an entry for what the branch shipped.

@@ -2,6 +2,7 @@ import { PhaseIds } from "spell/epic/phases"
 import { PlanAnchors } from "spell/epic/tool/PlanAnchors"
 import { PlanItem } from "spell/epic/tool/PlanItem"
 import { PlanMarkup } from "spell/epic/tool/PlanMarkup"
+import { PAGE_ANCHOR } from "spell/epic/tools/BlockAnchors.js"
 
 import type { Migration, MigrationContext } from "./migrations.types"
 
@@ -22,7 +23,13 @@ import type { Migration, MigrationContext } from "./migrations.types"
  * - Owen's COMMENTS, in the page's review inbox (`context.inbox`, when the runner read it):
  *   - an anchor whose block only MOVED (found again by its excerpt, `PlanAnchors.find()`):  FIXED, as a move the
  *     runner writes into the inbox (`context.moves`)
- *   - an anchor whose block is gone:  REPORTED
+ *   - an anchor whose ITEM is gone (its id, or its container's, on no element of the page, and not renamed in this
+ *     run:  `context.renames`):  REMOVED, by the runner (`context.removals`;  epic `epic-engine` T170), so a comment
+ *     never waits on something nobody can see;  a comment someone else wrote is left for their own check (one
+ *     writer per comments file, `SharedComments`)
+ *     - an item renumbered or a phase moved keeps its comment:  phase ids are stable, a renumber rekeys the inbox
+ *       (`ReviewInbox.renameIds()`), and a block found again by its excerpt is a MOVE, above
+ *   - an anchor whose block is gone but whose item is still there (a field taken out of a phase):  REPORTED
  * - the inbox's MARKS (and drafts, urgency ...) on an id that's gone:  REPORTED
  * - stable phase ids (P15) came with their own step, `stable-phase-ids`, which every page has run (gone since epic
  *   `repo-split` Q45)
@@ -128,6 +135,7 @@ export class LinksAgree implements Migration {
     const { inbox } = context
     const notes = context.notes ?? []
     const moves = context.moves ?? []
+    const removals = (context.removals ??= [])
     for (const [id, comment] of Object.entries(inbox!.comments)) {
       const found = PlanAnchors.find(document, comment.anchor, comment.excerpt)
       if (found.how === "moved") {
@@ -135,7 +143,16 @@ export class LinksAgree implements Migration {
         moves.push({ id, from: comment.anchor, to })
         notes.push(`links-agree:  comment ${id}:  ${comment.anchor} -> ${to} (its block moved)`)
       } else if (found.how === "gone") {
-        notes.push(`links-agree:  comment ${id} is on ${comment.anchor}, which is gone:  left for you`)
+        const gone = LinksAgree.itemGone(document, comment.anchor, context.renames)
+        if (gone && comment.own !== false) {
+          removals.push({ id, anchor: comment.anchor })
+          notes.push(`links-agree:  comment ${id} is on ${comment.anchor}, which is gone:  removed`)
+        } else if (gone) {
+          const whose = comment.by ? `${comment.by}'s` : "someone else's"
+          notes.push(
+            `links-agree:  comment ${id} is on ${comment.anchor}, which is gone:  ${whose}, left for their check`
+          )
+        } else notes.push(`links-agree:  comment ${id} is on ${comment.anchor}, which is gone:  left for you`)
       } else if (found.how === "changed") {
         notes.push(
           `links-agree:  comment ${id} is on ${comment.anchor}, whose words changed (or several blocks start the same):  ` +
@@ -149,6 +166,17 @@ export class LinksAgree implements Migration {
         notes.push(`links-agree:  ${what} on #${key}, which is gone:  left for you`)
       }
     }
+  }
+
+  /**
+   * Is the ITEM comment anchor `anchor` sits on gone from `document`:  its id (`t41`), or its container's for a block
+   * inside one (`p-x#field-2`), on no element, and not an id renamed in this run (`renames`, old => new)?
+   * - a block on the page itself (`page#para-3`) has no item:  never
+   */
+  static itemGone(document: Document, anchor: string, renames: Record<string, string> = {}): boolean {
+    const id = anchor.split("#")[0]!
+    if (!id || id === PAGE_ANCHOR) return false
+    return !document.getElementById(id) && !Object.hasOwn(renames, id)
   }
 }
 

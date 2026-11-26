@@ -47,7 +47,7 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  *   That's good, Reply, Skip it (`THREAD_BUTTONS`);  no note box, no inbox
  * - `closed`:  a closed thread's Reopen (`CLOSED_BUTTONS`)
  * - `proposal`:  an open phase while the page's phases are agreed (`<epic-page stage="phases">`, epic `epic-engine`
- *   P29):  Looks good and Defer (`PROPOSAL_BUTTONS`);  its note box a part's
+ *   P29):  Looks good (`PROPOSAL_BUTTONS`);  its note box a part's;  Defer is in its gear (T169)
  * - `plan`:  a phase whose build plan waits for Owen (`<epic-phase plan="waiting">`, P33):  Accept plan and Revisit
  *   (`PLAN_BUTTONS`);  its note box a part's
  * - `change`:  a change mark's (`<epic-change>`, epic `epic-engine` P30):  Reopen (`CHANGE_BUTTONS`);
@@ -119,7 +119,7 @@ export type ReviewButtonSpec = {
   /**
    * what it does (`ReviewClient.press()`;  `next` and `drop` a todo's plane and x)
    */
-  action: "approve" | "todo" | "revisit" | "next" | "drop" | "defer" | "accept" | "reopen" | "seen" | "hold"
+  action: "approve" | "todo" | "revisit" | "next" | "drop" | "accept" | "reopen" | "seen" | "hold"
   /** its colour once pressed:  green decided, blue an ask of Claude (Q20), grey no longer relevant */
   color: ReviewColor
   /** its `ui-icon` */
@@ -133,13 +133,11 @@ export type ReviewButtonSpec = {
     | "revisitNote"
     | "drop"
     | "looksGood"
-    | "defer"
     | "reopenChange"
     | "seenUpdate"
     | "doneReading"
     | "readLine"
     | "acceptPlan"
-    | "deferPhase"
     | "doThis"
     | "sawIt"
     | "closeIssue"
@@ -155,7 +153,6 @@ export type ReviewButtonSpec = {
     | "revisitNoteTip"
     | "dropTip"
     | "looksGoodTip"
-    | "deferTip"
     | "reopenChangeTip"
     | "seenUpdateTip"
     | "doneReadingTip"
@@ -318,12 +315,12 @@ export const ACCEPTED_BUTTONS: readonly ReviewButtonSpec[] = PHASE_BUTTONS.filte
  * An open phase's review buttons while the page's phases are agreed (`<epic-page stage="phases">`, epic `epic-engine`
  * P29;  Owen, 2026-10-24:  "when in 'approval' mode like this, these buttons were 'looks good' and 'defer'"):
  * - Looks good (`approve`, green:  decided):  the phase stands as written;  `inbox apply` notes it
- * - Defer (`defer`, grey:  not now):  the phase after the others, still to do;  `inbox apply` moves it
+ * - Defer moved to the phase's gear, "Defer this phase" (epic `epic-engine` T169;  Owen, 2026-11-26:  "Above it, add
+ *   'Defer this phase' and remove icon from the pill menu")
  * - the usual part buttons (`PART_BUTTONS`) come back once building starts
  */
 export const PROPOSAL_BUTTONS: readonly ReviewButtonSpec[] = [
-  { action: "approve", color: "green", icon: "thumbs up", label: "looksGood", tip: "looksGoodTip" },
-  { action: "defer", color: "grey", icon: "clock", label: "defer", tip: "deferTip" }
+  { action: "approve", color: "green", icon: "thumbs up", label: "looksGood", tip: "looksGoodTip" }
 ]
 
 /**
@@ -334,17 +331,15 @@ export const PROPOSAL_BUTTONS: readonly ReviewButtonSpec[] = [
 export const PLAN_BUTTONS: readonly ReviewButtonSpec[] = [
   // the thumbs up:  it means "accept this" (Owen, 2026-10-29;  epic `epic-engine` I181), the circled check before
   { action: "approve", color: "green", icon: "thumbs up", label: "acceptPlan", tip: "acceptPlanTip" },
-  // Revisit between them (Owen, 2026-10-25:  "revisit should be between accept / defer")
-  { action: "revisit", color: "blue", icon: "history", label: "revisit", tip: "revisitTip" },
-  // Owen, 2026-10-25:  "Add a 'Defer Phase' button next to 'Accept Phase'":  after the other phases, still to do
-  { action: "defer", color: "grey", icon: "clock", label: "deferPhase", tip: "deferTip" }
+  { action: "revisit", color: "blue", icon: "history", label: "revisit", tip: "revisitTip" }
+  // no Defer since epic `epic-engine` T169:  it's the phase's gear's "Defer this phase" (Owen, 2026-11-26)
 ]
 
 /**
- * A HELD phase's buttons (`<epic-phase plan="held">`, epic `epic-engine` I221):  a waiting plan's Accept plan and
- * Revisit, no Defer;  drawn with no ring, since a held phase asks nothing of Owen till he picks it up again.
+ * A HELD phase's buttons (`<epic-phase plan="held">`, epic `epic-engine` I221):  a waiting plan's, Accept plan and
+ * Revisit;  drawn with no ring, since a held phase asks nothing of Owen till he picks it up again.
  */
-export const HELD_BUTTONS: readonly ReviewButtonSpec[] = PLAN_BUTTONS.filter((spec) => spec.action !== "defer")
+export const HELD_BUTTONS: readonly ReviewButtonSpec[] = PLAN_BUTTONS
 
 /**
  * A change mark's button (`<epic-change>`, epic `epic-engine` P30;  Q13, B), in the popup a click on its words opens
@@ -654,19 +649,13 @@ export const REVIEW_NAME_TEXTS = [
     key: "acceptPlan",
     text: "Accept",
     description:
-      "A phase's review button while Claude's build plan waits, the left of its Accept | Defer pill (Owen, 2026-10-25:  \"make this single segmented pill, with just Accept Defer\";  the header's says Accept plan)."
+      "A phase's review button while Claude's build plan waits, the left of its Accept | Revisit pill (the header's says Accept plan)."
   },
   {
     key: "acceptPlanTip",
     text: "Build this plan",
     description: "What Accept plan does."
   },
-  {
-    key: "deferPhase",
-    text: "Defer",
-    description: "The right of a waiting plan's Accept | Defer pill:  build this phase after the others."
-  },
-  { key: "defer", text: "Defer", description: "A phase's review button while the phases are agreed:  its name." },
   { key: "reopenChange", text: "Reopen", description: "A change mark's button (the history):  its name." },
   { key: "seenUpdate", text: "Seen", description: "A new update block's button (the check):  its name." },
   {
@@ -769,11 +758,6 @@ export const REVIEW_TEXTS = [
     key: "looksGoodTip",
     text: "Keep the phase as written",
     description: "A phase's review button while the phases are agreed:  what Looks good does."
-  },
-  {
-    key: "deferTip",
-    text: "Later, after the other phases",
-    description: "A phase's review button while the phases are agreed:  what Defer does."
   },
   {
     key: "readLineTip",

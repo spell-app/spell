@@ -297,6 +297,24 @@ export const epicPhaseVocabulary = {
       description: "Its gear menu:  its Verify field, ticked while it shows (its own choice, else every phase's)."
     },
     {
+      key: "deferPhase",
+      text: "Defer this phase",
+      description:
+        "Its gear menu, on a to-do phase (T169):  build it after the other phases;  ticked while that waits for Send, picked again to take it back.  The Defer pill until then."
+    },
+    {
+      key: "removePhase",
+      text: "Remove this phase",
+      description:
+        "Its gear menu, on a phase not started (T169):  take it off the page when Claude next reads the marks;  ticked while that waits, picked again to take it back."
+    },
+    {
+      key: "removeNotice",
+      text: "“{name}” will be taken out of the plan when you press Send.",
+      description: "The notice after Remove this phase is picked (T169):  {name}, its title."
+    },
+    { key: "removeUndo", text: "Undo", description: "That notice's button:  keeps the phase after all." },
+    {
       key: "tookTip",
       text: "~{estimate}",
       description: "A done phase's time pill:  its tooltip, the estimate it had (`~3-4h`;  M3 on P41)."

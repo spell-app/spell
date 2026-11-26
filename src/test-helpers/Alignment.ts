@@ -228,15 +228,36 @@ export function scanLines(options: AlignmentOptions = {}): AlignmentFinding[] {
     return metrics
   }
   /**
+   * The `lines` of text inside `element` a reader sees:  not those its nearest clipping box (`overflow: hidden`) cuts off
+   * (a description clamped to two lines lays out the rest under it).
+   * - So its last line's baseline is the last SHOWN line's, not the clipping box's bottom edge (I458:  each home page
+   *   card's words measured 2.5px low, its tile beside them centred on what's drawn).
+   */
+  const shownLines = (lines: Box[], element: Element): Box[] => {
+    for (let clip: Element | null = element; clip; clip = clip.parentElement) {
+      const overflow = style(clip).overflowY
+      if (overflow === "visible") continue
+      // a scroller's lines out of view are still drawn, scrolled to:  only what's hidden for good is cut
+      if (!/^(hidden|clip)$/.test(overflow)) return lines
+      const { top, bottom } = boxOf(clip)
+      const shown = lines.filter((line) => line.top >= top - tolerance && line.bottom <= bottom + tolerance)
+      // none whole (one line in a box shorter than it, cut with an ellipsis):  all of it, as drawn
+      return shown.length ? shown : lines
+    }
+    return lines
+  }
+
+  /**
    * What `text` draws, from its first line's capitals to its last line's baseline:
    * where a reader sees it, and what an icon beside it is lined up with.
    * - Not its lines' full height:  that adds the font's room for accents and descenders, uneven above and below,
    *   so an icon that looks centred on the words measured up to a pixel off.
    */
   const textInk = (text: Text): Box | undefined => {
-    const lines = textLines(text)
     const parent = text.parentElement
-    if (!lines.length || !parent) return undefined
+    if (!parent) return undefined
+    const lines = shownLines(textLines(text), parent)
+    if (!lines.length) return undefined
     const { ascent, descent, capHeight } = metricsOf(style(parent))
     const baselineOf = (line: Box) => line.top + (line.bottom - line.top - (ascent + descent)) / 2 + ascent
     const [first, last] = [lines[0], lines[lines.length - 1]]

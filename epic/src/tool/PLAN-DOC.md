@@ -220,8 +220,10 @@ As `plan-doc.md`, "Ids":
     it moving down one, and what names them following (`PhaseNumbers.makeWhole()`).
 - `title`:  2-4 words, WITHOUT `P2 · ` (drawn).
 - `status`:  `todo`, `active`, `done`, `dropped`.
-  - `dropped` (epic `epic-engine` I228):  never built, and won't be, e.g. a phase moved later, re-added there (`epic
-    move` won't renumber a started one);  `phase <name>#P18 dropped --why "Moved to P38"`.
+  - `dropped` (epic `epic-engine` I228):  never built, and won't be;  `phase <name>#P18 dropped --why "Moved to P38"`.
+    - a phase NOT STARTED (to do, no commits, no requests filed into it) is removed instead:  `phase <name>#P18
+      remove`, or its gear's "Remove this phase" (epic `epic-engine` T169;  `PlanDoc.removePhase()`):  gone from the
+      page, its queued items unqueued, links to it plain words, the phases after it up a number
     - FINISHED, as `done` is (`PhaseStatuses.isFinished()`):  never the next phase, counted done in `3/5`, out of what's
       left of the estimate, an epic all of whose phases are finished is done, listed in "While you were out"
     - `--why` writes its Dropped field (`<epic-field name="dropped">`) in place of Done, a Done field removed;  a bare
@@ -302,8 +304,16 @@ As `plan-doc.md`, "Ids":
     no Send carries it early, and the page sends it as its countdown runs out;  `epic inbox` prints it `held` till
     then.  `inbox apply` moves the page on a stage and logs it
     (`STAGE accepted overview:  stage phases, write the phases`).
-  - While `phases`, an open phase's Defer pill leaves `{ action: "defer" }`:  `inbox apply` moves it after the other
-    phases, still to do (its number changes, its id never);  its Looks good is an approve, noted.
+  - While `phases`, an open phase's Looks good is an approve, noted.
+- A to-do phase's gear (epic `epic-engine` T169;  the Defer pill until then):
+  - "Defer this phase" leaves `{ action: "defer" }`:  `inbox apply` moves it after the other to-do phases, still to
+    do (its number changes, its id never)
+  - "Remove this phase", on one not started (no commits, nobody at work on it), leaves `{ action: "remove" }`:
+    `inbox apply` removes it (`PlanDoc.removePhase()`);  one started meanwhile, or with requests filed into it, is
+    left, the mark dropped, saying why
+- MOVING a phase (a drag, `epic move`, Defer;  `PlanDoc.movePhase()` on `PhaseMoves`, epic `epic-engine` I480):  only a
+  to-do phase moves, and the to-do (and dropped) phases take each other's places;  a started or done one keeps its
+  place and number, whatever passes it;  aimed at a started one's place, it lands on the nearest to-do place back.
 - Requests (epic `epic-workflow`):  what the person sent the phase from other sessions, one labelled block per request.
   - Every request becomes a phase or a todo (epic `epic-engine` T88;  the person:  "When an epic gets requests from
     other epics, it should make them a Todo or a phase").
@@ -1288,11 +1298,12 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
       saying an old number (an insert moved it down:  `#p-doc-review P10 · Doc Review` -> `P11 · Doc Review`), a comment
       whose block only moved (found by its excerpt, `PlanAnchors`:  BlockAnchors.js's rules, copied), moved in the
       inbox after the page
-    - reports, for Claude or the person:  a link to an id that's gone, a comment or mark on one,
-      a comment whose block's words
-      changed
+    - removes a comment on an id that's gone, when it's the person's own, with a log line (epic `epic-engine` T170);
+      reports, for Claude or the person:  a link to an id that's gone, someone else's comment or a mark on one, a
+      comment whose block's words changed
     - never the log, nor an Original Discussion:  history
-    - also run by `update --title` and `add-phase --before`, right after their change (what it says goes to stderr)
+    - also run by `update --title` and `add-phase --before`, right after their change (what it says goes to stderr),
+      and by `epic inbox apply` after it removed a phase (its gear's "Remove this phase", the mark `remove`, T169)
     - a phase's number in its words is its place (`PhaseIds.labelOf()`);  a phase's `renamed` line names the phase
       titled with its new name, else the one at that number
   - `caveats-and-tests` (2026-10-24, on command;  epic `epic-engine` P32, Q16), RETIRED by `item-renames` (P44):  one

@@ -1957,11 +1957,12 @@ describe("<epic-page> stages", () => {
     expect(stageButtonOf(host.querySelector("epic-overview")!)!.getAttribute("aria-label")).not.toMatch(/to accept/)
   })
 
-  test("phases:  an open phase's pills are Looks good and Defer;  a done one's, and every one once building, the usual", async () => {
+  // Defer left the pill for the phase's gear (epic `epic-engine` T169)
+  test("phases:  an open phase's pill is Looks good;  a done one's, and every one once building, the usual", async () => {
     await adoptClient(new FakeRoutes())
     const host = await render(stagedPage("phases"))
     const [one, two] = Array.from(host.querySelectorAll("epic-phase"))
-    await vi.waitFor(() => expect(pillsOf(one!)).toEqual(["approve", "defer"]))
+    await vi.waitFor(() => expect(pillsOf(one!)).toEqual(["approve"]))
     expect(pillsOf(two!)).toEqual(["todo", "revisit"])
     host.setAttribute("stage", "building")
     await vi.waitFor(() => expect(pillsOf(one!)).toEqual(["todo", "revisit"]))

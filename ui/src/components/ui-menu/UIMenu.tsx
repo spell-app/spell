@@ -1065,6 +1065,15 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     )
   }
 
+  /**
+   * What the page checker's alignment scan reads (`Alignment`, `data-align`):  a `labeled` menu's items are left alone.
+   * - Its items line up by their boxes and their words;  each icon's own shape sets how tall it's drawn
+   *   (a video camera is taller than a gamepad), so their drawn middles differ by a pixel or two, as meant (I458).
+   */
+  private get alignmentNote(): string | undefined {
+    return this.labeled ? LABELED_ALIGNMENT : undefined
+  }
+
   /** The name of its landmark or menubar:  its `aria-label`, else its `label`. */
   private get landmarkLabel(): string | undefined {
     return this.attributes["aria-label"] ?? this.sharedLabel ?? undefined
@@ -1105,6 +1114,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
             role="menubar"
             aria-orientation={this.isVertical ? "vertical" : undefined}
             aria-label={this.landmarkLabel}
+            data-align={this.alignmentNote}
           >
             {this.overflowButtonBox()}
             {this.boxContent()}
@@ -1120,6 +1130,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
             part={this.partForName("menu")}
             role={this.isTabs ? "tablist" : undefined}
             aria-label={this.landmarkLabel}
+            data-align={this.alignmentNote}
           >
             {this.overflowButtonBox()}
             {this.boxContent()}
@@ -1192,6 +1203,8 @@ const OVERFLOW = "overflow"
 /** The box's default slot:  its row. */
 const DEFAULT_SLOT = ":scope > slot:not([name])"
 
+/** `data-align` of a `labeled` menu's box:  why its items' drawn middles may differ (`alignmentNote`). */
+const LABELED_ALIGNMENT = "free: labeled items line up by their words;  each icon's shape sets its height"
 /** Icons of the overflow button:  `…`, and a segmented one's dropdown caret. */
 const MORE_ICON = "ellipsis horizontal"
 const CARET_ICON = "caret down"

@@ -231,6 +231,15 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
         "--file <reply.html>": "the answer, as HTML (required)",
         "--commit <sha>": "the commit it was built in"
       }
+    },
+    {
+      name: "delete",
+      usage: "<page>#<id>",
+      description:
+        "take a comment off a docs page or an epic page (seo#C3), whatever its status;  only its writer's;  " +
+        "one whose item is gone goes by itself",
+      example: "epic comments delete language#C1",
+      flags: {}
     }
   ],
   notes: [

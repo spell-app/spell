@@ -49,7 +49,7 @@
 			<list bulleted>
 				<item>They sit after the title, before its review buttons (while the page is reviewed); the fold chevron is at the row's start.</>
 				<item>⌥-click (Alt-click) on its chevron or title, or ⌥+Enter on the focused chevron, opens it and everything in it (sections, phases, items, asides and cards), parts loading as they open; on an open one it folds everything inside, then the block itself. The chevron's tooltip says so. Its title row has no expand-all or collapse-all button of its own (epic <text code>epic-engine</> I161): the page's toolbar keeps one.</>
-				<item>The pointer over its chevron, status icon, title, time pill and buttons. Over the row's empty space: the grab cursor on a to-do phase while the page is reviewed (it drags there), else the pointer, as a click there folds it.</>
+				<item>The pointer over its time pill and buttons. Over its chevron, status icon, title and the row's empty space: the grab cursor on a to-do phase while the page is reviewed, where a press drags it (epic <text code>epic-engine</> I480), else the pointer, as a click there folds it. Dragged, it trades places with the to-do phases only: a done or started phase keeps its place and number, shown or hidden by the filter.</>
 				<item>A click on one never folds or unfolds it.</>
 				<item>The docs runtime puts the block's bullhorn there too, so it never sits over a button.</>
 				<item>The estimate (<text code>2-3h</>) comes just before the review buttons, one width on every row, so the buttons line up row to row.</>
@@ -405,7 +405,7 @@
 					<text code>plan</>
 				</>
 				<cell><text code>waiting</> | <text code>accepted</></>
-				<cell>Claude's build plan, written by the epic tool: <text code>waiting</> for your Accept (its review buttons Accept, Revisit and Defer, the group ringed), or <text code>accepted</>. Still to do and accepted, its review group ends in a green thumbs up: good to go (epic <text code>epic-engine</> I140; a check before I181). Accept on a waiting plan is a thumbs up too: it means "accept this".</>
+				<cell>Claude's build plan, written by the epic tool: <text code>waiting</> for your Accept (its review buttons Accept and Revisit, the group ringed), or <text code>accepted</>. Still to do and accepted, its review group ends in a green thumbs up: good to go (epic <text code>epic-engine</> I140; a check before I181). Accept on a waiting plan is a thumbs up too: it means "accept this".</>
 				<cell/>
 			</>
 			<row>
@@ -493,13 +493,13 @@
 					<cell>
 						<text code>tools</>
 					</>
-					<cell>At the title's end: the page's own buttons (the <text code>actions</> slot), then its estimate (once done and timed, what it took), then its review buttons, while the page is reviewed: Do this (the plane: yes, build this phase; a thumbs up until I299, Make Todo before epic <text code>epic-engine</> I181), Revisit; while the page's phases are agreed (<text code>&lt;epic-page stage="phases"&gt;</>, epic <text code>epic-engine</> P29), an open phase's are Looks good and Defer (after the others, still to do); while its build plan waits, Accept, Revisit and Defer; still to do with its plan accepted, a green thumbs up, a state saying it's ready to build, then Revisit (no Do this: the accepted plan is the go-ahead). Revisit on a phase with your comments in its text marks it at once: those comments are its note. Its gear comes last.</>
+					<cell>At the title's end: the page's own buttons (the <text code>actions</> slot), then its estimate (once done and timed, what it took), then its review buttons, while the page is reviewed: Do this (the plane: yes, build this phase; a thumbs up until I299, Make Todo before epic <text code>epic-engine</> I181), Revisit; while the page's phases are agreed (<text code>&lt;epic-page stage="phases"&gt;</>, epic <text code>epic-engine</> P29), an open phase's is Looks good; while its build plan waits, Accept and Revisit; still to do with its plan accepted, a green thumbs up, a state saying it's ready to build, then Revisit (no Do this: the accepted plan is the go-ahead). Revisit on a phase with your comments in its text marks it at once: those comments are its note. Its gear comes last.</>
 				</>
 				<row>
 					<cell>
 						<text code>gear</>
 					</>
-					<cell>Its gear, last in its title row, with an <text code>id</> (epic <text code>epic-engine</> I166): a <text code>&lt;ui-dropdown&gt;</> menu, "Show this phase's files" and "Show this phase's checks", ticked while it shows them. Its choice wins over the Phases section's gear, for this phase.</>
+					<cell>Its gear, last in its title row, with an <text code>id</> (epic <text code>epic-engine</> I166): a <text code>&lt;ui-dropdown&gt;</> menu, "Show this phase's files" and "Show this phase's checks", ticked while it shows them. Its choice wins over the Phases section's gear, for this phase. Then, on a to-do phase while the page is reviewed (epic <text code>epic-engine</> T169), "Defer this phase" (after the other to-do phases, still to do) and, on one never started, "Remove this phase" (taken off the page when Claude reads your marks; a notice says so, with Undo): each ticked while it waits for Send, picked again to take it back. They were the Defer pill until then.</>
 				</>
 				<row>
 					<cell>

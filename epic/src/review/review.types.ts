@@ -176,7 +176,9 @@ export const REVIEW_ACTIONS = [
   // an accepted phase's thumbs up un-clicked (epic `epic-engine` I218):  its plan back to waiting, not built
   "hold",
   // a phase dragged to another place (epic `epic-engine` P34):  `{ action: "move", to }`
-  "move"
+  "move",
+  // a phase never started, removed from its gear (epic `epic-engine` T169):  `inbox apply` takes it off the page
+  "remove"
 ] as const
 
 /** One of `REVIEW_ACTIONS`. */

@@ -53,7 +53,7 @@ describe("LayeredSettings", () => {
     writeDeveloper("// mine\n{ away: { finishedPhaseDays: 9 } }")
     expect(read().values.away.finishedPhaseDays).toBe(9)
     expect(read().sourceOf(KEY)).toBe("developer")
-    expect(read().entries).toEqual([{ key: KEY, value: 9, source: "developer" }])
+    expect(read().entries[0]).toEqual({ key: KEY, value: 9, source: "developer" })
   })
 
   test("key by key:  a layer that names one key leaves the others to the layer below", () => {
@@ -97,5 +97,69 @@ describe("LayeredSettings", () => {
 
   test("no epic repo:  no org layer", () => {
     expect(LayeredSettings.read(undefined, { home }).layers.map(({ name }) => name)).toEqual(["default", "developer"])
+  })
+
+  test("a map (`bells.burnFlips`) takes any key, each true or false, and is one entry", () => {
+    vi.spyOn(console, "error").mockImplementation(() => {})
+    writeDeveloper("{ bells: { burn: 'low', burnFlips: { titleCheck: true } } }")
+    expect(read().values.bells.burnFlips).toEqual({ titleCheck: true })
+    expect(read().entries.find((entry) => entry.key === "bells.burnFlips")?.value).toEqual({ titleCheck: true })
+    writeDeveloper("{ bells: { burnFlips: { titleCheck: 'yes' } } }")
+    expect(read().values.bells.burnFlips).toEqual({})
+    expect(read().layers[2].problems[0]).toMatch(/true or false/)
+  })
+
+  test("a key with a few words takes only those:  bells.burn", () => {
+    vi.spyOn(console, "error").mockImplementation(() => {})
+    writeDeveloper("{ bells: { burn: 'lots' } }")
+    expect(read().values.bells.burn).toBe("high")
+    expect(read().layers[2].problems[0]).toMatch(/one of low, medium, high/)
+  })
+
+  describe("set()", () => {
+    const set = (key: string, value: unknown) => LayeredSettings.set(key, value, { content, home })
+    const developerFile = () => readFileSync(join(home, ".spell", LayeredSettings.FILE), "utf8")
+
+    test("writes the developer's file only, keeping its comments", () => {
+      writeDeveloper("// mine\n{ away: { finishedPhaseDays: 9 } }")
+      const settings = set("bells.designReview", false)
+      expect(settings.values.bells.designReview).toBe(false)
+      expect(settings.sourceOf("bells.designReview")).toBe("developer")
+      expect(developerFile()).toMatch(/\/\/ mine/)
+      expect(JSON5.parse(developerFile())).toEqual({ away: { finishedPhaseDays: 9 }, bells: { designReview: false } })
+    })
+
+    test("makes the file and its folder when there's none", () => {
+      rmSync(join(home, ".spell"), { recursive: true })
+      expect(set("bells.burn", "medium").values.bells.burn).toBe("medium")
+    })
+
+    test("a map's key, a whole map, and undefined taking a map's key out", () => {
+      set("bells.burnFlips.titleCheck", true)
+      expect(read().values.bells.burnFlips).toEqual({ titleCheck: true })
+      set("bells.burnFlips.titleCheck", undefined)
+      expect(read().values.bells.burnFlips).toEqual({})
+      set("bells.burnFlips", { speedTest: false })
+      expect(read().values.bells.burnFlips).toEqual({ speedTest: false })
+    })
+
+    test.each([
+      ["bells.nope", true, /no setting bells.nope/],
+      ["bells.designReview", "off", /takes a boolean/],
+      ["bells.burn", "lots", /one of low, medium, high/],
+      ["away.finishedPhaseDays", -2, /a number, 0 or more/],
+      ["bells", {}, /a group/],
+      ["bells.burnFlips", { x: 1 }, /object of true or false/]
+    ])("refuses %s = %j, writing nothing", (key, value, why) => {
+      expect(() => set(key, value)).toThrow(why)
+      expect(read().layers[2].found).toBe(false)
+    })
+
+    test("setMany():  one wrong value, nothing written", () => {
+      expect(() => LayeredSettings.setMany({ "bells.burn": "low", "bells.titleCheck": 3 }, { content, home })).toThrow(
+        TypeError
+      )
+      expect(read().values.bells.burn).toBe("high")
+    })
   })
 })

@@ -28,8 +28,14 @@
 
 @layer ui.components.docs-search.types {
   /* Never narrower than a short query:  in a row that shares its room (an app menu's end), it would shrink to its icon. */
+  /*
+   * The pill sits in the middle of the host, top to bottom:  a row that stretches its items (an app menu's end)
+   * makes the host taller than the pill, and its icons beside it are centred.
+   */
   :host {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     min-inline-size: 12em;
   }
 

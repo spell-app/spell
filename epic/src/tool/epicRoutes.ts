@@ -72,6 +72,7 @@ import { join } from "node:path"
 import { slug } from "spell/util/string"
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
+import { EPIC_VERBS } from "spell/epic/command/command.types"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import type { ContentRouteContext } from "spell/epic/list/runningRoutes"
 
@@ -179,8 +180,8 @@ export function epicName(title: string): string {
   return RESERVED.has(name) ? `${name}-epic` : name
 }
 
-/** The first words `/epic` takes as a verb, never an epic's name (`.claude/skills/epic/SKILL.md`, "1. Name"). */
-const RESERVED = new Set(["review", "resume", "color", "future", "phase", "start"])
+/** The first words `/epic` takes as a verb, never an epic's name:  `EPIC_VERBS`, the one list. */
+const RESERVED = new Set<string>(EPIC_VERBS)
 
 /**
  * Star (`favorite`) or unstar epic `name` in checkout `root`'s favourites (`FAVORITES_FILE`, in its epic folder);

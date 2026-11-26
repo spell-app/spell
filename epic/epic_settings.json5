@@ -8,5 +8,68 @@
     // "0. While you were out":  how many days a finished phase (done or dropped), and a bedtime run's summary line,
     // stay listed;  a phase with no time recorded stays until Done reading
     finishedPhaseDays: 3
+  },
+  // Bells & Whistles (the epic page's gear):  the steps epic work runs by itself that cost tokens or time
+  // - each step's own switch, every one on;  `epic settings bells` lists them, with what each costs
+  // - set one with the dialog, or `epic settings bells.<key> off`
+  bells: {
+    // the Token burn slider:  low, medium or high (everything, as your switches say)
+    burn: "high",
+    // switches flipped while the slider was below High:  cleared when it moves
+    burnFlips: {},
+    // planning
+    reuseCheckPlan: true,
+    reuseCheckPhases: true,
+    pageEditHelper: true,
+    // building
+    helpersBuild: true,
+    restartHelpers: true,
+    finalTidy: true,
+    // reviewing
+    designReview: true,
+    planCheck: true,
+    alignmentCheck: true,
+    handChecksFirst: true,
+    // words
+    titleCheck: true,
+    plainWordsCheck: true,
+    itemScoring: true,
+    changesInBold: true,
+    // testing
+    checksBeforeMerge: true,
+    fullTestRun: true,
+    speedTest: true,
+    editorAddOns: true,
+    editorWarnings: true,
+    stopStuckTests: true,
+    // docs
+    plainPhaseNotes: true,
+    epicGuide: true,
+    fixReadmes: true,
+    checkGuides: true,
+    changelog: true,
+    // adding
+    mergeEachHelper: true,
+    mergeMain: true,
+    remakeBuiltFiles: true,
+    renameOldNames: true,
+    installPackages: true,
+    keepOwnEdits: true,
+    // tidying
+    savePages: true,
+    clearStuckItems: true,
+    freshHint: true,
+    // listening
+    itemRequests: true,
+    promptAck: true,
+    openChat: true,
+    wakeQuietChat: true,
+    passSendToBusy: true,
+    watchAgentNotes: true,
+    // background
+    watchSends: true,
+    refreshPages: true,
+    closeLeftovers: true,
+    startNotices: true
   }
 }

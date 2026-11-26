@@ -4,6 +4,7 @@ import type { JSX } from "@solidjs/web"
 import { E } from "spell/ui/core"
 
 import { PageStages, PhaseIds, PhaseStatuses } from "spell/epic/phases"
+import { NOTICE_MS, PageNotices } from "spell/epic/review"
 
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
@@ -12,7 +13,7 @@ import { BADGE, COMMIT_TAG, COMMITS_PROPERTY, STATUS_SLOT } from "spell/epic/com
 import type { BadgeWord } from "spell/epic/components/epic-item/EpicItem.en"
 import { ItemBadge } from "spell/epic/components/epic-item/ItemBadge"
 // Import directly:  the fold base, not the `epic-section` barrel (which defines `<epic-section>`)
-import { EpicFold } from "spell/epic/components/epic-section/EpicFold"
+import { EpicFold, type GearEntry } from "spell/epic/components/epic-section/EpicFold"
 import { phaseFields } from "spell/epic/components/epic-section/PhaseFields"
 import { PhaseState, type PhaseFields } from "spell/epic/components/epic-section/PhaseState"
 import {
@@ -73,8 +74,8 @@ import phaseCSS from "./EpicPhase.css?inline"
  *   - a marked note at the top of its body
  *   - its note box at the end, Claude's status cards (`slot="status"`) just above it
  *   - Revisit and Edit unfold it (`epic-note-showing`)
- *   - while the page's phases are agreed (`<epic-page stage="phases">`, epic `epic-engine` P29), an open phase's are
- *     Looks good and Defer instead (`buttons="proposal"`;  Owen, 2026-10-24);  the usual ones once building starts
+ *   - while the page's phases are agreed (`<epic-page stage="phases">`, epic `epic-engine` P29), an open phase's is
+ *     Looks good instead (`buttons="proposal"`;  Owen, 2026-10-24);  the usual ones once building starts
  *   - while Claude's build plan for it waits (`plan="waiting"`, P33):  Accept plan and Revisit (`buttons="plan"`)
  *   - still to do, its plan accepted (`plan="accepted"`, I140):  a green thumbs up, a state saying it's good
  *     to go (`buttons="accepted"`;  Owen, 2026-10-26:  "so I can see they are good to go"), then Revisit;  no Do this:
@@ -84,6 +85,12 @@ import phaseCSS from "./EpicPhase.css?inline"
  *   - its own choice (`PhaseFields.setOwn()`), which wins over the Phases section's gear for it:  its fields' custom
  *     properties set on its own box (`foldStyle()`), over the ones they'd inherit from the section
  *   - a list of entries:  more settings for one phase come as more entries
+ *   - then, on a to-do phase while the page is reviewed (epic `epic-engine` T169;  Owen, 2026-11-26:  "Add to this menu
+ *     'Remove this phase' for an unstarted phase.  Above it, add 'Defer this phase' and remove icon from the pill
+ *     menu"), its marks, each ticked while it waits for Send, picked again to take it back (`ReviewClient.press()`):
+ *     - "Defer this phase":  the Defer pill's mark (`defer`):  after the other phases, still to do
+ *     - "Remove this phase", only while NOT STARTED (no commits, nobody at work on it):  `remove`, which `inbox
+ *       apply` takes it off the page with (`PlanDoc.removePhase()`);  a notice says so, with Undo
  * - Its commits (`commits`, or `<epic-commit>` children):  "Show this phase's commits" in its gear, ticked while they
  *   show (a git icon on its row from P53's J163 until I183;  Owen, 2026-10-29:  "Shouldn't have 'show git' icon
  *   anymore");  the Log lists every commit (P52)
@@ -453,6 +460,8 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   /**
    * Its gear:  "Show this phase's files" and "... checks", ticked while it shows them;  and "Show this phase's commits"
    * while it has any (its git icon until I183;  Owen, 2026-10-29:  "Shouldn't have 'show git' icon anymore").
+   * - then its marks (T169):  "Defer this phase" on a to-do phase, "Remove this phase" on one not started
+   *   (`markEntries()`)
    */
   private gear(id: string): JSX.Element {
     return this.renderGear({
@@ -465,12 +474,52 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
         })),
         ...(this.hasCommits
           ? [{ value: COMMITS_ENTRY, text: this.translationForKey("showCommits"), isOn: this.showCommits }]
-          : [])
+          : []),
+        ...this.markEntries()
       ],
       pick: (value) => {
         if (value === COMMITS_ENTRY) this.flipCommits()
+        else if (value === DEFER_ENTRY || value === REMOVE_ENTRY) this.markFromGear(id, value)
         else phaseFields.setOwn(id, value as PhaseFieldName, !phaseFields.shows(id, value as PhaseFieldName))
       }
+    })
+  }
+
+  /**
+   * Its gear's marks (epic `epic-engine` T169), each ticked while it waits for Send:
+   * - "Defer this phase":  a to-do phase, the page reviewed (`isMovable`)
+   * - "Remove this phase":  one NOT STARTED as well:  no commits, nobody at work on it
+   */
+  private markEntries(): GearEntry[] {
+    if (!this.isMovable) return []
+    const marked = this.reviewState.mark()?.action
+    const defer = { value: DEFER_ENTRY, text: this.translationForKey("deferPhase"), isOn: marked === DEFER_ENTRY }
+    if (this.hasCommits || this.isWorkedOn) return [defer]
+    return [defer, { value: REMOVE_ENTRY, text: this.translationForKey("removePhase"), isOn: marked === REMOVE_ENTRY }]
+  }
+
+  /**
+   * Defer or Remove picked in its gear:  its mark, as a pill's press makes one (`ReviewClient.press()`), taken back when
+   * it was the mark already;  Remove says so in a notice, with Undo.
+   */
+  @E.untracked
+  private markFromGear(id: string, action: typeof DEFER_ENTRY | typeof REMOVE_ENTRY) {
+    const client = this.reviewState.client
+    if (!client) return
+    const was = client.markOf(id)?.action
+    client.press(id, action)
+    if (action !== REMOVE_ENTRY || was === REMOVE_ENTRY) return
+    PageNotices.show(this.translationForKey("removeNotice", { name: EpicFold.titleText(this.domElement) }), {
+      ms: NOTICE_MS,
+      actions: [
+        {
+          text: this.translationForKey("removeUndo"),
+          icon: "rotate left",
+          click: () => {
+            if (client.markOf(id)?.action === REMOVE_ENTRY) client.press(id, REMOVE_ENTRY)
+          }
+        }
+      ]
     })
   }
 
@@ -641,6 +690,12 @@ const STATUS_TEXTS = {
 
 /** Its gear's entry for its commits. */
 const COMMITS_ENTRY = "commits"
+
+/** Its gear's entry that defers it:  its value is the mark's action. */
+const DEFER_ENTRY = "defer"
+
+/** Its gear's entry that removes it, not started:  its value is the mark's action. */
+const REMOVE_ENTRY = "remove"
 
 /** Class of a done phase's `not on main` pill (`unmerged`, epic `epic-engine` I273), before its time pill. */
 const UNMERGED = "unmerged"

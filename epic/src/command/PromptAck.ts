@@ -6,6 +6,7 @@ import { Git } from "spell/server/Git"
 
 // By package path, `.ts` and all:  the `UserPromptSubmit` hook loads this file with plain `node` (types stripped)
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
+import { Bells } from "spell/epic/config/Bells.ts"
 import { ClaudeHome } from "spell/epic/config/ClaudeHome.ts"
 
 /****************
@@ -18,7 +19,8 @@ import { ClaudeHome } from "spell/epic/config/ClaudeHome.ts"
  * - The line:  `systemMessage`, "On it:  <what he asked, in one sentence>", the sentence Haiku's
  *   (`claude -p --model haiku`, hooks off so it never runs this again), at most `ACK_TIMEOUT_MS`.
  * - Only when ALL of these hold (`shouldAck()`):
- *   - `promptAck` is on in the repo's `.epic/config.json5` (the default)
+ *   - its switch on in Bells & Whistles, `bells.promptAck` (`Bells.isOn()`, epic `epic-engine` P86;  the default);  the
+ *     repo's old `promptAck: false` in `.epic/config.json5` still turns it off, until it's moved there
  *   - the session was busy before the message came (its registry record, `busy` for `BUSY_BEFORE_MS`):  an idle
  *     session answers at once anyway, and the summary would only hold the reply up
  *   - the message is a real one:  `ACK_MIN_CHARS` or longer, not a slash command
@@ -73,6 +75,7 @@ export class PromptAck {
     const prompt = (input.prompt ?? "").trim()
     if (process.env.EPIC_PROMPT_ACK) return "the summary's own run"
     if (!input.cwd || !EpicConfig.of(input.cwd).promptAck) return "promptAck is off"
+    if (!Bells.isOn("promptAck", { cwd: input.cwd })) return Bells.offLine("promptAck")
     if (prompt.startsWith("/")) return "a slash command"
     if (prompt.length < ACK_MIN_CHARS) return "short"
     if (state.status !== "busy" || state.forMs < BUSY_BEFORE_MS) return "the session isn't busy"

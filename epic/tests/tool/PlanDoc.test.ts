@@ -831,7 +831,7 @@ describe("PlanDoc phases", () => {
   })
 })
 
-describe("PlanDoc moving phases (epic `epic-engine` I480)", () => {
+describe("PlanDoc moving and removing phases (epic `epic-engine` I480, T169)", () => {
   test("move past done phases:  the to-do ones take each other's places around them, the done ones keep theirs", () => {
     const plan = freshPlan()
     for (const name of ["A", "B", "C", "D", "E"]) plan.addPhase(name)
@@ -852,6 +852,51 @@ describe("PlanDoc moving phases (epic `epic-engine` I480)", () => {
     expect(plan.deferPhase(1)).toBe(5)
     expect(plan.deferPhase(5)).toBe(5)
     expect(problems(plan)).toEqual([])
+  })
+
+  test("remove a phase not started:  gone, its queued items unqueued, links to it plain words, later ones up a number", () => {
+    const plan = freshPlan()
+    for (const name of ["One", "Two", "Three"]) plan.addPhase(name)
+    const todo = plan.addItem("todo", "Later")
+    plan.queue(todo, "P2 · Two")
+    plan.document.querySelector("#o1 > p")!.innerHTML =
+      `See <a href="#p-two">P2 · Two</a> and <a href="#p-three">P3 · Three</a>.`
+    expect(plan.removePhase(2)).toEqual({ id: "p-two", label: "P2", name: "Two", unqueued: [todo] })
+    expect(plan.phases.map((phase) => `P${phase.number} ${phase.name}`)).toEqual(["P1 One", "P2 Three"])
+    expect(el(plan, todo).hasAttribute("queued")).toBe(false)
+    expect(el(plan, todo).hasAttribute("work")).toBe(false)
+    expect(plan.document.querySelector("#o1 > p")!.innerHTML).toBe(
+      `See P2 · Two and <a href="#p-three">P2 · Three</a>.`
+    )
+    expect(plan.findSection("log")!.textContent).toContain(
+      `P2 Two:  removed, never started;  ${todo.toUpperCase()} unqueued`
+    )
+    expect(problems(plan)).toEqual([])
+  })
+
+  test("never a phase started, with commits, or with requests filed into it:  dropped keeps those", () => {
+    const plan = freshPlan()
+    for (const name of ["One", "Two", "Three"]) plan.addPhase(name)
+    plan.setPhase(1, "active")
+    expect(() => plan.removePhase(1)).toThrow(/it's active;  only a phase not started is removed/)
+    plan.phase(2).insertAdjacentHTML("beforeend", `<epic-commit sha="abc1234">A commit</epic-commit>`)
+    expect(() => plan.removePhase(2)).toThrow(/it has commits/)
+    plan.addPhaseRequest(3, "r3", "Owen", "<p>Please</p>")
+    expect(() => plan.removePhase(3)).toThrow(/r3 filed into it;  file them elsewhere first/)
+    expect(plan.phases).toHaveLength(3)
+  })
+
+  test("the gear's Remove, applied:  gone;  started since, the mark dropped, saying why", () => {
+    const plan = freshPlan()
+    for (const name of ["One", "Two"]) plan.addPhase(name)
+    expect(plan.applyMark({ id: "p-two", action: "remove" })).toEqual({
+      applied: true,
+      did: "removed:  never started, out of the page"
+    })
+    expect(plan.phases.map((phase) => phase.name)).toEqual(["One"])
+    plan.setPhase(1, "active")
+    expect(plan.applyMark({ id: "p-one", action: "remove" })).toMatchObject({ applied: false, gone: true })
+    expect(plan.phases).toHaveLength(1)
   })
 })
 

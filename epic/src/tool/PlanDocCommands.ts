@@ -282,6 +282,8 @@ export class PlanDocCommands {
         if (status === "took") return this.tookAgain(name, file, phase, Boolean(flags.dryRun))
         // `phase seo#P20 planning [off]`:  Claude is writing its plan, on the page (epic `epic-engine` I147)
         if (status === "planning") return this.planning(file, phase, rest[2] !== "off")
+        // `phase seo#P5 remove`:  never started, taken off the page (epic `epic-engine` T169)
+        if (status === "remove") return this.removePhase(file, phase)
         if (flags.why !== undefined && status !== "dropped")
           throw new PlanDocError(`phase ${phase} ${status}:  --why is for dropped (why it was never built)`)
         const minutes = status === "done" ? this.minutesFor(name, file, phase) : undefined
@@ -316,8 +318,8 @@ export class PlanDocCommands {
           // its new place:  the phase there now, as people name it (`P5`, its name)
           const to = plan.phasePlace(need(rest[1], "its new place (the phase there now:  P5)"))
           const was = plan.phaseLabel(from)
-          plan.movePhase(from, to)
-          this.print(`${was} -> ${plan.phaseLabel(to)}`)
+          // past a started phase, it lands on the nearest to-do place (`PhaseMoves`, I480)
+          this.print(`${was} -> ${plan.phaseLabel(plan.movePhase(from, to))}`)
         })
       case "phase-body": {
         const planning = await this.edit(file, (plan) => {
@@ -613,6 +615,20 @@ export class PlanDocCommands {
     this.inbox.setWorking(file, id, on)
     const plan = this.read(file)
     this.print(`${plan.phaseLabel(plan.phasePlace(id))} planning:  ${on ? "on" : "off"}`)
+  }
+
+  /**
+   * `phase <name> P5 remove`:  phase P5, never started, taken off the page (epic `epic-engine` T169;
+   * `PlanDoc.removePhase()`, which throws for one started, with commits, or with requests filed into it);
+   * the phases after it moved up a number, so links' words follow them (`links-agree`)
+   */
+  private async removePhase(file: string, phase: string): Promise<void> {
+    const removed = await this.edit(file, (plan) => plan.removePhase(plan.phasePlace(phase)))
+    const back = removed.unqueued.length
+      ? `;  ${removed.unqueued.map((id) => id.toUpperCase()).join(", ")} unqueued`
+      : ""
+    this.print(`${removed.label} ${removed.name} removed${back}`)
+    await this.agree(file)
   }
 
   /** The stable id (`p-one-repo`) of the phase `phase` names in the doc at `file`, as people name one (`P20`). */
@@ -1877,12 +1893,17 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    Dropped field in place of Done ("Moved to P38":  the P38
                                                    becomes a link to it;  epic epic-engine I228);
                                                    brings the doc forward in VS Code (it updates itself)
+  phase <name> <N> remove                          a phase never started (to do, no commits, no requests filed
+                                                   into it) off the page:  its queued items unqueued, links to it
+                                                   plain words, the phases after it up a number (epic-engine T169)
   phase <name> <N> took [--dry-run]                a done phase's time, worked out again from the transcripts,
                                                    and its span from the log
   phase <name> <N> planning [off]                  Claude is writing its plan:  a blue spinner on its page (off
                                                    by itself once --plan is written;  phase-body sets it too)
   move <name> <N> <place>                          a to-do phase to place <place>, among the to-do phases;
                                                    numbers, links and "P5 · Name" text follow (epic-engine P34);
+                                                   a started or done phase keeps its place:  the to-do ones trade
+                                                   places around it (I480);
                                                    numbers stay whole:  a phase moved is numbered by its place
   add <name> question|judgement|todo|limit|issue|test|decision "title" [--details html] [--calm] [--requested] [--loud]
       [--title-ok]                                 the title read cold first by a fresh reader (T123):  a fail is
