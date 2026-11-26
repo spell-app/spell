@@ -7,6 +7,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
+import { TSWriter } from "spell/parser/parser/writers/TSWriter"
 import { SP } from "spell/parser/spell"
 import { parseSpellProject } from "spell/parser/spell/test"
 
@@ -222,7 +223,7 @@ start the box`
     const { files, scope } = parseSpellProject([{ path: "/Test.spell", contents: `${PLACE}\n${TYPES}\n` }])
     const code = SP.SpellProject.combineCompiled(
       files.map(({ match }) => match?.AST as P.ASTStatementGroup),
-      P.TSWriter.instance,
+      TSWriter.instance,
       "",
       scope
     )

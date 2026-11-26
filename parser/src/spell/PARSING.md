@@ -184,7 +184,7 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - [ruleNames.test.ts](../../tests/spell/rules/ruleNames.test.ts) pins every rule's name, module and order.
 - A rule's tests, `{ input, js, ts }`, parse the input once and write it with the javascript and TypeScript writers:
   - `js`:  what `P.JSWriter` writes
-  - `ts`:  what `P.TSWriter` writes, left out where it's the same
+  - `ts`:  what `TSWriter` writes, left out where it's the same
   - The Python writers are tested by their own tests, and by the fixtures' snapshots ("Testing a whole project").
   - [`unitTestModuleRules()`](../parser/test/unitTestModuleRules.ts) runs them.
   - `yarn spell:test:rules:bless` writes each test's `js` and `ts` into the source.
@@ -2990,10 +2990,10 @@ sidebars any of them opens.
 - The AST classes hold what was parsed;  a WRITER writes them out ([the writers](../parser/writers/)).
   - Each TARGET a project compiles to has its own writer ([targets.ts](targets.ts), `SP.TARGETS`):
     - `js/solid`, by `P.JSWriter`:  ALWAYS compiled, as it's what runs
-    - `ts/solid`, by `P.TSWriter`:  checked by `tsc`
+    - `ts/solid`, by `TSWriter`:  checked by `tsc`
     - `py`, by `PY.PyWriter`:  Python on asyncio, checked by pyright
       - with a words file of its own, by Python's names:  `<Project>.py.en.json5`
-    - `ts/lib`, by `P.LibraryWriter` (epic `people-and-orgs` P3):
+    - `ts/lib`, by `LibraryWriter` (epic `people-and-orgs` P3):
       a LIBRARY, the project's classes alone, for other code to import
       - one TypeScript file, `<Project>.lib.ts`, its own types, checked by `tsc`
       - no drawing, none of its top-level steps, the core with no Solid (`spell/parser/core/model`)

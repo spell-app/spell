@@ -4,7 +4,7 @@ import h from "@solidjs/h"
 
 import { peekProp } from "spell/util"
 import { core, App, List, View, ViewableList, Thing } from "spell/parser/core"
-import { P } from "spell/parser/parser"
+import { TSWriter } from "spell/parser/parser/writers/TSWriter"
 import { E } from "spell/ui/core"
 import { RootLoader } from "spell/ui/components/ui-root"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
@@ -2161,7 +2161,7 @@ describe("SpellElement", () => {
         for (const name of Object.getOwnPropertyNames(at)) names.add(name)
       }
       names.delete("constructor")
-      expect([...names].filter((name) => !P.TSWriter.ELEMENT_MEMBERS.has(name)).sort()).toEqual([])
+      expect([...names].filter((name) => !TSWriter.ELEMENT_MEMBERS.has(name)).sort()).toEqual([])
     })
   })
 })

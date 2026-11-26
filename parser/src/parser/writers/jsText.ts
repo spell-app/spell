@@ -1,6 +1,6 @@
 /**
  * JavaScript's punctuation and wrappers, as plain strings:
- * what `P.JSWriter` (and `P.TSWriter`) build their output from.
+ * what `P.JSWriter` (and `TSWriter`) build their output from.
  * - Text only, no AST:  writing a node is `JSWriter`'s job (`list()`, `args()`, `array()` write each item).
  * - Its names are generic (`SPACE`, `COMMA`, `InParens`, `Block` ...):
  *   so the barrel exports it as a namespace, `P.jsText`, never flattened.

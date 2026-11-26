@@ -1,6 +1,6 @@
 import { beforeAll, describe, test, expect } from "vite-plus/test"
 
-import { P } from "spell/parser/parser"
+import { TSWriter } from "spell/parser/parser/writers/TSWriter"
 import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
 
 /**
@@ -165,6 +165,6 @@ describe("Spanish, from the examples (epic `language` P31)", () => {
 /** `lines`, one file of its own project, compiled:  its code, its TypeScript and its parse errors. */
 function compiledText(lines: string[], { path = "/prueba.es.spell" } = {}) {
   const [file] = parseSpellProject([{ path, contents: lines.join("\n") }]).files
-  const ts = file!.scope.parser!.inPlay(() => (P.TSWriter.instance.writeMatch(file!.match) as string | undefined) ?? "")
+  const ts = file!.scope.parser!.inPlay(() => (TSWriter.instance.writeMatch(file!.match) as string | undefined) ?? "")
   return { code: file!.compiled, ts, errors: file!.errors }
 }

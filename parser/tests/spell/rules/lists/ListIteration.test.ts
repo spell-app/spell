@@ -4,6 +4,9 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { parseSpellProject } from "spell/parser/spell/test"
 
+// every target's writer, past javascript's, loads on first use
+await SP.loadTargets(Object.keys(SP.TARGETS))
+
 /** A getter that returns from inside a `for each`, and what it says when nobody matches. */
 const PROJECT = `a person is a thing:
 	- it has a name as text

@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { P } from "spell/parser/parser"
+import { LibraryWriter } from "spell/parser/parser/writers/LibraryWriter"
 import { PY } from "spell/parser/py"
 import { SP } from "spell/parser/spell"
 import {
@@ -108,7 +108,7 @@ describe("fixture projects compile to their snapshots", () => {
 
     // as a library (the `ts/lib` target, epic `people-and-orgs` P3):  its classes alone, one TypeScript file
     test.runIf(LIBRARY_FIXTURES.has(name))(`${name} as a library`, async () => {
-      await expect(compiledFixture(name, P.LibraryWriter.instance)).toMatchFileSnapshot(
+      await expect(compiledFixture(name, LibraryWriter.instance)).toMatchFileSnapshot(
         snapshotPath(name, `${file}.lib.snapshot.ts`)
       )
     })

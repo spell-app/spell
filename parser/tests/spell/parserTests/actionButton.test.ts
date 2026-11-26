@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { P } from "spell/parser/parser"
+import { TSWriter } from "spell/parser/parser/writers/TSWriter"
 import { PY } from "spell/parser/py"
 import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
 
@@ -51,7 +51,7 @@ describe("an action's button, <action>", () => {
 
   test("TypeScript:  the same call, in braces inside its parent's JSX", () => {
     const file = parsed(game('<action "auto play" size="small"/>'))
-    const ts = String(P.TSWriter.instance.writeMatch(file.match!))
+    const ts = String(TSWriter.instance.writeMatch(file.match!))
     expect(ts).toContain('{core.drawAction(this, "autoPlay", { size: "small" })}')
   })
 
@@ -116,7 +116,7 @@ describe("an action's button, <action>", () => {
     )
     // a `<buttons>` inside the menu keeps its buttons
     expect(file.compiled).toContain('core.drawAction(this, "cheat")')
-    const ts = String(P.TSWriter.instance.writeMatch(file.match!))
+    const ts = String(TSWriter.instance.writeMatch(file.match!))
     expect(ts).toContain('{core.drawAction(this, "autoPlay", { "in-menu": true })}')
     const python = String(PY.PyWriter.instance.writeMatch(file.match!))
     expect(python).toContain('core.draw_action(self, "auto_play", {"in-menu": True})')
@@ -190,7 +190,7 @@ describe("an action's button, <action>", () => {
     expect(file.errors).toEqual([])
     expect(file.compiled).toContain('core.drawContextMenu(this, ["autoPlay", "-", "undo"])')
     expect(file.compiled).toContain('h("ui-divider")')
-    const ts = String(P.TSWriter.instance.writeMatch(file.match!))
+    const ts = String(TSWriter.instance.writeMatch(file.match!))
     expect(ts).toContain('{core.drawContextMenu(this, ["autoPlay", "-", "undo"])}')
     const python = String(PY.PyWriter.instance.writeMatch(file.match!))
     expect(python).toContain('core.draw_context_menu(self, ["auto_play", "-", "undo"])')
@@ -209,7 +209,7 @@ describe("an action's button, <action>", () => {
     expect(file.errors).toEqual([])
     const menu = '[["autoPlay", { title: "Play" }], "-", ["undo", { "icon-only": true }]]'
     expect(file.compiled).toContain(`core.drawContextMenu(this, ${menu})`)
-    expect(String(P.TSWriter.instance.writeMatch(file.match!))).toContain(`{core.drawContextMenu(this, ${menu})}`)
+    expect(String(TSWriter.instance.writeMatch(file.match!))).toContain(`{core.drawContextMenu(this, ${menu})}`)
     expect(String(PY.PyWriter.instance.writeMatch(file.match!))).toContain(
       '[["auto_play", {"title": "Play"}], "-", ["undo", {"icon-only": True}]]'
     )

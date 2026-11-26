@@ -5,6 +5,9 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { parseSpellProject } from "spell/parser/spell/test"
 
+// every target's writer, past javascript's, loads on first use
+await SP.loadTargets(Object.keys(SP.TARGETS))
+
 /**
  * What the `data` epic found that's about the language (epic `language` P15, request r2):  each held to what it should be.
  * - Silent mistakes became errors or warnings;  English and Spanish agree.

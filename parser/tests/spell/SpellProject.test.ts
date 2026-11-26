@@ -2,6 +2,7 @@ import { afterEach, describe, test, expect, vi } from "vite-plus/test"
 
 import { LoadableFile } from "spell/util"
 import { P } from "spell/parser/parser"
+import { TSWriter } from "spell/parser/parser/writers/TSWriter"
 import { SP } from "spell/parser/spell"
 import { parseSpellProject } from "spell/parser/spell/test"
 
@@ -68,7 +69,7 @@ describe("the program's `@spell/core` import names only the spell classes it use
   })
 
   test("TypeScript's the same", () => {
-    expect(importedClasses(VIEWABLE_LIST, P.TSWriter.instance)).toEqual(["View", "ViewableList"])
+    expect(importedClasses(VIEWABLE_LIST, TSWriter.instance)).toEqual(["View", "ViewableList"])
   })
 })
 

@@ -1,7 +1,7 @@
 /**
  * `spell/parser/core/model`:  the core WITHOUT drawing, for code that uses spell's things as plain data,
  * e.g. the server holding a `Person` (epic `people-and-orgs` P3).
- * - What a compiled LIBRARY imports, e.g. `people.lib.ts`:  the `ts/lib` target, `P.LibraryWriter`.
+ * - What a compiled LIBRARY imports, e.g. `people.lib.ts`:  the `ts/lib` target, `LibraryWriter`.
  * - The same `core`, `Thing` and `List` as the barrel, assembled from the same modules, minus:
  *   - drawing (`drawing.ts`, `elements.ts`, `View`, `ViewableList`):  they load Solid
  *   - `App`, a `View` since epic `elemental-spell` (Q62):  a library declares no app

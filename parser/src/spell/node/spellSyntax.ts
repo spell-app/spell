@@ -3,6 +3,8 @@ import { join, relative, resolve } from "path"
 
 import { readTypeScript, type SourceNode } from "spell/util/node/typescript"
 import { P } from "spell/parser/parser"
+// Import directly:  the parser's barrel leaves the TypeScript writers out, so a bundle that never writes TypeScript drops them
+import { TSWriter } from "spell/parser/parser/writers/TSWriter"
 import { PY } from "spell/parser/py"
 import { core } from "spell/parser/core"
 import { SP } from "spell/parser/spell"
@@ -247,7 +249,7 @@ function writeExample(
   }
   return {
     js: write(P.JSWriter.instance, "js"),
-    ts: write(P.TSWriter.instance, "js"),
+    ts: write(TSWriter.instance, "js"),
     py: parsed.rule.getAST ? write(PY.PyWriter.instance, "py") : { error: NO_PYTHON }
   }
 }

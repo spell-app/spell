@@ -21,7 +21,7 @@ import { SpellJSX } from "./SpellJSX"
  *     see `P.Tokenizer.matchJSXElements()`.
  * - `P.JSXFragmentToken` does the tokenizing;  its children are parsed as an element's are (`SpellJSX.parse()`).
  * - Compiles to a list of its children in javascript, `[h("a"), h("b")]`, as Solid's `h()` takes a fragment;
- *   `<>...</>` in TypeScript:  see `P.JSWriter`, `P.TSWriter`.
+ *   `<>...</>` in TypeScript:  see `P.JSWriter`, `TSWriter`.
  */
 export class SpellJSXFragment extends SpellJSX {
   static ruleName = "jsxFragment"

@@ -1791,12 +1791,13 @@ export class SpellLanguageService {
   /**
    * `spell/compiled`:  the code `file` compiles to for `target`, javascript by default --
    * or a comment saying why it can't, in that language.
-   * - Written by that target's writer (`SP.TARGETS`), as `spell compile --target` writes it.
+   * - Written by that target's writer (`SP.TARGETS`), as `spell compile --target` writes it:
+   *   a writer past javascript's loads the first time it's asked for (`SP.loadTarget()`)
    */
-  compiled(file: SP.SpellFile, target: LSP.CompiledTarget = "js"): string {
+  async compiled(file: SP.SpellFile, target: LSP.CompiledTarget = "js"): Promise<string> {
     const { name, comment } = SpellLanguageService.COMPILED_TARGETS[target]
     if (!file.match) return `${comment} ${SP.SpellProject.sourceNameOf(file.path)} hasn't been parsed`
-    const { writer } = SP.targetFor(name)
+    const { writer } = await SP.loadTarget(name)
     return (
       SpellLanguageService.compileQuietly(file.match, writer) ??
       `${comment} ${SP.SpellProject.sourceNameOf(file.path)} couldn't be compiled to ${name}`
@@ -2501,13 +2502,18 @@ export class SpellLanguageService {
   /**
    * The code `file`'s project compiles to for `target` (`js/solid`, `ts/solid`, `py`), with its source map:
    * the compiled-code pane's, from the last compile here (`SP.SpellProject.codeWithMapFor()`;  epic `solid-2-final` T36).
-   * - `error` when it can't be written:  NEVER throws.
+   * - `error` when it can't be written:  NEVER rejects.
    *   - A project not compiled here, as one the editor opened from the compile cache:  its files' own compiles aren't
    *     there, so what it wrote would be the program's head alone (11 lines of Solitaire's 749).
    */
-  codeWithMap(file: SP.SpellFile, target: string): { code: string; map: P.SourceMapV3 } | { error: string } {
+  async codeWithMap(
+    file: SP.SpellFile,
+    target: string
+  ): Promise<{ code: string; map: P.SourceMapV3 } | { error: string }> {
     if (file.project.compiledFrom !== "compile") return { error: `${file.project.projectId} isn't compiled here` }
     try {
+      // a writer past javascript's loads the first time it's asked for
+      await SP.loadTarget(target)
       return file.project.codeWithMapFor(target)
     } catch (error) {
       return { error: error instanceof Error ? error.message : String(error) }

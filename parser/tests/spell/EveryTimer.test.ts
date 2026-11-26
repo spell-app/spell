@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { core } from "spell/parser/core"
-import { P } from "spell/parser/parser"
+import { TSWriter } from "spell/parser/parser/writers/TSWriter"
 import { PY } from "spell/parser/py"
 import { parseSpellProject, runSpell } from "spell/parser/spell/test"
 
@@ -27,7 +27,7 @@ describe("every_timer:  compiled", () => {
   })
 
   test("TypeScript:  the same", () => {
-    const ts = String(P.TSWriter.instance.writeMatch(parsed(COUNTDOWN).match!))
+    const ts = String(TSWriter.instance.writeMatch(parsed(COUNTDOWN).match!))
     expect(ts).toContain("  everySecond() {")
     expect(ts).toContain('core.addTimer(WeekendCountdown, "everySecond", { seconds: 1 })')
   })

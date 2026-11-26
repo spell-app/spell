@@ -3,6 +3,7 @@ import { dedent, elementTagFor } from "spell/util"
 import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
 import * as pyText from "./pyText"
+import { pyNativeName } from "./pyFunctions"
 
 const { attributeName, isCoreCall, kindFromDatatype, textValue, unwrapped } = P.jsShapes
 
@@ -474,10 +475,10 @@ export class PyBaseWriter extends P.ProgramWriter {
   /**
    * A code file's function, as Python names it:  its name in Python's case, through the writers' shared naming,
    * `copyText` => `copy_text`.
-   * - What `call native` says, written in Python;  and what a `.py` file is looked up by (`SP.NativeCode`).
+   * - What `call native` says, written in Python:  `pyNativeName()`'s.
    */
   static nativeName(name: string): string {
-    return PYTHON_NAMING.nameOf(name, "method")
+    return pyNativeName(name)
   }
 
   /**
@@ -1905,9 +1906,6 @@ function collapseBlankLines(text: string, topLevel: boolean): string {
 }
 
 /** `spell_core`'s functions imported only when the code CALLS them:  a variable may be named `position` too. */
-/** Python's names, PEP 8's:  what a native call's name is written in -- see `PyBaseWriter.nativeName()`. */
-const PYTHON_NAMING = new P.Naming(P.Naming.PYTHON, P.Naming.PYTHON_CLASHES)
-
 const CALLED = new Set(["position", "spell_position", "end_position", "with_spell_positions"])
 
 /** Text written with javascript's escapes, as a template's part is (`a\nb`), read:  the text itself. */

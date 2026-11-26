@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
+import { TSWriter } from "spell/parser/parser/writers/TSWriter"
 
 /**
  * `TSWriter`:  TypeScript on Solid, as a person writes it.
@@ -10,8 +11,8 @@ import { P } from "spell/parser/parser"
 
 /** A match for hand-made AST:  no tokens, so no datatype comes from it. */
 const match = new P.Match({ rule: new P.Symbol({} as never), matched: [] } as never)
-const writer = P.TSWriter.instance
-const UNKNOWN = P.TSWriter.UNKNOWN
+const writer = TSWriter.instance
+const UNKNOWN = TSWriter.UNKNOWN
 
 /** `to <name> (args)`, its body `return 1`. */
 function method(args: P.ASTVariableExpression[], props: Partial<P.ASTMethodDefinitionProps> = {}) {
@@ -28,7 +29,7 @@ describe("TSWriter", () => {
     expect(writer.typeFor("text")).toBe("string")
     expect(writer.typeFor("choice")).toBe("boolean")
     expect(writer.typeFor("Card")).toBe("Card")
-    expect(writer.typeFor("list of cards")).toBe(P.TSWriter.TYPES.list)
+    expect(writer.typeFor("list of cards")).toBe(TSWriter.TYPES.list)
     expect(writer.typeFor("something")).toBeUndefined()
     expect(writer.typeFor(undefined)).toBeUndefined()
   })

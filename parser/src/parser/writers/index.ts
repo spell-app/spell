@@ -2,7 +2,10 @@
  * Barrel for `writers/` -- what turns a spell tree (`P.ASTNode`s) into a target's code, or another view of it.
  * - `Writer` is the base:  one method per kind of node.
  *   - `ProgramWriter`:  what every writer of a program shares, whatever its language
- *   - `JSWriter` writes javascript;  `TSWriter`, on it, TypeScript
+ *   - `JSWriter` writes javascript;  `TSWriter`, on it, TypeScript, and `LibraryWriter`, on that, a library
+ *     - NOT here:  import those two by their files (`spell/parser/parser/writers/TSWriter`), as the `ts/solid` and
+ *       `ts/lib` targets load them on first use (`SP.loadTarget()`, epic `solid-2-final` P19).
+ *       Through this barrel, every bundle that parses would carry them:  the editor's language worker, 8 KB brotli.
  *   - Python's writers are `spell/parser/py`'s (`PY.PyWriter`, on `ProgramWriter`)
  *   - `TreeWriter`:  boxes for a diagram
  * - `jsText` stays a namespace (`P.jsText.InParens`):
@@ -21,8 +24,6 @@ export * from "./WriterProject"
 export * from "./DebugSteps"
 export * from "./ReadGathering"
 export * from "./Naming"
-export * from "./TSWriter"
-export * from "./LibraryWriter"
 export * from "./TreeWriter"
 export * as jsText from "./jsText"
 export * as jsShapes from "./jsShapes"

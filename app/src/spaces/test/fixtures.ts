@@ -11,6 +11,9 @@ import environment from "spell/app/spaces/server/node/environment"
 // Spell UI's pack, as every compile has it:  an example's drawing names its components bare (`<button>`)
 import "spell/app/spaces/models/spellUIPack"
 
+// every target's writer, past javascript's, loads on first use:  the fixtures are compiled for each, at once
+await SP.loadTargets(Object.keys(SP.TARGETS))
+
 /*
  * The test projects' helpers:  each one read from disk, parsed and compiled headlessly, as a compile would.
  * - Node only, for tests:  imported as `spell/app/spaces/test`, never from spaces' barrel.

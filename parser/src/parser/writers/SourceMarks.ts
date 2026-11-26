@@ -213,7 +213,7 @@ export class SourceMarks {
 
   /**
    * How long `text` is with no marks in it:  for a writer laying out a line by its length, so a map never changes the
-   * layout, e.g. `P.TSWriter`'s one-line JSX.
+   * layout, e.g. `TSWriter`'s one-line JSX.
    */
   static widthOf(text: string): number {
     return text.replace(MARKS, "").length

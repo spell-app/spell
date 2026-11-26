@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
+import { TSWriter } from "spell/parser/parser/writers/TSWriter"
 import { PY } from "spell/parser/py"
 import { SP } from "spell/parser/spell"
 import { parseSpellProject } from "spell/parser/spell/test"
@@ -37,7 +38,7 @@ describe("a list of values, as a Python hint", () => {
 function typescript(lines: string[]): string {
   const { scope, files } = parseSpellProject([{ path: "/Events.spell", contents: lines.join("\n") }])
   const parts = files.map(({ match, compiled }) => (match?.AST instanceof P.ASTStatementGroup ? match.AST : compiled))
-  const writer = P.TSWriter.instance
+  const writer = TSWriter.instance
   return SP.SpellProject.combineCompiled(parts, writer, SP.SpellProject.importHeaderFor(scope, writer), scope)
 }
 

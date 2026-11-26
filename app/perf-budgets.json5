@@ -98,8 +98,9 @@
       name: "The editor's language worker",
       // Review Chunking (epic solid-2-final P19):  410 KB, the worker's own copy of the grammar, the parser and the
       // language service.  Its budget is the lazy pieces' ceiling it breaks;  that ceiling still counts it too.
+      // P19 layout B:  386.9 => 372.8 KB, the TypeScript and Python writers loading on first use
       budget: 351,
-      ceiling: 419,
+      ceiling: 381,
       build: "editor",
       entries: ["index.html"],
       only: "languageWorker-[^/]*\\.js$",

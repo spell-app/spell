@@ -26,7 +26,7 @@ export const DRAWS_WAITING = "static drawsWaiting = true"
 /****************
  * ### `JSWriter`
  * Writes a spell tree as JavaScript:  the `js/solid` target's writer, what `ASTNode.compile()` calls.
- * - It's also the base of `P.TSWriter`, which writes TypeScript on the same runtime.
+ * - It's also the base of `TSWriter`, which writes TypeScript on the same runtime.
  * - ONE method per kind of node, named for its class -- see `P.Writer`.
  *   Write children with `this.write()`.
  * - Writes what a person writing javascript would, where spell's tree says enough (epic `output-targets`, P19):

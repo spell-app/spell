@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
+import { TSWriter } from "spell/parser/parser/writers/TSWriter"
 import { PY } from "spell/parser/py"
 import { SP } from "spell/parser/spell"
 import { compiledSpellProject, parseSpellProject } from "spell/parser/spell/test"
@@ -84,7 +85,7 @@ describe("an imported saved type reads and writes the place", () => {
 
   it("in TypeScript and Python too", () => {
     const { written } = importerOf(declarations, PROGRAM)
-    expect(written(P.TSWriter.instance)).toContain("core.savedThings(Recipe)")
+    expect(written(TSWriter.instance)).toContain("core.savedThings(Recipe)")
     expect(written(PY.PyWriter.instance)).toContain("core.saved_things(Recipe)")
   })
 

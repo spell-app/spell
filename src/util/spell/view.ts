@@ -4,7 +4,7 @@
  * - Here, not in `core` or `app`, so every side names them alike:
  *   - core names the tag as the class is declared (`core.defineElement()`)
  *   - app's `SpellElement` makes the element, with an attribute per property
- *   - the TypeScript writer (`P.TSWriter`, in `parser`, which can't import either) writes each view's element class
+ *   - the TypeScript writer (`TSWriter`, in `parser`, which can't import either) writes each view's element class
  */
 
 import { camelCase, kebabCase, withoutAccents } from "spell/util/string"

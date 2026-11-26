@@ -242,6 +242,6 @@ async function compileFile(
     status.done(row, "failed", error instanceof Error ? error.message : String(error))
     return false
   }
-  output.push(session.service.compiled(file))
+  output.push(await session.service.compiled(file))
   return !session.report(status, row, file.project).length
 }
