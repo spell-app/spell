@@ -49,6 +49,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `newestWins`:  a name for reads where a newer one aborts the older, e.g. a search as you type.
   - `PlaceBatch`:  lists asked in the same moment go in one request, for a place with `listMany()`:  `GraphPlace`'s aliases.
     A web server has one address per collection, so it can't:  its lists go one each, together.
+    - And things asked for by id in the same moment, ONE `getMany()` (epic `data` P57):  40 links followed are one request
+      where the place takes a list of ids (Spell's server, GraphQL, a web server that `gives many at once by "ids"`).
+  - [pagesOf.ts](pagesOf.ts) (epic `data` P57):  `pagesOf()`, a list's pages as a plain async generator, one each time its
+    reader asks for the next;  its `return()` aborts the page in flight.  The ONE pager:  `PlaceQuery`'s walk, the
+    program's read (`SavedRead`, in the parser's core), Spell's server's search by id.
+    - `ReadCeiling`:  what one read may load, counted page by page, a plain read of every page too (epic `data` I11).
   - `PlaceQuery`:  what the place didn't do is filtered, sorted, sliced or hidden here,
     up to a ceiling in rows and bytes, then a `PlaceError` naming the place.
     - A filter asking for `""` finds a row without that field too, as an unset text reads in Spell (epic `atmosphere` P37).
@@ -82,6 +88,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       filled from the thing sent (epic `data` P49);  each collection's enabled operations (`limitOperations()`, a
       thing's `enabled operations are ...` and its collection's switch), refused before they're sent, and
       `canWrite()` per collection;  versions, if the server has them (`If-Match`);  without, the last save wins the whole record.
+      Reading many things:  one `GET` each, at its own address;  with `manyAtOnceBy` (`it gives many at once by "ids"`,
+      epic `data` P57), one `GET` of the list for a page of them, `?ids=a,b,c`.
     - `GraphPlace`:  a plain `POST`, selecting only what's asked;  mutations named in its mapping;
       versions, if a line names their field (`versions: { field }`, sent back in an update's `input`;  epic `data` T19).
     - Their tests run in node, against [the recipe servers](../server/test/recipeServers.ts).
@@ -226,6 +234,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A refusal says the server side's own words (`WebPlace.messageOf()`), scrubbed of keys.
     - A program's lines go with every request (`lines`, `PlaceLines`):  never a key, only its name.  A place that takes them follows them (`Place.withLines()`).
     - A field the place says takes no write (`ListAnswer.readOnlyFields`) reads as read only here (`canWrite()`).
+    - Its lists come a page at a time (epic `data` P57):  Spell's server pages what its place can't (`ServerPages`, in
+      `spell/server/places`), and each page is an ordinary request.  A list kept on this device is read every page first.
     - `readsAt` (epic `atmosphere` P5):  its lists are read straight from the files, and written through the server side.
       - The reading is a `ChunkedPlace` on `WebChunks`.
       - Refused, it asks for a credential (`PLACE_CREDENTIAL`), a cookie, and reads again once.

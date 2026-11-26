@@ -138,7 +138,7 @@ export class Juego extends App {
   /** Una tarjeta del mazo al azar, con la palabra arriba:  nunca la que se acaba de ver */
   sacarOtra() {
     const otras = this.mazo.filter((tarjeta) => tarjeta !== this.tarjeta)
-    this.tarjeta = otras.randomItem()
+    this.tarjeta = otras.randomItem()!
     this.tarjeta?.turnFaceUp()
   }
 

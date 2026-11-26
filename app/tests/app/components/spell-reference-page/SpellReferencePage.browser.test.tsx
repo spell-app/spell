@@ -11,6 +11,7 @@ import {
   type ReferenceEditDetail,
   type SpellReferencePage
 } from "spell/app/app/components/spell-reference-page"
+import { PlaceReferenceSource } from "spell/app/app/components/spell-reference-page/PlaceReferenceSource"
 import { Routes, createAppRouter } from "spell/app/app/pages/routes"
 
 /**
@@ -43,7 +44,19 @@ const DESCRIPTION = {
       tag: "tenancy",
       state: { is: "verified", at: "2026-11-17T21:30:00.000Z", deployment: "dev", rows: 3 },
       operations: {
-        add: { method: "POST", at: "/tenancy/tenants/", params: { name: "text" }, state: { is: "unverified" } }
+        add: { method: "POST", at: "/tenancy/tenants/", params: { name: "text" }, state: { is: "unverified" } },
+        // a write tried and refused, the server's reason kept (epic `data` I137)
+        change: {
+          method: "PATCH",
+          at: "/tenancy/tenants/{id}/",
+          state: {
+            is: "failed",
+            at: "2026-11-17T21:32:00.000Z",
+            deployment: "dev",
+            status: 400,
+            reason: "Tenant with this Name already exists"
+          }
+        }
       },
       fields: {
         id: { words: "id", type: "number", isReadOnly: true },
@@ -266,6 +279,39 @@ describe("<spell-reference-page>", () => {
       ["dev", "https://dev.acme.test/api", "ACME_DEV_KEY", ""],
       ["production", "https://acme.test/api", "", "yes"]
     ])
+  })
+
+  test("a write's own state:  its label, tried when and where, and its server's reason (epic `data` I125, I137)", async () => {
+    serve()
+    const root = await mount()
+    await opened(root, "tenancy")
+    const tenants = await opened(root, "tenants")
+    const changes = await opened(tenants, "What it can change")
+    expect(itemsOf(changes)).toEqual([
+      ["add", "takes name (text)"],
+      ["change", "Tenant with this Name already exists"]
+    ])
+    const refused = changes
+      .querySelectorAll("spell-reference-item")[1]!
+      .querySelector("spell-reference-state ui-label")!
+    expect(refused.textContent).toBe("Failed")
+    expect(refused.getAttribute("title")).toMatch(/^Failed, tried on dev, .*2026.*\n/)
+  })
+
+  test("only its reference page reads where it runs:  the Data tab's places read no project file (epic `data` I126)", async () => {
+    const asked: string[] = []
+    serve()
+    const answer = globalThis.fetch
+    vi.stubGlobal("fetch", async (url: string | URL | Request) => {
+      asked.push(decodeURIComponent(`${url instanceof Request ? url.url : url}`))
+      return answer(url)
+    })
+    const place = await PlaceReferenceSource.placeAt(PATH)
+    expect(place?.name).toBe("acme")
+    expect(place?.deployments).toBeUndefined()
+    expect(asked.filter((each) => each.endsWith("/__project.json5"))).toEqual([])
+    const withDeployments = await PlaceReferenceSource.placeAt(PATH, { withDeployments: true })
+    expect(Object.keys(withDeployments?.deployments ?? {})).toEqual(["dev", "production"])
   })
 
   test("no place there:  says so, and how to make one", async () => {

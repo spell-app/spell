@@ -24,14 +24,14 @@
 
 import solidH from "@solidjs/h"
 import { createComponent, insert, render, spread, type JSX } from "@solidjs/web"
-import { Errored, createMemo, createRoot, getOwner, onCleanup, runWithOwner, untrack } from "solid-js"
+import { Errored, createEffect, createMemo, createRoot, getOwner, onCleanup, runWithOwner, untrack } from "solid-js"
 
 import { Cell, initialCaps } from "spell/util"
 import { untrackCells } from "spell/util/reactive"
 import { MOST_AT_ONCE, canDrawInWindows, drawnInWindow, rowAt } from "spell/element/drawnWindow"
 
 import { core } from "./core"
-import { defineCoreModule, type PartEdit } from "./core.types"
+import { defineCoreModule, type PartEdit, type SiteHost, type TabIcon } from "./core.types"
 import type { ContextMenuItem, MenuItem } from "./acting"
 import { List } from "./classes/List"
 import { ViewableList } from "./classes/ViewableList"
@@ -486,6 +486,8 @@ export const drawingMethods = defineCoreModule({
    * - SIDE EFFECT:  ⌘Z and ⇧⌘Z undo and redo while it has the focus, until it's unmounted (`listenForUndoKeys()`).
    * - SIDE EFFECT:  a `<ui-table editable>` of its things writes them (`listenForTableEdits()`).
    * - SIDE EFFECT:  a `<ui-table sort="the order">`'s header click sets the page's sort (`listenForTableSorts()`).
+   * - SIDE EFFECT:  the run's host shows its icon as the tab's, and again as it changes, until it's unmounted
+   *   (`showTabIcon()`, epic `editor` P50).
    */
   mountApp(app: CanDraw, element: HTMLElement): MountedApp {
     ;(element as AppElement).spellRoot?.unmount()
@@ -497,6 +499,7 @@ export const drawingMethods = defineCoreModule({
     const stopUndoKeys = listenForUndoKeys(element)
     const stopTableEdits = listenForTableEdits(element)
     const stopTableSorts = listenForTableSorts(element)
+    const stopTabIcon = showTabIcon(app, core.siteHost)
     const mounted: MountedApp = {
       app,
       unmount() {
@@ -504,6 +507,7 @@ export const drawingMethods = defineCoreModule({
         stopUndoKeys()
         stopTableEdits()
         stopTableSorts()
+        stopTabIcon()
         if ((element as AppElement).spellRoot === mounted) delete (element as AppElement).spellRoot
       }
     }
@@ -512,6 +516,49 @@ export const drawingMethods = defineCoreModule({
   }
 })
 Object.assign(core, drawingMethods)
+
+/**
+ * Have `host` show `app`'s icon as the tab's (`App.icon`, `iconColor`):  now, and again as either changes;
+ * returns what puts the host's own back.
+ * - Only an app that says one, on a host that shows them (`SiteHost.showIcon()`):  else nothing, and nothing to undo.
+ * - A value with a `/` or a picture's ending is a file of the project, found as `draw its thumbnail` finds one
+ *   (`core.addressOfFile()`);  any other is an icon's name.
+ * - A root of its own, as the app's drawing is:  the runner's effect that mounts it never owns it.
+ */
+function showTabIcon(app: CanDraw, host: SiteHost | undefined): () => void {
+  const show = host?.showIcon?.bind(host)
+  if (!show || !("icon" in app)) return () => {}
+  const said = app as unknown as { icon?: unknown; iconColor?: unknown }
+  let shown = false
+  const dispose = runWithOwner(null, () =>
+    createRoot((dispose) => {
+      createEffect(
+        () => [said.icon, said.iconColor] as const,
+        ([icon, color]) => {
+          const tabIcon = tabIconFor(icon, color)
+          if (!tabIcon && !shown) return
+          shown = !!tabIcon
+          show(tabIcon)
+        }
+      )
+      return dispose
+    })
+  )
+  return () => {
+    dispose()
+    if (shown) show(undefined)
+  }
+}
+
+/** What `showTabIcon()` hands the host for an app's `icon` and `iconColor`;  `undefined` for no icon. */
+function tabIconFor(icon: unknown, color: unknown): TabIcon | undefined {
+  if (typeof icon !== "string" || !icon.trim()) return undefined
+  if (PICTURE_FILE.test(icon)) return { address: core.addressOfFile(icon) }
+  return { name: icon.trim(), ...(typeof color === "string" && color.trim() && { color: color.trim() }) }
+}
+
+/** An icon that's a picture, a file:  a `/` in it, or a picture's ending (`icon.png`, `logo.svg`). */
+const PICTURE_FILE = /\/|\.(png|svg|ico|jpe?g|gif|webp|avif)$/i
 
 ////////////////
 // ## `@drawn`

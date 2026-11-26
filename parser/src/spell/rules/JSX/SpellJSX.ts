@@ -486,6 +486,17 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     return !!(match?.is(SpellJSX) && match.data.declares?.hidden)
   }
 
+  /**
+   * Is `child` the spaces between two children on one line (`P.Tokenizer.matchJSXSpaces()`), beside one that draws
+   * nothing:  `<columna "mazo" oculto/> <columna "C1"/>` draws the second alone, no space before it.
+   */
+  private static isSpaceBesideNothing(children: Array<P.Match | undefined>, child: P.Match | undefined): boolean {
+    const [token] = child?.matched ?? []
+    if (!(token instanceof P.JSXTextToken) || !/^[ \t]+$/.test(`${token.value}`)) return false
+    const at = children.indexOf(child)
+    return SpellJSX.drawsNothing(children[at - 1]) || SpellJSX.drawsNothing(children[at + 1])
+  }
+
   /** The thing whose own drawing (`to draw it`) `scope` is in, if it's in one -- `undefined` elsewhere. */
   private static drawingThingOf(scope: P.Scope): P.TypeScope | undefined {
     if (DrawIt.drawingIn(scope)?.drawing !== "draw") return undefined
@@ -1020,13 +1031,14 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       if (chain.length) asts.push(this.ifChain(chain))
       chain = []
     }
+    const children = match.data.children ?? []
     const add = (child: P.Match | undefined) => {
-      // a view it declares, hidden:  nothing drawn (T123)
-      if (SpellJSX.drawsNothing(child)) return
+      // a view it declares, hidden:  nothing drawn (T123), nor the spaces beside it (I75)
+      if (SpellJSX.drawsNothing(child) || SpellJSX.isSpaceBesideNothing(children, child)) return
       const ast = SpellJSX.childAST(child)
       if (ast) asts.push(ast)
     }
-    for (const child of match.data.children ?? []) {
+    for (const child of children) {
       if (child?.is(SpellJSX) && child.data.chain && child.data.inMarkup) {
         if (child.data.chain === "if") {
           endChain()

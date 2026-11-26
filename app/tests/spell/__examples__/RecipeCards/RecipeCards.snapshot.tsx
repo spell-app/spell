@@ -639,7 +639,7 @@ export class RecipeCard extends App {
       // The file can't be read just now:  the recipes list says so
       return
     }
-    this.chosen = core.getItemAt(await core.savedThings(Recipe), 0)
+    this.chosen = core.getItemAt(await core.savedThings(Recipe), 0)!
   }
 
   showMetric() {

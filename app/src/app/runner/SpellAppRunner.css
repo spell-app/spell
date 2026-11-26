@@ -99,3 +99,10 @@
     font-size: 16px;
   }
 }
+
+/* A view that keeps its own box shares a row it's in, in an app's drawing as in a view's (`SpellElement`'s
+   `KEEPS_ITS_BOX_IN_A_ROW`, epic `editor` P50, Q102):  a share of the row it draws is then a share of something. */
+:is(ui-stack, es-pila):state(horizontal) > :state(keeps-its-box) {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}

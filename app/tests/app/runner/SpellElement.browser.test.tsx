@@ -266,7 +266,7 @@ describe("SpellElement", () => {
      *   the space is half the row, and the segment starts where it ends.
      * - Written straight into the stack it always was;  inside a view with a box of its own it was 50% of nothing.
      */
-    describe("a share of a row it draws (`width=\"50%\"`) is a share of the row around it", () => {
+    describe('a share of a row it draws (`width="50%"`) is a share of the row around it', () => {
       /** A view drawing one `<ui-space width="50%">`, as the repro's `gap` does. */
       class Gap extends View {
         draw(): ReturnType<View["draw"]> {
@@ -283,26 +283,54 @@ describe("SpellElement", () => {
         }
         draw(): ReturnType<View["draw"]> {
           const space = (width: string) => () => [h("ui-space", { width, height: "2em" })]
-          return [() => core.drawIf(() => this.wide, space("50%"), space("25%"))] as unknown as ReturnType<
-            View["draw"]
-          >
+          return [() => core.drawIf(() => this.wide, space("50%"), space("25%"))] as unknown as ReturnType<View["draw"]>
         }
       }
 
-      /** The repro's row, 800px wide:  `tag`'s view, then a segment;  its stack and both boxes. */
+      /** A view drawing TWO spaces, a quarter each:  it keeps a box of its own. */
+      class TwoGaps extends View {
+        draw(): ReturnType<View["draw"]> {
+          const gaps = [h("ui-space", { width: "25%", height: "2em" }), h("ui-space", { width: "25%", height: "2em" })]
+          return gaps.map((it) => (it as unknown as () => unknown)()) as unknown as ReturnType<View["draw"]>
+        }
+      }
+      /** The repro's gap, draggable:  its box carries the drag, so it keeps it. */
+      class DraggableGap extends Gap {
+        static draggable = true
+      }
+
+      /** What `Row` draws next:  the view's tag, and its thing. */
+      let inTheRow: { tag: string; thing: View } | undefined
+
+      /** The repro's `row`:  a view drawing a horizontal stack, 800px wide, of `inTheRow`'s view, then a segment. */
+      class Row extends View {
+        draw(): ReturnType<View["draw"]> {
+          const { tag, thing } = inTheRow!
+          const view = h(tag, { ref: (element: HTMLElement & { thing?: View }) => (element.thing = thing) })
+          const segment = h("ui-segment", null, "Right half")
+          const stack = h("ui-stack", { direction: "horizontal", style: "width: 800px; gap: 0" }, view, segment)
+          return (stack as unknown as () => ReturnType<View["draw"]>)()
+        }
+      }
+
+      /**
+       * The repro's row, drawn by a view, as Spell draws it:  `tag`'s view, then a segment;  its stack and both boxes.
+       * - In a view's shadow root, where the row's rule for a view that keeps its box is (`STATES_CSS`).
+       */
       async function row(tag: string, thing: View) {
         await Promise.all([import("spell/ui/components/ui-space"), import("spell/ui/components/ui-segment")])
         await import("spell/ui/components/ui-stack")
-        core.defineElement(Gap, "Shares")
-        core.defineElement(ChosenGap, "Shares")
+        for (const Class of [Gap, ChosenGap, TwoGaps, DraggableGap, Row]) core.defineElement(Class, "Shares")
         await Promise.resolve()
-        const stack = await ElementFixture.render<HTMLElement>(
-          `<ui-stack direction="horizontal" style="width: 800px; gap: 0"><${tag}></${tag}><ui-segment>Right half</ui-segment></ui-stack>`
-        )
-        onTestFinished(() => stack.remove())
-        const view = stack.querySelector(tag) as HTMLElement & { thing?: View }
-        view.thing = thing
+        inTheRow = { tag, thing }
+        const rowElement = await ElementFixture.render<HTMLElement & { thing?: View }>("<shares-row></shares-row>")
+        onTestFinished(() => rowElement.remove())
+        rowElement.thing = new Row()
         flush()
+        await ElementFixture.settle(rowElement)
+        await expect.poll(() => rowElement.shadowRoot?.querySelector("ui-stack")).toBeTruthy()
+        const stack = rowElement.shadowRoot!.querySelector("ui-stack") as HTMLElement
+        const view = stack.querySelector(tag) as HTMLElement & { thing?: View }
         await ElementFixture.settle(stack)
         await ElementFixture.settle(stack)
         const left = stack.getBoundingClientRect().left
@@ -311,7 +339,24 @@ describe("SpellElement", () => {
           const host = stack.querySelector("ui-segment") as E.DOMElement
           return (host.shadowRoot!.querySelector(".ui.segment") as HTMLElement).getBoundingClientRect()
         }
-        return { view, left, space, segment }
+        return { view, left, space, segment, stack }
+      }
+
+      /**
+       * A view that keeps its box shares the row (Q102, C):  it grows to the room the segment leaves, so a share of
+       * the row it draws is that share of its box, never of nothing.
+       */
+      async function expectSharesTheRow(tag: string, thing: View, share: number): Promise<void> {
+        const { view, left, space, segment } = await row(tag, thing)
+        await expect.poll(() => view.matches(":state(keeps-its-box)")).toBe(true)
+        expect(view.matches(":state(lays-out-as-drawing)")).toBe(false)
+        const box = () => view.getBoundingClientRect()
+        // the view and the segment fill the row between them, the segment as wide as its words
+        await expect.poll(() => Math.round(box().width + segment().width)).toBe(800)
+        expect(box().width).toBeGreaterThan(500)
+        expect(Math.round(segment().left - left)).toBe(Math.round(box().width))
+        // what it draws is its share of the view's box, which is no longer 0
+        expect(Math.round(space().width)).toBe(Math.round(box().width * share))
       }
 
       test("a plain view's:  the space is 400px of 800, the segment starts at 400", async () => {
@@ -332,6 +377,14 @@ describe("SpellElement", () => {
         core.flush()
         await expect.poll(() => Math.round(space().width)).toBe(200)
         expect(Math.round(segment().left - left)).toBe(200)
+      })
+
+      test("a view drawing two elements keeps its box, and shares the row:  each quarter is a quarter of its box", async () => {
+        await expectSharesTheRow("shares-two-gaps", new TwoGaps(), 0.25)
+      })
+
+      test("a draggable view keeps its box, and shares the row:  its half is half its box", async () => {
+        await expectSharesTheRow("shares-draggable-gap", new DraggableGap(), 0.5)
       })
     })
 

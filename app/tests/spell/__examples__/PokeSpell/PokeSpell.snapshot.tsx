@@ -1409,7 +1409,7 @@ export class Guess extends Thing {
   async playAgain() {
     const firstOnes = core.rangeStartingAt(await core.savedThings(Pokemon), 0, 151)
     this.choices = core.randomItemsOf(firstOnes, 4)
-    this.hiding = core.randomItemOf(await core.answerOf(this, "choices"))
+    this.hiding = core.randomItemOf(await core.answerOf(this, "choices"))!
     this.guessed = undefined
   }
 
@@ -1531,7 +1531,7 @@ export class Pokedex extends App {
       this.showing = undefined
       return
     }
-    this.showing = core.getItemAt(await core.answerOf(this, "trail"), -1)
+    this.showing = core.getItemAt(await core.answerOf(this, "trail"), -1)!
     core.removeItemAt(await core.answerOf(this, "trail"), -1)
     core.scrollToTop()
   }

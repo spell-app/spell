@@ -10,6 +10,7 @@ import { appTexts } from "spell/app/app/ui/AppTexts"
 import { SpellAppRunner } from "spell/app/app/runner/SpellAppRunner"
 import { projectSource } from "spell/app/app/components/spell-viewer/projectSource"
 import { RunSiteHost, type OpenedFile } from "./RunSiteHost"
+import { TabIcons } from "./TabIcons"
 
 import "./RunPage.css"
 
@@ -34,7 +35,9 @@ export function RunPage(props: RunPageProps): JSX.Element {
   const isPhone = phoneWidth()
   joinLiveChannel()
   const editUrl = `/edit/${SpellUrls.encodeAddress(props.address)}`
-  const siteHost = new RunSiteHost(`/run/${SpellUrls.encodeAddress(props.projectId)}`, document, props.opened)
+  const siteHost = new RunSiteHost(`/run/${SpellUrls.encodeAddress(props.projectId)}`, document, props.opened, {
+    tabIcons: new TabIcons(document)
+  })
   return (
     <div class="RunPage">
       <div class="RunBar">

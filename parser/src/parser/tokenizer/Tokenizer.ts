@@ -976,6 +976,7 @@ export class Tokenizer {
   matchJSXChild(endTagName: string, text: string, start = 0, end?: number) {
     return (
       this.matchJSXComment(text, start, end) ||
+      this.matchJSXSpaces(text, start, end) ||
       this.matchJSXEndTag(endTagName, text, start, end) ||
       this.matchJSXExpression(text, start, end) ||
       this.matchJSXElement(text, start, end) ||
@@ -1126,6 +1127,23 @@ export class Tokenizer {
       value: line.replace(/^\/\/+/, "").trim(),
       commentSymbol: "//"
     })
+  }
+
+  /**
+   * Match the spaces between two of an element's children on one line, as JSX keeps them:
+   * `{its flag} {its name}` draws "🇦🇽 Åland", not "🇦🇽Åland" (epic `data` I75).
+   * - Only spaces and tabs, then a hole or a tag (`{`, `<`) on the same line, after a hole or a tag (`}`, `>`).
+   *   Text after them is `matchJSXText()`'s, which keeps its leading spaces itself.
+   * - Spaces before a line break are an indent's, dropped, as JSX drops them.
+   */
+  matchJSXSpaces = (text: string, start = 0, end?: number): P.JSXTextToken | undefined => {
+    if (typeof end !== "number" || end > text.length) end = text.length
+    if (start >= end || !/[}>]/.test(text[start - 1] ?? "")) return undefined
+    let at = start
+    while (at < end && (text[at] === " " || text[at] === "\t")) at++
+    if (at === start || at >= end || !/[{<]/.test(text[at]!) || text.startsWith("</", at)) return undefined
+    const value = text.slice(start, at)
+    return new P.JSXTextToken({ value, raw: value, start })
   }
 
   /**

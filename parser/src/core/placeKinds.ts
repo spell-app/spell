@@ -162,6 +162,11 @@ export type PlaceDetails = {
   sortDirections?: { param: string; descending?: string; ascending?: string }
   /** What a web server calls the fields it's asked for:  `it gives only the fields named in "fields"`. */
   fieldsNamedIn?: string
+  /**
+   * What a web server's list calls the question it takes many ids in, joined by commas:  `it gives many at once by "ids"`
+   * (epic `data` P57).
+   */
+  manyAtOnceBy?: string
   /** It takes no writes:  `it is read only`. */
   readOnly?: boolean
   /**
@@ -316,6 +321,7 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       ...restAbilitiesIn(details),
       ...(details.pageSize !== undefined && { pageSize: details.pageSize }),
       ...(details.mostPerSecond !== undefined && { mostPerSecond: details.mostPerSecond }),
+      ...(details.manyAtOnceBy !== undefined && { manyAtOnceBy: details.manyAtOnceBy }),
       ...(deviceCopy && { deviceCopy }),
       ...(details.versionsIn !== undefined && { versions: { field: details.versionsIn } }),
       ...(details.operations && { operations: details.operations }),
@@ -679,7 +685,14 @@ function restLinesForEveryCollection({ idColumn, rowsIn, nextPageIn }: PlaceDeta
  * What one list is asked, its own way, from the lines under its `live at` line:  `RestPlace`'s `RestCollection.asks`.
  * - Nothing for a list whose lines say none of it:  the place's lines hold.
  */
-function restAsksOf({ filters, filteredWith, sorts, sortedWith, sortOrders, sortDirections }: Omit<ListAsks, "searches">) {
+function restAsksOf({
+  filters,
+  filteredWith,
+  sorts,
+  sortedWith,
+  sortOrders,
+  sortDirections
+}: Omit<ListAsks, "searches">) {
   const asks = {
     ...(filters && { filter: filters }),
     ...(filteredWith && { filteredWith }),

@@ -12,7 +12,6 @@
 432:5 TS2322 Type 'undefined' is not assignable to type 'Piece'.
 451:45 TS18048 'square.piece' is possibly 'undefined'.
 466:9 TS2532 Object is possibly 'undefined'.
-466:30 TS2322 Type 'Piece | undefined' is not assignable to type 'Piece'.
 466:59 TS2345 Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
 471:5 TS2322 Type 'undefined' is not assignable to type 'Piece'.
 491:31 TS18048 'mover' is possibly 'undefined'.
@@ -67,7 +66,6 @@
 799:17 TS2532 Object is possibly 'undefined'.
 845:5 TS2322 Type 'string' is not assignable to type '"red" | "black"'.
 846:5 TS2322 Type 'string' is not assignable to type '"red" | "black" | "nobody"'.
-847:30 TS2322 Type 'Piece | undefined' is not assignable to type 'Piece'.
 961:5 TS2322 Type 'undefined' is not assignable to type 'Table'.
 971:5 TS2322 Type 'undefined' is not assignable to type 'Table'.
 1016:13 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.

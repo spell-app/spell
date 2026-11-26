@@ -165,6 +165,39 @@ describe("mergedSpell(), a person's words", () => {
     expect(twice.match(/APPARENTLY DELETED/g)).toHaveLength(1)
   })
 
+  it("keeps a type's own words through a merge (epic `data` I133)", () => {
+    const after = partsWith({
+      status: BEFORE.types[0]!.lines[1]!.text,
+      user: 'its "user" is text',
+      queue: 'its "queue" is text',
+      error: 'its "error" is text'
+    })
+    const { text } = mergedSpell(NETBOX, BEFORE, after, unused, [], MARKS)
+    expect(text).toContain(
+      'a "job" is a thing\n\t-- A piece of work NetBox runs in the background.\n\tit lives in netbox'
+    )
+  })
+
+  it("keeps the place's prose under its web server line through a merge (I133)", () => {
+    const after = { ...partsWith({ user: 'its "user" is text' }), placeLines: [...BEFORE.placeLines] }
+    const { text } = mergedSpell(NETBOX, BEFORE, after, unused, [], MARKS)
+    expect(text).toMatch(
+      /^netbox is a web server at "https:\/\/demo\.netbox\.dev"\n\t-- An inventory of a network\.\n\t-- Use the demo account for reads\.\n\tjobs live at/
+    )
+  })
+
+  it("marks a gone collection's type APPARENTLY DELETED, once, and keeps it (I133)", () => {
+    const after: SpellParts = { ...BEFORE, types: [] }
+    const once = mergedSpell(NETBOX, BEFORE, after, unused, [], MARKS)
+    // after the person's words for it, which stay
+    expect(once.text).toContain(
+      'a "job" is a thing\n\t-- A piece of work NetBox runs in the background.\n\t-- APPARENTLY DELETED as of 2026-11-19'
+    )
+    expect(once.couldnt.join("\n")).toMatch(/The collection "jobs" is gone from the source;  its type stays/)
+    const twice = mergedSpell(once.text, BEFORE, after, unused, [], MARKS).text
+    expect(twice.match(/APPARENTLY DELETED/g)).toHaveLength(1)
+  })
+
   it("marks nothing without a day", () => {
     const after = partsWith({ ...{ status: BEFORE.types[0]!.lines[1]!.text }, error: 'its "error" is text' })
     expect(mergedSpell(NETBOX, BEFORE, after, unused).text).not.toMatch(/NEW as of 2026-11-19/)

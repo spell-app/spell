@@ -6,7 +6,8 @@
  *     [--bundle <spell-ui.js>] [outDir]
  * - `--bundle`:  that file served as the pages' `spell-ui.js`, a bundle built elsewhere (a runtime not yet in
  *   `_assets/`), as the other demo checks take it
- * - the epic page:  a SCRATCH COPY of `epics/<name>/` (default `airplane`), in `src/demo/shots/fold/epics/<name>/`
+ * - the epic page:  a SCRATCH COPY of the epic folder's `epics/<name>/` (default `airplane`;  the epic folder
+ *   `EpicConfig.contentOf()`'s, epic `epic-engine` I495:  `epic/epics/` before, gone since the epic folder left the checkout), in `src/demo/shots/fold/epics/<name>/`
  *   (git-ignored), as deep as a real one, so its links need no change:  the review routes take epic pages only
  *   (`epics/<name>/<name>.plan.html`)
  *   - `--from <folder>` (from the root):  copied from `<folder>/<name>/` instead, e.g. a doc the tool migrated
@@ -15,7 +16,8 @@
  *   - REFUSES to run while the copy's inbox file exists (a run killed half way:  delete it)
  * - the item:  `--item <id>` (default:  the first item with details in a Todos or Questions section);
  *   the item near the page's END:  the doc's last item with details
- * - the guide:  `--guide <path from the root>` (default `guides/solid/solid-2.html`), read as it is (a fold writes
+ * - the guide:  `--guide <path from the root>` (default `guides/solid/solid-2.html`), the kit's own shipped guide
+ *   (served first, as the real page server does:  `DemoServer`), read as it is (a fold writes
  *   only the reader's own storage)
  * - the server:  a page server of its OWN (`DemoServer`:  spell-epic's `EpicServer` on a free port, no pid file),
  *   serving `src/demo/shots/fold/` as its epic folder, the real one's `guides/` ... linked in;  it wakes nobody;
@@ -30,10 +32,18 @@
  *   - a reply on an open item (Approve, or a todo's plane:  it folds by itself), then a click on the NEXT item's line,
  *     which opens it:  that line must not move either (Owen, 2026-10-10:  "clicking item headers jumps to top of
  *     page, seems maybe related to auto-closing after I reply")
+ *     - on the first item with details that takes a reply;  none (a finished epic, as `airplane` is):  skipped, and
+ *       the summary says so
  *   - the guide:  a section a link opened (a heading in it), folded by a click on its title;
  *     a click on plain text in a section, which must not scroll at all
  * - fails (exit 1) on a page error, a fold that doesn't happen, an item fold that doesn't animate,
  *   or a line / title that moves more than 1px:
+ *   - an item fold is expected to animate only once the page is no longer QUIET (`<html data-spell-quiet>`, the docs
+ *     runtime's `quietFor()`:  no motion while the page comes up, 2.5s, nor for a moment after a live patch;
+ *     Owen, 2025-10-25:  "if page is already loaded, skip the animations");  a fold the link cases make during it is
+ *     at once, by design, and only checked for moving (epic `epic-engine` I495:  all ten item cases said "didn't
+ *     animate", folding 150ms after the landing, inside the quiet);  the no-link case waits for the quiet to end, so
+ *     it checks the animation
  *   - what moved them, before I7's fix:
  *     the runtime let go of the page's held height by taking it off to measure, and that one layout clamped the
  *     scroll (20-80px);  and a click on any text in an epic page focused the page header's first link
@@ -69,6 +79,7 @@ if (!process.env.CHECK_FOLD_UNDER_TSX) {
 const { BrowserPage } = await import("spell/element-tools/BrowserPage")
 const { DemoServer } = await import("./DemoServer.ts")
 const { bundleRoutes, logInto } = await import("./demoPages.mjs")
+const { EpicConfig } = await import("spell/epic/config/EpicConfig.ts")
 
 ////////////////
 // ## Settings
@@ -78,9 +89,12 @@ const args = process.argv.slice(2)
 const flagValue = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : undefined)
 const docName = flagValue("--doc") ?? "airplane"
 const guide = flagValue("--guide") ?? "guides/solid/solid-2.html"
-const from = flagValue("--from") ?? "epics"
+/** where the doc is copied from:  `--from` (from the root), else the epic folder's `epics/` */
+const from = flagValue("--from") ? resolve(ROOT, flagValue("--from")) : join(EpicConfig.contentOf(ROOT), "epics")
 const flagged = new Set(
-  ["--doc", "--from", "--item", "--guide", "--bundle"].flatMap((name) => (args.includes(name) ? [args.indexOf(name) + 1] : []))
+  ["--doc", "--from", "--item", "--guide", "--bundle"].flatMap((name) =>
+    args.includes(name) ? [args.indexOf(name) + 1] : []
+  )
 )
 const out = args.find((arg, index) => !arg.startsWith("--") && !flagged.has(index)) ?? join(HERE, "shots/fold")
 const SIZES = [
@@ -103,7 +117,10 @@ if (existsSync(inboxFile)) {
 copyDoc()
 mkdirSync(out, { recursive: true })
 
-const server = await DemoServer.start({ content: join(HERE, "shots/fold"), port: 47_900 + Math.floor(Math.random() * 90) })
+const server = await DemoServer.start({
+  content: join(HERE, "shots/fold"),
+  port: 47_900 + Math.floor(Math.random() * 90)
+})
 const base = server.base
 const docUrl = `${base}/epics/${docName}/${docName}.plan.html`
 const browser = await BrowserPage.launch()
@@ -117,6 +134,7 @@ try {
     await itemCase(size, "item-no-link", { item: ids.item, click: "chevron" })
     if (ids.phase) await phaseCase(size, ids)
     if (ids.next) await replyCase(size, ids)
+    else summary[`reply-then-line ${size.width}px`] = "skipped:  no item with details takes a reply (Approve or plane)"
     await guideCases(size)
   }
 } catch (error) {
@@ -158,6 +176,8 @@ async function itemCase(size, name, { hash, item, click, wheelTo }) {
     await page.waitForTimeout(200)
     await clickAt(page, await pointOf(page, id, "toggle"))
     await page.waitForTimeout(800)
+    // a reader's fold, once the page has settled:  the one that animates
+    await untilSettled(page)
   }
   if (wheelTo !== undefined) {
     // a wheel, as the reader's:  the landing's late re-land stands aside for it
@@ -175,7 +195,7 @@ async function itemCase(size, name, { hash, item, click, wheelTo }) {
   })
   const folded = await page.evaluate((id) => !document.getElementById(id).open, id)
   if (!folded) problems.push(`${where}:  didn't fold`)
-  if (!watched.animated) problems.push(`${where}:  the details didn't animate (${watched.heights})`)
+  if (!watched.quiet && !watched.animated) problems.push(`${where}:  the details didn't animate (${watched.heights})`)
   report(where, watched)
   await finish(page, logs, where, `${name}-${size.width}`)
 }
@@ -185,9 +205,9 @@ async function itemCase(size, name, { hash, item, click, wheelTo }) {
  * - the reply waits in the copy's inbox, deleted at the end
  */
 async function replyCase(size, ids) {
-  const { page, logs } = await openPage(size, `${docUrl}#${ids.item}`)
+  const { page, logs } = await openPage(size, `${docUrl}#${ids.replied}`)
   const where = `reply-then-line #${ids.next} ${size.width}px`
-  await page.waitForFunction((id) => document.getElementById(id)?.open, ids.item, { timeout: 15_000 })
+  await page.waitForFunction((id) => document.getElementById(id)?.open, ids.replied, { timeout: 15_000 })
   const reviewing = await page
     .waitForFunction(() => document.querySelector("epic-page")?.hasAttribute("reviewing"), null, { timeout: 15_000 })
     .then(() => true)
@@ -195,14 +215,23 @@ async function replyCase(size, ids) {
   if (!reviewing) return problems.push(`${where}:  the page never said it's being reviewed (<epic-page reviewing>)`)
   await page.waitForTimeout(1200)
   // a reply from the line:  the note box has no buttons of its own since epic `epic-engine` I212
-  await page
-    .locator(`#${ids.item} ui-button[data-action="approve"], #${ids.item} ui-button[data-action="next"]`)
+  const reply = page
+    .locator(`#${ids.replied} ui-button[data-action="approve"], #${ids.replied} ui-button[data-action="next"]`)
     .first()
-    .click()
+  if (
+    !(await reply.waitFor({ timeout: 10_000 }).then(
+      () => true,
+      () => false
+    ))
+  ) {
+    problems.push(`${where}:  #${ids.replied} has no Approve or plane to reply with`)
+    return finish(page, logs, where)
+  }
+  await reply.click()
   // the item folds by itself (J51's animation, then the runtime's hold), its focused button gone with it
   await page.waitForTimeout(1000)
-  if (await page.evaluate((id) => document.getElementById(id).open, ids.item))
-    problems.push(`${where}:  #${ids.item} didn't fold after the reply`)
+  if (await page.evaluate((id) => document.getElementById(id).open, ids.replied))
+    problems.push(`${where}:  #${ids.replied} didn't fold after the reply`)
   const point = await pointOf(page, ids.next, "title")
   if (point.y < 0 || point.y > size.height) {
     problems.push(`${where}:  #${ids.next}'s line isn't in the window (${Math.round(point.y)})`)
@@ -312,12 +341,18 @@ async function openPage(size, url) {
   return { page, logs }
 }
 
-/** The items and phase the cases fold, from the doc (`--item` names the first). */
+/**
+ * The items and phase the cases fold, from the doc (`--item` names the first).
+ * - the reply case's item (`replied`):  the first with details that takes a reply, an Approve or a plane (a finished
+ *   epic's items take none, only Reopen:  the case is skipped then);  `next` the item with details after it
+ */
 async function pickIds(size) {
   const { page } = await openPage(size, docUrl)
   await page.waitForFunction(() => document.querySelector("epic-item")?.shadowRoot?.querySelector(".line"), null, {
     timeout: 15_000
   })
+  // the review buttons, drawn once the page's review client has the inbox
+  await page.waitForTimeout(2000)
   const ids = await page.evaluate((wanted) => {
     const withDetails = Array.from(document.querySelectorAll("epic-item[id]")).filter(
       (item) => item.hasAttribute("source") || item.children.length
@@ -326,11 +361,17 @@ async function pickIds(size) {
     // a phase opens for a link to it, as for one to an item in it
     const phase = document.querySelector("epic-phase[id]")
     const item = wanted ? document.getElementById(wanted) : (listed[0] ?? withDetails[0])
+    const takesReply = (other) =>
+      Array.from(other.shadowRoot?.querySelectorAll("epic-review") ?? []).some((review) =>
+        review.shadowRoot?.querySelector('ui-button:is([data-action="approve"], [data-action="next"])')
+      )
+    const replied = [...listed, ...withDetails].find(takesReply)
     // the next item with details in the same section:  the reply case opens it
-    const siblings = withDetails.filter((other) => other.parentElement === item?.parentElement)
+    const siblings = withDetails.filter((other) => other.parentElement === replied?.parentElement)
     return {
       item: item?.id,
-      next: siblings[siblings.indexOf(item) + 1]?.id,
+      replied: replied?.id,
+      next: replied ? siblings[siblings.indexOf(replied) + 1]?.id : undefined,
       last: withDetails.at(-1)?.id,
       phase: phase?.id
     }
@@ -361,10 +402,12 @@ async function clickAt(page, { x, y }) {
 
 /**
  * Watch `measure`'s top (and `details`' height) every frame, from just before `act()` to `WATCH_MS` after.
- * - returns `{ moved, end, at, animated, heights }`:  the furthest it moved, where it ended, when it moved most,
- *   and whether the details passed through a height between open and folded
+ * - returns `{ moved, end, at, animated, heights, quiet }`:  the furthest it moved, where it ended, when it moved
+ *   most, whether the details passed through a height between open and folded, and whether the page was QUIET as it
+ *   was clicked (`<html data-spell-quiet>`:  no motion then, by design)
  */
 async function watchWhile(page, act, { measure, details }) {
+  const quiet = await page.evaluate(() => document.documentElement.hasAttribute("data-spell-quiet"))
   await page.evaluate(
     ({ measure, details, watchMs }) => {
       const target = eval(measure)
@@ -397,13 +440,24 @@ async function watchWhile(page, act, { measure, details }) {
     end: Math.round((samples.at(-1).top - first.top) * 10) / 10,
     at: worst.at,
     animated: heights.some((height) => height > 1 && height < full - 1),
+    quiet,
     heights: [...new Set(heights)].slice(0, 6).join(" ")
   }
 }
 
+/**
+ * Until the page is no longer QUIET (`<html data-spell-quiet>`, the docs runtime's `quietFor()`):  folds animate
+ * from then on.
+ */
+async function untilSettled(page) {
+  await page.waitForFunction(() => !document.documentElement.hasAttribute("data-spell-quiet"), null, {
+    timeout: 15_000
+  })
+}
+
 /** Note what moved;  a problem past `TOLERANCE`. */
-function report(where, { moved, end, at }) {
-  summary[where] = { moved, end, at }
+function report(where, { moved, end, at, quiet }) {
+  summary[where] = { moved, end, at, ...(quiet ? { quiet } : {}) }
   if (Math.abs(moved) > TOLERANCE) problems.push(`${where}:  moved ${moved}px (at ${at}ms), ended ${end}px off`)
 }
 
@@ -419,7 +473,7 @@ async function finish(page, logs, where, shot) {
  * is in the real one, as `check-review-epics.mjs` does.  Never its inbox, agents or details.
  */
 function copyDoc() {
-  const source = join(ROOT, from, docName)
+  const source = join(from, docName)
   const skeleton = join(source, `${docName}.plan.html`)
   if (!existsSync(skeleton)) {
     console.error(`check-fold-epics:  no ${skeleton}`)

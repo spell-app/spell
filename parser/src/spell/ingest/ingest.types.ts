@@ -200,10 +200,17 @@ export type IngestAsk = {
   /**
    * It may try a write of each kind (`--try-writes`;  epic `data` P30):
    * for a server that keeps nothing, as JSONPlaceholder keeps nothing, or one you don't mind writing to.
+   * - `true`:  on its first list that can take them;  a list of names:  on each of those collections (epic `data` I108)
    * - Left out, it never writes.
    */
-  triesWrites?: boolean
+  triesWrites?: WritesAsked
 }
+
+/**
+ * Where writes may be tried (`--try-writes [lists]`):  `true`, on the first list that can take them;
+ * else on each collection named, by what Spell calls it.
+ */
+export type WritesAsked = true | readonly string[]
 
 /**
  * One deployment of a place:  dev, staging, production (epic `data` P49, Q49, Q53), as the project's file lists it.
@@ -228,8 +235,8 @@ export type Deployment = {
 export type VerifyAsk = {
   /** The deployment to try it on, by its name in the project's file:  left out, the first listed, else its own address. */
   deployment?: string
-  /** It may try a write of each kind:  never on a read only deployment. */
-  triesWrites?: boolean
+  /** It may try a write of each kind, as `IngestAsk.triesWrites`:  never on a read only deployment. */
+  triesWrites?: WritesAsked
   /**
    * Save what it reads as the place's saved answers, scrubbed (`spell place verify --fixtures`):  into this folder,
    * or `true` for its deployment's `fixtures`.  Under the project's folder unless it starts `/` or `~`.
@@ -458,22 +465,6 @@ export type PagesWith = {
   most?: number
 }
 
-/** The writes a look tried, one of each kind, because the person said it may (`--try-writes`;  epic `data` P30). */
-export type WritesSeen = {
-  /** The collection they were tried on, by its name there. */
-  collection: string
-  /** The status adding answered with. */
-  adding: number
-  /** The status changing answered with. */
-  changing: number
-  /** The status deleting answered with:  left out, nothing was added to delete. */
-  deleting?: number
-  /** The id adding answered with. */
-  addedId?: string
-  /** Was what was added there when it was read again?  Left out:  nothing said what was added. */
-  keeps?: boolean
-}
-
 /** A list a web server keeps under each thing of a collection, as a look found it (epic `data` P30). */
 export type ListUnderSeen = {
   /** The collection whose things it's under, by its name there:  `posts`. */
@@ -645,8 +636,10 @@ export type PlaceState = {
   deployment?: string
   /** The status it answered with. */
   status?: number
-  /** Why it failed, in words for people. */
+  /** Why it failed, in words for people:  a write's, the server's own (epic `data` I137). */
   reason?: string
+  /** A write that was taken:  was what was added there when it was read again?  Left out:  nothing said where. */
+  keeps?: boolean
   /** How many rows a read found. */
   rows?: number
   /** Nothing here can read it through the Spell:  its rows are the look's own (see `ReadOfType`). */
@@ -813,14 +806,15 @@ export type PlaceDescription = {
     collectionsAsked?: string[]
     /** The fields it was told hold a picture's id, `--pictures` as given:  looking again tries them again. */
     picturesAsked?: string[]
-    /** It was told it may try a write of each kind, `--try-writes`:  looking again tries them again. */
-    triesWrites?: boolean
   }
   /** What it can do, in plain words. */
   canDo: {
     /** Read:  always, as it's been read. */
     read: string
-    /** Write:  what it seems to offer, never tried;  or, tried with `--try-writes`, what each answered. */
+    /**
+     * Write:  what it seems to offer, never tried;  or, tried with `--try-writes`, what each answered.
+     * - The tried words are worked out from each write's `state` (`writeWordsFor()`):  never a record of their own.
+     */
     write: string
     /** Telling what changed. */
     live: string

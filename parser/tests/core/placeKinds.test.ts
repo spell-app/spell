@@ -101,6 +101,22 @@ describe("placeBehind(), a web server's collection paging its own way (epic `dat
   })
 })
 
+describe("placeBehind(), a web server that gives many at once (epic `data` P57)", () => {
+  afterEach(() => void vi.unstubAllGlobals())
+
+  test("its things are asked for in one request of its list, the ids joined", async () => {
+    const asked: string[] = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      asked.push(`${input instanceof Request ? input.url : input}`)
+      return Response.json([{ id: "a" }, { id: "c" }])
+    })
+    const behind = webServerWith({ manyAtOnceBy: "ids", collections: { recipes: { at: "/recipes" } } })
+    const rows = await behind.getMany!("recipes", ["a", "b", "c"], {})
+    expect(rows.map(({ id }) => id)).toEqual(["a", "c"])
+    expect(asked).toEqual(["https://cookbook.test/recipes?ids=a%2Cb%2Cc"])
+  })
+})
+
 describe("placeBehind(), a web server's list saying what it takes, under its own line", () => {
   afterEach(() => void vi.unstubAllGlobals())
 

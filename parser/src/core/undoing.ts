@@ -79,7 +79,11 @@ export type HookMoment = "before" | "while" | "after" | "failed" | "around"
 /** Which file a hook comes from:  a `.api.spell` file, the app's, or a page's (epic `data` Q84, Q96). */
 export type HookLevel = "api" | "app" | "page"
 
-/** One hook of an action:  the member it runs, its file's level, and its page's class for a page's. */
+/**
+ * One hook of an action:  the member it runs, its file's level, and its page's class for a page's.
+ * - A page's is the PAGE's member, given the thing first:  `jobsPage.whileComplete(job)`, so its steps read the page's
+ *   own fields, `set the busy note to ...` (epic `data` I112).
+ */
 export type ActionHook = { hook: string; level: HookLevel; page?: () => Function }
 
 /** An action's hooks, by moment:  `core.addAfterHook()`, `core.addActionHook()`. */
@@ -511,42 +515,29 @@ export function failsAsMissing(thing: object, error: Error): void {
 const missingThings = new WeakMap<object, Error>()
 
 /**
- * What runs around an action, for `thing`'s call with `args`, from `hooks`:  each hook a call of `thing`'s member.
+ * What runs around an action, for `thing`'s call with `args`, from `hooks`:  each hook a call of `thing`'s member,
+ * a page's of the page's, given `thing` first (`ActionHook`).
  * - Before and while steps, and wrappers, from the page in to the API file;  after and failure steps, the other way.
  * - A page's before and while steps and its wrappers only while the page is shown (`isShowing()`);  its after and
- *   failure steps even once it's left.
+ *   failure steps even once it's left, on the page that was (`pageFor()`).
  */
 function stepsOf(thing: object, hooks: ActionHooks, args: unknown[]): Omit<ActingSteps, "cancels"> {
-  const member = (hook: string) => (thing as Record<string, Function>)[hook]!
+  const run = ({ hook, level, page }: ActionHook, more: unknown[] = []): unknown => {
+    const onPage = level === "page" && page ? pageFor(page) : undefined
+    const receiver = (onPage ?? thing) as Record<string, Function>
+    return receiver[hook]!.apply(receiver, onPage ? [thing, ...args, ...more] : [...args, ...more])
+  }
+  // a page's that isn't there:  its page was never made, so it has nobody to run on
+  const runs = (each: ActionHook) => each.level !== "page" || !each.page || !!pageFor(each.page)
   const shown = (each: ActionHook) => each.level !== "page" || !each.page || isShowing(each.page)
   const outsideIn = (list: ActionHook[]) => byLevel(list, LEVELS_OUTSIDE_IN).filter(shown)
-  const insideOut = (list: ActionHook[]) => byLevel(list, [...LEVELS_OUTSIDE_IN].reverse())
+  const insideOut = (list: ActionHook[]) => byLevel(list, [...LEVELS_OUTSIDE_IN].reverse()).filter(runs)
   return {
-    during: outsideIn(hooks.while).map(
-      ({ hook }) =>
-        () =>
-          member(hook).apply(thing, args)
-    ),
-    before: outsideIn(hooks.before).map(
-      ({ hook }) =>
-        () =>
-          member(hook).apply(thing, args)
-    ),
-    around: outsideIn(hooks.around).map(
-      ({ hook }) =>
-        (inner: () => unknown) =>
-          member(hook).apply(thing, [...args, inner])
-    ),
-    after: insideOut(hooks.after).map(
-      ({ hook }) =>
-        () =>
-          member(hook).apply(thing, args)
-    ),
-    failed: insideOut(hooks.failed).map(
-      ({ hook }) =>
-        (error: unknown) =>
-          member(hook).apply(thing, [...args, error])
-    )
+    during: outsideIn(hooks.while).map((each) => () => run(each)),
+    before: outsideIn(hooks.before).map((each) => () => run(each)),
+    around: outsideIn(hooks.around).map((each) => (inner: () => unknown) => run(each, [inner])),
+    after: insideOut(hooks.after).map((each) => () => run(each)),
+    failed: insideOut(hooks.failed).map((each) => (error: unknown) => run(each, [error]))
   }
 }
 
@@ -566,6 +557,24 @@ function isShowing(pageClass: () => Function): boolean {
   const Page = pageClass()
   return !!core.RUNTIME?.pages.some((page) => page instanceof Page)
 }
+
+/**
+ * The page of class `Page` a page's hook runs on:  the one shown, else the last one made, once it's left
+ * (`Page`'s constructor notes it, `notePageMade()`) -- `undefined` if none was ever made.
+ */
+function pageFor(pageClass: () => Function): object | undefined {
+  const Page = pageClass()
+  const shown = core.RUNTIME?.pages.filter((page) => page instanceof Page).at(-1)
+  return shown ?? lastPagesMade.get(Page)?.deref()
+}
+
+/** SIDE EFFECT:  `page` is the last of its class made, for its after steps once it's left:  see `pageFor()`. */
+export function notePageMade(page: object): void {
+  lastPagesMade.set(page.constructor, new WeakRef(page))
+}
+
+/** The last page of each class made:  `notePageMade()`. */
+const lastPagesMade = new WeakMap<Function, WeakRef<object>>()
 
 /** `value`, then `next` given it, waited on if it waits. */
 function thenDo(value: unknown, next: (settled: unknown) => unknown): unknown {

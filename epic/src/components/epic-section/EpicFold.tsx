@@ -619,10 +619,10 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
   @E.whileConnected
   protected watchHash() {
     const listeners = new AbortController()
-    window.addEventListener("hashchange", this.followHash, { signal: listeners.signal })
+    window.addEventListener("hashchange", () => this.followHash(), { signal: listeners.signal })
     if (!this.hasFollowedHash) {
       this.hasFollowedHash = true
-      this.followHash()
+      this.followHash({ isFirst: true })
     }
     return () => listeners.abort()
   }
@@ -633,9 +633,12 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
    * - it never scrolls:  the page lands the link, once, by its own rules (the docs runtime, on Spell UI's
    *   `HashLanding`), which open the folds around it too;  opening here serves a page whose lander doesn't know epic
    *   folds (Epic UI's pages, the site's `SiteSections`)
+   * - NOT itself on a RELOAD (`isFirst`, the page reloaded):  that `#hash` is the page's own, written as the reader
+   *   scrolled (the address follows the section being read), not a link;  a fold they closed stays closed
+   *   (epic `epic-engine` I494:  "0. While you were out" opened again at every reload, its `#away` in the address)
    */
   @E.untracked
-  private readonly followHash = () => {
+  private readonly followHash = ({ isFirst = false }: { isFirst?: boolean } = {}) => {
     // an old phase address (`#p7`, from before stable ids) is the 7th phase (`PhaseIds.landing()`)
     const id = PhaseIds.landing(document, decodeURIComponent(location.hash.slice(1)))
     if (!id) return
@@ -643,8 +646,15 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
     const element = document.getElementById(id)
     const inside = !!element && element !== this.domElement && this.domElement.contains(element)
     if (element !== this.domElement && !inside && !partIds.includes(id)) return
+    if (isFirst && element === this.domElement && isReload()) return
     void this.reveal()
   }
+}
+
+/** Was this page reloaded (the browser's Reload, `location.reload()`), rather than reached by a link? */
+function isReload(): boolean {
+  const [navigation] = performance.getEntriesByType?.("navigation") ?? []
+  return (navigation as PerformanceNavigationTiming | undefined)?.type === "reload"
 }
 
 /** What a subclass draws in its fold (`EpicFold.renderFold()`);  each a function, read where it's drawn. */

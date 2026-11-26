@@ -1,6 +1,7 @@
 /**
  * Base classes for spell.
  */
+import { prop } from "spell/util"
 import { core } from "spell/parser/core/core"
 import { describedMethods } from "spell/parser/core/described"
 import type { ShownHistory } from "spell/parser/core/undoing"
@@ -29,6 +30,29 @@ export class App extends View {
   static {
     this.declareProp("id", APP_ID_PROP)
   }
+
+  ////////////////
+  // ## Its tab's icon
+  ////////////////
+
+  /**
+   * The icon its browser tab shows while it runs (epic `editor` P50):  `its icon is "rocket"`.
+   * - An icon's name, as `<icon "rocket" />` names one:  drawn small, in `iconColor`.
+   * - Or a picture, a file of its project:  `its icon is "static/icon.png"` (a value with a `/` or a file's ending).
+   * - The page running it shows it (`SiteHost.showIcon()`, asked by `core.mountApp()`), and puts its own back when
+   *   the program stops;  `<spell-viewer>` and VS Code leave their tab alone.
+   * - Said of the type, so it's no row's field:  a place is never asked for it.
+   */
+  @prop({ inPlaces: false })
+  accessor icon: string | undefined
+
+  /**
+   * The colour its tab's icon is drawn in, when `icon` names one:  `its icon color is "green"`.
+   * - One of Spell UI's colours (`green`, `red` ...), or any CSS colour;  none:  the icon's own, black.
+   * - A picture keeps its own colours.
+   */
+  @prop({ inPlaces: false })
+  accessor iconColor: string | undefined
 
   /**
    * SIDE EFFECT:  the running program's first app is its app, `core.RUNTIME.app`:

@@ -3,6 +3,7 @@ import type { ApiError } from "spell/util/fetching"
 import { ChunkedPlace } from "./ChunkedPlace"
 import type { DeviceCopy } from "./DeviceCopy"
 import { EVERY_FIELD, JsonChunks } from "./JsonChunks"
+import { pagesOf, type PageReader } from "./pagesOf"
 import {
   type ApplyAnswer,
   type ChangesAnswer,
@@ -34,7 +35,8 @@ const REMOTE_CAPABILITIES: PlaceCapabilities = {
   filter: "none",
   sort: "none",
   select: "none",
-  page: "none",
+  // the place server answers a list of a place that can't page a page at a time, and passes on one that can
+  page: "cursor",
   write: ["insert", "update", "delete"],
   atomic: false,
   versionCheck: true,
@@ -82,6 +84,8 @@ const OUT_OF_DATE_STATUS = 409
  * - Never holds a key, so it takes no `keyNamed`.
  * - A program's lines about the place go with every request (`lines`):  never a key, only its name.
  * - A place that says which fields take no write (`ListAnswer.readOnlyFields`) is answered for here (`canWrite()`).
+ * - Its lists come a page at a time (epic `data` P57):  the server side pages what its place can't (`ServerPages`), and
+ *   each page is an ordinary request, its `nextPage` handed back as it came.
  * - READING DIRECT (`readsAt`, epic `atmosphere` P5, Q6 C):  a space's own folder is read straight from its files,
  *   one plain `GET` of its list (`ChunkedPlace` on `WebChunks`), and only written through the server side.
  *   - So reading works while the server side can't write, or isn't there.
@@ -97,7 +101,8 @@ const OUT_OF_DATE_STATUS = 409
  *   each list it read whole is kept, with the version it was read at.
  *   - The next read of that list, on opening again or on a check, asks only what changed since (`changesSince()`), and
  *     puts it on the copy:  a feed of thousands of posts is a few rows a check.
- *   - Only a list the place did nothing to (no filter, sort or page of its own):  so the copy is the whole collection.
+ *   - Only a list the place did nothing to (no filter, sort or page of its own):  so the copy is the whole collection,
+ *     every page of it read before it's kept.
  *   - A place that can't say what changed, or a version it no longer knows, is read whole again.
  *   - Its reads are POSTs, which `WebPlace`'s own copy of GET answers never keeps:  so it's kept here, by list.
  ****************/
@@ -186,9 +191,29 @@ export class RemotePlace extends WebPlace implements Place {
       )
       if (answer) this.note(collection, answer.versions)
     }
-    answer ??= await this.listWhole(collection, query, context)
+    answer ??= query.page
+      ? await this.listWhole(collection, query, context)
+      : await this.everyPage(collection, query, context)
     const { readOnlyFields: _readOnly, ...kept } = answer
-    if (isWholeList(answer)) await copy.keep(address, { body: JSON.stringify(kept), headers: [] })
+    if (!query.page && isWholeList(answer)) await copy.keep(address, { body: JSON.stringify(kept), headers: [] })
+    return answer
+  }
+
+  /** Every page of `collection`'s `query`, as one answer:  the first page's, with every row and version.  - throws as `listWhole()` */
+  private async everyPage(
+    collection: string,
+    query: ListQuery,
+    context: PlaceContext
+  ): Promise<ListAnswer & WithVersions> {
+    let whole: (ListAnswer & WithVersions) | undefined
+    const read: PageReader<ListAnswer & WithVersions> = (at, signal) =>
+      this.listWhole(collection, at === undefined ? query : { ...query, page: { at } }, { ...context, signal })
+    for await (const page of pagesOf(read, { ...(context.signal && { signal: context.signal }) })) {
+      whole = whole
+        ? { ...whole, rows: [...whole.rows, ...page.rows], versions: { ...whole.versions, ...page.versions } }
+        : page
+    }
+    const { nextPage: _nextPage, ...answer } = whole!
     return answer
   }
 
@@ -375,12 +400,15 @@ function isWholeList({ nextPage, version, handled }: ListAnswer): boolean {
  * `was`, with `changes` on it:  each row changed put in its place (a new one at the end), each one removed left out,
  * and the version the changes were read at.
  * - A changed row's version isn't said with it:  it's dropped, so a change made from it isn't checked against an old one.
+ * - `startsOver`:  the server didn't know `was`'s version, and sent the whole list:  it replaces `was`, so a row
+ *   removed meanwhile goes too (epic `data` I145).
  */
 function withChanges(
   was: KeptList,
-  { rows, removed, token }: ChangesAnswer,
+  { rows, removed, token, startsOver }: ChangesAnswer,
   idOf: PlaceCapabilities["idOf"]
 ): KeptList {
+  if (startsOver) return { ...was, rows, version: token, versions: {} }
   const gone = new Set(removed)
   const changed = new Map(rows.map((row) => [idOfRow(row, idOf), row] as const))
   const versions = { ...was.versions }

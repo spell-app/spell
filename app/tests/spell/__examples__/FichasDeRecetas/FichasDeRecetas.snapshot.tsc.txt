@@ -1,7 +1,6 @@
 45:5 TS2322 Type 'undefined' is not assignable to type 'Receta'.
 119:38 TS2345 Argument of type '(item: Paso, index: number) => Element' is not assignable to parameter of type '(item: unknown, position: number, list: unknown) => Element'.
 361:29 TS2345 Argument of type 'number' is not assignable to parameter of type 'string'.
-646:5 TS2322 Type 'Receta | undefined' is not assignable to type 'Receta'.
 671:13 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.
 679:150 TS2339 Property 'elegida' does not exist on type 'Receta'.
 792:5 TS2322 Type 'undefined' is not assignable to type 'Receta'.

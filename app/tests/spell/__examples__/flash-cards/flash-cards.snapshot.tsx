@@ -138,7 +138,7 @@ export class Quiz extends App {
   /** A card from the deck at random, word up:  never the one just shown */
   dealACard() {
     const others = this.deck.filter((card) => card !== this.card)
-    this.card = others.randomItem()
+    this.card = others.randomItem()!
     this.card?.turnFaceUp()
   }
 

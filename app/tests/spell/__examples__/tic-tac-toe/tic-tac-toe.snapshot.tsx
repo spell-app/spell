@@ -118,7 +118,7 @@ export class TicTacToe extends App {
   checkTheLineFromSquareAThroughBToC(a: number, b: number, c: number) {
     const mark = this.board.getItem(position(a))?.mark
     if (mark === "") return
-    if (this.board.getItem(position(b))?.mark === mark && this.board.getItem(position(c))?.mark === mark) this.winner = mark
+    if (this.board.getItem(position(b))?.mark === mark && this.board.getItem(position(c))?.mark === mark) this.winner = mark!
   }
 
   /** Three in a row:  each row, each column, and the two diagonals;  a full board with none is a draw */

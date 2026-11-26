@@ -67,6 +67,23 @@ describe("FileLock", () => {
     rmSync(`${file}.lock`)
   })
 
+  // epic `epic-engine` I491:  eight writers on a big epic page, the later ones giving up while the line still moved
+  test("runAsync():  `wait` counts one holder at a time, so a line of holders handing on never times it out", async () => {
+    const file = join(DIR, "line.json")
+    let handedOn = 0
+    writeFileSync(`${file}.lock`, `${process.pid} holder 0`)
+    // a new holder every 150ms, 6 of them:  900ms in all, each well under `wait`
+    const line = setInterval(() => {
+      rmSync(`${file}.lock`, { force: true })
+      if (++handedOn < 6) writeFileSync(`${file}.lock`, `${process.pid} holder ${handedOn}`)
+      else clearInterval(line)
+    }, 150)
+    const started = Date.now()
+    expect(await SRV.FileLock.runAsync(file, async () => "mine", { wait: 400 })).toBe("mine")
+    expect(Date.now() - started).toBeGreaterThan(400)
+    clearInterval(line)
+  })
+
   test("a timeout names the holder;  `tell` hears who holds it, once (I283)", () => {
     const file = join(DIR, "live.json")
     writeFileSync(`${file}.lock`, `${process.pid} epic add seo#I ...`)

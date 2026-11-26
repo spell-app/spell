@@ -38,10 +38,24 @@ import { UIViewElements } from "./UIViewElements"
  *   - A stack's or a stretched column's mark on it (`--_ui-stacked`, `--_ui-grown`, `reset.css`) reaches its
  *     drawing's top boxes, rather than being reset there.
  *   - The page's own rule giving its tag a `display` wins:  a rule from outside beats a `:host` one.
+ * - A view that keeps its own box (`:state(keeps-its-box)`) shares a row it's in, a horizontal `<ui-stack>`'s, with the
+ *   rest of the row (`flex: 1 1 auto`;  epic `editor` P50, Q102):  so a share of the row it draws (`width="50%"`) is a
+ *   share of something, not of a box only as wide as what's in it.
+ *   - The rule is in the sheet of what draws the row:  a view's shadow root (`STATES_CSS`), or the runner's, for
+ *     an app's drawing (`SpellAppRunner.css`).
  */
+/**
+ * A view that keeps its own box, in a row (a horizontal stack's, the English tag or the Spanish), shares the row
+ * (epic `editor` P50, Q102):  in the sheet of the shadow root that draws the row, so `STATES_CSS` holds it;
+ * `SpellAppRunner.css` says the same for an app's drawing.
+ */
+const KEEPS_ITS_BOX_IN_A_ROW =
+  ":is(ui-stack, es-pila):state(horizontal) > :state(keeps-its-box) { flex: 1 1 auto; min-inline-size: 0; }"
+
 const STATES_CSS = `
   :host(:state(lays-out-as-drawing)) { display: contents; }
   :host(:state(lays-out-as-drawing)) > * { --_ui-stacked: inherit; --_ui-grown: inherit; }
+  ${KEEPS_ITS_BOX_IN_A_ROW}
   :host(:state(clickable)) { cursor: var(--ui-control-cursor, pointer); }
   :host(:state(clickable)), :host(:state(draggable)) { user-select: none; -webkit-user-select: none; }
   :host(:state(draggable)) { touch-action: none; }
@@ -455,6 +469,15 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     if (!thing || !core || this.drawnElements !== 1) return false
     if (this.isDrawingInChildren || "items" in thing || this.ownerList || this.isListItem) return false
     return !core.isAble(thing, "draggable") && !core.isAble(thing, "selectable")
+  }
+  /**
+   * Do we keep a box of our own, a view drawing something (`:state(keeps-its-box)`)?
+   * - Then, in a row, we share it with the rest of the row (`KEEPS_ITS_BOX_IN_A_ROW`, epic `editor` P50, Q102).
+   * - No for an app or a page, which draw in their children.
+   */
+  @E.cssState("keeps-its-box")
+  get keepsItsBox(): boolean {
+    return !!this.currentThing && !this.isDrawingInChildren && !this.laysOutAsDrawing
   }
 
   /**

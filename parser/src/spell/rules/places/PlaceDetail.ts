@@ -71,6 +71,8 @@ export type PlaceDetailValue = {
   sortDirections?: SortDirections
   /** What it calls the fields it's asked for:  see `GivesFieldsNamedIn`. */
   fieldsNamedIn?: string
+  /** What its list calls the question it takes many ids in:  see `GivesManyAtOnce`. */
+  manyAtOnceBy?: string
   /** The classes whose collections are read as the program starts, by name:  see `ReadOnStartup`. */
   readOnStartup?: string[]
   /** It takes no writes:  see `IsReadOnly`. */

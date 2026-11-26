@@ -402,6 +402,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       (the same page drawn again a moment later):  `follow()` asks again for whoever holds it now.
       Only with nobody holding it does the wait end in an `AbortError`.
       [links.test.ts](../../tests/core/links.test.ts) pins it.
+  - Its later pages come from ONE `pagesOf()` (`spell/places`, epic `data` P57):  each asked only once the one before has
+    come, every page counted against the place's ceiling, and the walk stopped (the page in flight aborted) when it
+    leaves.
+  - While a drawing holds it, it follows a place that announces changes;  once none does, it stops following (epic
+    `data` I150).  What an action read, or a link followed, follows for as long as the page is open.
   - It NEVER reads ahead:  a page reads only what it draws, as it draws it.
     - Lists asked for in the same moment still go in one request, where the place can take several (`PlaceBatch`).
     - The one way in, opt in, a line a collection:  `tags are read on startup` (`ReadOnStartup`) compiles to
@@ -586,6 +591,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     `around` (a second `to complete a job`, given what it wraps)
   - by the file each is in, its `level`:  before, while and around from a page's file in to the `.api.spell` file's,
     after and failure steps the other way;  a page's before and while steps only while one of it is made
+  - a page's hook is the page's method, given the thing first, `jobsPage.whileComplete(job)`, so its steps read the
+    page's own fields (epic `data` I112);  its after and failure steps run on the last one made, once it's left
   - a failure step gives back `core.passTheError()` to send it on;  anything else caught it
   - a server's action (`callsServer`) then runs `core.addServerFailureStep()`'s, last;  a refusal's notice, held till
     then (`holdNotice()`), shows only for what nobody caught, and the error goes on to the caller

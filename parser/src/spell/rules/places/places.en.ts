@@ -71,6 +71,7 @@ import { NamedSort, NamedSortField, NamedSorts } from "./NamedSorts"
 import { SortsWith } from "./SortsWith"
 import { SortDirection, SortsByAnyField } from "./SortsByAnyField"
 import { GivesFieldsNamedIn } from "./GivesFieldsNamedIn"
+import { GivesManyAtOnce } from "./GivesManyAtOnce"
 import { IsReadOnly } from "./IsReadOnly"
 import { WritesLike } from "./WritesLike"
 import { ReloadThings } from "./ReloadThings"
@@ -904,9 +905,11 @@ places.addRule(FiltersBy, {
     }
   ]
 })
-places.addRule(FiltersByAnyField, { syntax: "{type:subject_it} can be filtered by any field ,? with {field:text} and {value:text}" })
 places.addRule(FiltersByAnyField, {
-  syntax: '{collection:plural_type} can be filtered by any field ,? with {field:text} and {value:text}',
+  syntax: "{type:subject_it} can be filtered by any field ,? with {field:text} and {value:text}"
+})
+places.addRule(FiltersByAnyField, {
+  syntax: "{collection:plural_type} can be filtered by any field ,? with {field:text} and {value:text}",
   tests: [
     {
       compileAs: "block",
@@ -959,7 +962,9 @@ places.addRule(SortsWith, { syntax: "{type:subject_it} sorts with {param:text}" 
 places.addRule(SortDirection, {
   syntax: "((descending:newest first)|(ascending:oldest first)) with {param:text} as {value:text}"
 })
-places.addRule(SortsByAnyField, { syntax: "{type:subject_it} can be sorted by any field ,? with {param:text} {nested_statements}?" })
+places.addRule(SortsByAnyField, {
+  syntax: "{type:subject_it} can be sorted by any field ,? with {param:text} {nested_statements}?"
+})
 places.addRule(SortsByAnyField, {
   syntax: "{collection:plural_type} can be sorted by any field ,? with {param:text} {nested_statements}?",
   tests: [
@@ -1043,6 +1048,28 @@ places.addRule(GivesFieldsNamedIn, {
             '  kind: "web server",',
             '  at: "https://countries.test",',
             '  fieldsNamedIn: "response_fields"',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(GivesManyAtOnce, {
+  syntax: "{type:subject_it} gives many at once by {param:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'shop is a web server at "https://example.com/api"\n\t- it gives many at once by "ids"',
+          [
+            "export class Shop extends Place {}",
+            "export const shop = core.place(new Shop(), {",
+            '  name: "shop",',
+            '  kind: "web server",',
+            '  at: "https://example.com/api",',
+            '  manyAtOnceBy: "ids"',
             "})"
           ]
         ]

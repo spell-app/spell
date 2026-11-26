@@ -146,9 +146,10 @@ export class PlaceResult extends Loadable<PlaceRow[]> {
    * Show `rows`, kept from an earlier visit, until the place answers.
    * - `reload()` then asks the place:  a plain `load()` is satisfied by what's here.
    * - `answer`:  what the place said with those rows, if that was kept too.
+   * - `askedAt`:  how far the saves had got when they were asked (`Places.saveMark`):  a save since outranks them.
    */
-  showFromEarlierVisit(rows: PlaceRow[], answer?: Omit<ListAnswer, "rows">): this {
-    this.contents = this.rowsKept(rows, this.place, "write them", this.query)
+  showFromEarlierVisit(rows: PlaceRow[], answer?: Omit<ListAnswer, "rows">, askedAt?: number): this {
+    this.contents = this.rowsKept(rows, this.place, "write them", this.query, askedAt)
     this.setState("isFromEarlierVisit", true)
     if (answer) this.setState("answer", answer)
     return this
@@ -236,7 +237,7 @@ export class PlaceResult extends Loadable<PlaceRow[]> {
    */
   async getLoader(query: ListQuery | undefined, signal: AbortSignal): Promise<PlaceRow[]> {
     const { place, placeName, collection } = this
-    const { answer, wasAlreadyAnswered } = this.places.reads.answerFor(this, {
+    const { answer, wasAlreadyAnswered, askedAt } = this.places.reads.answerFor(this, {
       placeName,
       place,
       collection,
@@ -247,7 +248,8 @@ export class PlaceResult extends Loadable<PlaceRow[]> {
     const { rows, ...rest } = await answer
     if (signal.aborted) return []
     this.setState("answer", rest)
-    const kept = this.rowsKept(rows, place, wasAlreadyAnswered ? "only new ones" : "write them", query ?? this.query)
+    const writing = wasAlreadyAnswered ? "only new ones" : "write them"
+    const kept = this.rowsKept(rows, place, writing, query ?? this.query, askedAt)
     this.places.reads.noteRows(this, kept)
     return kept
   }
@@ -262,17 +264,20 @@ export class PlaceResult extends Loadable<PlaceRow[]> {
    * - `"only new ones"`:  the answer may be old, as when joining a read that finished a while ago.
    *   A row we already hold keeps its fields:  another read may have brought fresher ones.
    * - What's pending sits on top of what's read (`PendingChanges.replayOn()`), so you read your own writes.
+   *   - `askedAt`:  how far the saves had got as this was asked:  a save confirmed since outranks it (epic `data` I143).
    */
   private rowsKept(
     answered: PlaceRow[],
     place: Place,
     writing: "write them" | "only new ones",
-    query: ListQuery
+    query: ListQuery,
+    askedAt?: number
   ): PlaceRow[] {
     const { type } = this
     const { cache } = this.places
     const { idOf } = place.describe()
-    const rows = this.places.pendingIfAny(this.placeName)?.replayOn(this.collection, answered, query) ?? answered
+    const pending = this.places.pendingIfAny(this.placeName)
+    const rows = pending?.replayOn(this.collection, answered, query, askedAt) ?? answered
     if (type === undefined || idOf === undefined) return [...rows]
     return rows.map((row) => {
       const id = idOfRow(row, idOf)

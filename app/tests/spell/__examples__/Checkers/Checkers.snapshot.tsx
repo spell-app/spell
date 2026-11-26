@@ -463,7 +463,7 @@ export class Board extends ViewableList<Square> {
     other.setUpFromDiagram(this.diagram)
     other.turn = this.turn
     other.winner = this.winner
-    if (this.jumpSquare > 0) other.jumper = other.getItem(position(this.jumpSquare))?.piece
+    if (this.jumpSquare > 0) other.jumper = other.getItem(position(this.jumpSquare))?.piece!
   }
 
   /** The other side's turn:  with no piece that can move, it has lost */
@@ -844,7 +844,7 @@ export class Table extends Thing {
     board.setUpFromDiagram(this.diagram)
     board.turn = this.turn
     board.winner = this.winner
-    if (this.jumpSquare > 0) board.jumper = board.getItem(position(this.jumpSquare))?.piece
+    if (this.jumpSquare > 0) board.jumper = board.getItem(position(this.jumpSquare))?.piece!
     board.copyOntoOther(checkers.turnedBoard)
   }
 
@@ -986,7 +986,7 @@ export class Checker extends App {
     }
     if (found?.blackSeat === "") found!.blackSeat = this.seat
     else if (found?.redSeat === "" && found?.blackSeat !== this.seat) found!.redSeat = this.seat
-    this.table = found
+    this.table = found!
     found?.showOnBoard(this.board)
   }
   get playSomeoneIsSelected() {

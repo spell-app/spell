@@ -627,6 +627,10 @@ export class Tableau extends Pile {
   the TypeScript target writes that element out as a class, `CardElement`
   ([README-targets](README-targets.md#the-card-line-by-line)).
 - `draw each card in the deck` draws each in turn:  `core.drawItems(deck)`.
+- A view drawing one element sits in the layout around it as if that element were written there:
+  `<space width="50%" />` in a view, in a row, is half the row.
+  - A view that keeps a box of its own (it draws several elements, or can be dragged or selected) shares a row it's in:
+    it grows to the room the rest of the row leaves, so `width="50%"` inside it is half of that room.
 - A thing has ONE drawing, its `to draw it`:  a card face down checks its own direction there,
   in the two sided view it's built on ([Solitaire's Card.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spell), below).
   - In an outline, `to "draw it":` takes markup as its body, no `return` needed;
@@ -978,6 +982,13 @@ galaxy guide is a site at "owen@spell/galaxy"
     ([Spell UI's themes page](https://github.com/spell-app/spell/blob/main/ui/README-themes.md#6-a-projects-own-theme)).
   - Its line takes its own values the way a type's does, several joined by commas.
   - `its "theme" is "mockup"`, under the site, says the same.
+- An app, a site too, shows its own icon on the browser tab while it runs:  `its icon is "rocket"`, under it.
+  - An icon's name, as `<icon "rocket" />` names one, drawn in `its icon color is "green"`:
+    one of Spell UI's colours, or any CSS colour.
+  - Or a picture, a file of the project:  `its icon is "static/icon.png"`.
+  - On a site's line too:  `galaxy guide is a site with icon "rocket"`.
+  - The run page and the editor's Run show it, and their own icon again when it stops;
+    `<spell-viewer>` and VS Code leave their tab alone.
 - A site can be its titles and addresses alone, `Galaxy.site.spell`, each page a file of its own:
 
 ```spell

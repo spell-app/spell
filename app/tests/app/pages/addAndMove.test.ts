@@ -1037,7 +1037,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForSelector(".InputEditor .cm-editor", { timeout: 30_000 })
   })
 
-  test("the add bar runs down the left edge in Edit, the app then the code across;  its groups open beside it, its stars stay, its + opens everything (T151, T152, T173, T174, T183, I365, I367, I369)", async () => {
+  test("the add bar runs down the left edge in Edit, the app then the code across;  its groups open beside it, its stars stay, its + opens everything (T151, T152, T173, T174, T183, I365, I367, I369, I373)", async () => {
     const popupShows = () =>
       page.evaluate((panel) => !!document.querySelector<HTMLElement & { visible?: boolean }>(panel)?.visible, ADD_PANEL)
 
@@ -1160,9 +1160,10 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
 
     // a part's star puts it atop the bar, starred;  a right click takes the star away (T152)
     await layout.locator('ui-tree-item[label="Grid"]').locator("[part~=row]").first().hover()
-    // its icon alone, no tooltip (T162)
+    // its icon alone (T162), Spell UI's tooltip saying what it does, never the browser's title (I373)
     const star = layout.locator('ui-tree-item[label="Grid"] > ui-button.PaletteStar')
-    expect(await star.getAttribute("data-tooltip")).toBeNull()
+    expect(await star.getAttribute("data-tooltip")).toBe("Click the star to keep Grid at the top of the add bar")
+    expect(await star.locator("[part~=button]").getAttribute("title")).toBeNull()
     await star.locator("[part~=button]").click()
     await page.waitForTimeout(400)
     expect(await page.locator(".PaletteRail ui-item.PaletteFavorite").count()).toBe(1)

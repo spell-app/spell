@@ -1033,6 +1033,7 @@ export class WikiNote extends Thing {
     if (this.page && this.page.fits) {
       return h("ui-text", { paragraph: true, part: "words" },
         () => core.whileWaiting(() => this.page?.summary),
+        " ",
         () => core.drawWaiting(() => h("ui-link", { link: () => this.page?.contentUrls?.desktop?.page, target: "_blank" },
           "Read the rest on Wikipedia"
         ), "ui-link")

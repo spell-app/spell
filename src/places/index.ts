@@ -5,7 +5,8 @@
  * - `PlaceResult` is one reader's read of one place, on `Loadable`.
  * - `PlaceReads` shares one request between readers, and aborts it when the last one leaves.
  * - `PlaceQuery` does what a place can't, up to a ceiling.
- * - `PlaceBatch` joins lists asked in the same moment into one request, where the place allows it.
+ * - `PlaceBatch` joins lists asked in the same moment into one request, where the place allows it, and ids into one `getMany()`.
+ * - `pagesOf()`:  a list's pages, one each time its reader asks;  `ReadCeiling`, what one read may load.
  * - `MemoryPlace` and `DevicePlace` (this device, over preferences' `PrefPlace`) are the first two places.
  * - `DeviceCopy`:  a copy of what a server place reads, kept on this device, for a place whose line says so.
  * - `RestPlace` and `GraphPlace` reach a server, on `WebPlace`;  `FieldNames` matches a server's field names to ours by their words.
@@ -41,6 +42,7 @@ export * from "./people"
 
 export * from "./PlaceCache"
 export * from "./PlaceBatch"
+export { pagesOf, pagesOfList, ReadCeiling, type Page, type PageReader, type PagesOfOptions } from "./pagesOf"
 export * from "./PlaceQuery"
 export * from "./PlaceReads"
 export * from "./PlaceResult"

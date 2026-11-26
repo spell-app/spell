@@ -122,6 +122,7 @@ export class Issue extends Thing {
       h("ui-content",
         h("ui-header",
           () => this.title,
+          " ",
           h("ui-link", { link: () => this.htmlUrl, target: "_blank", "aria-label": "On GitHub" },
             h("ui-icon", { name: "github" })
           )
@@ -384,6 +385,7 @@ export class User extends Thing {
           h("ui-stack", { spacing: "none", align: "start" },
             h("ui-header",
               () => this.login,
+              " ",
               h("ui-link", { link: () => this.htmlUrl, target: "_blank", "aria-label": "On GitHub" },
                 h("ui-icon", { name: "github" })
               )
@@ -408,6 +410,7 @@ export class User extends Thing {
         }),
         h("ui-header", { size: "large" },
           () => this.name ? this.name : this.login,
+          " ",
           h("ui-link", { link: () => this.htmlUrl, target: "_blank", "aria-label": "On GitHub" },
             h("ui-icon", { name: "github" })
           )
@@ -1168,6 +1171,7 @@ export class Repository extends Thing {
       h("ui-content",
         h("ui-header",
           () => this.fullName,
+          " ",
           h("ui-link", { link: () => this.htmlUrl, target: "_blank", "aria-label": "On GitHub" },
             h("ui-icon", { name: "github" })
           )
