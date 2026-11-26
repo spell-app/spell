@@ -65,6 +65,8 @@ export type KeptServerState = "running" | "starting" | "stopped" | "down"
  * - `address`:  where it answers, while it does (a worktree's stopped one:  `port`, the one written down for it)
  * - `why`:  a few words on its state:  why it's down, what the keeper just did
  * - `since`:  when the keeper last started it;  `lastRequest`:  a worktree's last use
+ * - `used`:  a worktree's page server's, when its worktree was last used:  its last request, or its last git work
+ *   (`lastWorkedOn()`), whichever is later;  the Servers page lists the one used most recently first (epic `editor` I374)
  * - `started`:  when the server itself started, as it says (`ServerInfo.started`):  how long it's been up
  * - `building`:  what it's building now (a page server's bundles, `ServerInfo.building`)
  * - `log`:  its log file, whose last lines `GET /api/servers/log?id=<id>` answers (the Spell Servers page's fold)
@@ -83,6 +85,7 @@ export type KeptServer = {
   why?: string
   since?: string
   lastRequest?: string
+  used?: string
   started?: string
   building?: string[]
   log?: string

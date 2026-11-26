@@ -18,9 +18,12 @@ import "./ServersDialog.css"
  *   - In a frame the page hides its own title, wears the scheme the editor shows (`?scheme=`), and says how tall
  *     it is (`spellServersHeight`):  the frame takes that height, up to `MOST_HEIGHT`, then scrolls inside.
  *   - The frame's page talks to the keeper alone:  this page reads nothing of it but its height.
- * - Closes like every dialog:  its ✕, or Escape (`closedby="closerequest"`).
- *   - It opens with the focus on its title, so Escape closes it;  once a click puts the focus inside the frame, Escape
- *     reaches the keeper's page instead, and only the ✕ closes it (a cross-origin frame's keys never reach us).
+ * - Spell UI's standard dialog (epic `editor` I374):  its own heading and ✕, one surface, the page's cards on it.
+ * - Closes on its ✕, Escape, or a click on the dimmed page around it (`closedby="any"`, as Explain This):
+ *   a dialog to look at, with nothing to lose.
+ *   - It opens with the focus on its ✕, so Escape closes it;  once a click puts the focus inside the frame, Escape
+ *     reaches the keeper's page instead (a frame from another address keeps its keys), and the ✕ or a click
+ *     outside closes it.
  * - Show one with `openServers()`, which mounts it and cleans up.
  ****************/
 export function ServersDialog(props: ServersDialogProps) {
@@ -32,28 +35,26 @@ export function ServersDialog(props: ServersDialogProps) {
     const told = (event.data as { spellServersHeight?: unknown } | undefined)?.spellServersHeight
     if (event.origin === page.origin && typeof told === "number" && told > 0) setHeight(told)
   }
-  let title: HTMLElement | undefined
   window.addEventListener("message", onMessage)
   onCleanup(() => window.removeEventListener("message", onMessage))
   return (
     <ui-modal
       class="ServersDialog"
-      closedby="closerequest"
+      closedby="any"
       closable=""
-      aria-label={appTexts.text("serversTitle")}
+      heading={appTexts.text("serversTitle")}
       visible=""
       ref={(element: HTMLElement) => {
-        // the title takes the focus, not the frame:  Escape pressed inside the frame never reaches this page
-        element.addEventListener("ui-opened", () => title?.focus(), { once: true })
+        // the ✕ takes the focus, not the frame:  Escape pressed inside the frame never reaches this page
+        element.addEventListener(
+          "ui-opened",
+          () => element.shadowRoot?.querySelector<HTMLElement>("[part~=close]")?.focus(),
+          { once: true }
+        )
         element.addEventListener("ui-closed", () => props.onClose(), { once: true })
       }}
     >
-      <div class="ServersHeader">
-        <h2 class="ServersTitle" tabindex="-1" ref={(element: HTMLElement) => (title = element)}>
-          {appTexts.text("serversTitle")}
-        </h2>
-      </div>
-      <div class="ServersBody">
+      <ui-content class="ServersBody">
         <ui-embed
           class="ServersFrame"
           url={page.href}
@@ -62,7 +63,7 @@ export function ServersDialog(props: ServersDialogProps) {
           height={`${height()}px`}
           max-height={MOST_HEIGHT}
         />
-      </div>
+      </ui-content>
     </ui-modal>
   )
 }
