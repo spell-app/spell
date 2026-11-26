@@ -200,7 +200,9 @@ describe("runner builds", () => {
     // Solid 2.0.4's `solid-js` and `@solidjs/web` both export `heldRead`, by different paths:  two `export *`s of one
     // name cancel out, so `spell-solid.js` dropped it, and `<spell-viewer>` failed to load (epic `solid-2-final` P21)
     for (const dir of [element, runner]) {
-      const names = new Set(SHARED_NAMES.exec(readFileSync(join(dir, "spell-solid-shared.js"), "utf8"))![1]!.split(", "))
+      const names = new Set(
+        SHARED_NAMES.exec(readFileSync(join(dir, "spell-solid-shared.js"), "utf8"))![1]!.split(", ")
+      )
       const missing = chunks(dir).flatMap((file) =>
         [...readFileSync(join(dir, file), "utf8").matchAll(SHARED_IMPORT)].flatMap((match) =>
           match[1]!
