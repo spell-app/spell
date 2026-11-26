@@ -239,6 +239,9 @@ const ICONS = {
   "solid/star": ["star"],
   // the epic page gear's Tidy (epic `epic-engine` T168)
   "solid/broom": ["broom"],
+  // and its Hush settled items, Merge and push (T174;  Where are we? is the compass, Start fresh the seedling)
+  "solid/eye-slash": ["eye slash"],
+  "solid/cloud-arrow-up": ["cloud arrow up"],
   // the epic page gear's Bells & Whistles (epic `epic-engine` P86, T171)
   "solid/bell": ["bell"],
   "regular/star": ["star outline"],

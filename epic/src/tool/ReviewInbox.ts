@@ -11,7 +11,7 @@ import { DataFile } from "spell/epic/data/DataFile"
 import { AWAY_ID, isItemId } from "spell/epic/definitions/definitions.types"
 import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
 // Import directly:  the page client's pure helpers, never its barrel (the browser's `ReviewClient`)
-import { hasPick, hasSetChange, pickFieldsOf, pickOf, setPicksOf } from "spell/epic/review/review.types"
+import { hasPick, hasSetChange, pickFieldsOf, pickOf, setPicksOf, type GearAsk } from "spell/epic/review/review.types"
 // By file:  the review barrel is the page's (its client, its store);  these are plain functions
 import {
   STAGE_COUNTDOWN_MS,
@@ -145,8 +145,12 @@ import { SharedComments } from "./SharedComments"
  *     POLLER runs (epic `epic-engine` I144), else `null`:  the poller's next look says so (`📬`), which wakes the
  *     session, instead of typing into it (`askReview()`)
  *     - gone once a session waits on the inbox itself (`setListening()` with no poller), `epic inbox watch`
- *   - `tidyAsked`:  ISO time Owen pressed Tidy in the page's gear (epic `epic-engine` T168), else `null`:  asked as
- *     `reviewAsked` is, its `📬` line asking for `/epic tidy`;  gone once the tidy starts (`epic stale`, `tidyStarted()`)
+ *   - `gearAsks`:  what Owen asked for from the page's gear, each ask (`GearAsk`) -> the ISO time he pressed it:
+ *     asked as `reviewAsked` is, each its own `📬` line (`askFromGear()`)
+ *     - Tidy (epic `epic-engine` T168), Where are we?, Hush settled items, Start fresh, Merge and push (T174)
+ *     - gone once its line is handed to the session (`InboxMonitor`), or its work starts (`askStarted()`:  a tidy's
+ *       first step, `epic stale`)
+ *     - an older file's `tidyAsked` is read as `gearAsks.tidy`
  * - Node only (`node:fs`, `spell/server`'s lock):  NOT in the `spell-epic` barrel, imported by path.
  *   Imports no other file of the tool but `CommentList` (its comments);  of the page's review code, only its plain
  *   functions (`review.types`:  a revisit's note naming comments, I158).
@@ -186,8 +190,8 @@ export class ReviewInbox {
   doing: InboxDoing | null = null
   /** when Owen asked for a review from the page, for the session's poller to pass on (I144), else `null` */
   reviewAsked: string | null = null
-  /** when Owen asked for a tidy from the page's gear, for the session's poller to pass on (T168), else `null` */
-  tidyAsked: string | null = null
+  /** what Owen asked for from the page's gear (T168, T174), each ask -> when, for the session's poller to pass on */
+  gearAsks: Partial<Record<GearAsk, string>> = {}
 
   /**
    * An inbox:  empty, or the fields of `record` (a file's JSON) over an empty one's.
@@ -197,7 +201,10 @@ export class ReviewInbox {
    *   it off left items spinning for days;  the next write takes it out of the file
    */
   constructor(record: Partial<InboxRecord> & Record<string, unknown> = {}, now = Date.now()) {
-    Object.assign(this, record)
+    const { tidyAsked, ...rest } = record
+    Object.assign(this, rest)
+    // an older file's one ask (T168), before the gear had several (T174)
+    if (typeof tidyAsked === "string" && tidyAsked) this.gearAsks = { ...this.gearAsks, tidy: tidyAsked }
     CommentList.migrate(this.comments)
     this.working = Object.fromEntries(Object.entries(this.working).filter(([, work]) => isLiveWork(work, now)))
   }
@@ -372,7 +379,7 @@ export class ReviewInbox {
       !Object.keys(this.comments).length &&
       !this.listening &&
       !this.reviewAsked &&
-      !this.tidyAsked &&
+      !Object.keys(this.gearAsks).length &&
       !this.liveWoken()
     )
   }
@@ -807,20 +814,29 @@ export class ReviewInbox {
   }
 
   /**
-   * Owen pressed Tidy in the page's gear (epic `epic-engine` T168):  the session's next look prints the `📬` line
-   * asking for `/epic tidy`, which wakes it.
-   * - stays until the tidy starts:  its first step, `epic stale <epic>`, clears it (`tidyStarted()`)
+   * Owen pressed one of the page gear's asks (`ask`:  Tidy, epic `epic-engine` T168;  Where are we?, Hush settled
+   * items, Start fresh, Merge and push, T174):  the session's next look prints its `📬` line, which wakes it.
+   * - stays until that line is handed to the session (`InboxMonitor`), or its work starts (`askStarted()`)
+   * - pressed again before then:  one ask, its newer time
    */
-  askTidy(at = isoTime()): string {
-    this.tidyAsked = at
+  askFromGear(ask: GearAsk, at = isoTime()): string {
+    this.gearAsks = { ...this.gearAsks, [ask]: at }
     return at
   }
 
-  /** The tidy Owen asked for has started (`epic stale <epic>`):  nothing left to ask.  True when one was asked. */
-  tidyStarted(): boolean {
-    const asked = Boolean(this.tidyAsked)
-    this.tidyAsked = null
-    return asked
+  /** The `ask` Owen made from the gear has been told, or started:  nothing left to ask.  True when one was waiting. */
+  askStarted(ask: GearAsk): boolean {
+    const waiting = Boolean(this.gearAsks[ask])
+    const rest = { ...this.gearAsks }
+    delete rest[ask]
+    this.gearAsks = rest
+    return waiting
+  }
+
+  /** The oldest of the gear's asks still waiting, so each is told in the order Owen pressed them;  else `undefined`. */
+  get firstAsk(): GearAsk | undefined {
+    const waiting = Object.entries(this.gearAsks).filter(([, at]) => at) as [GearAsk, string][]
+    return waiting.sort(([, a], [, b]) => a.localeCompare(b))[0]?.[0]
   }
 
   /**
@@ -1483,7 +1499,9 @@ export type InboxRecord = {
   woken: InboxWoken | null
   doing: InboxDoing | null
   reviewAsked: string | null
-  tidyAsked: string | null
+  gearAsks: Partial<Record<GearAsk, string>>
+  /** before the gear had several asks (T174):  read as `gearAsks.tidy`, never written */
+  tidyAsked?: string | null
 }
 
 /** What the listening session is doing now (`ReviewInbox.doing`, epic `epic-engine` P35). */

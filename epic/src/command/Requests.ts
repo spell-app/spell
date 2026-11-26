@@ -455,9 +455,18 @@ export class Requests {
    * - Its shape:  `{ "epic": "epic-workflow", "set": "2026-10-11" }`
    */
   home(): string | null {
+    return Requests.homeIn(this.epics)
+  }
+
+  /**
+   * The tooling home's epic, as kept in epics folder `epics` (`home()`);  `null` for none.
+   * - STATIC:  the review routes ask it of a page's folder, with no checkout at hand (the gear's Merge and push, T174)
+   * - NEVER throws
+   */
+  static homeIn(epics: string): string | null {
     let home: { epic?: unknown } | undefined
     try {
-      home = DataFile.read<{ epic?: unknown }>(this.homeFile)
+      home = DataFile.read<{ epic?: unknown }>(Requests.homeFileIn(epics))
     } catch {
       return null
     }
@@ -478,7 +487,12 @@ export class Requests {
 
   /** Where the tooling home is kept. */
   private get homeFile(): string {
-    return join(this.epics, `home${DataFile.SUFFIX}`)
+    return Requests.homeFileIn(this.epics)
+  }
+
+  /** Where the tooling home is kept in epics folder `epics`. */
+  private static homeFileIn(epics: string): string {
+    return join(epics, `home${DataFile.SUFFIX}`)
   }
 
   ////////////////

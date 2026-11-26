@@ -192,6 +192,11 @@ Then, for what it printed:
    prints each one's file under the words (`IMG2:  <file>`);  look at it first.  "IMG2" in their words means that one.
 5. `epic inbox status <epic> --clear`, then `epic inbox wait <epic>` again (in the foreground), unless they said stop.
 
+The epic page's gear asks too (Tidy;  Where are we?, Hush settled items, Start fresh, Merge and push):
+- A Claude Code session gets each as one `📬` line saying what to run (`$wtf`, `$epic tidy`, `$epic hush`,
+  `$epic fresh`);  Merge and push, the tooling home's only, is the go-ahead to merge into `main` and push it.
+- No session hears it (a Codex session):  the page says so, and gives the command to type.
+
 ## turn -- End every turn
 
 ```sh

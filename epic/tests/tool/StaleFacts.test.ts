@@ -209,19 +209,19 @@ describe("StaleFacts", () => {
 
 // epic `epic-engine` T168:  the gear's Tidy asks through the inbox;  `epic stale`, the tidy's first step, clears it
 describe("epic stale", () => {
-  test("a tidy asked for from the page's gear has started:  the inbox's tidyAsked cleared", async () => {
+  test("a tidy asked for from the page's gear has started:  the inbox's gear ask cleared", async () => {
     const content = join(root, "content")
     const page = join(content, "epics", "x", "x.plan.html")
     mkdirSync(join(content, "epics", "x"), { recursive: true })
     writeFileSync(page, plan.toString())
     const inboxFile = ReviewInbox.pathFor(page)
-    ReviewInbox.update(inboxFile, (inbox) => inbox.askTidy())
+    ReviewInbox.update(inboxFile, (inbox) => inbox.askFromGear("tidy"))
     const owner = new PlanDocCommands({ files: new PlanDocFiles({ root, content }) })
     const printed: string[] = []
     vi.spyOn(owner, "print").mockImplementation((text) => void printed.push(text))
     expect(await owner.run(["stale", "x", "--json"])).toBe(0)
     expect(printed.length).toBe(1)
-    expect(ReviewInbox.read(inboxFile).tidyAsked).toBeNull()
+    expect(ReviewInbox.read(inboxFile).gearAsks.tidy).toBeUndefined()
     rmSync(content, { recursive: true, force: true })
   })
 })

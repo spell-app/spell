@@ -1186,6 +1186,20 @@ This session LISTENS:  it waits on the doc's review inbox, and acts on what arri
     <epic>` (this section), as if they'd typed it
   - `📬 <epic>:  the person pressed Tidy ...`:  the page gear's Tidy (epic `epic-engine` T168);  run `/epic tidy <epic>`
     ("14. Tidy"), as if they'd typed it
+  - The gear's other rows (epic `epic-engine` T174), each the same way, as if they'd typed it;  no session listening,
+    the page types the command into the session's tab instead:
+    - `📬 <epic>:  the person pressed "Where are we?" ...`:  post a short status, `/wtf` (what's running, what merged,
+      what waits on them)
+    - `📬 <epic>:  the person pressed "Hush settled items" ...`:  `/epic hush <epic>` ("17. Hush":  the dry run's table
+      first, and greying only once they say go)
+    - `📬 <epic>:  the person pressed "Start fresh" ...`:  `/epic fresh` ("16. Fresh":  it waits for running agents,
+      then goes by itself)
+    - `📬 <epic>:  the person pressed "Merge and push" ...`:  the tooling home's page only (`epic home`);  pressing it IS
+      their go-ahead to push.  Merge the finished work into `main` (`epic worktree merge-main`, `epic merge <epic>`),
+      push `main` (`git push origin main`:  the pre-push hook runs the names and dependency checks), and say what was
+      pushed:  the commits, and anything a check refused
+      - In Codex:  never pressed there;  the push is still the tooling home's session's alone
+    - each line is said once:  the next look tells the next row pressed
 - Mechanical marks:  at once.
 - Add Details and "revisit now":  by background agents ("The session answers;  agents build").
   - In Codex:  a Codex sub-agent each, waited for;  or answered here, one at a time.
@@ -1978,7 +1992,7 @@ Its mechanical half runs BY ITSELF at the end of every turn (epic `epic-engine` 
   with a reason (below)
 
 1. Get the facts:  `epic stale <epic> --json` (scratchpad file).
-   - It also marks a Tidy asked for from the page as started (the inbox's `tidyAsked`), so its `📬` line isn't said
+   - It also marks a Tidy asked for from the page as started (the inbox's `gearAsks.tidy`), so its `📬` line isn't said
      again.
    - One entry per open call, issue, todo and limit:  age from when it was written, its phase and whether that's done,
      the files and code names it mentions and whether they still exist (in its worktree or on `main`;  only what

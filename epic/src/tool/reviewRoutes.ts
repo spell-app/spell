@@ -76,20 +76,25 @@
  *   asks the ONE running Claude session titled for the epic through its inbox poller (epic `epic-engine` I144), else
  *   types `/epic review <epic>` into its tab;
  *   none or several:  sends nothing, says which it found (`ReviewStart`);  answers its `StartResult`, not the inbox
- *   - `{ page, ask: "tidy" }`:  the gear's Tidy (epic `epic-engine` T168), `/epic tidy <epic>` the same way
+ *   - `{ page, ask }`:  one of the page gear's asks the same way (`ReviewStart.commandFor()`):  `tidy` (epic
+ *     `epic-engine` T168), `status`, `hush`, `fresh`, `push` (T174);  `push` on the tooling home's page only (403)
+ * - `GET /api/epics/review/home?page=` -- `{ home }`:  is the page's epic the tooling home (`epic home`)?  The gear
+ *   shows Merge and push only there (T174)
  * - writes:  under the inbox's lock, atomic (`ReviewInbox.updateAsync()`);
  *   each needs the page server's token (`x-server-token`) and its own origin (`SRV.Guard`)
  * - Loaded by the page server under `tsx` (`PageServer.loadRoutes()`), with `packages/server/tsconfig.json`'s aliases.
  *   Imports `ReviewInbox` (and `TestShots`, as light), never `PlanDoc`:  a request reads the doc's TEXT
  *   (`ReviewInbox.itemIds()`);  only an instant mark loads `InstantMarks`, and `PlanDoc` with it, when one comes,
- *   and a picture's delete `ItemPictures`.
+ *   and a picture's delete `ItemPictures`;  the gear's Merge and push `Requests`, for the tooling home.
  * - From the docs tools' `reviewRoutes.ts` (epic `epic-components`, P7).
  */
+
+import { dirname } from "node:path"
 
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
 
-import { INSTANT_GRACE_MS, SAGA_PREFIX, isInstant, isInstantDue } from "spell/epic/review/review.types"
+import { INSTANT_GRACE_MS, PAGE_ASKS, SAGA_PREFIX, isInstant, isInstantDue } from "spell/epic/review/review.types"
 
 import { InboxError, ReviewInbox, type PageInbox } from "./ReviewInbox"
 import { ReviewStart } from "./ReviewStart"
@@ -117,6 +122,11 @@ const reviewRoutes: RouteModule = {
   name: "review",
   setup({ root, router, guard, web }) {
     const api = new SRV.Router()
+    // the tooling home, read only now:  `Requests` brings the epic tool's commands, which no other route needs
+    api.get("/home", async (request, reply) => {
+      const file = planDoc(web.files, request.query.page)
+      reply.noStore().json({ home: await isHome(file) })
+    })
     api.get("/inbox", (request, reply) => {
       const file = planDoc(web.files, request.query.page)
       const inbox = ReviewInbox.read(ReviewInbox.pathFor(file))
@@ -234,7 +244,9 @@ const reviewRoutes: RouteModule = {
     api.post("/start", async (request, reply) => {
       const body = request.body as { page?: unknown; ask?: unknown }
       const file = planDoc(web.files, body.page)
-      const ask = body.ask === "tidy" ? "tidy" : "review"
+      const ask = PAGE_ASKS.find((each) => each === body.ask) ?? "review"
+      if (ask === "push" && !(await isHome(file)))
+        throw new SRV.HttpError(403, "Merge and push is only for the tooling home's epic (epic home)")
       reply.json(await new ReviewStart(root).start(epicOf(file), file, ask))
     })
     router.use(API, api)
@@ -265,6 +277,13 @@ export function planDoc(files: SRV.StaticHandler, page: unknown): string {
 function epicOf(file: string): string {
   const saga = SAGA_PAGE.exec(file)?.[1]
   return saga ? `${SAGA_PREFIX}${saga}` : PLAN_DOC.exec(file)![1]!
+}
+
+/** Is page `file` the tooling home's epic page (`Requests.homeIn()`)?  A saga page never is. */
+async function isHome(file: string): Promise<boolean> {
+  if (!PLAN_DOC.test(file)) return false
+  const { Requests } = await import("spell/epic/command/Requests")
+  return Requests.homeIn(dirname(dirname(file))) === epicOf(file)
 }
 
 /**
