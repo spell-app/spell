@@ -623,8 +623,12 @@ export class JSWriter extends ProgramWriter {
         node
       )
     }
-    const dot = this.mayBeNothing(node.thing) ? "?." : "."
-    return `${this.memberObject(node.thing)}${dot}${this.nameOf(node.methodName)}${this.argsOf(node)}`
+    return `${this.memberObject(node.thing)}${this.callDot(node)}${this.nameOf(node.methodName)}${this.argsOf(node)}`
+  }
+
+  /** The dot a method call is read with:  `?.` off what may be nothing, `startPile.lastItem?.flip()`. */
+  callDot(node: P.ASTScopedMethodInvocation): string {
+    return this.mayBeNothing(node.thing) ? "?." : "."
   }
 
   /**

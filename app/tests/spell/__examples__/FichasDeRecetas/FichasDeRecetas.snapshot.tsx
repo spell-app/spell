@@ -643,7 +643,7 @@ export class Ficha extends App {
       // El archivo no se puede leer ahora:  la lista de recetas lo dice
       return
     }
-    this.elegida = core.getItemAt(await core.savedThings(Receta), 0)
+    this.elegida = core.getItemAt(await core.savedThings(Receta), 0)!
   }
 
   mostrarMétrico() {

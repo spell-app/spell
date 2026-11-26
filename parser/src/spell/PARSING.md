@@ -1794,6 +1794,9 @@ would.
 What a drawing's markup may say, a page's or a plain file's (epic `elemental-spell` P7;  plain Spell's since epic
 `language` P45, Q4 A).
 
+- The spaces between two children on one line are drawn, as JSX keeps them:  `{its flag} {its name}` draws
+  "🇦🇽 Åland" (epic `data` I75, `Tokenizer.matchJSXSpaces()`);  an indent before a line break is dropped, and so are the
+  spaces beside a hidden member's tag, which draws nothing.
 - `</>` closes any element there (`Tokenizer.emptyEndTagCloses`, on for both of spell's tokenizers), and a tag's
   name may hold any letter (`<botón>`, `<área-texto>`;  epic `language` P46, `Tokenizer.JSX_TAG_START`),
   so Spanish names Spell UI's components bare too.

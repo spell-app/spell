@@ -113,7 +113,7 @@ export class Juego extends App {
 
   sacarOtra() {
     const otras = this.mazo.filter((tarjeta) => tarjeta !== this.tarjeta)
-    this.tarjeta = otras.randomItem()
+    this.tarjeta = otras.randomItem()!
     this.tarjeta?.turnFaceUp()
   }
 

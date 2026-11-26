@@ -153,6 +153,7 @@ export class Issue extends Thing {
         <ui-content>
           <ui-header>
             {this.title}
+            {" "}
             <ui-link link={this.htmlUrl} target="_blank" aria-label="On GitHub">
               <ui-icon name="github" />
             </ui-link>
@@ -466,6 +467,7 @@ export class User extends Thing {
             <ui-stack spacing="none" align="start">
               <ui-header>
                 {this.login}
+                {" "}
                 <ui-link link={this.htmlUrl} target="_blank" aria-label="On GitHub">
                   <ui-icon name="github" />
                 </ui-link>
@@ -485,6 +487,7 @@ export class User extends Thing {
           <ui-button icon="arrow left" appearance="basic" aria-label="Back" title="Back" onClick={core.pressed(this, async () => await this.lookAwayFromUser())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
           <ui-header size="large">
             {this.name ? this.name : this.login}
+            {" "}
             <ui-link link={this.htmlUrl} target="_blank" aria-label="On GitHub">
               <ui-icon name="github" />
             </ui-link>
@@ -1394,6 +1397,7 @@ export class Repository extends Thing {
         <ui-content>
           <ui-header>
             {this.fullName}
+            {" "}
             <ui-link link={this.htmlUrl} target="_blank" aria-label="On GitHub">
               <ui-icon name="github" />
             </ui-link>
@@ -2824,7 +2828,7 @@ export class OpenMeteoPage extends Thing {
       latitude: -34.6,
       longitude: -58.38
     }))
-    this.city = core.getItemAt(this.cities, 0)
+    this.city = core.getItemAt(this.cities, 0)!
   }
 
   /** The city's, from Open-Meteo:  asked for by where it is, with no list of them all */
@@ -2862,10 +2866,10 @@ export class OpenMeteoPage extends Thing {
         <ui-stack spacing="sm" part="forecast_table">
           <ui-text color="grey">
             {"The next two days in "}
-            {core.whileWaiting(() => this.forecast.timezone)}
+            {core.whileWaiting(() => this.forecast!.timezone)}
             , hour by hour.
           </ui-text>
-          {core.whileWaiting(() => this.forecast.drawHourTable())}
+          {core.whileWaiting(() => this.forecast!.drawHourTable())}
         </ui-stack>
       )
     }

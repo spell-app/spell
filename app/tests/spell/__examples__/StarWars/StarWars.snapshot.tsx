@@ -1101,6 +1101,7 @@ export class WikiNote extends Thing {
       return (
         <ui-text paragraph={true} part="words">
           {core.whileWaiting(() => this.page?.summary)}
+          {" "}
           {core.drawWaiting(() => <ui-link link={this.page?.contentUrls?.desktop?.page} target="_blank">Read the rest on Wikipedia</ui-link>, "ui-link")}
         </ui-text>
       )
@@ -1276,7 +1277,7 @@ export class Guide extends App {
       this.showing = undefined
       return
     }
-    this.showing = core.getItemAt(this.trail, -1)
+    this.showing = core.getItemAt(this.trail, -1)!
     core.removeItemAt(this.trail, -1)
     core.scrollToTop()
   }

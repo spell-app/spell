@@ -242,7 +242,7 @@ export class ReviewDialog extends View {
   accessor draft!: Review
 
   async saveTheReview() {
-    this.draft.filmTitle = (await core.answerOf(this, "film"))?.title
+    this.draft.filmTitle = (await core.answerOf(this, "film"))?.title!
     core.saveThing(this.draft)
     this.draft = new Review({ stars: 5 })
     core.closeSitePart("review dialog")

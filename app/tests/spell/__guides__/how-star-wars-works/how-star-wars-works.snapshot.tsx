@@ -401,7 +401,7 @@ export class Guide extends App {
       this.showing = undefined
       return
     }
-    this.showing = core.getItemAt(this.trail, -1)
+    this.showing = core.getItemAt(this.trail, -1)!
     core.removeItemAt(this.trail, -1)
     core.scrollToTop()
   }

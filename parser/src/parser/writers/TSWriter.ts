@@ -214,8 +214,48 @@ export class TSWriter extends JSWriter {
    * - Being SET, it can't be `?.`:  `!` instead, `app.tasks.firstItem!.title = "New title"`.
    */
   memberDot(node: P.ASTPropertyExpression): string {
-    if (!this.mayBeNothing(node.object)) return "."
+    if (!this.mayBeNothing(node.object)) return this.writingLater && this.isItemGetterRead(node.object) ? "!." : "."
     return this.isSetting(node) ? "!." : "?."
+  }
+
+  /** As javascript's;  in a function that runs later, a call off a read an `if` checked is as found:  see `later()`. */
+  callDot(node: P.ASTScopedMethodInvocation): string {
+    const dot = super.callDot(node)
+    return dot === "." && this.writingLater && this.isItemGetterRead(node.thing) ? "!." : dot
+  }
+
+  /**
+   * `write()`'s text, for a function that runs later, `core.whileWaiting(() => ...)`:
+   * an `if` around it doesn't reach inside for TypeScript, so a read it checked is read as found,
+   * `this.forecast!.timezone` (epic `data` I72;  see `isItemGetterRead()`).
+   */
+  private later(write: () => string): string {
+    const previous = this.writingLater
+    this.writingLater = true
+    try {
+      return write()
+    } finally {
+      this.writingLater = previous
+    }
+  }
+
+  /** Writing a function that runs later:  see `later()`. */
+  private writingLater = false
+
+  /**
+   * Is `node` a read of a getter that returns an item read, `get forecast() { return core.getItemAt(...) }`?
+   * - TypeScript types it `Forecast | undefined`;  javascript reads off it with `.`, as spell found it there.
+   */
+  private isItemGetterRead(node: P.ASTExpression): boolean {
+    const inner = unwrapped(node)
+    if (!(inner instanceof P.ASTPropertyExpression) || inner.object instanceof P.ASTTypeExpression) return false
+    const getter = this.project.getterOf(this.kindOf(inner.object), inner.property.value)
+    let readsItem = false
+    forEachNode(getter?.body, (each) => {
+      const value = each instanceof P.ASTReturnStatement && each.value ? unwrapped(each.value) : undefined
+      if (value instanceof P.ASTScopedMethodInvocation && JSWriter.ITEM_READS.has(value.methodName)) readsItem = true
+    })
+    return readsItem
   }
 
   /**
@@ -440,6 +480,12 @@ export class TSWriter extends JSWriter {
    */
   ASTAssignmentStatement(node: P.ASTAssignmentStatement): string {
     const { thing, value } = node
+    // a property set to an item read, as found, as spell sets it:  `this.city = core.getItemAt(this.cities, 0)!`
+    // - its type is the item's, never `undefined` (epic `data` I72)
+    if (!node.isNewVariable && thing instanceof P.ASTPropertyExpression && this.mayBeNothing(value)) {
+      this.noteLocal(node)
+      return `${this.setting(thing)} = ${this.foundArg(value)}`
+    }
     if (!node.isNewVariable) return super.ASTAssignmentStatement(node)
     this.noteLocal(node)
     const declared = this.declarator(node)
@@ -1470,11 +1516,12 @@ export class TSWriter extends JSWriter {
    * An element's children, one a line, as `jsxChild()` writes each.
    * - Text with a space at either end is written as a string, `{" times"}`:
    *   JSX drops the spaces at a line's ends, so `Clicked {count} times` would draw "Clicked 0times".
+   * - So is a space alone, between two holes:  `{" "}` (epic `data` I75).
    */
   private jsxLines(children: P.ASTExpression[]): string[] {
     return children
       .map((child) =>
-        child instanceof P.ASTJSXText && /^\s|\s$/.test(child.value) && child.value.trim()
+        child instanceof P.ASTJSXText && /^\s|\s$/.test(child.value)
           ? `{${JSON.stringify(child.value)}}`
           : this.jsxChild(child)
       )
@@ -1484,8 +1531,10 @@ export class TSWriter extends JSWriter {
   /** A value in JSX:  just the expression -- Solid's compiler makes it live. */
   ASTJSXLiveValue(node: P.ASTJSXLiveValue): string {
     if (this.writingCallProps) return super.ASTJSXLiveValue(node)
-    if (this.project.spotsThatWait.has(node)) return `core.whileWaiting(() => ${this.bare(node.expression)})`
-    if (this.project.ifsThatWait.has(node)) return `core.drawWaiting(() => ${this.bare(node.expression)})`
+    if (this.project.spotsThatWait.has(node))
+      return `core.whileWaiting(() => ${this.later(() => this.bare(node.expression))})`
+    if (this.project.ifsThatWait.has(node))
+      return `core.drawWaiting(() => ${this.later(() => this.bare(node.expression))})`
     return this.loopDrawn(node.expression, this.bare(node.expression))
   }
 
@@ -1509,7 +1558,9 @@ export class TSWriter extends JSWriter {
     const expression = child instanceof P.ASTJSXExpression ? child.output : child
     if (!expression) return ""
     // JSX already, e.g. an element written as a child's value:  no braces
-    const text = this.listChildDrawn(expression, this.bare(expression))
+    const waits = this.project.spotsThatWait.has(expression) || this.project.ifsThatWait.has(expression)
+    const write = () => this.listChildDrawn(expression, this.bare(expression))
+    const text = waits ? this.later(write) : write()
     if (this.project.spotsThatWait.has(expression)) return `{core.whileWaiting(() => ${text})}`
     // an if-chain whose conditions wait:  a spot of its own, ONE spinner there meanwhile (`WriterProject.ifsThatWait`)
     if (this.project.ifsThatWait.has(expression)) return `{core.drawWaiting(() => ${text})}`

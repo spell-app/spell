@@ -211,7 +211,7 @@ export class ChatPage extends App {
               </ui-stack>
               <ui-stack class="messages" spacing="none">
                 <ui-stack class="message-list" spacing="none">
-                  {core.drawRead(async () => await core.savedThings(Message, { filter: { thread: (await core.answerOf(this, "picked")).topic }, sort: [{ field: "sent" }] }, "as drawn"), (message: Message) => core.drawThing(message), {
+                  {core.drawRead(async () => await core.savedThings(Message, { filter: { thread: (await core.answerOf(this, "picked"))!.topic }, sort: [{ field: "sent" }] }, "as drawn"), (message: Message) => core.drawThing(message), {
                     waitingSay: () => "Joining the thread",
                     none: () => <ui-text class="none" color="grey">{"Nothing yet:  say hello."}</ui-text>,
                     failed: () => <ui-text color="red">We can't join this thread right now.</ui-text>
