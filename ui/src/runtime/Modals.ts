@@ -6,8 +6,12 @@ import type { ChooseModalOptions, Disposer, ModalOptions, ModalProvider } from "
  * `$.modal('confirm', ...)` shortcuts -- and `choose()`, a pick from a list.
  * - A thin front door:  the `ui-modal` family registers its provider (`register()`) when it's imported, so the
  *   runtime chunk carries no modal markup.
- * - Until then every method throws, rather than falling back to `window.confirm()` with different behaviour;
- *   `await UI.modals.ready()` first imports the family on a page with a `<ui-root>` that hasn't (`loadFamilyWith()`).
+ * - Each dialog loads its own code:  `confirm()`, `alert()`, `prompt()` and `choose()` await `ready()` first, which
+ *   imports the family on a page with a `<ui-root>` that hasn't (`loadFamilyWith()`), so no caller has to remember.
+ *   - A `<ui-root>` also imports it ahead, once the page has drawn and gone idle (`RootLoader.warmUp()`), so the
+ *     first dialog opens at once.
+ * - A page with no way to import it:  every dialog rejects, rather than falling back to `window.confirm()` with
+ *   different behaviour.
  * - Strings accept plain text or options:  `UI.modals.confirm("Delete?")`.
  ****************/
 export class Modals {
@@ -40,7 +44,7 @@ export class Modals {
 
   /**
    * Resolves once a dialog can show, importing the `ui-modal` family the first time it's needed (as `UI.toasts.ready()`).
-   * - for a component pack's element, which can't import the family itself (`PACK_MODULES`)
+   * - The ONE loader:  every dialog awaits it, and `RootLoader.warmUp()` calls it ahead of the first
    * - rejects if the family can't be imported;  a page with no way to import it resolves, and a dialog says what's wrong
    */
   async ready(): Promise<void> {
@@ -48,17 +52,20 @@ export class Modals {
   }
 
   /** Resolves `true` on approve, `false` on deny / dismiss. */
-  confirm(options: ModalOptions | string): Promise<boolean> {
+  async confirm(options: ModalOptions | string): Promise<boolean> {
+    await this.ready()
     return this.registeredProvider.confirm(this.optionsFor(options))
   }
 
   /** Resolves once acknowledged. */
-  alert(options: ModalOptions | string): Promise<void> {
+  async alert(options: ModalOptions | string): Promise<void> {
+    await this.ready()
     return this.registeredProvider.alert(this.optionsFor(options))
   }
 
   /** Resolves with the entered text, or `undefined` on deny / dismiss. */
-  prompt(options: ModalOptions | string): Promise<string | undefined> {
+  async prompt(options: ModalOptions | string): Promise<string | undefined> {
+    await this.ready()
     return this.registeredProvider.prompt(this.optionsFor(options))
   }
 
@@ -66,11 +73,12 @@ export class Modals {
    * Resolves with the positions of the rows picked, or `undefined` on deny / dismiss (epic `language` P66).
    * - One:  a row picks itself;  several (`options.several`):  each row turns on and off, and OK picks them.
    */
-  choose(options: ChooseModalOptions): Promise<number[] | undefined> {
+  async choose(options: ChooseModalOptions): Promise<number[] | undefined> {
+    await this.ready()
     return this.registeredProvider.choose(options)
   }
 
-  /** `Modals.provider`;  throws until the `ui-modal` family has registered one. */
+  /** `Modals.provider`;  throws when the `ui-modal` family hasn't registered one, even after `ready()`. */
   private get registeredProvider(): ModalProvider {
     if (!Modals.provider) {
       throw new Error("UI.modals:  ui-modal not registered;  import its family (`spell/ui/ui-modal`) first")

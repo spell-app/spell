@@ -68,6 +68,11 @@
 
 			`parameter="section"` does the same with a query parameter (`?section=photos`), keeping the page's
 			other parameters and its hash:  any number of tab sets and form fields can each keep one.
+
+			In a Spell site, a page's tab can be a segment of its address instead (`/settings/photos`):  the site
+			lists the page at `"/settings/:section?"`, and the tabs are bound to the page's `section` by name, as
+			any form control is, with neither `history` nor `parameter`.  Picking one writes the address, a step in
+			the history, without drawing the page again;  Back, Forward and a page opened at the address pick it.
 		</>
 	</>
 

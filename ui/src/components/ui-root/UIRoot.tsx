@@ -360,6 +360,8 @@ export class UIRoot<V extends E.ComponentVocabulary = RootVocabulary> extends E.
     this.contentIsReady = true
     this.send("ui-ready" as never, { failed: [...this.failures] })
     this.resolveSettled([...this.failures])
+    // the first dialog's code, loaded once the page has drawn and gone idle
+    RootLoader.warmUp()
   }
 
   /**

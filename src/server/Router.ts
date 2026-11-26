@@ -12,6 +12,7 @@ import { HttpError } from "./server.types"
  * - patterns:
  *   - `/projects/list/:domainId` -- `:name` matches one segment
  *   - `/projects/file/:projectId/:filePath*` -- `:name*` matches the REST of the path, `/`s included
+ *   - `/settings/:section?` -- `:name?` may be left out, as in Express:  `/settings` matches too
  *   - `*` (alone, or as the last segment) -- anything;  lands in `params["0"]`
  *   - case-insensitive, and a trailing `/` is optional, as in Express
  * - layers run in the order added;  the first that answers wins, the rest are skipped

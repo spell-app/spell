@@ -33,6 +33,8 @@ export const SpellUrls = {
   LIST: "/api/projects/list/",
   /** How a project's compile is coming along, while a request waits for it:  `GET /api/projects/building/<address>`. */
   BUILDING: "/api/projects/building/",
+  /** The themes a site of a project may wear, its own and its imports':  `GET /api/projects/themes/<address>`. */
+  THEMES: "/api/projects/themes/",
   /** The org whose own space is the repo's built-ins, spell-app's `spaces/@spell/`. */
   BUILT_IN_ORG: "spell",
 
@@ -73,6 +75,11 @@ export const SpellUrls = {
   /** URL of project `projectId`'s index:  `/api/projects/index/<address>`. */
   indexUrl(projectId: string): string {
     return SpellUrls.INDEX + SpellUrls.encodeAddress(projectId)
+  },
+
+  /** URL of the themes a site of project `projectId` may wear:  `/api/projects/themes/<address>`. */
+  themesUrl(projectId: string): string {
+    return SpellUrls.THEMES + SpellUrls.encodeAddress(projectId)
   },
 
   /** URL of how project `projectId`'s compile is coming along:  `/api/projects/building/<address>`. */
@@ -127,7 +134,7 @@ export const SpellUrls = {
    */
   projectIdFor(place: string): string {
     if (/%/.test(place)) place = decodeParts(place, place)
-    for (const prefix of [SpellUrls.INDEX, SpellUrls.LIST, SpellUrls.BUILDING])
+    for (const prefix of [SpellUrls.INDEX, SpellUrls.LIST, SpellUrls.BUILDING, SpellUrls.THEMES])
       if (place.startsWith(prefix)) place = place.slice(prefix.length)
     const group = SpellSetup.groupFor(place)
     const rest = group ? place.slice(group.path.length + 1) : ""

@@ -389,5 +389,5 @@
 			</ui-tabs>
 			```
 		</>
-		<message size="small" class="site-not-ported">Not ported:  a real URL path per tab (<text code>historyType: 'state'</>, <text code>path</>) -- it needs a server route for every tab, so <text code>history</> uses the hash, and <text code>parameter</> a query parameter.</>
+		<message size="small" class="site-not-ported">Not ported:  a real URL path per tab (<text code>historyType: 'state'</>, <text code>path</>) -- it needs a server route for every tab, so <text code>history</> uses the hash, and <text code>parameter</> a query parameter.  In a Spell site, a page's tabs bound to a parameter of its address (<text code>"/settings/:section?"</>) keep the tab in its path:  see Usage.</>
 	</>
