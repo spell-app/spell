@@ -223,7 +223,7 @@ export const epicSectionVocabulary = {
       description:
         "The Judgement calls, Issues and Todos sections' button on their title (epic `epic-engine` T158), only while " +
         'the page is reviewed and one is waiting for your tick:  "Close 12 decided" ticks every DECIDED call (FIXED ' +
-        "issue, DONE todo) at once, after a confirm, with Undo in the notice after it."
+        'or DONE issue, DONE or FIXED todo:  "Close 1 fixed, 2 done") at once, with Undo in the notice after it.'
     },
     {
       name: "start-testing",
@@ -290,20 +290,30 @@ export const epicSectionVocabulary = {
     },
     {
       key: "closeAll",
-      text: "Close {count} {state}",
+      text: "Close {counts}",
       description:
         "The Judgement calls, Issues and Todos sections' Close all button on their title (epic `epic-engine` T158):  " +
-        "how many it closes, and their state (`closeDecided` ...)."
+        "how many it closes of each state, `closeAllCount`s joined by commas (I487)."
     },
-    { key: "closeDecided", text: "decided", description: "A judgement call's finished word, in Close all." },
-    { key: "closeFixed", text: "fixed", description: "An issue's finished word, in Close all." },
-    { key: "closeDone", text: "done", description: "A todo's finished word, in Close all." },
-    { key: "closeJudgementOne", text: "decided judgement call", description: "Close all's thing, one call." },
-    { key: "closeJudgements", text: "decided judgement calls", description: "Close all's things, several calls." },
-    { key: "closeIssueOne", text: "fixed issue", description: "Close all's thing, one issue." },
-    { key: "closeIssues", text: "fixed issues", description: "Close all's things, several issues." },
-    { key: "closeTodoOne", text: "finished todo", description: "Close all's thing, one todo." },
-    { key: "closeTodos", text: "finished todos", description: "Close all's things, several todos." },
+    { key: "closeAllCount", text: "{count} {state}", description: "Close all's count of one state:  `2 done`." },
+    { key: "closeDecided", text: "decided", description: "A decided item's word, in Close all's button." },
+    { key: "closeFixed", text: "fixed", description: "A fixed item's word, in Close all's button." },
+    { key: "closeDone", text: "done", description: "A done item's word, in Close all's button." },
+    {
+      key: "closeThings",
+      text: "{states} {things}",
+      description: "What Close all closes, in its tooltip and notice:  `fixed or finished issues`."
+    },
+    { key: "closeOr", text: " or ", description: "Between two states in `closeThings`." },
+    { key: "closeThingDecided", text: "decided", description: "A decided item's state, in `closeThings`." },
+    { key: "closeThingFixed", text: "fixed", description: "A fixed item's state, in `closeThings`." },
+    { key: "closeThingDone", text: "finished", description: "A done item's state, in `closeThings`." },
+    { key: "closeJudgementOne", text: "judgement call", description: "Close all's thing, one call." },
+    { key: "closeJudgements", text: "judgement calls", description: "Close all's things, several calls." },
+    { key: "closeIssueOne", text: "issue", description: "Close all's thing, one issue." },
+    { key: "closeIssues", text: "issues", description: "Close all's things, several issues." },
+    { key: "closeTodoOne", text: "todo", description: "Close all's thing, one todo." },
+    { key: "closeTodos", text: "todos", description: "Close all's things, several todos." },
     {
       key: "closeAllTip",
       text: "Close all {count} {things} at once:  each turns grey, as if you ticked it",

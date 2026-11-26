@@ -908,6 +908,26 @@ function anchoredComments(value: unknown): WaitingComment[] {
 }
 
 /**
+ * What the page header's gear can ask the epic's session to do (`ReviewInbox.gearAsks`):  each its own `📬` line
+ * (`InboxMonitor`), else its command typed into the session's tab (`ReviewStart`).
+ * - `tidy`:  Tidy, `/epic tidy <epic>` (epic `epic-engine` T168)
+ * - `status`:  Where are we?, a short status, `/wtf` (T174)
+ * - `hush`:  Hush settled items, `/epic hush <epic>` (T174)
+ * - `fresh`:  Start fresh, `/epic fresh` (T174)
+ * - `push`:  Merge and push, the tooling home's only:  finished work into `main`, and `main` pushed to GitHub (T174)
+ */
+export const GEAR_ASKS = ["tidy", "status", "hush", "fresh", "push"] as const
+
+/** One of the gear's asks (`GEAR_ASKS`). */
+export type GearAsk = (typeof GEAR_ASKS)[number]
+
+/** What the page asks the epic's session to start:  a review (the pill), or one of the gear's asks (T168, T174). */
+export type PageAsk = "review" | GearAsk
+
+/** Every ask the page may make (`PageAsk`):  what `POST /api/epics/review/start` takes. */
+export const PAGE_ASKS: readonly PageAsk[] = ["review", ...GEAR_ASKS]
+
+/**
  * The page server's answer to "start a review" (`POST /api/epics/review/start`, epic `airplane` P12):
  * its `StartResult`.
  * - `asked`:  told through its inbox poller (epic `epic-engine` I144);  `sent`:  typed into the one session titled for

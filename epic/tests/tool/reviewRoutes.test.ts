@@ -458,6 +458,34 @@ describe("start, and waking the epic", () => {
     expect(asked[0]?.[1]).toMatchObject({ prompt: "/epic tidy big" })
   })
 
+  // epic `epic-engine` T174
+  test("the gear's other asks:  each one's command typed;  an unknown ask is a review", async () => {
+    sessions(["🚧 big", process.pid])
+    const typed = []
+    for (const ask of ["status", "hush", "fresh", "nonsense"]) {
+      asked.length = 0
+      typed.push((await post("start", { page: PLAN_URL, ask })).body.command)
+    }
+    expect(typed).toEqual(["/wtf", "/epic hush big", "/epic fresh", "/epic review big"])
+  })
+
+  test("Merge and push:  refused unless the page's epic is the tooling home;  GET home says which", async () => {
+    sessions(["🚧 big", process.pid])
+    const home = (page: string) => ask(port, "GET", `/api/epics/review/home?page=${encodeURIComponent(page)}`)
+    expect(JSON.parse((await home(PLAN_URL)).text)).toEqual({ home: false })
+    expect((await post("start", { page: PLAN_URL, ask: "push" })).status).toBe(403)
+    writeFileSync(join(root, "epics", "home.json5"), '{ "epic": "big" }\n')
+    try {
+      expect(JSON.parse((await home(PLAN_URL)).text)).toEqual({ home: true })
+      expect(JSON.parse((await home(`/${PAGES.saga}`)).text)).toEqual({ home: false })
+      const got = await post("start", { page: PLAN_URL, ask: "push" })
+      expect(got.body).toMatchObject({ state: "sent" })
+      expect(got.body.command).toMatch(/^Merge and push/)
+    } finally {
+      rmSync(join(root, "epics", "home.json5"), { force: true })
+    }
+  })
+
   test("none:  nothing sent, and says so", async () => {
     sessions(["🚧 other", process.pid], ["bigger things", process.ppid])
     const got = await post("start", { page: PLAN_URL })

@@ -24,6 +24,13 @@ import { On } from "./On"
 export class WhenUploading extends On {
   @proto static priority = Priority.specific
 
+  /** The line, with a warning when the project also runs in Python, where no upload reaches it (I166). */
+  parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    const match = super.parse(scope, tokens)
+    if (match) SP.SpellWarnings.noteFilesNotInPython(match)
+    return match
+  }
+
   /** Always `uploading`, whatever the language's words. */
   ownEventName(_match: P.MatchFor<On>): string {
     return "uploading"
@@ -56,7 +63,10 @@ export class FileUploadHandler extends SpellStatement<"moment|body?"> {
 
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     if (!P.SubjectScope.of(scope)?.subjectType) return undefined
-    return super.parse(scope, tokens)
+    const match = super.parse(scope, tokens)
+    // no upload reaches a program running in Python (I166)
+    if (match) SP.SpellWarnings.noteFilesNotInPython(match)
+    return match
   }
 
   /** The body's scope:  `the file`, in the language's own word, and `it` / `its` the view. */

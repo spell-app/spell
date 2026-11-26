@@ -227,6 +227,43 @@ describe("files and folders dragged in from the desktop:  the drag lines, `file`
   })
 })
 
+describe("a project also compiled to Python is told its file lines do nothing there (epic `language` I166, B)", () => {
+  /** The warnings on a drop area's `lines`, in a project compiling to `targets`. */
+  function warningsIn(lines: string[], targets: string[], path = "/test.spell", head = "a drop area is a view where:") {
+    const contents = `${head}\n${lines.map((line) => `\t${line}`).join("\n")}`
+    const { files } = parseSpellProject([{ path, contents }], { targets })
+    return describeWarnings(files[0]!.match)
+  }
+  const lines = [
+    "when a file is dropped on it:",
+    "\tprint the file",
+    "can take a file when:",
+    "\tyes",
+    "when uploading:",
+    "\tprint 1",
+    "when a file is uploaded:",
+    "\tprint the file"
+  ]
+
+  test("each file line warns, in the novice voice;  a project not compiled to Python hears nothing", () => {
+    const warnings = warningsIn(lines, ["py"])
+    expect(warnings).toHaveLength(4)
+    for (const warning of warnings) expect(warning).toContain("turn into a Python program")
+    expect(warningsIn(lines, [])).toEqual([])
+    expect(warningsIn(lines, ["ts/solid"])).toEqual([])
+  })
+
+  test("in Spanish too", () => {
+    const warnings = warningsIn(
+      ["cuando un archivo se suelta sobre ella:", "\timprimir el archivo"],
+      ["py"],
+      "/zona.es.spell",
+      "una zona es una vista:"
+    )
+    expect(warnings).toEqual([expect.stringContaining("programa de Python")])
+  })
+})
+
 describe("the file uploader's words, English and Spanish (epic `language` P67, r32;  OK'd in from-console Q14)", () => {
   /** A view's outline of `lines`, in `language`:  its code, its parse errors left out of it. */
   function view(lines: string[], language: "en" | "es" = "en"): string {

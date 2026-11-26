@@ -499,9 +499,10 @@ That game lives in the server's memory, though:  restart the server, and every g
 
 - A save is sent beside the games, so by itself it holds nobody else up,
   and stopping the app waits until the last one's sent.
-  - Except where a program can't wait:  a drawing, or a thing being made, that reads while a save's being sent
-    waits for that save, and so does every other visitor.
-    An `in one go:` or a named operation there does the same.
+  - A drawing, or a thing being made, that reads while a save's being sent doesn't wait for it:
+    it shows what the place has, with the saves on their way laid over it.
+    A save the place then refuses shows until the next read.
+  - An `in one go:` or a named operation there still waits, and so does every other visitor.
   - A save that fails is a line in the server's log, not an error the program catches.
 - A message that fails is logged, and the page carries on.
 - `--seed <n>` deals the same game every run.

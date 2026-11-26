@@ -1223,7 +1223,7 @@
       "name": "--ui-checkbox-toggle-width",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-checkbox>`'s token.  Default:  `3.5em`"
+        "value": "The toggle's lane: about twice its handle, as the platforms' own switches (Fomantic's is 3.5em).\n\n`<ui-checkbox>`'s token.  Default:  `2.75em`"
       }
     },
     {

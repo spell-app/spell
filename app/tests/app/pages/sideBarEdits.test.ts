@@ -380,64 +380,67 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     expect((await fileState(page, "Card.spell")).text).toBe(typed)
 
     // a click on a card moves the focus out of the code:  the key still reaches what was typed
+    // (in Edit the editor owns the keys, so a move the click made in the game isn't undone first:  editor T171)
     await select(page, "solitaire-card").catch(() => undefined)
     expect(await page.evaluate(() => document.activeElement?.closest(".cm-editor"))).toBeNull()
-    // a click that played the card undoes first, the game's own step (I167)
-    const gameCanUndo = () =>
-      page.evaluate(
-        () =>
-          (window as unknown as { core: { RUNTIME: { history: { canUndo: boolean } } } }).core.RUNTIME.history.canUndo
-      )
-    while (await gameCanUndo()) await press(page, "ControlOrMeta+z")
-    expect((await fileState(page, "Card.spell")).text).toBe(typed)
     await press(page, "ControlOrMeta+z")
     expect((await fileState(page, "Card.spell")).text).toBe(before)
     await page.close()
   })
 
-  test("a move in the running app undoes before the editor's change (I167)", { timeout: 90_000 }, async () => {
-    // the files as they are on disk:  a save the last test answered would load in their place
-    saved.clear()
-    const page = await context.newPage()
-    await page.goto(`${EDITOR}edit/@spell/examples/Solitaire/Card.spell`, { timeout: 60_000 })
-    await new CodeEditor(page).shown()
-    await page.waitForTimeout(5000)
-    const { text: before } = await fileState(page, "Card.spell")
-    await new CodeEditor(page).lineLocator().nth(1).click()
-    await page.keyboard.press("Home")
-    await page.keyboard.type("Q")
-    await page.waitForTimeout(3000)
-    const { text: typed } = await fileState(page, "Card.spell")
-    expect(typed).not.toBe(before)
+  test(
+    "⌘Z off the code:  in Edit what was typed, in Run the game's move first (I167, editor T171)",
+    { timeout: 90_000 },
+    async () => {
+      // the files as they are on disk:  a save the last test answered would load in their place
+      saved.clear()
+      const page = await context.newPage()
+      await page.goto(`${EDITOR}edit/@spell/examples/Solitaire/Card.spell`, { timeout: 60_000 })
+      await new CodeEditor(page).shown()
+      await page.waitForTimeout(5000)
+      const { text: before } = await fileState(page, "Card.spell")
+      await new CodeEditor(page).lineLocator().nth(1).click()
+      await page.keyboard.press("Home")
+      await page.keyboard.type("Q")
+      await page.waitForTimeout(3000)
+      const { text: typed } = await fileState(page, "Card.spell")
+      expect(typed).not.toBe(before)
 
-    // a click on the stock plays a card:  a step of the game's own
-    const game = () =>
-      page.evaluate(() => {
-        const { core } = window as unknown as { core: { RUNTIME: { history: { canUndo: boolean } } } }
-        const discard = document.querySelector("solitaire-discard-pile")
-        return { canUndo: core.RUNTIME.history.canUndo, discards: discard?.querySelectorAll("solitaire-card").length }
-      })
-    const dealt = await game()
-    await page.locator("solitaire-stock-pile").first().click()
-    await page.waitForTimeout(1000)
-    const played = await game()
-    expect(played).toEqual({ canUndo: true, discards: dealt.discards! + 1 })
-    expect(await page.evaluate(() => document.activeElement?.closest(".cm-editor"))).toBeNull()
+      // a click on the stock plays a card:  a step of the game's own
+      const game = () =>
+        page.evaluate(() => {
+          const { core } = window as unknown as { core: { RUNTIME: { history: { canUndo: boolean } } } }
+          const discard = document.querySelector("solitaire-discard-pile")
+          return { canUndo: core.RUNTIME.history.canUndo, discards: discard?.querySelectorAll("solitaire-card").length }
+        })
+      const dealt = await game()
+      await page.locator("solitaire-stock-pile").first().click()
+      await page.waitForTimeout(1000)
+      const played = await game()
+      expect(played).toEqual({ canUndo: true, discards: dealt.discards! + 1 })
+      expect(await page.evaluate(() => document.activeElement?.closest(".cm-editor"))).toBeNull()
 
-    // the focus in the app (or on nothing):  the game's move first, the code as typed
-    await press(page, "ControlOrMeta+z")
-    expect(await game()).toEqual(dealt)
-    expect((await fileState(page, "Card.spell")).text).toBe(typed)
-    // with no move left to undo:  the editor's, what was typed
-    await press(page, "ControlOrMeta+z")
-    expect((await fileState(page, "Card.spell")).text).toBe(before)
+      // in Edit, the focus in the app (or on nothing):  the editor owns the keys (editor T171), so what was typed,
+      // and the game's move stays
+      await press(page, "ControlOrMeta+z")
+      expect((await fileState(page, "Card.spell")).text).toBe(before)
+      expect(await game()).toEqual(played)
 
-    // in the code:  the code editor's own
-    await new CodeEditor(page).lineLocator().nth(1).click()
-    await press(page, "Shift+ControlOrMeta+z")
-    expect((await fileState(page, "Card.spell")).text).toBe(typed)
-    await page.close()
-  })
+      // in the code:  the code editor's own
+      await new CodeEditor(page).lineLocator().nth(1).click()
+      await press(page, "Shift+ControlOrMeta+z")
+      expect((await fileState(page, "Card.spell")).text).toBe(typed)
+
+      // in Run:  the program's own first, the game's move, and the code as typed
+      await page.evaluate(`window.editor.showRunner()`)
+      await page.waitForTimeout(2000)
+      await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+      await press(page, "ControlOrMeta+z")
+      expect(await game()).toEqual(dealt)
+      expect((await fileState(page, "Card.spell")).text).toBe(typed)
+      await page.close()
+    }
+  )
 
   test("a notebook's lock is a step of the same history", { timeout: 90_000 }, async () => {
     const page = await context.newPage()
@@ -750,13 +753,14 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     const foundations = await centersOf(page, "solitaire-foundation")
     await startInspecting(page)
 
-    // from the empty cell left of the foundations, across the first two
-    const start = { x: foundations[0]!.x - 70, y: foundations[0]!.y + 4 }
+    // from the background right of the foundations, across the last two
+    // (the cell left of them is a <spacer>, a part of its own since Owen's edits, so a press there is no band)
+    const start = { x: foundations[3]!.x + 45, y: foundations[3]!.y + 4 }
     await page.mouse.move(start.x, start.y)
     await page.mouse.down()
-    await page.mouse.move(start.x + 3, start.y, { steps: 2 })
+    await page.mouse.move(start.x - 3, start.y, { steps: 2 })
     expect(await page.locator(".InspectorBand").count()).toBe(0)
-    await page.mouse.move(foundations[1]!.x, foundations[1]!.y + 4, { steps: 6 })
+    await page.mouse.move(foundations[2]!.x, foundations[2]!.y + 4, { steps: 6 })
     expect(await page.locator(".InspectorBand").count()).toBe(1)
     await page.mouse.up()
     await page.waitForTimeout(300)
@@ -769,7 +773,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     // Esc cancels a band, and inspecting goes on
     await page.mouse.move(start.x, start.y)
     await page.mouse.down()
-    await page.mouse.move(foundations[3]!.x, foundations[3]!.y + 4, { steps: 6 })
+    await page.mouse.move(foundations[0]!.x, foundations[0]!.y + 4, { steps: 6 })
     await page.keyboard.press("Escape")
     await page.mouse.up()
     await page.waitForTimeout(300)

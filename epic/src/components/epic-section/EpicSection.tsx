@@ -28,7 +28,7 @@ import { PhaseDrag } from "./PhaseDrag"
 import { phaseFields } from "./PhaseFields"
 import { PhaseState } from "./PhaseState"
 import { MARKED_SHOWS_AS, StateFilter, type ChipPick } from "./StateFilter"
-import { CloseAllRule, type CloseAllKind } from "./CloseAllRule"
+import { CloseAllRule, type CloseAllKind, type CloseWord } from "./CloseAllRule"
 import { TestQueue } from "./TestQueue"
 import {
   CLOSED_STATUSES,
@@ -354,18 +354,20 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   })
 
   /**
-   * The ids of the items its Close all closes (epic `epic-engine` T158;  `CloseAllRule`):  a Judgement calls section's
-   * DECIDED calls, an Issues section's FIXED issues, a Todos section's DONE todos, still waiting for his tick;  none
-   * for any other kind, or outside a review.
+   * The items its Close all closes, each with its finished word (epic `epic-engine` T158, I487;  `CloseAllRule`):
+   * a Judgement calls section's DECIDED calls, an Issues section's FIXED and DONE issues, a Todos section's DONE and
+   * FIXED todos, still waiting for his tick;  none for any other kind, or outside a review.
    */
-  readonly closable = createMemo((): string[] => {
+  readonly closable = createMemo((): ClosableItem[] => {
     const kind = CloseAllRule.kindOf(this.kind)
     const client = this.reviewState.client
     if (!kind || !client || isServer) return []
     return this.itemStates().flatMap(({ item, state }) => {
       const live = this.reviewState.liveOf(item.id)
       const commented = client.commentsIn(item.id).length > 0
-      return CloseAllRule.closes(kind, item, { state: state as ItemState, live, commented }) ? [item.id] : []
+      if (!CloseAllRule.closes(kind, item, { state: state as ItemState, live, commented })) return []
+      const word = CloseAllRule.wordOf(kind, item)
+      return word ? [{ id: item.id, word }] : []
     })
   })
 
@@ -757,11 +759,12 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * The Judgement calls, Issues and Todos sections' Close all, on their title while reviewed and one waits for his
    * tick (Owen, 2026-11-23:  "1-click way to quickly e.g. close all "DECIDED" things in Js and "FIXED" in and "DONE" in
    * todos";  on each section's own title row, his choice):  "Close 12 decided", green outlined.
+   * - each finished word counted apart, in the section's order:  "Close 1 fixed, 2 done" (I487)
    * - a click closes them at once, no confirm (`closeAll()`, I462)
    */
   private closeAllButton(kind: CloseAllKind): JSX.Element {
     const count = () => this.closable().length
-    const things = () => this.closeThings(kind, count())
+    const things = () => this.closeThings(kind, this.closable())
     return (
       <Show when={count()}>
         <ui-button
@@ -778,10 +781,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
             void this.closeAll(kind)
           }}
         >
-          {this.translationForKey("closeAll", {
-            count: String(count()),
-            state: this.translationForKey(CLOSE_STATE_WORDS[kind])
-          })}
+          {this.translationForKey("closeAll", { counts: this.closeCounts(kind, this.closable()) })}
         </ui-button>
       </Show>
     )
@@ -797,16 +797,21 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   @E.untracked
   async closeAll(kind: CloseAllKind) {
     const client = this.reviewState.client
-    const ids = this.closable()
+    const counted = this.closable()
+    const ids = counted.map((each) => each.id)
     if (!client || !ids.length) return
-    const count = (n: number) => ({ count: String(n), things: this.closeThings(kind, n) })
     const answer = await client.closeAll(kind, ids)
     if (!answer) return
     const left = answer.left.length
       ? `  ${this.translationForKey("closedAllLeft", { count: String(answer.left.length) })}`
       : ""
     const batch = answer.batch
-    PageNotices.show(`${this.translationForKey("closedAll", count(answer.closed.length))}${left}`, {
+    const closed = new Set(answer.closed)
+    const things = this.closeThings(
+      kind,
+      counted.filter((each) => closed.has(each.id.toLowerCase()))
+    )
+    PageNotices.show(`${this.translationForKey("closedAll", { count: String(answer.closed.length), things })}${left}`, {
       tone: "success",
       ms: NOTICE_MS,
       actions: batch
@@ -828,10 +833,26 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     })
   }
 
-  /** What Close all on section kind `kind` closes, `count` of them, in words:  `decided judgement calls`. */
-  private closeThings(kind: CloseAllKind, count: number): string {
+  /** Close all's counts on section kind `kind`, a word each, in its order:  `1 fixed, 2 done` (I487). */
+  private closeCounts(kind: CloseAllKind, items: readonly ClosableItem[]): string {
+    return CloseAllRule.wordsIn(kind, items)
+      .map(([word, count]) =>
+        this.translationForKey("closeAllCount", {
+          count: String(count),
+          state: this.translationForKey(CLOSE_STATE_WORDS[word])
+        })
+      )
+      .join(", ")
+  }
+
+  /** What Close all on section kind `kind` closes, `items`, in words:  `decided judgement calls`, `fixed or finished issues`. */
+  private closeThings(kind: CloseAllKind, items: readonly ClosableItem[]): string {
     const [one, many] = CLOSE_THING_WORDS[kind]
-    return this.translationForKey(count === 1 ? one : many)
+    const states = CloseAllRule.wordsIn(kind, items).map(([word]) => this.translationForKey(CLOSE_THING_STATES[word]))
+    return this.translationForKey("closeThings", {
+      states: states.join(this.translationForKey("closeOr")),
+      things: this.translationForKey(items.length === 1 ? one : many)
+    })
   }
 
   ////////////////
@@ -1508,14 +1529,21 @@ const CLOSE_ALL_BUTTON = "close-all"
 /** How long Close all's notice, and its Undo, stays (ms):  longer than a plain notice, so there's time to undo. */
 const NOTICE_MS = 12_000
 
-/** Each Close all's finished word, a text key:  `Close 12 decided`. */
+/** Each finished word in Close all's button, a text key:  `Close 12 decided`. */
 const CLOSE_STATE_WORDS = {
-  judgements: "closeDecided",
-  issues: "closeFixed",
-  todos: "closeDone"
-} as const satisfies Record<CloseAllKind, string>
+  decided: "closeDecided",
+  fixed: "closeFixed",
+  done: "closeDone"
+} as const satisfies Record<CloseWord, string>
 
-/** Each Close all's things, one and several, text keys:  `decided judgement call(s)`. */
+/** Each finished word in Close all's tooltip and notice, a text key:  `fixed or finished issues`. */
+const CLOSE_THING_STATES = {
+  decided: "closeThingDecided",
+  fixed: "closeThingFixed",
+  done: "closeThingDone"
+} as const satisfies Record<CloseWord, string>
+
+/** Each Close all's things, one and several, text keys:  `judgement call(s)`. */
 const CLOSE_THING_WORDS = {
   judgements: ["closeJudgementOne", "closeJudgements"],
   issues: ["closeIssueOne", "closeIssues"],
@@ -1524,6 +1552,9 @@ const CLOSE_THING_WORDS = {
 
 /** Class of the Manual tests section's last line in a run across every epic. */
 const NEXT_EPIC = "next-epic"
+
+/** An item Close all closes, and the finished word it's closed in (`EpicSection.closable()`). */
+type ClosableItem = { id: string; word: CloseWord }
 
 /** The Manual tests section's button, as things stand (`EpicSection.testing()`). */
 type TestingState = { open: number; left: number; prepared: boolean; preparing: boolean; queued: boolean }
