@@ -18,6 +18,8 @@ behind.apply([{"kind": "insert", "collection": "device_notes", "id": "device-not
   The compiler refuses them first (spell's `SP.TARGETS`, `PY.PLACE_KINDS`):  this is for a program compiled by hand.
 - A place's key comes from the environment (`key_from()`):  a Python program is a server side, as `spell run` is.
 - A server asking it to wait is waited out, when that's soon (`open_minding_limits()`):  what `WebPlace` does.
+- A place on the page server answers a list a page at a time (epic data P57):  `pages()` reads one as it's wanted;
+  `rows()` and `rows_now()` read them all.
 - Standard library only:  HTTP through `urllib`, its waiting off the event loop (`asyncio.to_thread()`).
   - `apply()` and `call()` wait where they're called:  `places.py` calls them off the loop.
 - Knows nothing of things:  rows are plain JSON, by the JavaScript names of their fields.  `places.py` makes things.
@@ -32,7 +34,7 @@ import threading
 import time
 import urllib.error
 import urllib.request
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import AsyncIterator, Callable, Mapping, Sequence
 from datetime import datetime
 from email.utils import parsedate_to_datetime
 from http.client import HTTPException, HTTPResponse
@@ -117,6 +119,7 @@ class PlaceBehind:
     """What's behind one place:  its rows, by collection, and the changes it takes.
 
     - `rows()` waits, as any read does;  `apply()` waits where it's called, in a thread (`place_queue.py`).
+    - `pages()` reads them a page at a time, for a place that answers so:  one page of every row, by default.
     """
 
     # the kind's word, as the program's line says it:  `data folder`
@@ -149,6 +152,13 @@ class PlaceBehind:
     def rows_now(self, collection: str) -> list[Row]:
         """As `rows()`, answered now, where nothing can wait:  a drawing.  - throws `PlaceError`"""
         raise NotImplementedError
+
+    async def pages(self, collection: str) -> AsyncIterator[list[Row]]:
+        """Each page of `collection`'s rows, in order:  one page, every row (`rows()`), unless the place pages.
+
+        - A page is asked only when the loop over it wants the next.  - throws `PlaceError`
+        """
+        yield await self.rows(collection)
 
     def apply(self, changes: list[Change]) -> None:
         """Make `changes`, in order, all or none where the place can (`makes_all_or_none`).
@@ -234,6 +244,9 @@ class ServerPlace(PlaceBehind):
       it keeps what came before a refusal, and says how many that was (`says_what_it_kept`).
     - Each change goes with an id of its own (`changeId`):  the page server never makes one twice.
     - Who's asking:  this machine's person, as the page server takes anyone with its token.
+    - A sheet or a data folder can't page by itself, so the page server answers its list a page at a time
+      (epic data P57):  about 100 rows, and a `nextPage` while there are more, asked for with `query.page.at`.
+      - `pages()` asks for each as it's wanted;  `rows()` and `rows_now()` follow `nextPage` to the end.
     - `post`:  sends a request, for a test to stand in for the server;  `urllib`'s by default.
     """
 
@@ -257,15 +270,40 @@ class ServerPlace(PlaceBehind):
         self.times_held: str | Sequence[str] = EVERY_FIELD if kind in HOLDS_ANY_FIELD else ()
 
     async def rows(self, collection: str) -> list[Row]:
-        """Every row of `collection`, asked of the server off the event loop."""
+        """Every row of `collection`, every page, asked of the server off the event loop."""
         return await asyncio.to_thread(self.rows_now, collection)
 
     def rows_now(self, collection: str) -> list[Row]:
-        """As `rows()`, waiting here for the answer."""
-        answer = self.ask("list", {"collection": collection, "query": {}})
-        if isinstance(answer, dict) and "timesHeld" in answer:
+        """As `rows()`, waiting here for each page's answer."""
+        rows, at = self.page_now(collection, None)
+        while at is not None:
+            more, at = self.page_now(collection, at)
+            rows.extend(more)
+        return rows
+
+    async def pages(self, collection: str) -> AsyncIterator[list[Row]]:
+        """Each page of `collection`'s rows, asked of the server off the event loop only when the loop wants it."""
+        at: str | None = None
+        while True:
+            rows, at = await asyncio.to_thread(self.page_now, collection, at)
+            yield rows
+            if at is None:
+                return
+
+    def page_now(self, collection: str, at: str | None) -> tuple[list[Row], str | None]:
+        """The page of `collection` at `at` (`None`:  the first), and the next page's `at`:  `None` for the last.
+
+        - SIDE EFFECT:  the first page says what a sheet can hold (`timesHeld`), by its columns.
+        - Waits here for the answer.  - throws `PlaceError`
+        """
+        query = {} if at is None else {"page": {"at": at}}
+        answer = self.ask("list", {"collection": collection, "query": query})
+        if not isinstance(answer, dict):
+            return [], None
+        if at is None and "timesHeld" in answer:
             self.times_held = answer["timesHeld"]
-        return list(answer.get("rows", [])) if isinstance(answer, dict) else []
+        next_page = answer.get("nextPage")
+        return list(answer.get("rows", [])), next_page if isinstance(next_page, str) and next_page else None
 
     def apply(self, changes: list[Change]) -> None:
         """Send `changes`, waiting for the server's answer:  what it refused, it says.

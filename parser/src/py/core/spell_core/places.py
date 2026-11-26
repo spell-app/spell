@@ -25,6 +25,7 @@ core.remove_saved(notes[0])                # remove it from the notes
     - so a place's no is a line on the console;  an `in one go:` waits for its answer, and raises it
     - with no loop running (a plain script's top level) it's sent there and then, and raises
   - a read of a place waits until that place's queue is empty, so it sees what was just saved
+    - read a page at a time (`pages()`, epic data P57), it waits so before each page, and gathers them all
   - In a drawing, where nothing can wait (`core.run_at_once()`), a read doesn't wait for a save (I158):
     it's what the place has, with every save still on its way laid over it (`laid_over()`), as a browser's are.
     - so a drawing shows a save before the place keeps it;  a refused one shows until the next read
@@ -217,8 +218,7 @@ class ProgramPlaces:
             if self.waits_here():
                 rows = laid_over(behind.rows_now(home.collection), queue.on_its_way(), home.collection)
             else:
-                await queue.wait_until_sent()
-                rows = await self.listed(behind, cls)
+                rows = await self.listed(behind, cls, queue)
             self.take(saved, rows)
         return saved.things
 
@@ -229,9 +229,22 @@ class ProgramPlaces:
         behind.know_numbers(home.collection, _number_fields_of(cls))
         return behind
 
-    async def listed(self, behind: PlaceBehind, cls: type) -> list[Row]:
-        """Every row of `cls`'s collection, waited for."""
-        return await behind.rows(self.home_of_class(cls).collection)
+    async def listed(self, behind: PlaceBehind, cls: type, queue: PlaceQueue) -> list[Row]:
+        """Every row of `cls`'s collection, every page (`pages()`), waited for.
+
+        - Before each page, the place's saves waiting are sent (`queue`):  so a page has every save made before it.
+        """
+        rows: list[Row] = []
+        pages = behind.pages(self.home_of_class(cls).collection)
+        try:
+            while True:
+                await queue.wait_until_sent()
+                try:
+                    rows.extend(await anext(pages))
+                except StopAsyncIteration:
+                    return rows
+        finally:
+            await pages.aclose()
 
     def read_of(self, cls: type, filter: Mapping[str, object] | None) -> SavedRead:
         """The kept read of `cls` by `filter`, made the first time."""

@@ -942,6 +942,91 @@ def test_a_named_operation(page_server: str, program: Core) -> None:
         asyncio.run(program.call_place("this_device", "publish"))
 
 
+class PagedServer:
+    """A page server's list answered a page at a time (epic data P57):  three pages, `nextPage` on all but the last.
+
+    - It stands in for `ServerPlace.post`;  `asked` is each request's last word and body, in order.
+    """
+
+    # the rows of each page, in order
+    PAGES: ClassVar[list[list[dict[str, Any]]]] = [
+        [{"id": "a", "text": "one"}, {"id": "b", "text": "two"}],
+        [{"id": "c", "text": "three"}],
+        [{"id": "d", "text": "four"}],
+    ]
+
+    def __init__(self) -> None:
+        """Nothing asked yet."""
+        self.asked: list[tuple[str, dict[str, object]]] = []
+
+    def __call__(self, url: str, body: dict[str, object], headers: dict[str, str]) -> object:
+        """The answer to `body`, posted to `url`."""
+        what = url.rsplit("/", 1)[1]
+        self.asked.append((what, body))
+        if what != "list":
+            return {"rows": []}
+        query = body["query"]
+        assert isinstance(query, dict)
+        index = int(query["page"]["at"]) if "page" in query else 0
+        more = index + 1 < len(self.PAGES)
+        times = {"timesHeld": ["created"]} if index == 0 else {"timesHeld": ["modified"]}
+        return {"rows": self.PAGES[index], "handled": {}, **times, **({"nextPage": str(index + 1)} if more else {})}
+
+    def pages_asked(self) -> list[object]:
+        """Each list request's page:  `None` for the first."""
+        return [body["query"].get("page", {}).get("at") for what, body in self.asked if what == "list"]  # type: ignore[union-attr]
+
+
+def test_a_list_read_whole_follows_every_page() -> None:
+    server = PagedServer()
+    behind = ServerPlace("sheet", "http://x.test/p", TOKEN, post=server)
+    assert [row["id"] for row in behind.rows_now("notes")] == ["a", "b", "c", "d"]
+    assert server.pages_asked() == [None, "1", "2"]
+    # what a sheet can hold is the first page's word
+    assert behind.times_held == ["created"]
+    assert [row["id"] for row in asyncio.run(behind.rows("notes"))] == ["a", "b", "c", "d"]
+
+
+def test_each_page_is_asked_only_when_the_loop_wants_it() -> None:
+    server = PagedServer()
+    behind = ServerPlace("data folder", "http://x.test/p", TOKEN, post=server)
+
+    async def two_pages() -> list[list[str]]:
+        pages = behind.pages("notes")
+        first = await anext(pages)
+        assert len(server.asked) == 1
+        second = await anext(pages)
+        assert len(server.asked) == 2
+        await pages.aclose()
+        return [[row["id"] for row in page] for page in (first, second)]
+
+    assert asyncio.run(two_pages()) == [["a", "b"], ["c"]]
+    assert server.pages_asked() == [None, "1"]
+
+
+def test_a_read_through_the_program_gets_every_page(program: Core) -> None:
+    server = PagedServer()
+    program._places.behinds["note_folder"] = ServerPlace("data folder", "http://x.test/p", TOKEN, post=server)
+
+    async def saves_then_reads() -> list[str]:
+        program.save_thing(FolderNote(text="five"))
+        return [note.text for note in await program.saved_things(FolderNote)]
+
+    assert asyncio.run(saves_then_reads()) == ["one", "two", "three", "four"]
+    # the save waiting went first, then each page
+    assert [what for what, _body in server.asked] == ["apply", "list", "list", "list"]
+
+
+def test_a_place_that_doesnt_page_is_one_page(tmp_path: Path) -> None:
+    device = DeviceFile(tmp_path / "Notes.device.json")
+    device.apply([{"kind": "insert", "collection": "notes", "id": "a", "fields": {"text": "one"}}])
+
+    async def every_page() -> list[list[str]]:
+        return [[row["id"] for row in page] async for page in device.pages("notes")]
+
+    assert asyncio.run(every_page()) == [["a"]]
+
+
 def test_with_no_token_a_read_says_how_to_get_one(program: Core, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("SPELL_SERVER_URL", "http://127.0.0.1:9")
     monkeypatch.delenv("SPELL_SERVER_TOKEN", raising=False)
