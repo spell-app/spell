@@ -9880,7 +9880,7 @@
           "ruleNames": ["filters_by_any_field"],
           "internal": false,
           "file": "src/spell/rules/places/FiltersByAnyField.ts",
-          "line": 15,
+          "line": 17,
           "purpose": "A web server's list filters by any field, asked the field and the value as two questions.",
           "syntaxes": [
             {
@@ -9897,6 +9897,9 @@
                   "code": "class Recetario(Place):\n    pass\n\nrecetario = core.place(\n    Recetario(),\n    {\n        \"name\": \"recetario\",\n        \"kind\": \"web server\",\n        \"at\": \"https://recetario.test\",\n        \"collections\": {\n            \"recetas\": {\n                \"at\": \"/api/recipes\",\n                \"filters\": \"every field\",\n                \"filtered_with\": {\"field\": \"field\", \"value\": \"value\"},\n            },\n        },\n        \"unclear_numbers\": \",\",\n    },\n)"
                 }
               }
+            },
+            {
+              "syntax": "{type:subject_implied} se puede filtrar por cualquier campo ,? con {field:text} y {value:text}"
             }
           ],
           "aliases": ["statement"]
@@ -9935,7 +9938,7 @@
           "ruleNames": ["sorts_by_any_field"],
           "internal": false,
           "file": "src/spell/rules/places/SortsByAnyField.ts",
-          "line": 26,
+          "line": 27,
           "purpose": "A web server's list sorts by any field, named in one question.",
           "syntaxes": [
             {
@@ -9952,6 +9955,9 @@
                   "code": "class Recetario(Place):\n    pass\n\nrecetario = core.place(\n    Recetario(),\n    {\n        \"name\": \"recetario\",\n        \"kind\": \"web server\",\n        \"at\": \"https://recetario.test\",\n        \"collections\": {\n            \"recetas\": {\n                \"at\": \"/api/recipes\",\n                \"sorts\": \"every field\",\n                \"sorted_with\": \"sort\",\n                \"sort_directions\": {\"param\": \"order\", \"descending\": \"desc\"},\n            },\n        },\n        \"unclear_numbers\": \",\",\n    },\n)"
                 }
               }
+            },
+            {
+              "syntax": "{type:subject_implied} se puede ordenar por cualquier campo ,? con {param:text} {nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -9961,7 +9967,7 @@
           "ruleNames": ["named_sorts"],
           "internal": false,
           "file": "src/spell/rules/places/NamedSorts.ts",
-          "line": 26,
+          "line": 27,
           "purpose": "The sorts a web server's list has names of its own for, each sent as its value.",
           "syntaxes": [
             {
@@ -9978,6 +9984,9 @@
                   "code": "class Recetario(Place):\n    pass\n\nrecetario = core.place(\n    Recetario(),\n    {\n        \"name\": \"recetario\",\n        \"kind\": \"web server\",\n        \"at\": \"https://recetario.test\",\n        \"collections\": {\n            \"recetas\": {\n                \"sorted_with\": \"order_by\",\n                \"at\": \"/api/recipes\",\n                \"sort_orders\": [\n                    {\"name\": \"creación\", \"as_\": \"created_at\", \"field\": \"createdAt\"},\n                    {\"name\": \"últimaVez\", \"as_\": \"recency\", \"field\": \"cocinadaEn\"},\n                ],\n            },\n        },\n        \"unclear_numbers\": \",\",\n    },\n)"
                 }
               }
+            },
+            {
+              "syntax": "{type:subject_implied} se puede ordenar por :? {nested_statements}"
             }
           ],
           "aliases": ["statement"]
@@ -10810,7 +10819,7 @@
           "ruleNames": ["sort_direction"],
           "internal": false,
           "file": "src/spell/rules/places/SortsByAnyField.ts",
-          "line": 68,
+          "line": 72,
           "purpose": "One line under `jobs can be sorted by any field, with \"sort\"`, `- newest first with \"order\" as \"desc\"`.",
           "syntaxes": [
             {
@@ -10824,7 +10833,7 @@
           "ruleNames": ["named_sort"],
           "internal": false,
           "file": "src/spell/rules/places/NamedSorts.ts",
-          "line": 63,
+          "line": 67,
           "purpose": "One line of a `named_sorts` block, `- \"completion\" as \"recency\", by end time`.",
           "syntaxes": [
             {
@@ -11192,7 +11201,7 @@
           "ruleNames": ["named_sort_field"],
           "internal": false,
           "file": "src/spell/rules/places/NamedSorts.ts",
-          "line": 93,
+          "line": 97,
           "purpose": "The field a `named_sort` line says, after its `, by`: every word to the line's end.",
           "syntaxes": [],
           "aliases": []

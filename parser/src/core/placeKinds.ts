@@ -310,6 +310,8 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       ...(details.namesLike !== undefined && { namesLike: folder.nameStyleLike(details.namesLike) }),
       ...(details.searches && { searches: details.searches }),
       ...(details.sortOrders && { sortOrders: details.sortOrders }),
+      ...(details.sortDirections && { sortDirections: details.sortDirections }),
+      ...(details.filteredWith && { filteredWith: details.filteredWith }),
       ...restLinesForEveryCollection(details),
       ...restAbilitiesIn(details),
       ...(details.pageSize !== undefined && { pageSize: details.pageSize }),

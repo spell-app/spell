@@ -840,6 +840,7 @@ placesEs.addRule(FiltersBy, {
     }
   ]
 })
+placesEs.addRule(FiltersByAnyField, { syntax: "{type:subject_implied} se puede filtrar por cualquier campo ,? con {field:text} y {value:text}" })
 placesEs.addRule(FiltersByAnyField, {
   syntax: `${THE}? {collection:plural_type} se pueden filtrar por cualquier campo ,? con {field:text} y {value:text}`,
   tests: [
@@ -897,6 +898,7 @@ placesEs.addRule(SortDirection, {
   syntax:
     "((descending:de más reciente a más antiguo|de mas reciente a mas antiguo)|(ascending:de más antiguo a más reciente|de mas antiguo a mas reciente)) con {param:text} como {value:text}"
 })
+placesEs.addRule(SortsByAnyField, { syntax: "{type:subject_implied} se puede ordenar por cualquier campo ,? con {param:text} {nested_statements}?" })
 placesEs.addRule(SortsByAnyField, {
   syntax: `${THE}? {collection:plural_type} se pueden ordenar por cualquier campo ,? con {param:text} {nested_statements}?`,
   tests: [
@@ -927,6 +929,7 @@ placesEs.addRule(SortsByAnyField, {
 })
 placesEs.addRule(NamedSortField)
 placesEs.addRule(NamedSort, { syntax: "{name:text} como {value:text} (, por {field:named_sort_field})?" })
+placesEs.addRule(NamedSorts, { syntax: "{type:subject_implied} se puede ordenar por :? {nested_statements}" })
 placesEs.addRule(NamedSorts, {
   syntax: `${THE}? {collection:plural_type} se pueden ordenar por :? {nested_statements}`,
   tests: [

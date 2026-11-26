@@ -1400,6 +1400,27 @@ describe("a list's own filters and sorts, under its line", () => {
     ])
   })
 
+  test("`it can be ...` under the place's line:  every list's directions and field-and-value, unless its own say", async () => {
+    const asked: string[] = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      asked.push(`${input instanceof Request ? input.url : input}`)
+      return Response.json([])
+    })
+    const place = new RestPlace({
+      url: "https://jobs.test",
+      can: { sort: "every field", filter: "every field" },
+      sortDirections: { param: "order", descending: "desc", ascending: "asc" },
+      filteredWith: { field: "field", value: "value" },
+      collections: { jobs: { path: "/api/jobs{/id}" } }
+    })
+    await place.list("jobs", { sort: [{ field: "name" }] }, {})
+    await place.list("jobs", { filter: { status: "open" } }, {})
+    expect(asked).toEqual([
+      "https://jobs.test/api/jobs?sort=name&order=asc",
+      "https://jobs.test/api/jobs?field=status&value=open"
+    ])
+  })
+
   test("what it would do is known before it's asked:  `takes()`", () => {
     const { place } = asking()
     expect(

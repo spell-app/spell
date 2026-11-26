@@ -20,18 +20,22 @@ const DIRECTION_SCOPES = new WeakSet<P.Scope>()
  *   Then the field goes as it is, and the way round in its own question:  `?sort=created_at&order=desc`.
  *   A way round no line names isn't the server's:  Spell's server sorts what it read.
  * - Beside `jobs can be sorted by:` (`NamedSorts`), the same list's named sorts, sent in the same question.
+ * - Or `it can be sorted by any field, with "sort"`:  under a list's line, `it` is that list;  under the place's, every list.
  * - `it sorts by every field with "sort"` still reads, the same without its lines.
  * - Compiles to the list's `sorts: "every field"`, `sortedWith` and `sortDirections`.
  */
-export class SortsByAnyField extends PlaceDetail<"collection|param|body?"> {
+export class SortsByAnyField extends PlaceDetail<"collection?|type?|param|body?"> {
   detailOf(match: P.MatchFor<this>): PlaceDetailValue {
-    const name = collectionNameFor(`${match.groups.collection.raw}`.replace(/s$/, ""))
     const sortDirections = SortsByAnyField.directionsUnder(this.getBody(match))
-    return {
-      collections: {
-        [name]: { sorts: "every field", sortedWith: textIn(match.groups.param), ...(sortDirections && { sortDirections }) }
-      }
+    const asks = {
+      sorts: "every field" as const,
+      sortedWith: textIn(match.groups.param),
+      ...(sortDirections && { sortDirections })
     }
+    const { collection } = match.groups
+    // `it`:  the list it's under, or every list
+    if (!collection) return asks
+    return { collections: { [collectionNameFor(`${collection.raw}`.replace(/s$/, ""))]: asks } }
   }
 
   /** Its lines' scope:  only there does a `sort_direction` read. */

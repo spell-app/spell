@@ -196,7 +196,8 @@ export function filtersOf(saved: P.SavedPlace | undefined): "every field" | stri
  * - Its list's own;  empty when no line says any.
  */
 export function namedSortsOf(saved: P.SavedPlace | undefined): { name: string; as: string; field: string }[] {
-  return placeLinesOf(saved)?.collections?.[saved!.collection]?.sortOrders ?? []
+  const details = placeLinesOf(saved)
+  return details?.collections?.[saved!.collection]?.sortOrders ?? details?.sortOrders ?? []
 }
 
 /**
@@ -209,7 +210,7 @@ export function namedSortsOf(saved: P.SavedPlace | undefined): { name: string; a
 export function sortsOnItsServer(saved: P.SavedPlace | undefined, field: string, descending: boolean): boolean {
   const details = placeLinesOf(saved)
   const own = details?.collections?.[saved!.collection]
-  const orders = own?.sortOrders ?? []
+  const orders = own?.sortOrders ?? details?.sortOrders ?? []
   const named = orders.find(({ name }) => name === field)
   if (named && descending) return true
   // its field, newest first, is the named sort itself
@@ -217,7 +218,7 @@ export function sortsOnItsServer(saved: P.SavedPlace | undefined, field: string,
   const byField = named?.field ?? field
   const sorts = own?.sorts ?? details?.sorts
   if (!sorts || (sorts !== "every field" && !sorts.includes(byField))) return false
-  const directions = own?.sortDirections
+  const directions = own?.sortDirections ?? details?.sortDirections
   return !directions || (descending ? directions.descending : directions.ascending) !== undefined
 }
 

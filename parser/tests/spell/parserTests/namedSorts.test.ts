@@ -278,3 +278,74 @@ describe("a sort its server can't do is an error, unless it ends `, sorted here`
     expect(opted!.errors).toEqual([])
   })
 })
+
+describe("`it` for the list:  `it can be sorted by:`, `it can be sorted by any field`, `it can be filtered by any field`", () => {
+  test("under a list's line, the same as its plural name", () => {
+    const [file] = compiled([
+      {
+        path: "/A.spell",
+        lines: [
+          `acme is a web server at "https://acme.test":`,
+          `\t- measurements live at "/api/measurements"`,
+          `\t\t- it can be sorted by any field, with "sort"`,
+          `\t\t\t- newest first with "order" as "desc"`,
+          `\t\t- it can be sorted by:`,
+          `\t\t\t- "completion" as "recency", by end time`,
+          `\t\t- it can be filtered by any field, with "field" and "value"`,
+          ...TYPE,
+          ...PAGE(`every measurement, sorted by completion, newest first`)
+        ]
+      }
+    ])
+    expect(file!.errors).toEqual([])
+    const code = file!.compiled
+    const list = code.slice(code.indexOf("measurements: {"))
+    expect(list).toMatch(/sorts: "every field",\s*sortedWith: "sort",/)
+    expect(list).toMatch(/sortDirections: \{\s*param: "order",\s*descending: "desc"\s*\}/)
+    expect(list).toMatch(/sortOrders: \[\{\s*name: "completion",\s*as: "recency",\s*field: "endTime"\s*\}\]/)
+    expect(list).toMatch(/filters: "every field",\s*filteredWith: \{ field: "field", value: "value" \}/)
+    expect(code).toContain(`sort: [{ field: "completion", descending: true }]`)
+  })
+
+  test("under the place's line, every list's", () => {
+    const [file] = compiled([
+      {
+        path: "/A.spell",
+        lines: [
+          `acme is a web server at "https://acme.test":`,
+          `\t- it can be sorted by:`,
+          `\t\t- "completion" as "recency", by end time`,
+          ...TYPE,
+          ...PAGE(`every measurement, sorted by completion, newest first`)
+        ]
+      }
+    ])
+    expect(file!.errors).toEqual([])
+    expect(file!.compiled).toMatch(/^ {2}sortOrders: \[\{\s*name: "completion"/m)
+  })
+
+  test("Spanish:  `se puede ordenar por:`, `se puede ordenar por cualquier campo`, `se puede filtrar por cualquier campo`", () => {
+    const [file] = compiled([
+      {
+        path: "/A.es.spell",
+        lines: [
+          `acme es un servidor web en "https://acme.test"`,
+          `\t- las mediciones están en "/api/measurements"`,
+          `\t\t- se puede ordenar por cualquier campo, con "sort"`,
+          `\t\t\t- de más reciente a más antiguo con "order" como "desc"`,
+          `\t\t- se puede ordenar por:`,
+          `\t\t\t- "finalización" como "recency", por hora de fin`,
+          `\t\t- se puede filtrar por cualquier campo, con "field" y "value"`,
+          `una "medición" es una cosa:`,
+          `\t- se guarda en acme`,
+          `\t- su "hora de fin" es una fecha`
+        ]
+      }
+    ])
+    expect(file!.errors).toEqual([])
+    const code = file!.compiled
+    expect(code).toMatch(/sortDirections: \{\s*param: "order",\s*descending: "desc"\s*\}/)
+    expect(code).toMatch(/sortOrders: \[\{\s*name: "finalización",\s*as: "recency",\s*field: "horaDeFin"\s*\}\]/)
+    expect(code).toMatch(/filteredWith: \{ field: "field", value: "value" \}/)
+  })
+})

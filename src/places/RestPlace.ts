@@ -149,6 +149,10 @@ export class RestPlace extends WebPlace implements Place {
   private readonly searches: RestSearch | undefined
   /** The orders it has a name of its own for, for every list. */
   private readonly sortOrders: readonly RestSortOrder[]
+  /** How every list is asked which way round a sort goes:  `RestAsks.sortDirections`, a list's own winning. */
+  private readonly sortDirections: RestAsks["sortDirections"]
+  /** What every list calls a filter's field and value:  `RestAsks.filteredWith`, a list's own winning. */
+  private readonly filteredWith: RestAsks["filteredWith"]
   /** Each collection's field names, made when it's first used. */
   private readonly fieldNames = new Map<string, FieldNames>()
   /** Fields a program named for a collection after it was made:  `addFields()`. */
@@ -169,12 +173,16 @@ export class RestPlace extends WebPlace implements Place {
     namesLike,
     searches,
     sortOrders = [],
+    sortDirections,
+    filteredWith,
     ...rest
   }: RestPlaceProps) {
     super(rest)
     this.namesLike = namesLike
     this.searches = searches
     this.sortOrders = sortOrders
+    this.sortDirections = sortDirections
+    this.filteredWith = filteredWith
     this.operations = operations ?? {}
     this.collections = collections
     this.allCollections = allCollections
@@ -570,7 +578,7 @@ export class RestPlace extends WebPlace implements Place {
     const { filter = {}, search = {}, sort = [], select } = query
     const { select: canSelect, idOf } = this.capabilities
     const { filter: canFilter, sort: canSort, sortParam, sortOrders, sortDirections } = this.asksOf(collection)
-    const { filteredWith } = this.mappingOf(collection).asks ?? {}
+    const filteredWith = this.mappingOf(collection).asks?.filteredWith ?? this.filteredWith
     const data: Record<string, unknown> = {}
     const filtering = Object.keys(filter)
     const { askedBy } = this.mappingOf(collection)
@@ -656,7 +664,7 @@ export class RestPlace extends WebPlace implements Place {
       sort: asks?.sort ?? this.capabilities.sort,
       sortParam: asks?.sortedWith ?? this.params.sort,
       sortOrders: [...(asks?.sortOrders ?? []), ...this.sortOrders],
-      sortDirections: asks?.sortDirections
+      sortDirections: asks?.sortDirections ?? this.sortDirections
     }
   }
 
@@ -934,6 +942,10 @@ export type RestPlaceProps = WebPlaceProps & {
    * - A list's own come first (`RestCollection.asks`).
    */
   sortOrders?: readonly RestSortOrder[]
+  /** How every list is asked which way round a sort goes, unless its own asks say:  `RestAsks.sortDirections`. */
+  sortDirections?: RestAsks["sortDirections"]
+  /** What every list calls a filter's field and value, unless its own asks say:  `RestAsks.filteredWith`. */
+  filteredWith?: RestAsks["filteredWith"]
 }
 
 /**

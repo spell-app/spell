@@ -904,6 +904,7 @@ places.addRule(FiltersBy, {
     }
   ]
 })
+places.addRule(FiltersByAnyField, { syntax: "{type:subject_it} can be filtered by any field ,? with {field:text} and {value:text}" })
 places.addRule(FiltersByAnyField, {
   syntax: '{collection:plural_type} can be filtered by any field ,? with {field:text} and {value:text}',
   tests: [
@@ -958,6 +959,7 @@ places.addRule(SortsWith, { syntax: "{type:subject_it} sorts with {param:text}" 
 places.addRule(SortDirection, {
   syntax: "((descending:newest first)|(ascending:oldest first)) with {param:text} as {value:text}"
 })
+places.addRule(SortsByAnyField, { syntax: "{type:subject_it} can be sorted by any field ,? with {param:text} {nested_statements}?" })
 places.addRule(SortsByAnyField, {
   syntax: "{collection:plural_type} can be sorted by any field ,? with {param:text} {nested_statements}?",
   tests: [
@@ -991,6 +993,7 @@ places.addRule(SortsByAnyField, {
 })
 places.addRule(NamedSortField)
 places.addRule(NamedSort, { syntax: "{name:text} as {value:text} (, by {field:named_sort_field})?" })
+places.addRule(NamedSorts, { syntax: "{type:subject_it} can be sorted by :? {nested_statements}" })
 places.addRule(NamedSorts, {
   syntax: "{collection:plural_type} can be sorted by :? {nested_statements}",
   tests: [

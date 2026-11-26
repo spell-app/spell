@@ -40,6 +40,10 @@ export type ImportedPlaceDetails = {
   filters?: "every field" | string[]
   /** The fields it sorts by itself, for every list:  `it sorts by title`.  Left out:  none. */
   sorts?: "every field" | string[]
+  /** The sorts every list has names of its own for:  `it can be sorted by:`, under the place's line. */
+  sortOrders?: { name: string; as: string; field: string }[]
+  /** How every list is asked which way round:  under `it can be sorted by any field, with "sort"`. */
+  sortDirections?: { param: string; descending?: string; ascending?: string }
   /** What its lines say of each collection, by the name a type's `savedIn` knows it by:  only what's said. */
   collections?: Record<string, ImportedPlaceCollection>
 }

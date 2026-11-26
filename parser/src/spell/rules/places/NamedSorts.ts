@@ -17,17 +17,21 @@ const NAMED_SORT_SCOPES = new WeakSet<P.Scope>()
  *     - "completion" as "recency", by end time
  *   ```
  *
+ * - Or `it can be sorted by:`:  under a list's line, `it` is that list;  under the place's, every list.
  * - Then `the first 20 measurements sorted by completion, newest first` asks `?order_by=recency&limit=20`.
  * - A read names one by its name alone, as it names a field (`sort_key_field`);  a name wins over a field of the same name.
  * - The server sorts each newest first only:  the other way round, Spell's server sorts what it read, by its field.
  * - Each line's field is its value's (`created_at`, the field `created at`), unless `, by` names another.
  * - Compiles to the list's `sortOrders`:  `[{ name: "creation", as: "created_at", field: "createdAt" }]`.
  */
-export class NamedSorts extends PlaceDetail<"collection|body?"> {
+export class NamedSorts extends PlaceDetail<"collection?|type?|body?"> {
   detailOf(match: P.MatchFor<this>): PlaceDetailValue {
-    const name = collectionNameFor(`${match.groups.collection.raw}`.replace(/s$/, ""))
     const sortOrders = NamedSorts.ordersUnder(this.getBody(match))
-    return sortOrders.length ? { collections: { [name]: { sortOrders } } } : {}
+    if (!sortOrders.length) return {}
+    const { collection } = match.groups
+    // `it`:  the list it's under, or every list
+    if (!collection) return { sortOrders }
+    return { collections: { [collectionNameFor(`${collection.raw}`.replace(/s$/, ""))]: { sortOrders } } }
   }
 
   /** Its lines' scope:  only there does a `named_sort` read. */

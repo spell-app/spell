@@ -9,13 +9,18 @@ import { PlaceDetail, textIn, type PlaceDetailValue } from "./PlaceDetail"
  *   `every job where its status is "open"` asks `?field=status&value=open`.
  * - One field at a time:  a `where` naming more sends the first, and the rest is checked on the Spell server, over
  *   what came back.
- * - Spanish:  `los trabajos se pueden filtrar por cualquier campo, con "field" y "value"`.
+ * - Or `it can be filtered by any field, with "field" and "value"`:  under a list's line, `it` is that list;  under
+ *   the place's, every list.
+ * - Spanish:  `los trabajos se pueden filtrar por cualquier campo, con "field" y "value"`, `se puede filtrar por ...`.
  * - Compiles to the list's `filters: "every field"` and `filteredWith`.
  */
-export class FiltersByAnyField extends PlaceDetail<"collection|field|value"> {
+export class FiltersByAnyField extends PlaceDetail<"collection?|type?|field|value"> {
   detailOf(match: P.MatchFor<this>): PlaceDetailValue {
-    const name = collectionNameFor(`${match.groups.collection.raw}`.replace(/s$/, ""))
     const filteredWith = { field: textIn(match.groups.field), value: textIn(match.groups.value) }
-    return { collections: { [name]: { filters: "every field", filteredWith } } }
+    const asks = { filters: "every field" as const, filteredWith }
+    const { collection } = match.groups
+    // `it`:  the list it's under, or every list
+    if (!collection) return asks
+    return { collections: { [collectionNameFor(`${collection.raw}`.replace(/s$/, ""))]: asks } }
   }
 }
