@@ -1,44 +1,20 @@
 /*
- * The Servers dialog (`<ServersDialog>`):  a title bar, then the Spell Servers page in a frame under it.
- * On the 4px grid, the title bar as the Keyboard Shortcuts dialog's.
- * - The frame sits on the theme's plain surface, made opaque (`--ServersDialog-paper`), as the shortcuts' rows do:
- *   the page is see-through in a frame, and Glass's surfaces let the app show through.
- * - The ✕ is `<ui-modal>`'s own, placed on the title bar's centre line (its `--ui-modal-inner-close-*`).
+ * The Servers dialog (`<ServersDialog>`):  Spell UI's standard dialog, its heading and ✕ its own, and the Spell Servers
+ * page in a frame under them, all on the dialog's one surface (epic `editor` I374:  a header of glass over a white
+ * page read as two dialogs).
+ * - The content and the frame draw no surface of their own:  the page's cards sit on the dialog's glass, as its header
+ *   does.  The page itself is see-through in a frame.
+ * - Wide enough for the page's three cards a row;  a little less padding than a dialog's own, as the cards have theirs.
  */
 .ServersDialog {
-  --ui-modal-width: min(760px, 95vw);
-  /* the title bar's height, and the ✕'s box, centred in it */
-  --ServersDialog-bar-height: 56px;
-  --ui-modal-close-hitbox: 32px;
-  --ui-modal-inner-close-top: calc((var(--ServersDialog-bar-height) - 32px) / 2);
-  --ui-modal-inner-close-right: 12px;
-  --ServersDialog-paper: oklch(from var(--ui-surface) l c h / 1);
+  --ui-modal-width: min(880px, 95vw);
+  --ui-modal-content-background: transparent;
 }
 
-.ServersDialog .ServersHeader {
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  height: var(--ServersDialog-bar-height);
-  padding: 0 56px 0 20px;
-  border-bottom: var(--ui-border-width) solid var(--ui-border-color);
-}
-
-.ServersDialog .ServersTitle {
-  margin: 0;
-  font-family: var(--ui-font-family-heading);
-  font-size: 18px;
-  line-height: 24px;
-  font-weight: var(--ui-font-weight-bold);
-  color: var(--ui-text-dark);
-}
-
-.ServersDialog .ServersTitle:focus {
-  outline: none;
-}
-
-/* the keeper's page, on the theme's plain surface (its own background is see-through in a frame) */
 .ServersDialog .ServersBody {
-  padding: 12px 20px 16px 20px;
-  background: var(--ServersDialog-paper);
+  --ui-modal-content-padding: 4px 16px 16px 16px;
+}
+
+.ServersDialog .ServersFrame {
+  --ui-embed-background: transparent;
 }

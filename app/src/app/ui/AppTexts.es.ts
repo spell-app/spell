@@ -377,7 +377,7 @@ const APP_TEXTS_ES: AppTextPack = {
   shortcutShowShortcuts: "Mostrar los atajos de teclado",
   shortcutShowIcons: "Mostrar todos los iconos, con sus nombres",
   allIcons: "Todos los iconos…",
-  servers: "Servidores…",
+  servers: "Servidores de Spell…",
   serversAllRunning: "Todos los servidores de Spell en segundo plano están funcionando.",
   serversOneDown:
     "Uno de los servidores de Spell en segundo plano se ha parado.\nHaz clic para ver cuál, y volver a ponerlo en marcha.",

@@ -105,7 +105,7 @@ describe("<AppBarMenus>", () => {
     expect(popup.visible).toBe(false)
   })
 
-  test("Help:  Keyboard Shortcuts, its key ?, opens the shortcuts dialog;  All Icons (T158);  then the tours (P40), then Help (epic `editor` P36)", async () => {
+  test("Help:  the tours (P40), then Keyboard Shortcuts, its key ?, opening the shortcuts dialog, and All Icons (T158), each group under a tight divider (epic `editor` P36, I375)", async () => {
     const showShortcuts = spyOnEditor("showShortcuts")
     const host = await mount(() => <AppBarMenus mode="edit" />)
     const popup = host.querySelector<HTMLElement & { visible: boolean }>("ui-popup[for=HelpBarMenu]")!
@@ -116,21 +116,23 @@ describe("<AppBarMenus>", () => {
     await rowsReady(menu()!)
     // the editor's own rows, not the Spell's:  their words are their text
     const rows = [...menu()!.children].map((row) =>
-      `${row.textContent?.trim()} ${row.getAttribute("shortcut") ?? ""}`.trim()
+      row.getAttribute("kind") === "divider"
+        ? "─"
+        : `${row.textContent?.trim()} ${row.getAttribute("shortcut") ?? ""}`.trim()
     )
+    // Owen's order (I375):  the tours first;  Spell Servers… after the last divider only where a keeper runs, none here
     expect(rows).toEqual([
-      `Keyboard Shortcuts ${EDITOR_HOTKEYS.showShortcuts.shortcut}`,
-      `All Icons… ${EDITOR_HOTKEYS.showIcons.shortcut}`,
-      "",
       "Design Tour",
       "Anatomy Tour",
       "Inspect App Tour",
       "Tours…",
-      "",
-      "Help"
+      "─",
+      `Keyboard Shortcuts ${EDITOR_HOTKEYS.showShortcuts.shortcut}`,
+      `All Icons… ${EDITOR_HOTKEYS.showIcons.shortcut}`,
+      "─"
     ])
     expect(EDITOR_HOTKEYS.showShortcuts.shortcut).toBe("?")
-    const shortcuts = menu()!.children[0] as HTMLElement
+    const shortcuts = menu()!.children[5] as HTMLElement
     shortcuts.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!.click()
     flush()
     await waitForCondition(() => showShortcuts.mock.calls.length > 0)
