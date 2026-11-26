@@ -1,5 +1,7 @@
-import { Show, createSignal } from "solid-js"
+import { Show, createSignal, onSettled } from "solid-js"
 import type { JSX } from "@solidjs/web"
+
+import { cssSecondsFor } from "spell/util/dom"
 
 import { editor } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
@@ -152,6 +154,8 @@ export function toggleCode() {
  * - A header's segmented menu (`appearance="segmented link header"`), inside the bar's own:
  *   its thumb slides to the mode chosen, the same look as every header's tabs.
  * - Not on a phone, which only runs (`chrome.css`).
+ * - Glides to its new place across the bar as its icons come and go (Run <-> Edit),
+ *   or as the draft's pill comes and goes on the left (`BarGlide`, epic `editor` T184).
  ****************/
 export function ModeButtons(props: {
   current: Mode
@@ -159,8 +163,13 @@ export function ModeButtons(props: {
   inspect?: JSX.Element
   anatomy?: JSX.Element
 }): JSX.Element {
+  let group: HTMLElement | undefined
+  onSettled(() => {
+    const glide = group && new BarGlide(group)
+    return () => glide?.stop()
+  })
   return (
-    <ui-item class="ModeButtons">
+    <ui-item class="ModeButtons" ref={(element: HTMLElement) => (group = element)}>
       <ui-menu
         appearance="segmented link header"
         tabs=""
@@ -239,6 +248,127 @@ const MODE_TIPS: Record<Mode, { chosen: AppTextKey; other: AppTextKey }> = {
   edit: { chosen: "editingTip", other: "editTip" },
   design: { chosen: "designingTip", other: "designTip" },
   site: { chosen: "siteShownTip", other: "siteTip" }
+}
+
+/****************
+ * ### `BarGlide`
+ * Run | Edit | Design GLIDE across the top bar to their new place, rather than jump
+ * (Owen, 2026-11-26, epic `editor` T184:  "the run/edit buttons should animate into their new horizontal position").
+ * - They move when the icons after them come or go (Run <-> Edit), since the group is centred,
+ *   or when the draft's pill comes or goes on the bar's left.
+ * - A FLIP on the group's drawn box (its `item` part:  the `<ui-item>` itself draws none):
+ *   a `ResizeObserver` on the bar's three sections and the group says the bar was laid out again,
+ *   before it's painted;  the group is put back where it was with a `translate`, then let go to `0`.
+ * - What came into the bar fades in meanwhile, so the two read as one move:  the group's icons, as Edit shows them;
+ *   the draft's pill, as you make a draft.
+ *   - By animation, not a CSS transition:  a transition set on an icon's `::part(item)` from outside would replace
+ *     its own (its hover's colour).
+ * - Not the View Transitions API:  it would have to wrap every change that moves the group (a mode switch,
+ *   a draft made in the code, Publish), and freezes the page as a picture while it runs.
+ * - Not when the window changed width, which the bar spans:  then the group just goes there.
+ * - None for anyone who asks for less motion, or inside `--ui-motion: none`.
+ * - The same group across Run and Edit:  the editor's switch stays on its page, so it's never drawn again.
+ * - Starts once the bar's sections are drawn (each one's `ready`):  before that they have no box to watch.
+ ****************/
+class BarGlide {
+  /** What watches the bar's sections. */
+  private readonly observer = new ResizeObserver(() => this.laidOut())
+  /** The group's left edge as last laid out, px, glide aside;  `undefined` until first seen. */
+  private left: number | undefined
+  /** The window's width as last laid out, px:  the bar's host draws no box to measure. */
+  private windowWidth = 0
+  /** The glide running, if any. */
+  private running: Animation | undefined
+  /** What's been in the bar already, so doesn't fade in. */
+  private readonly seen = new WeakSet<Element>()
+  /** Stopped:  the sections drawn too late watch nothing. */
+  private isStopped = false
+
+  constructor(private readonly group: HTMLElement) {
+    const sections = [group, ...(this.bar?.querySelectorAll(":scope > ui-menu") ?? [])]
+    void Promise.all(
+      sections.map((section) => (section as Element & { ready?: Promise<void> }).ready ?? Promise.resolve())
+    )
+      .then(() => {
+        if (this.isStopped) return
+        for (const section of sections) this.observer.observe(boxOf(section) ?? section)
+      })
+      .catch((error) => console.error(error))
+  }
+
+  /** Stop watching, and end any glide. */
+  stop(): void {
+    this.isStopped = true
+    this.observer.disconnect()
+    this.running?.cancel()
+  }
+
+  /** The bar the group is in. */
+  private get bar(): Element | null {
+    return this.group.closest("ui-app-menu")
+  }
+
+  /** The bar was laid out again:  glide from the group's last place to its new one;  fade in what came. */
+  private laidOut() {
+    const box = boxOf(this.group)
+    const bar = this.bar
+    if (!box || !bar) return
+    // where it's drawn, less the glide's own offset:  its place as laid out
+    const offset = translateOf(box)
+    const left = box.getBoundingClientRect().left - offset
+    const windowWidth = innerWidth
+    const isFirst = this.left === undefined
+    const from = isFirst ? 0 : this.left! - left + offset
+    const windowResized = windowWidth !== this.windowWidth
+    this.left = left
+    this.windowWidth = windowWidth
+    const came = this.cameIn(bar)
+    if (isFirst || windowResized || !this.canGlide) return
+    const timing = this.timing
+    for (const element of came) element.animate([{ opacity: 0 }, { opacity: 1 }], timing)
+    if (Math.abs(from) < 1) return
+    this.running?.cancel()
+    this.running = box.animate([{ translate: `${from}px 0` }, { translate: "0 0" }], timing)
+  }
+
+  /** What's in the bar now that wasn't before:  the group's icons' boxes, the draft's pill;  noted as seen. */
+  private cameIn(bar: Element): Element[] {
+    const icons = [...this.group.querySelectorAll("ui-item[appearance~='circular']")].map(boxOf)
+    const comers = [...icons, bar.querySelector(".PublishDraft")].filter((each) => !!each && !this.seen.has(each))
+    for (const each of comers) this.seen.add(each!)
+    return comers as Element[]
+  }
+
+  /** The glide's time and ease:  the theme's `--ui-duration-normal` and `--ui-ease-out`. */
+  private get timing(): KeyframeAnimationOptions {
+    const seconds = cssSecondsFor(this.group, "--ui-duration-normal") ?? GLIDE_SECONDS
+    const easing = getComputedStyle(this.group).getPropertyValue("--ui-ease-out").trim() || "ease-out"
+    return { duration: seconds * 1000, easing }
+  }
+
+  /** Motion's welcome:  not reduced, and not `--ui-motion: none` around the bar. */
+  private get canGlide(): boolean {
+    return (
+      !matchMedia("(prefers-reduced-motion: reduce)").matches &&
+      getComputedStyle(this.group).getPropertyValue("--ui-motion").trim() !== "none"
+    )
+  }
+}
+
+/** How long the group takes to glide, when the theme sets no `--ui-duration-normal`. */
+const GLIDE_SECONDS = 0.2
+
+/** A section's drawn box:  its shadow root's `item` or `menu` part, the host itself drawing none. */
+function boxOf(section: Element): HTMLElement | undefined {
+  // its root's own children:  `:scope` matches nothing in a query on a shadow root
+  const children = [...(section.shadowRoot?.children ?? [])] as HTMLElement[]
+  return children.find((child) => child.matches("[part~='item'], [part~='menu']"))
+}
+
+/** How far `box` is moved across by its `translate` right now, px:  a glide part-way. */
+function translateOf(box: HTMLElement): number {
+  const translate = getComputedStyle(box).translate
+  return translate === "none" ? 0 : Number.parseFloat(translate) || 0
 }
 
 /****************
