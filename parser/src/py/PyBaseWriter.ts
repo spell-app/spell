@@ -400,6 +400,8 @@ export class PyBaseWriter extends P.ProgramWriter {
     const [value, boolean] = unwrapped(rhs) instanceof P.ASTBooleanLiteral ? [lhs, rhs] : [rhs, lhs]
     const yesOrNo = unwrapped(boolean)
     if (yesOrNo instanceof P.ASTBooleanLiteral && this.kindOf(value) === "choice") {
+      // one that can be nothing (`yes, no or nothing`):  no is `False`, not `None` too
+      if (!yesOrNo.value && this.canBeNothing(value)) return `${this.tight(value)} ${isNot ? "is not" : "is"} False`
       return yesOrNo.value !== isNot ? this.bare(value) : `not ${this.operand(value, "and", "rhs")}`
     }
     return undefined

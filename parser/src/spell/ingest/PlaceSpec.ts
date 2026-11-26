@@ -727,6 +727,8 @@ export class PlaceSpec {
     if (choices?.length && oneOfWords(choices)) said.choices = choices
     const kind = kindOfSchema(field)
     if (kind) {
+      // a yes or no that can be `null`:  `yes, no or nothing`, so a `null` isn't read as no
+      if (kind === "yes or no" && (field.nullable || plainSchema(field).nullable)) said.canBeNothing = true
       return { words: kind === "yes or no" ? yesOrNoWords(words) : words, type: kind, ...said }
     }
     const isList = field.type === "array"

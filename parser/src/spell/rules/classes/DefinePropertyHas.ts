@@ -12,6 +12,7 @@ import {
   OutlineSpecifierMedia,
   OutlineSpecifierSort,
   OutlineSpecifierList,
+  OutlineSpecifierYesNoOrNothing,
   PropertyBodyMust,
   QuotedPropertyFormula,
   TypeSpecifierEnum,
@@ -463,6 +464,9 @@ export class DefinePropertyHas extends SpellStatement<
       // a type's name as text, so a writer can read the type:  `P.TSWriter` types the property from it.
       // Checked at runtime by its class's name:  see `P.ASTTypeExpression.runtimeName`.
       check.addProp("type", new P.ASTTypeNameLiteral(match, { value: typeExpression.runtimeName, quote: "'" }))
+      // a yes or no that can be nothing:  unset, it reads as nothing, not no (`PropInfo.orNothing`)
+      if (match.groups.specifier?.is(OutlineSpecifierYesNoOrNothing))
+        check.addProp("orNothing", new P.ASTBooleanLiteral(match, true))
       // where it starts:  `a number starting at 0`, made once per instance
       initializer = (match.groups.specifier?.groups as { start?: P.Match } | undefined)?.start?.AST as
         | P.ASTExpression

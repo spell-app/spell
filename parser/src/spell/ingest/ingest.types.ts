@@ -588,6 +588,11 @@ export type FieldDescription = {
   pictureAt?: string
   /** Every thing has one, its schema says:  `required text`.  Never a field the server writes itself. */
   isRequired?: boolean
+  /**
+   * A yes or no its schema says can be `null` (`nullable`, `anyOf: [{ type: "boolean" }, { type: "null" }]`):
+   * `its "passed" is yes, no or nothing`, so a `null` reads as nothing, not no.
+   */
+  canBeNothing?: boolean
   /** The server writes it, and takes no write of it:  its schema's `readOnly`. */
   isReadOnly?: boolean
   /** Its only legal values, by its schema:  `one of active, planned or retired`. */

@@ -575,6 +575,22 @@ export abstract class ProgramWriter extends Writer {
     return kindFromDatatype(inner.datatype ?? inner.match?.datatype)
   }
 
+  /**
+   * Is `node` a property declared as a yes or no that can be nothing, `its "passed" is yes, no or nothing`
+   * (its `check` says `orNothing`)?  So `its passed is no` means no, not nothing too.
+   */
+  canBeNothing(node: P.ASTExpression): boolean {
+    const inner = unwrapped(node)
+    if (!(inner instanceof P.ASTPropertyExpression)) return false
+    const property = this.project.propertyOf(this.kindOf(inner.object), inner.property.value)
+    return !!property?.check?.properties?.some(
+      (each) =>
+        each instanceof P.ASTObjectLiteralProperty &&
+        each.property.value === "orNothing" &&
+        unwrapped(each.value as P.ASTExpression) instanceof P.ASTBooleanLiteral
+    )
+  }
+
   /** Is `node` one of spell's `List`s, so it has its own methods?  See `kindOf()`. */
   isList(node: P.ASTExpression): boolean {
     const kind = this.kindOf(node)

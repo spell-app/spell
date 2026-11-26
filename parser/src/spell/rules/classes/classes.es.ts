@@ -62,6 +62,7 @@ import { OutlineSpecifierEnum } from "./OutlineSpecifierEnum"
 import { OutlineSpecifierInstance } from "./OutlineSpecifierInstance"
 import { OutlineSpecifierList } from "./OutlineSpecifierList"
 import { OutlineSpecifierTextKind } from "./OutlineSpecifierTextKind"
+import { OutlineSpecifierYesNoOrNothing } from "./OutlineSpecifierYesNoOrNothing"
 import { OutlineSpecifierYesOrNo } from "./OutlineSpecifierYesOrNo"
 import { PatternText } from "./PatternText"
 import { PropertyBodyMust } from "./PropertyBodyMust"
@@ -2060,6 +2061,12 @@ classesEs.addRule(OutlineSpecifierMeasure, { syntax: "(un|una) {datatype:singula
 classesEs.addRule(OutlineSpecifierYesOrNo, {
   syntax: "(o bien)? ((sí|si) o no|verdadero o falso)",
   tests: [{ tests: [["sí o no", "choice"]] }]
+})
+
+// un sí o no que puede ser nada, como el `null` de un servidor:  `su "aprobado" es sí, no o nada`
+classesEs.addRule(OutlineSpecifierYesNoOrNothing, {
+  syntax: "(sí|si) , no o nada",
+  tests: [{ tests: [["sí, no o nada", "choice"]] }]
 })
 
 classesEs.addRule(OutlineSpecifierList, {

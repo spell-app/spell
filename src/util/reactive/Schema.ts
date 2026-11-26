@@ -204,6 +204,11 @@ export type PropInfo = {
    */
   default?: unknown
   /**
+   * `true`:  unset, it's nothing, not its type's default:  `its "passed" is yes, no or nothing` reads as nothing
+   * until it's set, and a place's row that sends `null` or leaves it out sets nothing.
+   */
+  orNothing?: boolean
+  /**
    * Makes its value on first read, once per instance, e.g. `() => new List()` -- stored, so it's one of `keys()`.
    * - Called with `this` ~== the instance.
    */

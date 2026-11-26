@@ -47,6 +47,11 @@ export type ValueInfo = {
   /** Its value while nothing's kept:  wins over the first choice and the type's default. */
   default?: unknown
   /**
+   * `true`:  while nothing's kept, it's nothing, not its type's default:  a yes or no that can be nothing,
+   * `its "passed" is yes, no or nothing`, reads as nothing until it's set, not as no.
+   */
+  orNothing?: boolean
+  /**
    * Values it allowed before a choice was renamed, each to the value it's called now:  `{ asYouType: "everywhere" }`.
    * - `PrefStore` reads a kept old one as its new one, quietly, and keeps the new one in its place.
    * - So a person's choice survives the rename, and the console says nothing of it.

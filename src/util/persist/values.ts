@@ -59,10 +59,12 @@ const JS_TYPES = new Map<string, string>([
  * The default `info` declares:  its `default`, else its first choice, else its type's, else `undefined`.
  * - The types':  `number` 0, `text` "", `choice` false.
  * - e.g. `{ oneOf: ["light", "dark", "auto"] }` => `"light"`;  `{ type: "number" }` => `0`
+ * - One that can be nothing, `orNothing`, has none but its own `default`:  `{ type: "choice", orNothing: true }` => `undefined`
  */
 export function defaultFor(info: ValueInfo | undefined): unknown {
   if (!info) return undefined
   if (info.default !== undefined) return info.default
+  if (info.orNothing) return undefined
   const choices = choicesOf(info)
   if (choices?.length) return choices[0]
   return info.type === undefined ? undefined : TYPE_DEFAULTS.get(info.type)

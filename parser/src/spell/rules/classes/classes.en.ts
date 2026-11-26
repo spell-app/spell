@@ -53,6 +53,7 @@ import { OutlineSpecifierEnum } from "./OutlineSpecifierEnum"
 import { OutlineSpecifierInstance } from "./OutlineSpecifierInstance"
 import { OutlineSpecifierList } from "./OutlineSpecifierList"
 import { OutlineSpecifierTextKind } from "./OutlineSpecifierTextKind"
+import { OutlineSpecifierYesNoOrNothing } from "./OutlineSpecifierYesNoOrNothing"
 import { OutlineSpecifierYesOrNo } from "./OutlineSpecifierYesOrNo"
 import { PatternText } from "./PatternText"
 import { PropertyBodyMust } from "./PropertyBodyMust"
@@ -2110,6 +2111,12 @@ classes.addRule(OutlineSpecifierMeasure, { syntax: "(a|an) {datatype:singular_ty
 classes.addRule(OutlineSpecifierYesOrNo, {
   syntax: "either? (yes or no|true or false)",
   tests: [{ tests: [["yes or no", "choice"]] }]
+})
+
+// a yes or no that can be nothing, as a server's `null`:  `its "passed" is yes, no or nothing`
+classes.addRule(OutlineSpecifierYesNoOrNothing, {
+  syntax: "yes , no or nothing",
+  tests: [{ tests: [["yes, no or nothing", "choice"]] }]
 })
 
 classes.addRule(OutlineSpecifierList, {
