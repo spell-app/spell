@@ -38,6 +38,7 @@ export type PagesOfOptions<P extends Page> = {
  * - Its `return()` (the reader stopping, a `break`) aborts the page in flight, as `signal` does:
  *   the next it would have read is never asked.
  * - Every page counts against `ceiling`, when it has one:  a plain read of every page too (epic `data` I11).
+ * - A hidden page reads no more pages until it's shown again (`untilShown()`).
  * - NOT reactive, and knows nothing of things:  the program's read (`SavedRead`, in the parser's core) reads it,
  *   and so does `PlaceQuery`, walking a place's own pages.
  * - throws what `read` threw;  `PlaceError` over the ceiling
@@ -68,6 +69,7 @@ async function* walk<P extends Page>(
   let at = after
   for (;;) {
     signal.throwIfAborted()
+    await untilShown(signal)
     const page = await read(at, signal)
     signal.throwIfAborted()
     ceiling?.count(rowsOf(page))
@@ -75,6 +77,33 @@ async function* walk<P extends Page>(
     if (page.nextPage === undefined) return
     at = page.nextPage
   }
+}
+
+/**
+ * Done once the page is shown:  at once while it is, or where there's no page (node).
+ * - A hidden page asks for no more pages, as `pollWhileVisible()` asks nothing:  it goes on when it's shown again.
+ * - Rejects with `signal`'s reason once it aborts.
+ */
+function untilShown(signal: AbortSignal): Promise<void> {
+  const page = globalThis.document as Document | undefined
+  if (page?.visibilityState !== "hidden") return Promise.resolve()
+  return new Promise((resolve, reject) => {
+    const done = () => {
+      page.removeEventListener("visibilitychange", shown)
+      signal.removeEventListener("abort", stopped)
+    }
+    const shown = () => {
+      if (page.visibilityState === "hidden") return
+      done()
+      resolve()
+    }
+    const stopped = () => {
+      done()
+      reject(signal.reason)
+    }
+    page.addEventListener("visibilitychange", shown)
+    signal.addEventListener("abort", stopped, { once: true })
+  })
 }
 
 /** A page's `rows`, if it has them. */

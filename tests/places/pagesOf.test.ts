@@ -113,3 +113,24 @@ describe("pagesOfList()", () => {
     expect(asks.map((ask) => ask.page)).toEqual([{ size: 2 }, { size: 2, at: "2" }, { size: 2, at: "4" }])
   })
 })
+
+describe("pagesOf() on a hidden page", () => {
+  test("asks for no page while the page is hidden, and goes on once it's shown", async () => {
+    const { read, asked } = pagesReader(3)
+    let state: DocumentVisibilityState = "hidden"
+    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => state })
+    try {
+      const pages = pagesOf(read)
+      const first = pages.next()
+      await new Promise((resolve) => setTimeout(resolve, 20))
+      expect(asked).toEqual([])
+      state = "visible"
+      document.dispatchEvent(new Event("visibilitychange"))
+      await first
+      expect(asked).toEqual([undefined])
+    } finally {
+      // back to the browser's own
+      delete (document as { visibilityState?: unknown }).visibilityState
+    }
+  })
+})
