@@ -279,16 +279,18 @@
   color: var(--ui-text-muted);
   font-size: 13px;
 
+  /*
+   * Its book icon, name and line centred:  its words share one font, so they sit on one baseline all the same;
+   * `ui-icon` is `display: contents`, so an `align-self` on it never reached the icon, which sat on the baseline
+   * 1.5px above the words (I458).
+   */
   .SpellUILink {
     display: inline-flex;
-    align-items: baseline;
+    align-items: center;
     gap: 8px;
     color: inherit;
     text-decoration: none;
 
-    ui-icon {
-      align-self: center;
-    }
     .name {
       font-weight: 600;
       color: var(--Home-accent);
