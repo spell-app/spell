@@ -700,6 +700,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `FilePlace`:  one JSON5 file as a place, its comments kept
     - `PlaceServer`:  any place over HTTP, on the `Router`, behind `Guard`, reads too;  `RemotePlace` is its browser half
       - holds keys (`PlaceKeys`), and scrubs them from every answer
+      - a list of a place that can't page (a sheet, a folder) is answered a page at a time, 100 rows unless asked
+        (`ServerPages`, epic `data` P57):  read whole once, its later pages from that read, each `nextPage` naming it,
+        held 5 minutes;  a first page is always read afresh;  a search by id in such a place reads page by page
       - or opens a place by its name, as it's first asked for (`open`, epic `atmosphere` P1):
         - a name may then be an address, `/`s and all
         - who's asking (`identityOf`) reaches the place as `PlaceContext.identity`

@@ -72,6 +72,7 @@ import {
   keysOf,
   schemaOf,
   getProp,
+  safelyCallAll,
   setProp,
   sourcesReadBy,
   TYPE_KEY,
@@ -511,7 +512,10 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
    *   a read asking for what it first left out.
    * - throws `TypeError` if `result` has no `type`, or nothing is known by its type's name
    */
-  thingsFrom(result: PlaceResult, { quietly = false }: { quietly?: boolean } = {}): SpellObject[] {
+  thingsFrom(
+    result: PlaceResult,
+    { quietly = false, reader }: { quietly?: boolean; reader?: object } = {}
+  ): SpellObject[] {
     const { type, contents = [] } = result
     if (type === undefined) {
       throw new TypeError(
@@ -520,7 +524,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     }
     const { placeName, collection } = result
     const { idOf, live } = result.place.describe()
-    if (this.places && live === "push") this.followPlace(placeName, collection, type)
+    if (this.places && live === "push") this.followPlace(placeName, collection, type, reader)
     return untrackCells(() =>
       whileReading(() =>
         contents.map((row) => {
@@ -537,16 +541,35 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
   // ## What's done to a thing goes to its place
   ////////////////
 
-  /** Follow what a place that pushes says, once for each collection it's read from. */
-  private followPlace(placeName: string, collection: string, type: string): void {
+  /**
+   * Follow what a place that pushes says, once for each collection it's read from, while something reads it.
+   * - `reader`:  what's reading it (the program's read of a list):  once every reader has let go (`letGoOf()`), it stops
+   *   following, so a server watching for pages sees the last one leave (epic `data` I150).
+   * - With no reader (what an action read, a link followed), it follows for as long as the page is open, as it always did.
+   */
+  private followPlace(placeName: string, collection: string, type: string, reader: object | undefined): void {
     const key = `${placeName}\n${collection}\n${type}`
-    if (this.following.has(key)) return
-    this.following.add(key)
-    this.places!.heal.follow({ placeName, collection, type })
+    let followed = this.following.get(key)
+    if (!followed) {
+      const stop = this.places!.heal.follow({ placeName, collection, type })
+      followed = { stop, readers: new Set(), isForGood: false }
+      this.following.set(key, followed)
+    }
+    if (reader) followed.readers.add(reader)
+    else followed.isForGood = true
   }
 
-  /** What it's following already. */
-  private readonly following = new Set<string>()
+  /** `reader` reads none of what it read any more:  what nothing else reads stops being followed.  NEVER throws. */
+  letGoOf(reader: object): void {
+    for (const [key, followed] of this.following) {
+      if (!followed.readers.delete(reader) || followed.readers.size || followed.isForGood) continue
+      this.following.delete(key)
+      safelyCallAll([followed.stop])
+    }
+  }
+
+  /** What it's following, by place, collection and type:  what stops it, and who reads it. */
+  private readonly following = new Map<string, { stop: () => void; readers: Set<object>; isForGood: boolean }>()
 
   /**
    * `thing`, made here, is now kept in a place:  sent there whole, under its own id (`Thing.id`, made in the browser).

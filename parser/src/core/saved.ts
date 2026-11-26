@@ -1019,8 +1019,8 @@ class ProgramPlaces {
     for (const read of this.reads.values()) if (read.Class === Class) void read.askWhole()
   }
 
-  /** Each thing `result` holds, made or changed in place:  `quietly`, see `PlaceThings.thingsFrom()`. */
-  thingsOf(result: PlaceResult, options?: { quietly?: boolean }): Thing[] {
+  /** Each thing `result` holds, made or changed in place:  `quietly` and `reader`, see `PlaceThings.thingsFrom()`. */
+  thingsOf(result: PlaceResult, options?: { quietly?: boolean; reader?: object }): Thing[] {
     const things = this.things!.thingsFrom(result, options) as Thing[]
     for (const thing of things) this.thingsReadSincePersonChanged?.add(thing)
     return things
@@ -1033,6 +1033,11 @@ class ProgramPlaces {
   noteUnclearNumbers(Class: SavedClass, { unclearNumbers }: PlaceResult): void {
     if (unclearNumbers && this.detailsOf(Class).numbersLike === undefined)
       readNumbersAs(Class, { unclear: unclearNumbers })
+  }
+
+  /** `reader` reads none of what it read any more:  a place that pushes stops being followed for it (`PlaceThings.letGoOf()`). */
+  letGoOf(reader: object): void {
+    this.things?.letGoOf(reader)
   }
 
   /** Someone else added or removed `thing`, as a read found out by asking again. */
@@ -1195,6 +1200,16 @@ export type ReadUntil<T> = {
   where: (thing: T, position: number, list: List) => unknown
 }
 
+/** One page of a `SavedRead`'s, after its first:  its things, its rows (for the ceiling), and where the next is. */
+type ReadPage = {
+  /** Its rows, as things. */
+  things: Thing[]
+  /** Its rows. */
+  rows: readonly unknown[]
+  /** Where the next page is.  Left out:  this is the last. */
+  nextPage?: string
+}
+
 /**
  * `query`, without a search for no text:  every row holds no text (`ListQuery.search`).
  * - Not a search of all of each thing (`ANY_FIELD`), which finds nothing then (`PlaceQuery.answer()`).
@@ -1232,6 +1247,8 @@ class SavedRead {
   private readsPagesWhenDrawn = false
   /** The page it's reading now. */
   private readingPage: Promise<void> | undefined
+  /** Its pages after the first, one each time it asks for the next:  `withOtherPages()`. */
+  private pages: AsyncGenerator<ReadPage, void> | undefined
   /** What's holding it. */
   private holders = 0
   /** Stops asking what changed. */
@@ -1341,8 +1358,22 @@ class SavedRead {
       return
     }
     this.holders++
-    onCleanup(() => this.letGo())
+    this.drawnBy++
+    onCleanup(() => {
+      this.drawnBy--
+      this.letGo()
+    })
   }
+
+  /**
+   * What reads it, for following its place (`PlaceThings.thingsFrom()`'s `reader`):  itself while a computation holds it,
+   * so it stops following once none does (epic `data` I150);  else nothing, as an action's things go on hearing changes.
+   */
+  private get reader(): object | undefined {
+    return this.drawnBy > 0 ? this : undefined
+  }
+  /** How many computations hold it:  `hold()` inside one. */
+  private drawnBy = 0
 
   /**
    * Read it now, as the program starts, and hold it for as long as it runs:  a collection read on startup
@@ -1386,6 +1417,8 @@ class SavedRead {
     this.isIdle = true
     this.timesLeft++
     this.stopPolling?.()
+    this.stopPages()
+    this.program.letGoOf(this)
     this.result?.leave()
     this.answered = undefined
   }
@@ -1456,7 +1489,7 @@ class SavedRead {
       return found
     }
     let found = await passing()
-    while (found.length < first && this.nextPage !== undefined) {
+    while (found.length < first && this.nextPage !== undefined && this.pages) {
       await (this.readingPage ??= this.readPage().finally(() => {
         this.readingPage = undefined
       }))
@@ -1473,7 +1506,8 @@ class SavedRead {
   private async readTheRest(): Promise<void> {
     this.readsPagesWhenDrawn = false
     await this.readingPage
-    while (this.nextPage !== undefined) await this.readPage()
+    // stopped (it left):  the next reader reads again from the first page
+    while (this.nextPage !== undefined && this.pages) await this.readPage()
   }
 
   /**
@@ -1500,28 +1534,79 @@ class SavedRead {
   /**
    * `result`'s rows, and its later pages' up to `pages`:  `every recipe` means every one of them, unless the query says how many,
    * or what's reading it only draws it, and asks for the next when it's needed.
+   * - Its later pages come from ONE `pagesOf()` (`spell/places`), made again with each first page:  so the place's
+   *   pages are read in turn, the next only when it's asked for, and stopping it stops the page in flight (`leave()`).
+   * - Every page counts against the place's ceiling, the first too (epic `data` I11).
    */
   private async withOtherPages(result: PlaceResult, pages: number): Promise<Thing[]> {
     this.program.noteUnclearNumbers(this.Class, result)
-    const things = this.program.thingsOf(result, { quietly: this.isQuiet })
+    this.stopPages()
+    const folder = this.program.folderNow!
+    const { placeName, collection, place } = result
+    const ceiling = new folder.ReadCeiling({ placeName, collection, place }, "every page")
+    ceiling.count(result.contents ?? [])
+    const things = this.program.thingsOf(result, { quietly: this.isQuiet, reader: this.reader })
     this.nextPage = this.query.page?.size === undefined ? result.nextPage : undefined
     this.pagesRead = 1
+    if (this.nextPage !== undefined) {
+      this.pages = folder.pagesOf((at, signal) => this.pageAt(at!, signal), { after: this.nextPage, ceiling })
+    }
     things.push(...(await this.pagesAfter(pages)))
     return things
   }
 
-  /** The things on the pages after what it's read, up to `pages` in all. */
-  private async pagesAfter(pages: number): Promise<Thing[]> {
-    const things: Thing[] = []
-    while (this.nextPage !== undefined && this.pagesRead < pages) {
-      const more = this.program.newResult(this.Class, { ...this.query, page: { at: this.nextPage } })
+  /** The page of its read at `at`, as things.  - throws what the read threw, or `signal`'s reason */
+  private async pageAt(at: string, signal: AbortSignal): Promise<ReadPage> {
+    const more = this.program.newResult(this.Class, { ...this.query, page: { at } })
+    const leave = () => more.leave()
+    signal.addEventListener("abort", leave, { once: true })
+    try {
       await more.load()
-      things.push(...this.program.thingsOf(more, { quietly: this.isQuiet }))
-      this.nextPage = more.nextPage
-      this.pagesRead++
+      signal.throwIfAborted()
+      const { nextPage, contents: rows = [] } = more
+      return {
+        things: this.program.thingsOf(more, { quietly: this.isQuiet, reader: this.reader }),
+        rows,
+        ...(nextPage !== undefined && { nextPage })
+      }
+    } finally {
+      signal.removeEventListener("abort", leave)
       more.leave()
     }
+  }
+
+  /** The things on the pages after what it's read, up to `pages` in all:  each the next of its `pagesOf()`. */
+  private async pagesAfter(pages: number): Promise<Thing[]> {
+    const things: Thing[] = []
+    const reading = this.pages
+    while (reading && this.nextPage !== undefined && this.pagesRead < pages) {
+      let step: IteratorResult<ReadPage, void>
+      try {
+        step = await reading.next()
+      } catch (error) {
+        // stopped while it read (it left, or a newer first page started another walk):  nothing went wrong
+        if (reading !== this.pages) break
+        throw error
+      }
+      // a newer first page started another walk while this one waited:  what it read belongs to that one
+      if (reading !== this.pages) break
+      const { done, value } = step
+      if (done) {
+        this.nextPage = undefined
+        break
+      }
+      things.push(...value.things)
+      this.nextPage = value.nextPage
+      this.pagesRead++
+    }
     return things
+  }
+
+  /** Stop reading its pages:  the one in flight is aborted, and no more are asked.  NEVER throws. */
+  private stopPages(): void {
+    const { pages } = this
+    this.pages = undefined
+    pages?.return().catch(() => {})
   }
 
   /**

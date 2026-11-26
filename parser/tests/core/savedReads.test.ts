@@ -3,7 +3,7 @@
  * - The compiling half:  `tests/spell/parserTests/readGathering.test.ts`.
  */
 import { parseHTML } from "linkedom"
-import { createSignal, enableExternalSource, flush } from "solid-js"
+import { createRoot, createSignal, enableExternalSource, flush } from "solid-js"
 import { render } from "@solidjs/web"
 import { beforeAll, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
@@ -625,5 +625,120 @@ describe("the number of, counted by the place (`core.savedCount()`)", () => {
     }
     const { Recipe } = program(place)
     expect(await core.savedCount(Recipe)).toBe(4)
+  })
+})
+
+describe("a list's pages, read through one pager (epic `data` P57)", () => {
+  /** A place that answers two rows a page, whose pages after the first wait until `release()`. */
+  class SlowPages extends CountingPlace {
+    /** Each page after the first, waiting. */
+    waiting: (() => void)[] = []
+    /** The signals its pages were asked with. */
+    signals: (AbortSignal | undefined)[] = []
+    /** Where each page asked starts:  `undefined` for the first. */
+    asked: (string | undefined)[] = []
+
+    async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
+      this.signals.push(context.signal)
+      this.asked.push(query.page?.at)
+      if (query.page?.at !== undefined) await new Promise<void>((resolve) => this.waiting.push(resolve))
+      return super.list(collection, { ...query, page: { at: query.page?.at ?? "0", size: 2 } }, context)
+    }
+
+    /** Let every waiting page answer. */
+    release() {
+      for (const resolve of this.waiting.splice(0)) resolve()
+    }
+  }
+
+  /** Six recipes, two a page. */
+  async function sixSlow() {
+    const place = new SlowPages({ capabilities: WITH_IDS })
+    await place.apply(
+      ["Soup", "Stew", "Curry", "Salad", "Sushi", "Tacos"].map((title, at) => ({
+        kind: "insert" as const,
+        collection: "recipes",
+        id: `r${at}`,
+        fields: { id: `r${at}`, title }
+      }))
+    )
+    place.requests = []
+    place.asked = []
+    place.signals = []
+    return place
+  }
+
+  test("every page, each asked only once the one before has come", async () => {
+    const place = await sixSlow()
+    const { Recipe } = program(place)
+    const reading = core.savedThings(Recipe)
+    await settled()
+    expect(place.asked).toEqual([undefined, "2"])
+    place.release()
+    await settled()
+    expect(place.asked).toEqual([undefined, "2", "4"])
+    place.release()
+    expect((await reading).items).toHaveLength(6)
+  })
+
+  test("what reads it going away mid-list stops its pages:  the one in flight is aborted, and no more are asked", async () => {
+    const place = await sixSlow()
+    const { Recipe } = program(place)
+    let dispose = () => {}
+    createRoot((disposeRoot) => {
+      dispose = disposeRoot
+      core.savedThings(Recipe).catch(() => {})
+    })
+    await settled()
+    expect(place.asked).toEqual([undefined, "2"])
+    dispose()
+    await settled()
+    expect(place.signals[1]?.aborted).toBe(true)
+    place.release()
+    await settled()
+    expect(place.asked).toEqual([undefined, "2"])
+  })
+
+  test("each row stays the same thing as more pages come", async () => {
+    const place = await sixSlow()
+    const { Recipe } = program(place)
+    const first = core.savedThings(Recipe, {}, "as drawn")
+    await settled()
+    const list = await first
+    const soup = list.items[0]
+    place.release()
+    const whole = core.savedThings(Recipe)
+    await settled()
+    place.release()
+    await settled()
+    place.release()
+    expect((await whole).items[0]).toBe(soup)
+    expect((await whole).items).toHaveLength(6)
+  })
+})
+
+describe("a place that announces changes, followed while something reads it (epic `data` I150)", () => {
+  test("followed once for its list, and no longer once nothing reads it", async () => {
+    const place = filled(new CountingPlace({ capabilities: { ...WITH_IDS, live: "push" } }))
+    const watch = place.watch.bind(place)
+    let following = 0
+    place.watch = (target, onEvent) => {
+      following++
+      const stop = watch(target, onEvent)
+      return () => {
+        following--
+        stop()
+      }
+    }
+    const { Recipe } = program(place)
+    let dispose = () => {}
+    await createRoot(async (disposeRoot) => {
+      dispose = disposeRoot
+      await core.savedThings(Recipe)
+    })
+    expect(following).toBe(1)
+    dispose()
+    await settled()
+    expect(following).toBe(0)
   })
 })
