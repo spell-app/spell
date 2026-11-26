@@ -69,9 +69,11 @@ export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
 
   /** Make the view in `element`, from the props as they are now.  SIDE EFFECT:  sets `instance`, calls `onMount`. */
   function create() {
+    // Not in the page yet (its parent moved, or not placed):  the root is a bare element, which has no selection
+    const root = element.getRootNode()
     const view = new EditorView({
       parent: element,
-      root: element.getRootNode() as Document | ShadowRoot,
+      root: root instanceof Document || root instanceof ShadowRoot ? root : document,
       state: props.state ?? ownState(props.value ?? "")
     })
     instance = view

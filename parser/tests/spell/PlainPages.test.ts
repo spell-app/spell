@@ -61,6 +61,23 @@ describe("a page", () => {
     expect(code).toContain("export class Box extends View {")
   })
 
+  test.each([
+    ["a `//` line", "// a note"],
+    ["a `--` line", "-- a note"],
+    ["an indented `//` line", "  // a note"]
+  ])("%s at the left edge ends nothing:  the page's lines under it are still its body (I188)", (_comment, note) => {
+    const text = `"notes" is a page\n\t# Hi\n${note}\n\tBye\n\tAgain\n`
+    const { code, errors } = compiled(text)
+    expect(errors).toEqual([])
+    expect(code).toContain("Bye")
+    expect(code).toContain("Again")
+  })
+
+  test("a `---` line at the left edge still ends the page:  it's no comment", () => {
+    const { errors } = compiled(`"notes" is a page\n\t# Hi\n---\n\tBye\n`)
+    expect(errors).not.toEqual([])
+  })
+
   test("it starts by itself:  two pages in one project, the first starts, once", () => {
     const pages = ["one", "two"].map((name) => ({
       path: `/${name}.spell`,

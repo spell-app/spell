@@ -115,7 +115,11 @@ export class TypeDeclaration<
   declareType(match: P.Match, superType: string, { itemType }: { itemType?: P.Datatype } = {}): void {
     const { groups, scope } = TypeDeclaration.named(match)
     const name = `${groups.type.value}`
-    const options = { itemType, aka: groups.aka && `${groups.aka.value}`, gender: TypeDeclaration.genderOf(match) }
+    const options = {
+      itemType,
+      aka: groups.aka && TypeDeclaration.shortNameOf(groups.aka),
+      gender: TypeDeclaration.genderOf(match)
+    }
     // TODO: complain if existing type is set up differently!
     const existing = scope.types?.get(name)
     if (existing && !existing.alonePage && !(existing.parentScope instanceof P.ImportScope)) {
@@ -226,6 +230,15 @@ export class TypeDeclaration<
       if (current instanceof P.FileScope) return current
     }
     return undefined
+  }
+
+  /**
+   * The short name `aka` says, as written:  `Account` for `aka account`, `CardInPlay` for `aka "card in play"`.
+   * - Not its match's `value`:  that's the type a known name finds, and a scan stubs the short name ahead
+   *   (`SpellParser.declaredShortNames()`), so `account` already finds `BankAccount` itself.
+   */
+  private static shortNameOf(aka: P.Match): string {
+    return (aka.rule as SpellType).mapValue(aka.rule.declaredText(aka).replace(/\s+/g, "-"))
   }
 
   private static named(match: object) {

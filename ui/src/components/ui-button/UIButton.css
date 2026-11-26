@@ -355,6 +355,49 @@
     );
   }
 
+  /*
+   * Bare:  a lone icon-only button draws ONLY its icon (`UIButton.isBare`;  epic `editor` I370, Owen's standing rule:
+   * "icons like this should NOT have a button surround").
+   * - No ring, pill or fill at rest, on hover or pressed down:  pointing at it only changes the icon's colour.
+   * - Its icon a step bigger than its words' would be:  1.5em, on the spacing grid (12px in a mini button at 13px,
+   *   24px at 16px).
+   * - Its box stays what it was, at least 24px (a finger's target), see-through:  the icon centred in it.
+   * - Keyboard focus:  the focus ring hugs the icon, 2px out, never the whole box.
+   * - Still fills while pressed on (`selected`, `.active`):  a toolbar's on state.
+   * - Never `circular`, `toggle`, coloured, labeled or in a group:  their box is the point (the component decides).
+   */
+  .ui.bare.icon.button {
+    --_button-bare-icon: round(1.5em, var(--ui-grid, 4px));
+    --_button-bare-box: max(
+      24px,
+      round(
+        max(
+          1em + 2 * var(--_button-pad-block, var(--_ui-button-padding-block)) * var(--_button-density, 1),
+          var(--ui-control-height, 0px) * var(--ui-scale, 1)
+        ),
+        var(--ui-grid, 4px)
+      )
+    );
+    --_button-bg: transparent;
+    --_button-bg-hover: transparent;
+    --_button-bg-down: transparent;
+    --_button-bg-focus: transparent;
+    --_button-edge: 0 0 #0000;
+    --_button-edge-hover: 0 0 #0000;
+    --_button-edge-down: 0 0 #0000;
+    --_button-edge-focus: 0 0 #0000;
+    --_button-icon-width: var(--_button-bare-icon);
+    --_button-icon-height: var(--_button-bare-icon);
+    --_button-icon-opacity: 1;
+    --_button-min-width: var(--_button-bare-box);
+    padding: calc((var(--_button-bare-box) - var(--_button-bare-icon)) / 2);
+    outline-offset: calc((var(--_button-bare-icon) - var(--_button-bare-box)) / 2 + var(--ui-focus-offset, 2px));
+  }
+  /* on a dark surface, pointing at it lights the icon, as there's no fill to turn dark ink on */
+  .ui.bare.inverted.icon.button {
+    --_button-fg-hover: var(--ui-color-inverted, var(--ui-text-inverted-hovered));
+  }
+
   /* Labeled icon:  the icon sits in its own tinted block on the start (or `right labeled`:  end) side. */
   .ui.labeled.icon:is(.button, .buttons) {
     --_button-pad-inline: var(--_ui-button-padding-inline);

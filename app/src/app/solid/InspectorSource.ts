@@ -189,7 +189,7 @@ function declaredEventOf(
     for (const place of places) {
       if (place.of !== name || !isEventLike(place)) continue
       const lines = files.find((file) => file.path === place.path)?.text.split("\n")
-      // an ability that's its type tag's bare attribute (`<view "card" draggable>`) has no code to edit
+      // an ability said on its type's line (`a "card" is a draggable view`) has no code to edit
       if (lines && hasCode(place, lines) && sameWords(wordsAt(place, lines), row.words)) return { place, lines }
     }
   }
@@ -270,9 +270,9 @@ function testWordsAt(place: SP.SpellDeclarationPlace, lines: readonly string[]):
 
 /**
  * Where a property's Spell is written, the code that works it out (epic `editor` P23, Q29):
- * - `<property "name">its rank + " of " + its suit</>`:  between its tag's ends, on its line
+ * - `its "name" is its rank && "of" && its suit`:  after its `is`, on its line
  * - else its body's lines, as an event's are
- * - `undefined`:  it has none, e.g. `<property "rank" one-of="..."/>`
+ * - `undefined`:  it has none, e.g. `its "rank" is one of ...`
  */
 export function propertyCodePlace(place: SP.SpellDeclarationPlace, lines: readonly string[]): CodePlace | undefined {
   const line = lines[place.line] ?? ""
@@ -340,7 +340,7 @@ function tagEndAfter(line: string, from: number): number {
 }
 
 /**
- * A property's values, as its `one-of` says them (`<property "rank" one-of="ace, 2 ... 10, jack, queen, king"/>`),
+ * A property's values, as its `one-of` says them (`its "rank" is one of ace, 2 ... 10, jack, queen, king`),
  * or its plain line (`its "rank" is one of ace, 2 ... 10, jack, queen, king`):
  * each as written (`2 ... 10` stays one), with where the list is in its file, to write it back (`oneOfWritten()`).
  * - `undefined`:  it has no `one-of` on its line.
@@ -404,7 +404,7 @@ function hasCode(place: SP.SpellDeclarationPlace, lines: readonly string[]): boo
 }
 
 /**
- * Is `place` a bare ability, one with no condition:  its type's tag's attribute, `<view "card" draggable>`,
+ * Is `place` a bare ability, one with no condition:  said on its type's line, `a "card" is a draggable view`,
  * its line in plain Spell, `it is draggable` (epic `language` P46), or its word on its type's line,
  * `a "card" is a draggable two sided view` (P48)?
  */
@@ -451,7 +451,7 @@ function codeAt(place: SP.SpellDeclarationPlace, lines: readonly string[]): stri
   return [withoutTagEnd(first.join("").trim()), dedent(rest).trim()].filter(Boolean).join("\n")
 }
 
-/** A one-line tag's code, less its tag's end:  `it is face down />` => `it is face down`, `print 1</on>` => `print 1`. */
+/** A one-line tag's code, less its tag's end:  `it is face down />` => `it is face down`, `print 1</>` => `print 1`. */
 function withoutTagEnd(code: string): string {
   return code.replace(/\s*(?:\/>|<\/[^<>]*>)\s*$/, "")
 }
@@ -485,7 +485,7 @@ function colonOutsideQuotes(line: string, from: number): number {
 /**
  * Where a declaration's code is, as `CodePlace` says (1-based lines):
  * - its code after its words on its line (`- on click play it`):  from there, with `column`
- * - else its body's lines, under its line, and above a closing tag (`</on>`)
+ * - else its body's lines, under its line, and above a closing tag (`</>`)
  * - else its empty body's line, a new handler's (`newEventIn()`)
  * - else its own line
  */
@@ -640,7 +640,7 @@ export type WrittenEvent = {
 /**
  * Where an event's, ability's or action's code is written:  its file, and its lines (epic `editor`, Events In Code).
  * - `from` and `to`:  1-based, both in.
- * - Its body's lines when it has some (`<on click>` ... `</on>`, a `- on card dropped:` line's lines under it);
+ * - Its body's lines when it has some (`when clicked`'s lines under it);
  *   else its own line, words and code together (`- on click play it`).
  */
 export type CodePlace = {

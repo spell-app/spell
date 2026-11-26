@@ -419,8 +419,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - not in `SRV`:  it imports the page server, which imports the barrel
     - its holds, `~/.spell/server-keeper-holds.json`:  servers stopped by hand, and hands off
     - THE SPELL SERVERS PAGE (epic `editor` P49):  `GET /servers/` on the keeper's own port, so it answers while every
-      page server is down ([servers.html](keeper/servers.html), [servers.js](keeper/servers.js));  a card per server
-      (each row's `started`, `building`), its last 50 log lines (`GET /api/servers/log?id=`, `lastLines()`), Restart;
+      page server is down ([servers.html](keeper/servers.html), [servers.js](keeper/servers.js));  a compact card per
+      server, three a row (epic `editor` I374):  its name, Restart or Start, its state;  what it's for, how long it's been
+      up (`started`) and what it's building (`building`) the name's tooltip;  in sections:  This Mac, each repo ("Spell"
+      for Spell's own), then Epics, the worktree used most recently first (`used`:  its last request or last git work,
+      `lastWorkedOn()`);  a server's last 50 log lines are still `GET /api/servers/log?id=` (`lastLines()`), no longer
+      on the page;
       Spell UI from the first kit's `"uiScript"` and engine routes, served by the keeper as files (`uiFiles()`), a
       plain table without;  in a frame (the epic tooling's Servers tab, epic `epic-engine` P85;  the editor's Help › Servers,
       epic `editor` T185, which finds it through the app's `/api/keeper/glance`) it hides its title,

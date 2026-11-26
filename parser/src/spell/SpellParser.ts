@@ -506,6 +506,43 @@ export class SpellParser extends P.Parser {
   }
 
   /**
+   * The short name of each type `text` declares, by a scan of its lines -- see `P.Parser.declaredShortNames()`:
+   * `card` for `playing-card`, in `a "playing card" is a thing, aka "card"` or `a playing card aka card is a thing`
+   * (epic `language` T104).
+   * - Spanish's `alias`, its language's `typeNameStopWords`.
+   * - A comment after the line, `-- A playing card`, is no part of it.
+   */
+  declaredShortNames(text: string): Map<string, string> {
+    if (this.form === "page") text = SP.PageTwin.skeletonOf(text, this)
+    const { typeNameStopWords, declarations } = (this.language ?? SP.Language.default).words
+    const found = new Map<string, string>()
+    if (!typeNameStopWords.size) return found
+    const shortName = new RegExp(
+      `[ \t,](?:${[...typeNameStopWords].join("|")})[ \t]+(?:["']([^"'\n]+)["']|([\\p{L}\\p{M}\\d_-]+))`,
+      "iu"
+    )
+    for (const match of text.matchAll(declarations.typeDeclaration)) {
+      const [, type, typeWords] = match
+      const name =
+        type ??
+        typeWords
+          ?.trim()
+          .split(/[ \t]+/)
+          .join("-")
+      if (!name) continue
+      const lineEnd = text.indexOf("\n", match.index)
+      const line = text.slice(match.index, lineEnd < 0 ? undefined : lineEnd).replace(TRAILING_COMMENT, "")
+      const said = shortName.exec(line)
+      const aka = (said?.[1] ?? said?.[2])
+        ?.trim()
+        .split(/[ \t]+/)
+        .join("-")
+      if (aka && aka !== name) found.set(name, aka)
+    }
+    return found
+  }
+
+  /**
    * What each type `text` declares is a kind of, by a scan of its lines -- see `P.Parser.declaredSuperTypes()`:
    * `pile` for `stock-pile`, in `a "stock pile" is a pile with layout "stacked"` (epic `language` J177).
    * - Its type's name, as `P.typeName()` reads its words:  `TwoSidedView` for `a "card" is a draggable two sided view`,

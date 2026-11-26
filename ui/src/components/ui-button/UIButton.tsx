@@ -3,6 +3,7 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UI, UIT } from "spell/ui/core"
 import { buttonVocabulary } from "./UIButton.en"
+import { buttonsVocabulary } from "./UIButtons.en"
 import { DOMElementClick } from "./UIButton.types"
 import { ButtonFallback } from "./UIButton.fallback"
 import { Invoker } from "./Invoker"
@@ -146,11 +147,43 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
     return super.classValue(name)
   }
 
-  /** `icon` for icon-only buttons and for `labeled icon` buttons. */
+  /**
+   * `icon` for icon-only buttons and for `labeled icon` buttons;
+   * `bare icon` for a lone icon-only one that draws only its icon (`isBare`).
+   */
   protected get extraClass(): string | undefined {
     if (!this.hasIcon || this.reveal) return undefined
+    if (this.isBare) return BARE_ICON_CLASS
     const isLabeledIcon = !!this.labeled && !this.hasBadge
     return !this.hasText || isLabeledIcon ? UIT.ICON_CLASS : undefined
+  }
+
+  /**
+   * Draws ONLY its icon:  no ring, pill or fill around it at rest, the icon a step bigger (`UIButton.css`, "Bare").
+   * - Every icon-only button, `basic` and `tertiary` too, EXCEPT one whose box is the point:
+   *   - `circular` / `pill`:  a round icon button, on purpose (the top bar's Inspect and JS)
+   *   - `toggle`, a `color`, `labeled`, a `badge`, `attach-to`:  the box says something
+   *   - one in a `<ui-buttons>` group:  the group's track is its box
+   * - Pressed (`selected`) it still shows its pressed fill:  a toolbar's on state.
+   * - Owen's standing rule (2026-11-26, epic `editor` I370):  "icons like this should NOT have a button surround".
+   */
+  get isBare(): boolean {
+    if (!this.hasIcon || this.hasText || this.reveal || this.labeled || this.hasBadge) return false
+    if (this.color || this.toggle || this.attachTo) return false
+    const words = typeof this.appearance === "string" ? this.appearance.split(/\s+/) : []
+    if (words.some((word) => BOXED_APPEARANCES.has(word))) return false
+    return !this.isInGroup
+  }
+
+  /** In a `<ui-buttons>` group, in any language;  read again as it's connected. */
+  private get isInGroup(): boolean {
+    if (!this.isConnected) return false
+    const name = this.domElement.parentElement?.localName
+    if (!name) return false
+    return (
+      name === buttonsVocabulary.tag ||
+      ("vocabulary" in UI && UI.vocabulary.canonicalTagFor(name) === buttonsVocabulary.tag)
+    )
   }
 
   ////////////////
@@ -417,6 +450,12 @@ export interface UIButton extends E.AttributeValues<typeof buttonVocabulary> {}
  * - Not in the vocabulary:  read off the DOM element as written.
  */
 const FORM_ATTRIBUTES = ["form", "formaction", "formenctype", "formmethod", "formnovalidate", "formtarget"] as const
+
+/** Class words of a lone icon-only button that draws only its icon (`isBare`). */
+const BARE_ICON_CLASS = "bare icon"
+
+/** `appearance` words whose box is the point:  an icon-only button with one keeps its box (`isBare`). */
+const BOXED_APPEARANCES = new Set(["circular", "pill"])
 
 /** `icon-position` that puts the icon after the text. */
 const ICON_END = "right"

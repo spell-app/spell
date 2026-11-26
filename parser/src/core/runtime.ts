@@ -106,7 +106,7 @@ export function once<Payload extends object = object>(eventType: string, callbac
  * `trigger card-click with the card` => `trigger("card-click", { card: this })`.
  * - `props` are copied onto the event, so a listener reads `event.card`.
  * - Who hears it, in order:
- *   - the program's app and pages, each by its own handler, `<on fizz>` (`onFizz()`;  epic `language` T78):
+ *   - the program's app and pages, each by its own handler, `on fizz` (`onFizz()`;  epic `language` T78):
  *     one of a kind, so a page can listen for itself, with no line at a file's top
  *   - the program's own listeners, `on fizz:` at a file's top, in the order they were added
  * - Returns what each returned, in that order.

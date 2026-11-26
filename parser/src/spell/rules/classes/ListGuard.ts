@@ -53,6 +53,10 @@ export const CAN_NEVER_MOVE = "can (never:never) {verb:take_or_give_up} (a|an) {
  *     so its cards drag with no `draggable` of their own
  *   - `- droppable when the card is one lower`:  `canTake(card)`, and `static droppable = true`;
  *     the card is the item the list holds
+ * - A FILE or a FOLDER from the desktop, on any view (epic `language` I167):  `can take a file when: ...` is
+ *   `canTakeFile(file)` (`canTakeFolder(folder)`), in every language, so it never clashes with a card's `canTake()`.
+ *   - The page asks it of each file dropped (app's `SpellElement`);  a view with it takes desktop files.
+ *   - A program's own `file` type wins:  then it's an ordinary `canTake(file)`.
  */
 export class ListGuard extends SpellStatement<"type|verb?|item?|when?|body?|never?"> {
   @proto static priority = Priority.declaration
@@ -76,6 +80,7 @@ export class ListGuard extends SpellStatement<"type|verb?|item?|when?|body?|neve
     if (when && Wording.meaningOf(when) === "if")
       SP.SpellWarnings.note(match, SP.Language.of(scope).parserMessage("say-when"), when)
     if (!item && !ListGuard.listItemType(match)) return undefined
+    ListGuard.noteDesktopItem(match)
     return match
   }
 
@@ -118,7 +123,7 @@ export class ListGuard extends SpellStatement<"type|verb?|item?|when?|body?|neve
       thisVar: listType.instanceName,
       mapItTo: "this",
       itDatatype: SP.typeName(listType.name),
-      args: [new P.ScopeVariable({ name: P.instanceCase(itemType), datatype: itemType })],
+      args: [new P.ScopeVariable({ name: ListGuard.itemNameOf(match), datatype: itemType })],
       declaredBy: match
     })
   }
@@ -127,7 +132,7 @@ export class ListGuard extends SpellStatement<"type|verb?|item?|when?|body?|neve
     const { type, never } = match.groups
     const itemType = ListGuard.itemTypeOf(match)
     // its type, e.g. `Card` for `a card`:  a typed target writes it
-    const arg = new P.ASTVariableExpression(match, { name: P.instanceCase(itemType), datatype: itemType })
+    const arg = new P.ASTVariableExpression(match, { name: ListGuard.itemNameOf(match), datatype: itemType })
     const body = never
       ? new P.ASTReturnStatement(match, { value: new P.ASTBooleanLiteral(match, false) })
       : P.matchAST<MethodBody>(this.getBody(match))
@@ -148,16 +153,44 @@ export class ListGuard extends SpellStatement<"type|verb?|item?|when?|body?|neve
     return new P.ASTStatementGroup(match, { statements: [guard, new P.ASTPatchedMember(match, { member: flag })] })
   }
 
-  /** `canTake` for a verb meaning `take`, e.g. `add`;  else `canGiveUp` -- the `List` method we override. */
-  static methodName(match: P.MatchFor<ListGuard>): "canTake" | "canGiveUp" {
+  /**
+   * `canTake` for a verb meaning `take`, e.g. `add`;  else `canGiveUp` -- the `List` method we override.
+   * - Taking a desktop file or folder:  `canTakeFile`, `canTakeFolder`, which the page asks as one is dropped.
+   */
+  static methodName(match: P.MatchFor<ListGuard>): string {
     const move = (match.rule as ListGuard).shortFor ?? Wording.meaningOf(match.groups.verb)
-    return move === "take" ? "canTake" : "canGiveUp"
+    if (move !== "take") return "canGiveUp"
+    const { desktop } = match.data as ListGuardData
+    return desktop ? `canTake${desktop}` : "canTake"
   }
 
-  /** The item's type, e.g. `Card`:  as the line says it, else the list's own (`listItemType()`). */
+  /**
+   * Is the line's item a file or a folder from the desktop (`a file`, `una carpeta`)?  Kept on the match, while parsing.
+   * - Not when the program has its own type of that name.
+   */
+  private static noteDesktopItem(match: P.MatchFor<ListGuard>) {
+    const { item } = match.groups
+    const word = item && `${item.value}`.toLowerCase()
+    const desktop = word ? SP.Language.of(match.scope).words.desktopFileWords[word] : undefined
+    if (desktop && !match.scope.getType(SP.typeName(word!))) (match.data as ListGuardData).desktop = desktop
+  }
+
+  /**
+   * The item's type, e.g. `Card`:  as the line says it, else the list's own (`listItemType()`).
+   * - A desktop file or folder:  `File` or `Folder` in every language.
+   */
   private static itemTypeOf(match: P.MatchFor<ListGuard>): string {
+    const { desktop } = match.data as ListGuardData
+    if (desktop) return desktop
     const { item } = match.groups
     return SP.typeName(item ? `${item.value}` : (ListGuard.listItemType(match) ?? "thing"))
+  }
+
+  /** What the body calls the item, e.g. `card`;  a desktop file as it's written, `the file`, Spanish `el archivo`. */
+  private static itemNameOf(match: P.MatchFor<ListGuard>): string {
+    const { item } = match.groups
+    if ((match.data as ListGuardData).desktop) return P.instanceCase(SP.typeName(`${item!.value}`))
+    return P.instanceCase(ListGuard.itemTypeOf(match))
   }
 
   /**
@@ -186,8 +219,13 @@ export class ListGuard extends SpellStatement<"type|verb?|item?|when?|body?|neve
 /** A move a list's rule is about:  taking a thing, or giving one up. */
 type Move = "take" | "give_up"
 
-/** What `ListGuard` keeps on a short form's match:  its list's item type, e.g. `Card`. */
-type ListGuardData = { itemType?: string }
+/** What `ListGuard` keeps on its match. */
+type ListGuardData = {
+  /** a short form's list's item type, e.g. `Card` */
+  itemType?: string
+  /** `File` or `Folder`:  its item is one from the desktop */
+  desktop?: "File" | "Folder"
+}
 
 /** Declared, so a `specialize()`d instance reads its own. */
 export interface ListGuard {

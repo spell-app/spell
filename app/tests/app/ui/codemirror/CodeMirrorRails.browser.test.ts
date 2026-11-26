@@ -196,6 +196,55 @@ describe("a body's rail under the caret", () => {
     }
   })
 
+  test("an end tag with code after it on its line:  a foot as any, the code after it at the code's size and place (I185)", async () => {
+    const view = await bubblyEditorOf(
+      `a "game" is a view\n\tto draw it\n\t\t<segment>\n\t\t\t<toolbar>\n\t\t\t\t<divider />\n\t\t\t</toolbar> <divider />\n\t\t</segment>\n\t\t<text "after" />\n`
+    )
+    await frames()
+    const rows = [...view.contentDOM.querySelectorAll<HTMLElement>(".cmb-feet-row")]
+    // its own row, and the end tag on the line under it another:  never joined past the code
+    expect(rows.map((row) => row.classList.contains("cmb-feet-then-code"))).toEqual([true, false])
+    expect(rows[0]!.querySelector(".cmb-tag-foot")!.textContent).toBe("</toolbar>")
+    // the divider's pill where a pill sits on any line, at the same size
+    const pillPlace = (pill: HTMLElement) => {
+      const line = pill.closest(".cm-line")!.getBoundingClientRect()
+      const box = pill.getBoundingClientRect()
+      return { top: box.top - line.top, height: box.height }
+    }
+    const divider = rows[0]!.querySelector<HTMLElement>(":scope > .cmb-tag-pill")!
+    // the same tag on a line of its own, a band there
+    const action = [
+      ...view.contentDOM.querySelectorAll<HTMLElement>(".cm-line:not(.cmb-feet-row) > .cmb-tag-band")
+    ].find((pill) => pill.textContent!.includes("divider"))!
+    expect(pillPlace(divider).top).toBeCloseTo(pillPlace(action).top, 1)
+    expect(pillPlace(divider).height).toBeCloseTo(pillPlace(action).height, 1)
+    // a space's room after the foot
+    const foot = rows[0]!.querySelector(".cmb-tag-foot")!.getBoundingClientRect()
+    expect(divider.getBoundingClientRect().left).toBeGreaterThan(foot.right + 2)
+  })
+
+  test("a tag pair inside a one-line element sits level with it, not lower (I186)", async () => {
+    const view = await bubblyEditorOf(
+      `a "game" is a view\n\tto draw it\n\t\t<text slot="right"><b>Score</b>: <number "score" /></>\n`
+    )
+    await frames()
+    const line = [...view.contentDOM.querySelectorAll<HTMLElement>(".cm-line")].find((each) =>
+      each.textContent!.includes("Score")
+    )!
+    const top = (text: string) => {
+      const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT)
+      for (let node = walker.nextNode(); node; node = walker.nextNode())
+        if (node.textContent!.trim() === text) {
+          const range = document.createRange()
+          range.selectNodeContents(node)
+          return range.getBoundingClientRect().top
+        }
+      throw new TypeError(`no ${text}`)
+    }
+    expect(top("Score")).toBeCloseTo(top("text"), 1)
+    expect(top("Score")).toBeCloseTo(top("number"), 1)
+  })
+
   test("a run of end tags alone on their lines:  ONE row of feet, each end tag reached by a click and the caret (I132)", async () => {
     const view = await bubblyEditorOf(NESTED)
     const [end, outerEnd] = linesStarting(view, ["</>", "</container>"])

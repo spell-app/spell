@@ -391,7 +391,7 @@ export const APP_TEXTS = {
   allIcons: "All Icons…",
   // Help › Servers (epic `editor` T185):  the item, its dot's words (`ServersGlance.words`), and its dialog's title;
   // `{count}`, how many servers aren't running
-  servers: "Servers…",
+  servers: "Spell Servers…",
   serversAllRunning: "All of Spell's background servers are running.",
   serversOneDown: "One of Spell's background servers has stopped.\nClick to see which one, and start it again.",
   serversSomeDown:

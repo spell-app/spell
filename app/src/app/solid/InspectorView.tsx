@@ -1054,7 +1054,7 @@ function memberLabel(member: ThingMember): string {
 /****************
  * ### `<TypeField>`
  * One of a type's fields, as All Cards edits it (epic `editor` P23, Q29;  `Inspector.propertyWritten()`):
- * - worked out by Spell (`<property "name">its rank + " of " + its suit</>`):  that Spell, in the code editor on its
+ * - worked out by Spell (`its "name" is its rank && "of" && its suit`):  that Spell, in the code editor on its
  *   lines of the file, to read and change there (Owen:  "For derived fields, you'd show the spell to calculate it")
  * - else a `one-of`:  its values as pills, to add, take away or type (Owen:  "rank should be a type-in field listing
  *   the values as pills"), written back into its `one-of` as one step (`Inspector.writeOneOf()`)

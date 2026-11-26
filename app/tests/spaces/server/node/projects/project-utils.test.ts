@@ -253,18 +253,18 @@ describe("project-utils", () => {
     expect(index.imports.map((it) => it.path)).toEqual(["/Paged.spell", `/Card${SP.EDITOR_PAGE_SUFFIX}`])
   })
 
-  // epic `elemental-spell` J95, Owen 2026-10-25:  "one file";  epic `language` P40:  every file `.spell`, in either shape
-  test("a tag-shaped file is an import of its own, as a plain one is", async () => {
+  // epic `elemental-spell` J95, Owen 2026-10-25:  "one file";  epic `language` P40:  every file `.spell`
+  test("a type's own file is an import of its own", async () => {
     const projectId = project("Tags")
     const folder = resolve(workspace, "Tags")
-    writeFileSync(resolve(folder, "Card.spell"), '<spell-thing "card">\n</spell-thing>\n')
+    writeFileSync(resolve(folder, "Card.spell"), 'a "card" is a thing\n')
 
     const index = await projectUtils.getIndex(projectId)
     expect(index.imports.map((it) => it.path)).toEqual(["/Tags.spell", "/Card.spell"])
   })
 
   describe("sub-folders (notebook P10)", () => {
-    const TAG = '<spell-thing "card">\n</spell-thing>\n'
+    const TAG = 'a "card" is a thing\n'
     /** Write `file` under project `folder`, making its sub-folders. */
     function write(folder: string, file: string, contents = TAG) {
       mkdirSync(dirname(resolve(folder, file)), { recursive: true })
@@ -451,7 +451,7 @@ describe("project-utils", () => {
     ]
     writeFileSync(resolve(folder, SP.PROJECT_FILE), JSON.stringify({ title: "Ordered", imports }, null, 2))
     const before = readFileSync(resolve(folder, SP.PROJECT_FILE), "utf8")
-    writeFileSync(resolve(folder, "Console.spell"), '<spell-thing "console">\n</spell-thing>\n')
+    writeFileSync(resolve(folder, "Console.spell"), 'a "console" is a thing\n')
 
     // the explainer not there:  left out of the index, and the project file left as it is
     const paths = async () => (await projectUtils.getIndex(projectId)).imports.map((it) => it.path)
@@ -459,13 +459,13 @@ describe("project-utils", () => {
     expect(readFileSync(resolve(folder, SP.PROJECT_FILE), "utf8")).toBe(before)
 
     // back again:  in its place
-    writeFileSync(resolve(folder, "Explainer.spell"), '<spell-page "explainer">\n</spell-page>\n')
+    writeFileSync(resolve(folder, "Explainer.spell"), '"explainer" is a page\n')
     expect(await paths()).toEqual(["/Console.spell", "/Explainer.spell", "/Ordered.spell"])
     expect(readFileSync(resolve(folder, SP.PROJECT_FILE), "utf8")).toBe(before)
 
     // a new one goes at the end, the gone one's place kept
     rmSync(resolve(folder, "Explainer.spell"))
-    writeFileSync(resolve(folder, "Extra.spell"), '<spell-thing "extra">\n</spell-thing>\n')
+    writeFileSync(resolve(folder, "Extra.spell"), 'an "extra" is a thing\n')
     expect(await paths()).toEqual(["/Console.spell", "/Ordered.spell", "/Extra.spell"])
     expect((await projectUtils.loadProjectFile(projectId)).imports.map((it) => it.path)).toEqual([
       "/Console.spell",

@@ -2270,7 +2270,7 @@
               "syntax": "((old:antigua|antiguo)|(new:nueva|nuevo)|(mocked:maquetada|maquetado)|(built:construida|construido))"
             },
             {
-              "syntax": "((red:rojo)|(orange:naranja)|(yellow:amarillo)|(olive:oliva)|(green:verde)|(teal:turquesa)|(blue:azul)|(violet:violeta)|(purple:morado)|(pink:rosa)|(brown:marrón)|(brown:marron)|(grey:gris))"
+              "syntax": "((red:rojo|roja)|(orange:naranja)|(yellow:amarillo|amarilla)|(olive:verde oliva|oliva)|(teal:verde azulado|turquesa)|(green:verde)|(blue:azul)|(violet:violeta)|(purple:morado|morada|púrpura|purpura)|(pink:rosa)|(brown:marrón|marron)|(grey:gris))"
             },
             {
               "syntax": "(página no encontrada|pagina no encontrada)"
@@ -7210,7 +7210,7 @@
           "ruleNames": ["list_guard"],
           "internal": false,
           "file": "src/spell/rules/classes/ListGuard.ts",
-          "line": 57,
+          "line": 61,
           "purpose": "What a list type takes, or gives up, when something MOVES (epic page Q23 - Q25).",
           "syntaxes": [
             {
@@ -7532,7 +7532,7 @@
           "ruleNames": ["outline_specifier_percent"],
           "internal": false,
           "file": "src/spell/rules/classes/OutlineSpecifierPercent.ts",
-          "line": 14,
+          "line": 13,
           "purpose": "A property that's a PERCENT (epic `language` P34, Owen's C1 on I47): `its \"tip\" is a percent`, `its \"tip\" is a percent starting at 18%`; Spanish `su \"propina\" es un porcentaje`.",
           "syntaxes": [
             {
@@ -11345,7 +11345,7 @@
           "ruleNames": ["jsxText"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSXText.ts",
-          "line": 17,
+          "line": 15,
           "purpose": "Match literal text between JSX tags (`jsxChild`).",
           "syntaxes": [],
           "aliases": ["jsxChild"]

@@ -11,7 +11,7 @@ import {
   statSync,
   writeFileSync
 } from "node:fs"
-import { dirname, join } from "node:path"
+import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { every } from "spell/util/timing"
@@ -509,10 +509,12 @@ export class ServerKeeper {
       const hasRecord = existsSync(join(checkout, PAGE_SERVER_FILE))
       if (!booked && !hasRecord) continue
       const id = idOf(repo, "page server", worktree)
+      const worked = lastWorkedOn(checkout)
       const row = {
         ...this.row(id, repo, checkout, "page server", "its own pages, on demand", worktree),
         log: SRV.serverLogOf(checkout, "page server"),
-        ...(booked && { port: booked })
+        ...(booked && { port: booked }),
+        ...(worked && { used: worked })
       }
       // its address by its name, through main's page server, which starts it on the first visit (epic `epic-engine` T167)
       const named = SRV.namedAddressOf(checkout)
@@ -535,7 +537,10 @@ export class ServerKeeper {
         ...howItStands(running),
         state: "running",
         address: `${named ?? running.base}/`,
-        ...(running.lastRequest && { lastRequest: running.lastRequest })
+        ...(running.lastRequest && {
+          lastRequest: running.lastRequest,
+          used: latestOf(running.lastRequest, worked)
+        })
       })
       rows.push(this.editorRow(repo, checkout, worktree))
     }
@@ -1154,4 +1159,32 @@ function readJson<T>(file: string): T | undefined {
   } catch {
     return undefined
   }
+}
+
+/**
+ * When worktree `checkout` was last worked on, by git:  the newest of its git folder's `logs/HEAD` (a commit, a
+ * checkout, a merge) and its `index` (anything staged);  the Servers page lists the one used most recently first
+ * (epic `editor` I374).  Unknown:  `undefined`.
+ * - Read from the disk, with no `git` run:  the keeper looks every 10 seconds.
+ * - NEVER throws
+ */
+export function lastWorkedOn(checkout: string): string | undefined {
+  try {
+    const gitdir = /^gitdir:\s*(.+)$/m.exec(readFileSync(join(checkout, ".git"), "utf8"))?.[1]?.trim()
+    if (!gitdir) return undefined
+    const own = resolve(checkout, gitdir)
+    const times = [join(own, "logs", "HEAD"), join(own, "index")].map(
+      (file) => statSync(file, { throwIfNoEntry: false })?.mtimeMs ?? 0
+    )
+    const newest = Math.max(...times)
+    return newest ? new Date(newest).toISOString() : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/** the later of two times (ISO);  either may be missing */
+function latestOf(one: string | undefined, other: string | undefined): string | undefined {
+  if (!one || !other) return one ?? other
+  return Date.parse(one) >= Date.parse(other) ? one : other
 }

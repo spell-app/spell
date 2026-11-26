@@ -132,7 +132,7 @@ export function RestartNeeded() {
             </ui-button>
             <ui-button
               class="RestartNeededClose"
-              appearance="circular basic"
+              appearance="basic"
               size="mini"
               icon="close"
               aria-label={appTexts.text("restartNoticeClose")}

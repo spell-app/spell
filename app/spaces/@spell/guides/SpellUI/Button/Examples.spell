@@ -53,8 +53,9 @@
 		</>
 
 		<section label="Icon" sticky="stack" collapsible dividing>
-			<example "Icon" description="A button can have only an icon.  Give it a name with `aria-label`.">
+			<example "Icon" description="A button can have only an icon.  Give it a name with `aria-label`.  Alone, it draws only its icon, a size up, with no button around it;  pointing at it changes the icon's colour.  A round one (`circular`), a `toggle`, a coloured one or one in a group keeps its button.">
 				<button icon="cloud" aria-label="Cloud"/>
+				<button icon="cloud" appearance="circular" aria-label="Cloud"/>
 			</example>
 		</>
 

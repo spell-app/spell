@@ -15,7 +15,7 @@ import { itsObject, type ItsMatchData } from "./properties.shared"
  *   so at `Priority.preferred` it would beat `its last card`, the ordinal.
  * - Tracks `it`, as `its_property` does.
  * - Declared further down counts, as for `the X`:  `P.Parser.stubDeclaredProperties()` knows the names ahead,
- *   e.g. a view's drawing reading `its lost signal` above its `<property "lost signal">` (epic `language` P17).
+ *   e.g. a view's drawing reading `its lost signal` above its `its "lost signal" is ...` line (epic `language` P17).
  * - No `it` yet, on an outline body's line:  the type the body is about, as `its X` there compiles to `this.X`,
  *   e.g. `- its "recent" menu has its recent files, each running ...` (epic `language` T30).
  */

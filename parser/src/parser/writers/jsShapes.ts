@@ -52,6 +52,18 @@ export function isCoreCall(node: P.ASTNode): boolean {
   return node instanceof P.ASTScopedMethodInvocation && node.thing instanceof P.ASTCoreExpression
 }
 
+/**
+ * What a loop's function does each turn, written as a plain loop (`for (const card of ...)`, `for card in ...`):
+ * its body -- but an inline one that's a lone `return x` is `x`, a statement.
+ * - `play each card in the discard pile` is `(card) => card.play()`:  in a loop, that `return` would end the
+ *   whole method after the first card (epic `language` I193).
+ */
+export function loopBody(method: P.ASTMethodDefinition): P.ASTStatementBlock | P.ASTNode {
+  const [only, ...rest] = method.body.statements ?? []
+  if (!method.inline || rest.length || !(only instanceof P.ASTReturnStatement) || !only.value) return method.body
+  return only.value
+}
+
 /** Is `node` a loop's answer, `core.map(...)`, maybe in parens? */
 export function isLoopCall(node: P.ASTNode): boolean {
   while (node instanceof P.ASTParenthesizedExpression) node = node.expression

@@ -2,12 +2,12 @@ import { For, Show, createSignal, onCleanup, onSettled } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { kebabCase, upperFirst } from "spell/util"
-import { cssSecondsFor } from "spell/util/dom"
-import { after, afterSolidUpdate, type CancelablePromise } from "spell/util/timing"
+import { after, type CancelablePromise } from "spell/util/timing"
 import type { ComponentDefinition } from "spell/ui/components/ComponentDefinitions"
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { hoverDelay } from "spell/app/app/ui/codePopups"
+import { BarPanels, type BarPanel } from "./BarPanels"
 import { Inspector } from "./Inspector"
 import { on } from "./on"
 import { PartEdits } from "./PartEdits"
@@ -276,167 +276,20 @@ function PlusPanel(): JSX.Element {
   )
 }
 
-/** A box's size, in px. */
-type Size = { width: number; height: number }
-
 /** One of the add bar's sub-panels:  a `<ui-popup>`, shown and hidden by `visible`. */
-type RailPanel = HTMLElement & { visible?: boolean }
+type RailPanel = BarPanel
 
 /**
- * The add bar's sub-panels, as one (epic `editor` T173, Owen:  "When a submenu is displayed, hovering over other
- * items in the bar should open them immediately with an animation like the bar is moving down"):
- * - which is out, and the button it's out of
- * - pointing at another button while one is out opens that one at once:
- *   the one out goes as it opens, with no slide back, and the new one glides from where it was to its own button
- *   (`gliding`, `--PaletteFlyout-glide`, `PaletteView.css`)
- * - the same just after one went (`REOPENS_WITHIN_MS`):  the mouse crossing a gap
- * - otherwise a panel slides out from behind the bar (the sheet's own `@starting-style`)
- * - Static on purpose:  ONE add bar per page.
+ * The add bar's sub-panels, as one (epic `editor` T173):  pointing at another button while one is out opens it at
+ * once, gliding up or down from where the last one was (`gliding`, `--PaletteFlyout-glide`, `PaletteView.css`).
+ * - The top bar's menus move the same way, sideways (`BarPanels`).
  */
-class RailPanels {
-  /** The panel out, and the button it's out of. */
-  private static shown: { panel: RailPanel; button: HTMLElement } | undefined
-
-  /** The height a gliding panel starts at:  the last one's (I365). */
-  private static heightFrom: { panel: RailPanel; height: number } | undefined
-
-  /** The panel to go once the one replacing it opens. */
-  private static leaving: RailPanel | undefined
-
-  /** The last panel to go, its button, and when:  a button reached just after opens at once too. */
-  private static gone: { panel: RailPanel; button: HTMLElement; at: number } | undefined
-
-  /**
-   * Follow `panel`, out of `buttonOf()`, as it shows and hides:  `setOut()` says whether it's out.
-   * - Every way it opens and closes counts:  its own hover, a click, Escape, `Palette.closeMenus()`.
-   */
-  static follow(panel: RailPanel, buttonOf: () => HTMLElement | undefined, setOut: (isOut: boolean) => void): void {
-    panel.addEventListener("beforetoggle", (event) => {
-      const button = buttonOf()
-      const isOpening = (event as ToggleEvent).newState === "open"
-      setOut(isOpening)
-      if (isOpening) {
-        panel.classList.remove(SWITCHING)
-        if (button) RailPanels.shown = { panel, button }
-        // the one it replaces goes only now:  a panel opening for the first time takes a moment to draw
-        const leaving = RailPanels.leaving
-        RailPanels.leaving = undefined
-        if (leaving && leaving !== panel) leaving.visible = false
-        // its height from the last one's, as it glides (I365):  measured once it shows, before it's painted
-        const from = RailPanels.heightFrom
-        RailPanels.heightFrom = undefined
-        if (from?.panel === panel) afterSolidUpdate(() => RailPanels.growFrom(panel, from.height))
-        return
-      }
-      panel.classList.remove(GLIDING)
-      if (RailPanels.shown?.panel !== panel) return
-      RailPanels.shown = undefined
-      if (button) RailPanels.gone = { panel, button, at: performance.now() }
-    })
-  }
-
-  /**
-   * The mouse is on `button`:  open its `panel` at once if another is out, or just went (`REOPENS_WITHIN_MS`).
-   * - Returns whether it did:  otherwise the panel opens as it usually would, once the mouse rests.
-   */
-  static pointedAt(panel: RailPanel, button: HTMLElement): boolean {
-    if (RailPanels.shown?.panel === panel || !RailPanels.last) return false
-    RailPanels.open(panel, button)
-    return true
-  }
-
-  /** Open `panel`, out of `button`, at once:  gliding from the panel out (or just gone), else sliding out. */
-  static open(panel: RailPanel, button: HTMLElement): void {
-    if (RailPanels.shown?.panel === panel) return
-    const last = RailPanels.last
-    RailPanels.gone = undefined
-    if (last && last.panel !== panel) {
-      last.panel.classList.add(SWITCHING)
-      RailPanels.leaving = last.panel
-      // from the last one's place:  as far from its button as this one will be from its own
-      const glide = topOf(last.button) - topOf(button)
-      panel.style.setProperty(GLIDE_TOKEN, `${Math.round(glide)}px`)
-      panel.classList.add(GLIDING)
-      RailPanels.heightFrom = { panel, height: boxOf(last.panel)?.getBoundingClientRect().height ?? 0 }
-    }
-    panel.visible = true
-  }
-
-  /**
-   * Grow or shrink `panel` from `height` to its own, as it glides into place (epic `editor` I365, Owen:  "the open menu
-   * jumps in height as I hover over the other tabs in the sidebar, feels janky").
-   * - In the glide's time and ease (`--ui-duration-normal`, `--ui-ease-out`), so the two read as one move.
-   * - Its box cuts what's past its height meanwhile, its foot staying at its bottom.
-   * - Reduced motion:  none.
-   */
-  private static growFrom(panel: RailPanel, height: number): void {
-    const own = boxOf(panel)?.getBoundingClientRect().height ?? 0
-    if (!height || !own || Math.abs(own - height) < 1) return
-    RailPanels.glideBox(panel, [{ height: `${height}px` }, { height: `${own}px` }])
-  }
-
-  /**
-   * Glide `panel` from size `from` to `to`, as what's in it changes (the `+` panel's search;  epic `editor` I369, Owen:
-   * "The menu should animate thinner/wider as I type in the search box"):  its box cuts what's past it meanwhile.
-   * - Reduced motion:  none.
-   */
-  static resize(panel: RailPanel, from: Size, to: Size): void {
-    if (Math.abs(from.width - to.width) < 1 && Math.abs(from.height - to.height) < 1) return
-    RailPanels.glideBox(panel, [
-      { width: `${from.width}px`, height: `${from.height}px` },
-      { width: `${to.width}px`, height: `${to.height}px` }
-    ])
-  }
-
-  /** Run `keyframes` on `panel`'s box, in the glide's time and ease;  nothing with reduced motion. */
-  private static glideBox(panel: RailPanel, keyframes: Keyframe[]): void {
-    const box = boxOf(panel)
-    if (!box || REDUCED_MOTION.matches) return
-    const seconds = cssSecondsFor(panel, "--ui-duration-normal") ?? DEFAULT_GLIDE_SECONDS
-    const easing = getComputedStyle(panel).getPropertyValue("--ui-ease-out").trim() || "ease-out"
-    box.animate(keyframes, { duration: seconds * 1000, easing })
-  }
-
-  /** The panel out, else the one that went within `REOPENS_WITHIN_MS`. */
-  private static get last(): { panel: RailPanel; button: HTMLElement } | undefined {
-    const gone = RailPanels.gone
-    return RailPanels.shown ?? (gone && performance.now() - gone.at < REOPENS_WITHIN_MS ? gone : undefined)
-  }
-}
-
-/**
- * Where `button` is drawn, down the window:  its own box, else its shadow root's first drawn box
- * (a `<ui-item>` is `display: contents`, so it has no box of its own).
- */
-function topOf(button: Element): number {
-  const own = button.getBoundingClientRect()
-  if (own.height) return own.top
-  const drawn = [...(button.shadowRoot?.children ?? [])].find((child) => child.getBoundingClientRect().height)
-  return drawn?.getBoundingClientRect().top ?? own.top
-}
-
-/** A panel's box, its `popup` part:  what slides, glides and grows. */
-function boxOf(panel: RailPanel): HTMLElement | undefined {
-  return panel.shadowRoot?.querySelector<HTMLElement>("[part~=popup]") ?? undefined
-}
-
-/** The person asks for less motion:  a panel's height doesn't glide (its slide and glide are the sheet's). */
-const REDUCED_MOTION = matchMedia("(prefers-reduced-motion: reduce)")
-
-/** A glide's time when the page says none:  Spell UI's normal duration. */
-const DEFAULT_GLIDE_SECONDS = 0.2
-
-/** A panel opening where another was:  it glides from there (`PaletteView.css`). */
-const GLIDING = "gliding"
-
-/** A panel going as another opens:  at once, with no slide back. */
-const SWITCHING = "switching"
-
-/** How far a gliding panel starts from its own place, up or down:  `RailPanels.open()` sets it. */
-const GLIDE_TOKEN = "--PaletteFlyout-glide"
-
-/** How soon after a panel goes another still opens at once, gliding from it:  the mouse crossing to the next button. */
-const REOPENS_WITHIN_MS = 300
+const RailPanels = new BarPanels({
+  along: "y",
+  glideToken: "--PaletteFlyout-glide",
+  grows: "height",
+  reopensWithinMs: 300
+})
 
 /**
  * ### `<FavoriteButton>`

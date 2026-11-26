@@ -27,7 +27,7 @@ def test_a_handler_hears_the_programs_event_with_its_payload(core: Core) -> None
 
 
 def test_a_page_and_the_app_hear_the_programs_event_by_their_own_handlers(core: Core) -> None:
-    """`<on fizz>` on a page or the app hears `trigger fizz`, before the program's listeners (epic `language` T78)."""
+    """`on fizz` on a page or the app hears `trigger fizz`, before the program's listeners (epic `language` T78)."""
     heard = []
 
     class Explainer(Page):

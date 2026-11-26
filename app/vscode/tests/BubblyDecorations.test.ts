@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
 import values from "spell/app/app/components/spell-code/bubbly.values.json"
-import { optionsFor, styleKey, type BubblyRange } from "../src/BubblyDecorations"
+import { optionsFor, pillPieces, styleKey, type BubblyRange } from "../src/BubblyDecorations"
 
 /** A stretch of `kind`, its range anywhere. */
 const stretch = (kind: string, more: Partial<BubblyRange> = {}): BubblyRange => ({
@@ -51,7 +51,32 @@ describe("BubblyDecorations", () => {
       after: { contentText: " " }
     })
     expect(options.borderRadius).toBeTruthy()
-    expect(options.border).toContain(values.settings["--bubbly-action"].light)
+    expect(options.borderColor).toContain(values.settings["--bubbly-action"].light)
+    expect(options.borderWidth).toBe("1px")
     expect(JSON.stringify(options)).not.toMatch(/padding|margin/)
+  })
+
+  test("a pill over several letters in three pieces, so VS Code's runs inside it don't each round off (T115)", () => {
+    const pill = stretch("input", {
+      partOfSpeech: "action",
+      range: { start: { line: 2, character: 4 }, end: { line: 2, character: 10 } }
+    })
+    const pieces = pillPieces(pill)
+    expect(pieces.map(({ piece, range }) => [piece, range.start.character, range.end.character])).toEqual([
+      ["start", 4, 5],
+      ["middle", 5, 9],
+      ["end", 9, 10]
+    ])
+    expect(new Set(pieces.map(styleKey)).size).toBe(3)
+    const [start, middle, end] = pieces.map(optionsFor)
+    // corners and edges only at its ends;  the room beside it outside them
+    expect(start).toMatchObject({ borderRadius: "5px 0 0 5px", borderWidth: "1px 0 1px 1px", before: { contentText: "\u00a0" } })
+    expect(start!.after).toBeUndefined()
+    expect(middle).toMatchObject({ borderRadius: "0", borderWidth: "1px 0" })
+    expect(middle!.before ?? middle!.after).toBeUndefined()
+    expect(end).toMatchObject({ borderRadius: "0 5px 5px 0", borderWidth: "1px 1px 1px 0", after: { contentText: "\u00a0" } })
+    // one letter, another kind:  as they are
+    expect(pillPieces(stretch("input"))).toHaveLength(1)
+    expect(pillPieces(stretch("reference", { range: pill.range }))).toHaveLength(1)
   })
 })

@@ -10,7 +10,9 @@ import { Alignment } from "spell/test-helpers/Alignment"
 
 /**
  * How the editor's end-to-end tests find the running editor:  every test file here that opens it imports this.
- * - No record of an editor, as in CI:  `SERVING` is false, and the file skips itself.
+ * - No record of an editor, in CI:  `SERVING` is false, and the file skips itself.
+ * - No record of an editor anywhere else:  importing this THROWS, saying to start one (epic `language` I189).
+ *   - Skipped, a run with the servers down reported success with every test skipped.
  * - A record, and the editor answers:  `SERVING` is true.
  * - A record, but no answer for `ANSWER_MS`:  importing this THROWS, so the file fails and says why.
  *   - The editor is meant to be running, so skipping would look like a pass.
@@ -48,6 +50,11 @@ async function isAnswering(address: string): Promise<boolean> {
 /** The running editor's address;  `undefined`:  none noted. */
 export const EDITOR = editorAddress()
 
+if (!EDITOR && !process.env.CI) {
+  throw new Error(
+    "runningEditor:  no editor is running for this checkout, so these tests can't run;  start it:  spell server start all"
+  )
+}
 if (EDITOR && !(await isAnswering(EDITOR))) {
   throw new Error(`runningEditor:  the editor noted at ${EDITOR} doesn't answer;  start it:  spell server start all`)
 }

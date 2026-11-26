@@ -12,6 +12,7 @@ export * as P from "./"
 
 export * from "./parser.types"
 export * from "./Inflector"
+export * from "./HTMLEntities"
 export * from "./tokenizer"
 export * from "./Match"
 export * from "./Expectations"

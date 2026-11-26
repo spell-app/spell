@@ -4116,7 +4116,7 @@ export interface UIButtonAttributes {
    */
   "prop:attachTo"?: "both" | "top" | "bottom" | "left" | "right"
   /**
-   * Its icon, by name:  Font Awesome's, or Fomantic's aliases.  With no text, it's an icon button, with square padding (the `icon` class).  With `labeled`, it's a `labeled icon` button.
+   * Its icon, by name:  Font Awesome's, or Fomantic's aliases.  With no text, it's an icon button, with square padding (the `icon` class).  Alone, it draws only its icon, half again as big as its words' would be:  no ring, pill or fill around it, pointing at it only changing the icon's colour (the `bare` class).  Round (`circular`), `toggle`, coloured or in a group, it keeps its button around the icon.  With `labeled`, it's a `labeled icon` button.
    * - takes:  icon name
    */
   icon?: string

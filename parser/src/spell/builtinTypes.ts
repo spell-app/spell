@@ -416,7 +416,7 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
           "- Drawn while it has no drawing of its own:  writing one replaces it.",
           "- A drawing can place it too:  `draw its thumbnail`.",
           "- A site's card shows it, unless the site's line names its own.",
-          '- Say it on its tag, `<spell-page "terms" thumbnail="snapshots/terms.jpg"/>`, or in its body, `- its thumbnail is "..."`.'
+          '- Say it in its body:  `its thumbnail is "snapshots/terms.jpg"`.'
         )
       }
     ]
@@ -446,7 +446,7 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
         docstring: md(
           "Whether what's changed on the page is saved:  `unlocked` (the default) or `locked`.",
           "- On a locked page every edit is a try-out:  the editor saves it for nobody, its own author included.",
-          '- Say it on its tag, `<spell-page "guide" locked>`, or in its body, `- it is locked` or `- its lock is locked`.'
+          '- Say it on its line, `"guide" is a locked page`, or in its body, `it is locked` or `its lock is locked`.'
         )
       }
     ]

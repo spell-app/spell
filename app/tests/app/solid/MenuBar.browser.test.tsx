@@ -105,7 +105,7 @@ describe("<AppBarMenus>", () => {
     expect(popup.visible).toBe(false)
   })
 
-  test("Help:  Keyboard Shortcuts, its key ?, opens the shortcuts dialog;  All Icons (T158);  then the tours (P40), then Help (epic `editor` P36)", async () => {
+  test("Help:  the tours (P40), then Keyboard Shortcuts, its key ?, opening the shortcuts dialog, and All Icons (T158), each group under a tight divider (epic `editor` P36, I375)", async () => {
     const showShortcuts = spyOnEditor("showShortcuts")
     const host = await mount(() => <AppBarMenus mode="edit" />)
     const popup = host.querySelector<HTMLElement & { visible: boolean }>("ui-popup[for=HelpBarMenu]")!
@@ -116,21 +116,23 @@ describe("<AppBarMenus>", () => {
     await rowsReady(menu()!)
     // the editor's own rows, not the Spell's:  their words are their text
     const rows = [...menu()!.children].map((row) =>
-      `${row.textContent?.trim()} ${row.getAttribute("shortcut") ?? ""}`.trim()
+      row.getAttribute("kind") === "divider"
+        ? "─"
+        : `${row.textContent?.trim()} ${row.getAttribute("shortcut") ?? ""}`.trim()
     )
+    // Owen's order (I375):  the tours first;  Spell Servers… after the last divider only where a keeper runs, none here
     expect(rows).toEqual([
-      `Keyboard Shortcuts ${EDITOR_HOTKEYS.showShortcuts.shortcut}`,
-      `All Icons… ${EDITOR_HOTKEYS.showIcons.shortcut}`,
-      "",
       "Design Tour",
       "Anatomy Tour",
       "Inspect App Tour",
       "Tours…",
-      "",
-      "Help"
+      "─",
+      `Keyboard Shortcuts ${EDITOR_HOTKEYS.showShortcuts.shortcut}`,
+      `All Icons… ${EDITOR_HOTKEYS.showIcons.shortcut}`,
+      "─"
     ])
     expect(EDITOR_HOTKEYS.showShortcuts.shortcut).toBe("?")
-    const shortcuts = menu()!.children[0] as HTMLElement
+    const shortcuts = menu()!.children[5] as HTMLElement
     shortcuts.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!.click()
     flush()
     await waitForCondition(() => showShortcuts.mock.calls.length > 0)
@@ -325,6 +327,62 @@ describe("<BarMenu>", () => {
     await ElementFixture.settle(host)
     expect(chosen).toHaveBeenCalledTimes(1)
     expect(popup.visible).toBe(false)
+  })
+})
+
+describe("the top bar's menus slide down from under the bar (epic `editor` T187)", () => {
+  test("each hangs from its name's foot, no arrow, top corners square;  the mouse onto another's name while one is open glides there", async () => {
+    const host = await mount(() => (
+      // in a menu, as the bar's are:  a `<ui-item>` draws its box only there
+      <ui-menu>
+        <BarMenu id="LeftBarMenu" label="Left" name="Left">
+          <ui-action>One</ui-action>
+        </BarMenu>
+        <BarMenu id="RightBarMenu" label="Right" name="Right">
+          <ui-action>Two</ui-action>
+          <ui-action>Three</ui-action>
+        </BarMenu>
+      </ui-menu>
+    ))
+    const popupOf = (id: string) => host.querySelector<HTMLElement & { visible: boolean }>(`ui-popup[for=${id}]`)!
+    const boxOf = (id: string) => popupOf(id).shadowRoot!.querySelector<HTMLElement>("[part~=popup]")!
+    const nameOf = (id: string) => document.getElementById(id)!.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!
+    const left = popupOf("LeftBarMenu")
+    left.visible = true
+    flush()
+    await ElementFixture.settle(host)
+    // once it's down:  its top at its name's foot, its left its name's
+    await new Promise((resolve) => setTimeout(resolve, 400))
+    const box = boxOf("LeftBarMenu")
+    const style = getComputedStyle(box)
+    expect(Math.round(box.getBoundingClientRect().top)).toBe(
+      Math.round(nameOf("LeftBarMenu").getBoundingClientRect().bottom)
+    )
+    expect(Math.round(box.getBoundingClientRect().left)).toBe(
+      Math.round(nameOf("LeftBarMenu").getBoundingClientRect().left)
+    )
+    expect([style.borderTopLeftRadius, style.borderTopRightRadius]).toEqual(["0px", "0px"])
+    expect(getComputedStyle(box, "::before").content).toBe("none")
+
+    // the mouse onto the other name:  it opens at once, gliding from the first's place;  the first goes at once
+    document.getElementById("RightBarMenu")!.dispatchEvent(new PointerEvent("pointerenter", { pointerType: "mouse" }))
+    flush()
+    await ElementFixture.settle(host)
+    const right = popupOf("RightBarMenu")
+    expect(right.visible).toBe(true)
+    expect(left.visible).toBe(false)
+    expect(right.classList.contains("gliding")).toBe(true)
+    const glide =
+      nameOf("LeftBarMenu").getBoundingClientRect().left - nameOf("RightBarMenu").getBoundingClientRect().left
+    expect(right.style.getPropertyValue("--BarMenu-glide")).toBe(`${Math.round(glide)}px`)
+
+    // with none open, the mouse onto a name opens nothing:  a click does
+    right.visible = false
+    flush()
+    await ElementFixture.settle(host)
+    document.getElementById("LeftBarMenu")!.dispatchEvent(new PointerEvent("pointerenter", { pointerType: "mouse" }))
+    flush()
+    expect(left.visible).toBe(false)
   })
 })
 

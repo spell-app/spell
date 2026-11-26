@@ -24,6 +24,8 @@ import { CodeMirrorMenu } from "./CodeMirrorMenu"
 import "spell/app/app/solid/cellsBridge"
 // Spell's project groups (`@spell/examples` ...), so the project resolves
 import "spell/app/spaces/models/projectGroups"
+// The grammar, loaded the first time a file is parsed, as the app's
+import "spell/parser/spell/grammarOnFirstUse"
 import "./CodeMirrorTest.css"
 
 /****************

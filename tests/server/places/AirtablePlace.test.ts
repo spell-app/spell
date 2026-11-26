@@ -664,6 +664,9 @@ describe("behind a server side", () => {
 })
 
 describe("behind a room", () => {
+  /** How long a step through the room and Airtable's window may take:  a full run's load made 4 seconds too short (I191). */
+  const LOADED_WAIT = 15_000
+
   test("a Referee takes it as its store:  a change goes through to Airtable, and an edit in Airtable's window comes in as a step", async () => {
     const { place, stub } = await base({ checkedEvery: 0.05 })
     const referee = new Referee({
@@ -681,17 +684,17 @@ describe("behind a room", () => {
     await visitor.read()
     visitor.set("r-1", "title", "From the room")
     await vi.waitFor(() => expect(stub.rowsOf("Recipes")[0]!.Title).toBe("From the room"), {
-      timeout: 4000,
+      timeout: LOADED_WAIT,
       interval: 20
     })
     const { sequence } = referee
     stub.editInAirtable("Recipes", stub.rowsOf("Recipes")[1]!.recordId, { Title: "From Airtable" })
     await vi.waitFor(() => expect(visitor.shown.get("r-2")?.title).toBe("From Airtable"), {
-      timeout: 4000,
+      timeout: LOADED_WAIT,
       interval: 20
     })
     expect(referee.sequence).toBeGreaterThan(sequence)
-  })
+  }, 40_000)
 })
 
 describe("a column named differently (epic `data` T65, T84)", () => {

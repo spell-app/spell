@@ -121,6 +121,13 @@ describe("the selection in the bubbly look", () => {
   }
 
   // epic `language` I123 (Owen:  "Don't auto-add quotes if they are not present in the text. Just the pill.")
+  test("the caret drawn as the opposite of what's under it:  seen on the paper and on a light pill in dark alike (I130)", async () => {
+    const view = await bubblyEditorOf(QUOTED, { focused: true })
+    const layer = view.dom.querySelector<HTMLElement>(".cm-cursorLayer")!
+    expect(getComputedStyle(layer).mixBlendMode).toBe("difference")
+    expect(getComputedStyle(layer.querySelector(".cm-cursor")!).borderLeftColor).toBe("rgb(255, 255, 255)")
+  })
+
   test("a bare value, `direction=down`:  its pill alone, no curly marks the text doesn't have", async () => {
     const text = "card is a view\n\tto draw it\n\t\t<card-image direction=down />\n"
     const view = await bubblyEditorOf(text, { focused: true })

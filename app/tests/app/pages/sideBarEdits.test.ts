@@ -1,4 +1,4 @@
-import { chromium, type BrowserContext, type Page } from "playwright"
+import { chromium, type BrowserContext, type Locator, type Page } from "playwright"
 import { afterAll, afterEach, beforeEach, describe, expect, test } from "vite-plus/test"
 
 import { builtInProjectsNow, CodeEditor, EDITOR, SERVING } from "./runningEditor"
@@ -111,6 +111,17 @@ function fileState(page: Page, name: string) {
     ).project.spellFiles.find((each) => each.path.endsWith(`/${file}`))!
     return { text: spellFile.contents, isDirty: spellFile.isDirty }
   }, name)
+}
+
+/** The small line under a field saying why a change to it won't be kept (epic `editor` I244), once it shows. */
+async function noteUnder(property: Locator): Promise<string> {
+  await property
+    .page()
+    .waitForFunction(
+      (element) => !!element?.shadowRoot?.querySelector(".field > .note")?.textContent,
+      await property.elementHandle()
+    )
+  return property.evaluate((element) => element.shadowRoot!.querySelector(".field > .note")!.textContent ?? "")
 }
 
 /** The page's debug globals, what's used of them. */
@@ -294,7 +305,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       expect(await page.locator(".InspectorColumn").innerText()).not.toMatch(/All Solitaires/i)
       // a change it can't keep still says why, in words that name no "all"
       await change(page, "score", 7)
-      expect(await page.locator(".InspectorNotSaved").textContent()).not.toMatch(/\ball\b/i)
+      expect(await noteUnder(page.locator("ui-property[name=score]"))).not.toMatch(/\ball\b/i)
       await page.close()
     }
   )
@@ -563,7 +574,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       // this one can't:  its type sets it after the line
       await change(page, "layout", "vertical")
       expect((await fileState(page, "Solitaire.spell")).text).toBe(before)
-      expect(await page.locator(".InspectorNotSaved").textContent()).toMatch(/All foundations start with this/)
+      expect(await noteUnder(layout)).toMatch(/Every one of the foundations starts with this/)
 
       // the switch's items, clicked as its row's own
       await page
@@ -572,9 +583,8 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
         .evaluate((item) => (item as HTMLElement).click())
       await page.waitForTimeout(300)
       await change(page, "layout", "horizontal")
-      const declared = `<spell-view "foundation" template="pile"`
       const text = (await fileState(page, "Solitaire.spell")).text
-      expect(text.slice(text.indexOf(declared))).toContain(`<property "layout">horizontal</>`)
+      expect(text).toContain(`a "foundation" is a pile with layout "horizontal"`)
       expect(text.length).toBe(before.length + "horizontal".length - "stacked".length)
       await page.close()
     }
@@ -598,9 +608,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       expect(await count.locator(".label").getAttribute("title")).toBe("From Counter")
       await change(page, "count", 5)
       expect((await fileState(page, "Counter.spell")).text).toBe(before)
-      expect(await page.locator(".InspectorNotSaved").textContent()).toMatch(
-        /Every one of the counters starts with this/
-      )
+      expect(await noteUnder(count)).toMatch(/Every one of the counters starts with this/)
       await page.close()
     }
   )

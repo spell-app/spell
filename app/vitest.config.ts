@@ -48,7 +48,7 @@ const ALL_LANGUAGES = "tests/allLanguages.ts"
  *     - They all drive this checkout's one running editor, so they get in each other's way:
  *       `fullEditor` breaks the editor bar's file on purpose, which every open editor then shows,
  *       and many browsers at once are too much for one dev server.
- *     - No editor running, as in CI:  they skip themselves (`runningEditor.ts`, beside them).
+ *     - No editor running:  in CI they skip themselves;  anywhere else they fail, saying to start it (`runningEditor.ts`).
  *   - `app:browser`:  `BROWSER_TESTS`, in chromium (Vitest browser mode + Playwright):
  *     Solid's client build, so staged writes, effects and `flush()` behave as in the app.
  * - `spell`:  spell-parser's language on the frozen test projects (`spaces/@spell/test/`), in `tests/spell/`, at the

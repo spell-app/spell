@@ -49,13 +49,15 @@ describe("Help › Servers", () => {
     await waitForCondition(() => !!servers())
     await ElementFixture.settle(host)
     const dot = () => servers()!.querySelector("ui-label[slot=badge]")!
-    expect(servers()!.textContent?.trim()).toBe("Servers…")
+    expect(servers()!.textContent?.trim()).toBe("Spell Servers…")
     expect(dot().getAttribute("color")).toBe("green")
     expect(servers()!.getAttribute("data-tooltip")).toBe("All of Spell's background servers are running.")
     expect(dot().getAttribute("aria-label")).toBe("All of Spell's background servers are running.")
-    // it sits after All Icons, before the tours
-    const rows = [...menu()!.children].map((row) => row.textContent?.trim())
-    expect(rows.slice(0, 4)).toEqual(["Keyboard Shortcuts", "All Icons…", "Servers…", ""])
+    // it sits last, after All Icons and a divider (Owen's order, I375)
+    const rows = [...menu()!.children].map((row) =>
+      row.getAttribute("kind") === "divider" ? "─" : row.textContent?.trim()
+    )
+    expect(rows.slice(-4)).toEqual(["Keyboard Shortcuts", "All Icons…", "─", "Spell Servers…"])
 
     // two down:  red, and the words say how many
     answer.glance = { page: "http://127.0.0.1:4949/servers/", servers: 4, down: 2 }

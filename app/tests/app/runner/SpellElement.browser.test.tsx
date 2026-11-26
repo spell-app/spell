@@ -8,6 +8,7 @@ import { TSWriter } from "spell/parser/parser/writers/TSWriter"
 import { E } from "spell/ui/core"
 import { RootLoader } from "spell/ui/components/ui-root"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { spanishMessages } from "spell/parser/spell/languages/es/messages"
 import { installSpellElements, SpellElement } from "spell/app/app/runner/SpellElement"
 
 import "spell/app/app/solid/cellsBridge"
@@ -1098,6 +1099,128 @@ describe("SpellElement", () => {
         await vi.waitFor(() => expect(box.note).toBe(""))
         expect(box.heard).toEqual(["uploading", "uploading", "uploaded cat.png"])
       } finally {
+        mounted.unmount()
+        root.remove()
+      }
+    })
+
+    test("`can take a file when:` (canTakeFile) turns a file away as it's dropped:  no line, no ui-file-dropped (language I167)", async () => {
+      /** `a text area is a view` with `can take a file when: the file's type is "text/plain"` and a drop line. */
+      class TextArea extends View {
+        static elementTag = core.defineElement(this, "Game")
+        heard: string[] = []
+        draw(): ReturnType<View["draw"]> {
+          return (h("i", {}, "text only") as unknown as () => ReturnType<View["draw"]>)()
+        }
+        canTakeFile(file: File) {
+          return file.type === "text/plain"
+        }
+        whenFileDroppedOn(file: File) {
+          this.heard.push(`dropped ${file.name}`)
+        }
+      }
+      /** `a sink is a view` with only `can take a file when: yes`:  it takes the drop, though no line hears it. */
+      class Sink extends View {
+        static elementTag = core.defineElement(this, "Game")
+        draw(): ReturnType<View["draw"]> {
+          return (h("i", {}, "sink") as unknown as () => ReturnType<View["draw"]>)()
+        }
+        canTakeFile() {
+          return true
+        }
+      }
+      const area = new TextArea()
+      const sink = new Sink()
+      const root = document.createElement("div")
+      document.body.append(root)
+      const mounted = core.mountApp({ draw: () => [core.drawThing(area), core.drawThing(sink)] }, root)
+      flush()
+      await ElementFixture.settle(root)
+      const dropped: string[] = []
+      const listen = (event: Event) => dropped.push((event as CustomEvent).detail.name)
+      root.addEventListener("ui-file-dropped", listen)
+      const drop = (element: Element, type: string) => {
+        const transfer = new DataTransfer()
+        transfer.items.add(new File(["hello"], "notes.txt", { type: "text/plain" }))
+        transfer.items.add(new File(["png"], "cat.png", { type: "image/png" }))
+        const event = new DragEvent(type, { bubbles: true, composed: true, cancelable: true, dataTransfer: transfer })
+        element.dispatchEvent(event)
+        return event
+      }
+      try {
+        const element = root.querySelector("game-text-area")!
+        expect(drop(element, "dragenter").defaultPrevented).toBe(true)
+        expect(drop(element, "drop").defaultPrevented).toBe(true)
+        await vi.waitFor(() => expect(area.heard).toEqual(["dropped notes.txt"]))
+        expect(dropped).toEqual(["notes.txt"])
+        // a rule alone takes desktop files too:  the browser never opens them
+        expect(drop(root.querySelector("game-sink")!, "dragenter").defaultPrevented).toBe(true)
+      } finally {
+        root.removeEventListener("ui-file-dropped", listen)
+        mounted.unmount()
+        root.remove()
+      }
+    })
+
+    test("in a Spanish program:  a file's page events take Spanish names, and a Spanish uploader's events still reach its lines (language I168, I171)", async () => {
+      /** `una zona es una vista` with `cuando un archivo se suelta sobre ella:` and the uploader's `al subir:`, as compiled. */
+      class Zona extends View {
+        static elementTag = core.defineElement(this, "Game")
+        heard: string[] = []
+        draw(): ReturnType<View["draw"]> {
+          return (h("i", {}, "suelta aquí") as unknown as () => ReturnType<View["draw"]>)()
+        }
+        whenFileDroppedOn(archivo: File) {
+          this.heard.push(`soltado ${archivo.name}`)
+        }
+        onUploading(event: { cancel(): void }) {
+          this.heard.push("subiendo")
+          event.cancel()
+        }
+      }
+      // what the runner does for a Spanish program, before it runs it
+      await RootLoader.useLanguage("es")
+      core.useMessages(spanishMessages)
+      const zona = new Zona()
+      const root = document.createElement("div")
+      document.body.append(root)
+      const mounted = core.mountApp({ draw: () => core.drawThing(zona) }, root)
+      flush()
+      await ElementFixture.settle(root)
+      const events: string[] = []
+      const listen = (event: Event) => events.push(event.type)
+      const names = ["archivo-arrastrado-sobre", "archivo-soltado", "ui-file-dropped"]
+      for (const name of names) root.addEventListener(name, listen)
+      const element = root.querySelector("game-zona") as HTMLElement & { renderRoot: ShadowRoot }
+      const files = () => {
+        const transfer = new DataTransfer()
+        transfer.items.add(new File(["hola"], "notas.txt", { type: "text/plain" }))
+        return transfer
+      }
+      const drag = (type: string) =>
+        element.dispatchEvent(
+          new DragEvent(type, { bubbles: true, composed: true, cancelable: true, dataTransfer: files() })
+        )
+      // a stand-in for `<es-cargador-archivos>`, sending its Spanish events
+      const uploader = document.createElement("div")
+      element.renderRoot.append(uploader)
+      try {
+        drag("dragenter")
+        drag("drop")
+        await vi.waitFor(() => expect(zona.heard).toEqual(["soltado notas.txt"]))
+        expect(events).toEqual(["archivo-arrastrado-sobre", "archivo-soltado"])
+        const uploading = new CustomEvent("es-subiendo", {
+          bubbles: true,
+          composed: true,
+          cancelable: true,
+          detail: {}
+        })
+        uploader.dispatchEvent(uploading)
+        expect(zona.heard).toEqual(["soltado notas.txt", "subiendo"])
+        expect(uploading.defaultPrevented).toBe(true)
+      } finally {
+        for (const name of names) root.removeEventListener(name, listen)
+        core.useMessages(undefined)
         mounted.unmount()
         root.remove()
       }

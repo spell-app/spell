@@ -97,7 +97,7 @@ export class BubblyDecorations {
   /** Decorate `editor` with `stretches`, clearing every style it doesn't use. */
   private decorate(editor: vscode.TextEditor, stretches: BubblyRange[]) {
     const byStyle = new Map<string, vscode.Range[]>()
-    for (const stretch of stretches) {
+    for (const stretch of stretches.flatMap(pillPieces)) {
       const key = styleKey(stretch)
       const { start, end } = stretch.range
       let ranges = byStyle.get(key)
@@ -133,16 +133,48 @@ export type BubblyRange = {
   partOfSpeech?: string
   /** the name its head defines */
   isName?: boolean
+  /**
+   * which piece of a pill it is (`pillPieces()`):  its first letter, its last, or what's between;
+   * left out for a whole pill, one letter long
+   */
+  piece?: PillPiece
+}
+
+/** A piece of a pill split in three (`pillPieces()`). */
+export type PillPiece = "start" | "middle" | "end"
+
+/**
+ * `stretch` as VS Code should draw it:  a pill over more than one letter in three pieces, its first letter, its last,
+ * and what's between, each with only its own corners and edges (epic `language` T115).
+ * - Why:  VS Code draws a decoration once per run of differently coloured text inside it, a bold name, an
+ *   underline, and gave each run the whole pill's round corners and edges, so a pill over several words looked
+ *   cut into several pills.
+ * - The middle has square corners and an edge only along its top and bottom, so however VS Code cuts it, it reads as
+ *   one;  the room beside the pill goes before its first piece and after its last.
+ * - Any other stretch, or a pill over lines, as it is.
+ */
+export function pillPieces(stretch: BubblyRange): BubblyRange[] {
+  const { start, end } = stretch.range
+  if (!PILLS.has(stretch.kind) || start.line !== end.line || end.character - start.character < 2) return [stretch]
+  const at = (from: number, to: number) => ({
+    start: { line: start.line, character: from },
+    end: { line: start.line, character: to }
+  })
+  const pieces: BubblyRange[] = [{ ...stretch, range: at(start.character, start.character + 1), piece: "start" }]
+  if (end.character - start.character > 2)
+    pieces.push({ ...stretch, range: at(start.character + 1, end.character - 1), piece: "middle" })
+  pieces.push({ ...stretch, range: at(end.character - 1, end.character), piece: "end" })
+  return pieces
 }
 
 /** Which decoration type `stretch` takes:  stretches with the same key look the same. */
-export function styleKey({ kind, partOfSpeech, isName }: BubblyRange): string {
+export function styleKey({ kind, partOfSpeech, isName, piece }: BubblyRange): string {
   if (!PILLS.has(kind)) return kind
-  return `${kind}:${partOfSpeech ?? "plain"}${isName ? ":name" : ""}`
+  return `${kind}:${partOfSpeech ?? "plain"}${isName ? ":name" : ""}${piece ? `:${piece}` : ""}`
 }
 
 /** How `stretch` is drawn, in the sheet's values, light and dark. */
-export function optionsFor({ kind, partOfSpeech = "plain", isName }: BubblyRange): vscode.DecorationRenderOptions {
+export function optionsFor({ kind, partOfSpeech = "plain", isName, piece }: BubblyRange): vscode.DecorationRenderOptions {
   const ink = INK[kind] ?? "ink"
   const look: vscode.DecorationRenderOptions = {
     light: { color: setting(INK_SETTINGS[ink], "light") },
@@ -164,15 +196,19 @@ export function optionsFor({ kind, partOfSpeech = "plain", isName }: BubblyRange
   const isBold = isName || kind === "choice"
   const color = isBold ? "--bubbly-bold-ink" : "--bubbly-ink"
   const room = { contentText: ROOM }
+  // its corners and edges:  a whole pill's all round, a piece's only its own (`pillPieces()`)
+  const { radius, width } = PIECE_EDGES[piece ?? "whole"]
   return {
     light: { color: setting(color, "light"), backgroundColor: part["--bubbly-pill"].light },
     dark: { color: setting(color, "dark"), backgroundColor: part["--bubbly-pill"].dark },
     ...(isBold ? { fontWeight: setting("--bubbly-bold", "light") } : {}),
-    borderRadius: PILL_RADIUS,
-    border: `1px solid ${hue}${PILL_EDGE_ALPHA}`,
+    borderRadius: radius,
+    borderStyle: "solid",
+    borderColor: `${hue}${PILL_EDGE_ALPHA}`,
+    borderWidth: width,
     rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
-    before: room,
-    after: room
+    ...(piece === "middle" || piece === "end" ? {} : { before: room }),
+    ...(piece === "middle" || piece === "start" ? {} : { after: room })
   }
 }
 
@@ -210,6 +246,14 @@ const WEIGHTS: Record<string, string> = {
  * - Here the pill is the text's own background, tight round its letters:  the page's round ends would cut into them.
  */
 const PILL_RADIUS = "5px"
+
+/** A whole pill's corners and edge widths, and each piece's (`pillPieces()`):  CSS's top, right, bottom, left. */
+const PIECE_EDGES: Record<PillPiece | "whole", { radius: string; width: string }> = {
+  whole: { radius: PILL_RADIUS, width: "1px" },
+  start: { radius: `${PILL_RADIUS} 0 0 ${PILL_RADIUS}`, width: "1px 0 1px 1px" },
+  middle: { radius: "0", width: "1px 0" },
+  end: { radius: `0 ${PILL_RADIUS} ${PILL_RADIUS} 0`, width: "1px 1px 1px 0" }
+}
 
 /** How see-through a pill's edge is, as a hex alpha on its hue. */
 const PILL_EDGE_ALPHA = "66"

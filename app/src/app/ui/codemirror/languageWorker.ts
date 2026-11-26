@@ -11,8 +11,10 @@
  *   the parser, spaces' models and the language service;  NEVER the editor, Solid or CodeMirror.
  * - It holds the editor's ONE grammar, up front (`spell/parser/spell/languages/en`):  the page's copy of the language
  *   loads only on first use (epic `solid-2-final` P20).
+ * - Not HTML's entity table, which a drawing's text and markdown decode with:  a chunk of its own, loaded as the
+ *   worker starts;  the messages wait for it, in order, so the first parse has it (epic `solid-2-final` I64).
  */
-import type { P } from "spell/parser/parser"
+import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { SPACES } from "spell/app/spaces"
 import { LSP } from "spell/app/lsp"
@@ -32,8 +34,21 @@ const host = new LSP.LanguageHost({
 // its value's words list a Pick row first, which the editor opens the picker for (epic `editor` T61)
 host.service.picksValues = true
 
+// the messages that come before HTML's entity table:  handled in order once it's in (or once it failed to load:
+// the decoder still knows the common names)
+let waitingForEntities: Promise<void> | undefined = P.HTMLEntities.load()
+  .catch((error: unknown) => console.error("couldn't load HTML's entities", error))
+  .finally(() => (waitingForEntities = undefined))
+
 addEventListener("message", (event: MessageEvent<LanguageWorkerMessage>) => {
-  const message = event.data
+  if (!waitingForEntities) return handle(event.data)
+  waitingForEntities = waitingForEntities
+    .then(() => handle(event.data))
+    .catch((error: unknown) => console.error("couldn't handle a message", error))
+})
+
+/** Do what `message` asks. */
+function handle(message: LanguageWorkerMessage): void {
   if (message.kind === "groups") {
     // the page's person and their org's groups, before any project (`LanguageClient`'s `groupsOnPage()`)
     SPACES.setLocalPerson(message.person)
@@ -55,7 +70,7 @@ addEventListener("message", (event: MessageEvent<LanguageWorkerMessage>) => {
       (error: unknown) => reply({ id, error: plainError(error) })
     )
   }
-})
+}
 
 /** Send `message` back to the page:  an answer a message can't carry is an error saying so.  NEVER throws. */
 function reply(message: Extract<LanguageWorkerReply, { id: number }>): void {

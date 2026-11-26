@@ -43,7 +43,7 @@ import { ShowTourStep } from "./ShowTourStep"
 import { MoveTourStep } from "./MoveTourStep"
 import { Prompt } from "./Prompt"
 import { Choose, ChooseSeveral } from "./Choose"
-import { MEDIA_KINDS, TEXT_SIZES } from "./UI.shared"
+import { colorWordsSyntax, MEDIA_KINDS, TEXT_SIZES } from "./UI.shared"
 import { Warn } from "./Warn"
 
 /** Spanish's `UI` rules. */
@@ -70,10 +70,7 @@ UIEs.addRule(Wording.specialize({ ruleName: "notify_kind", meanings: NOTIFY_KIND
 
 // A toast's colour, for `notificar ... en rojo`:  each meaning Spell UI's hue name
 UIEs.addRule(Wording.specialize({ ruleName: "toast_color", meanings: TOAST_COLORS }), {
-  syntax:
-    "((red:rojo|roja)|(orange:naranja)|(yellow:amarillo|amarilla)|(olive:verde oliva|oliva)" +
-    "|(teal:verde azulado|turquesa)|(green:verde)|(blue:azul)|(violet:violeta)" +
-    "|(purple:morado|morada|púrpura|purpura)|(pink:rosa)|(brown:marrón|marron)|(grey:gris)|(black:negro|negra))"
+  syntax: colorWordsSyntax("es")
 })
 
 // Where a toast goes, for `notificar ... arriba a la izquierda`:  each meaning Spell UI's `position`

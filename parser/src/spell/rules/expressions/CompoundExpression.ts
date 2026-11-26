@@ -3,7 +3,7 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { And } from "./And"
 import { InfixOperatorSuffix } from "./InfixOperatorSuffix"
-import { JoinedValues } from "./JoinedValues"
+import { JoinedValues, type ItemJoin } from "./JoinedValues"
 import { Or } from "./Or"
 import { PostfixOperatorSuffix } from "./PostfixOperatorSuffix"
 import { SpellExpression } from "./SpellExpression"
@@ -283,12 +283,7 @@ const ITEMS_COLLECTED = new WeakSet<P.ASTCoreMethodInvocation>()
  * `core.mergeLists([stock, [discardPile.lastItem]], List)` -- a side saying items as it is, one item in a list of its own.
  * - `lhs` a list we made:  `rhs` joins its parts, `A and B and C` one merge of three.
  */
-function itemsCollected(
-  match: P.Match,
-  lhs: unknown,
-  rhs: unknown,
-  sides: { lhs: "items" | "one"; rhs: "items" | "one" }
-): P.ASTCoreMethodInvocation {
+function itemsCollected(match: P.Match, lhs: unknown, rhs: unknown, sides: ItemJoin): P.ASTCoreMethodInvocation {
   const part = (side: unknown, as: "items" | "one") =>
     (as === "one" ? new P.ASTArrayLiteral(match, { items: [side as P.ASTExpression] }) : side) as P.ASTExpression
   const made = lhs instanceof P.ASTCoreMethodInvocation && ITEMS_COLLECTED.has(lhs)
@@ -299,7 +294,9 @@ function itemsCollected(
     args: [
       new P.ASTArrayLiteral(match, { items: [...parts, part(rhs, sides.rhs)] }),
       new P.ASTTypeExpression(match, { name: "List" })
-    ]
+    ],
+    // what the list holds, `list of cards`:  the `and` it's made by is a question's operator otherwise (I164)
+    datatype: sides.datatype
   })
   ITEMS_COLLECTED.add(list)
   return list

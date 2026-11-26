@@ -64,7 +64,7 @@ export class SpellMarkdown extends UIMarkdown {
 
   /** `MDEngine`, loaded on first use;  the import starts once, for every `<spell-markdown>` on the page. */
   @E.once private static loadMDEngine(): Promise<MarkdownRendering> {
-    return import("./MDEngine").then((module) => module.MDEngine.instance)
+    return import("./MDEngine").then((module) => module.MDEngine.load())
   }
 }
 

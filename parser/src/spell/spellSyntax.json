@@ -2142,7 +2142,7 @@
               "syntax": "((info:info)|(success:success)|(warning:warning)|(error:error))"
             },
             {
-              "syntax": "((red:red)|(orange:orange)|(yellow:yellow)|(olive:olive)|(green:green)|(teal:teal)|(blue:blue)|(violet:violet)|(purple:purple)|(pink:pink)|(brown:brown)|(grey:grey|gray)|(black:black))"
+              "syntax": "((red:red)|(orange:orange)|(yellow:yellow)|(olive:olive)|(teal:teal)|(green:green)|(blue:blue)|(violet:violet)|(purple:purple)|(pink:pink)|(brown:brown)|(grey:grey|gray)|(black:black))"
             },
             {
               "syntax": "((top_left:at the top left)|(top_center:at the top center|at the top centre|at the top)|(top_right:at the top right)|(centered:in the center|in the centre|in the middle)|(bottom_left:at the bottom left)|(bottom_center:at the bottom center|at the bottom centre|at the bottom)|(bottom_right:at the bottom right))"
@@ -2253,7 +2253,7 @@
               "syntax": "((old:old)|(new:new)|(mocked:mocked)|(built:built))"
             },
             {
-              "syntax": "((red:red)|(orange:orange)|(yellow:yellow)|(olive:olive)|(green:green)|(teal:teal)|(blue:blue)|(violet:violet)|(purple:purple)|(pink:pink)|(brown:brown)|(grey:grey))"
+              "syntax": "((red:red)|(orange:orange)|(yellow:yellow)|(olive:olive)|(teal:teal)|(green:green)|(blue:blue)|(violet:violet)|(purple:purple)|(pink:pink)|(brown:brown)|(grey:grey|gray))"
             },
             {
               "syntax": "(not found page|missing page)"
@@ -7200,7 +7200,7 @@
           "ruleNames": ["list_guard"],
           "internal": false,
           "file": "src/spell/rules/classes/ListGuard.ts",
-          "line": 57,
+          "line": 61,
           "purpose": "What a list type takes, or gives up, when something MOVES (epic page Q23 - Q25).",
           "syntaxes": [
             {
@@ -7504,7 +7504,7 @@
           "ruleNames": ["outline_specifier_percent"],
           "internal": false,
           "file": "src/spell/rules/classes/OutlineSpecifierPercent.ts",
-          "line": 14,
+          "line": 13,
           "purpose": "A property that's a PERCENT (epic `language` P34, Owen's C1 on I47): `its \"tip\" is a percent`, `its \"tip\" is a percent starting at 18%`; Spanish `su \"propina\" es un porcentaje`.",
           "syntaxes": [
             {
@@ -11379,7 +11379,7 @@
           "ruleNames": ["jsxText"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSXText.ts",
-          "line": 17,
+          "line": 15,
           "purpose": "Match literal text between JSX tags (`jsxChild`).",
           "syntaxes": [],
           "aliases": ["jsxChild"]

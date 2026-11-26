@@ -812,7 +812,7 @@ export class Solitaire extends App {
       this.discardPile.filter((card) => card.isOnTop),
       core.pickFromEach(core.everyThing(Column), (column: Column) => column.lastItem),
       core.pickFromEach(core.everyThing(Column), (column: Column) => column.filter((card) => card.isFaceDirection("up")).firstItem)
-    ], List) as boolean
+    ], List) as List<Card>
 
     //  Remove kings directly on the board so they don't switch back and forth
     candidates.removeWhere((card) => card.rank === "king" && card.isOnBottom)
