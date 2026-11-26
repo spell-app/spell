@@ -56,7 +56,11 @@ const SAVED_IN = "savedIn"
 const ELEMENT_TAG = "elementTag"
 
 /** A `where`'s `core` helper, and its twin that asks each item in turn when its condition waits. */
-const WAITING_TWINS: Record<string, string> = { filter: "filterInTurn", itemWhere: "itemWhereInTurn" }
+const WAITING_TWINS: Record<string, string> = {
+  filter: "filterInTurn",
+  itemWhere: "itemWhereInTurn",
+  sortedBy: "sortedByInTurn"
+}
 
 /** A line's description comment, `-- ...`:  written as a plain `//` (`ASTLineComment()`). */
 const DESCRIPTION_SYMBOL = "--"

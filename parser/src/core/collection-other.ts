@@ -533,7 +533,7 @@ export const collectionOtherMethods = defineCoreModule({
    * - Two with the same key keep their order;  one with no key goes last.
    * - Text compares ignoring case:  `apple` before `Bread`.  Accents aren't considered:  see epic `data` P10.
    * - A plain object's values, in an array.
-   * - NEVER waits:  a `key` that waits is a mistake.
+   * - NEVER waits:  a `key` that waits is `sortedByInTurn()`'s, which compiled spell writes for it.
    */
   sortedBy<T = unknown, C extends CollectionOf<T> = CollectionOf<T>>(
     collection?: C & CollectionOf<T>,
@@ -547,10 +547,23 @@ export const collectionOtherMethods = defineCoreModule({
         throw new TypeError("core.sortedBy():  a sort key can't wait:  it would sort by promises, in no order")
       keyed.push({ value, sortKey })
     })
-    keyed.sort((one, other) => compareSortKeys(one.sortKey, other.sortKey))
-    const results = core.isArrayLike(collection) ? core.newThingLike(collection) : []
-    for (const { value } of keyed) core.append(results, value)
-    return results as C
+    return inOrderOfKeys(collection, keyed) as C
+  },
+
+  /**
+   * As `sortedBy()`, when `key` waits:  each item's key asked in turn, its answer waited for, then sorted by them.
+   * - Compiled spell writes it for a sort whose key waits:  `sorted by its name`, where some `name` waits.
+   */
+  async sortedByInTurn<T = unknown, C extends CollectionOf<T> = CollectionOf<T>>(
+    collection?: C & CollectionOf<T>,
+    key?: CollectionIterationCallback<NoInfer<T>>
+  ): Promise<C> {
+    if (!assert.isDefined(collection, "core.sortedByInTurn(collection)")) return undefined as C
+    const keyed: Array<{ value: T; sortKey: unknown }> = []
+    await core.forEachSequential(collection, async (value: T, position, _collection) => {
+      keyed.push({ value, sortKey: key ? await key(value, position, _collection) : value })
+    })
+    return inOrderOfKeys(collection, keyed) as C
   },
 
   /**
@@ -935,4 +948,12 @@ function entriesInTurn<T>(collection: CollectionOf<T>, fromTheEnd: boolean): Arr
     entries.push([value as T, position as string | number, _collection])
   })
   return fromTheEnd ? entries.reverse() : entries
+}
+
+/** `keyed`'s values in order of their keys, smallest first, as a collection like `collection`:  `core.sortedBy()`'s. */
+function inOrderOfKeys<T>(collection: unknown, keyed: Array<{ value: T; sortKey: unknown }>): unknown {
+  keyed.sort((one, other) => compareSortKeys(one.sortKey, other.sortKey))
+  const results = core.isArrayLike(collection) ? core.newThingLike(collection) : []
+  for (const { value } of keyed) core.append(results, value)
+  return results
 }

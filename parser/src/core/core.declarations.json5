@@ -1001,6 +1001,23 @@
     },
     {
       "kind": "method",
+      "name": "sortedByInTurn",
+      "of": "core",
+      "module": "collection-other",
+      "waits": true,
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "key"
+        }
+      ],
+      "section": "iteration",
+      "description": "As `sortedBy()`, when `key` waits:  each item's key asked in turn, its answer waited for, then sorted by them."
+    },
+    {
+      "kind": "method",
       "name": "descending",
       "of": "core",
       "module": "collection-other",
