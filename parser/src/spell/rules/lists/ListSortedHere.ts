@@ -4,7 +4,10 @@ import { P } from "spell/parser/parser"
 import { PostfixOperatorSuffix, Precedence, SuffixLeft, type OperatorOperands } from "spell/parser/spell/rules/expressions"
 import { isItemScope } from "./lists.shared"
 
-/** What `, sorted here` notes on the sort it follows (`ListSortedHere`):  it's meant to be done on the Spell server. */
+/**
+ * What `, sorted here` notes on the list its sort sorts (`ListSortedHere`):  its sort is meant to be done on the Spell
+ * server.  A sort hands on what it follows (`handsOnItsLeft`), so that's what the suffix after it follows too.
+ */
 export type SortedHereData = { sortedHere?: boolean }
 
 /**
@@ -22,13 +25,13 @@ export class ListSortedHere extends PostfixOperatorSuffix {
   /** The same list. */
   @proto static handsOnItsLeft = true
 
-  /** Not inside a predicate or a key;  SIDE EFFECT:  the sort it follows notes it, for its errors. */
+  /** Not inside a predicate or a key;  SIDE EFFECT:  the list its sort sorts notes it, for the sort's errors. */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     if (isItemScope(scope)) return undefined
     const match = super.parse(scope, tokens)
     if (!match) return undefined
     const left = SuffixLeft.current
-    if (left) for (const sort of sortsIn(left)) (sort.data as SortedHereData).sortedHere = true
+    if (left) (left.data as SortedHereData).sortedHere = true
     return match
   }
 
@@ -40,11 +43,4 @@ export class ListSortedHere extends PostfixOperatorSuffix {
   compileASTExpression(_match: P.MatchFor<this>, { lhs }: OperatorOperands): P.ASTExpression {
     return lhs!
   }
-}
-
-/** The sorts in `left`, a few steps down:  what the suffix follows, through a `, filtered here`. */
-function sortsIn(left: P.Match, depth = 3): P.Match[] {
-  if (left.rule.name === "list_sorted_by") return [left]
-  if (!depth) return []
-  return left.matched.flatMap((item) => (item instanceof P.Match ? sortsIn(item, depth - 1) : []))
 }

@@ -177,14 +177,19 @@ export const PARSER_MESSAGES = {
   "where-looks-through":
     "This can't be sent to the place, which only finds exact values:  it reads every {type} and looks through them here, up to a limit",
   /**
-   * A `where` on a web server's list that it can't be asked all of:  `{clauses}`, what stays, as written;
-   * `{type}`, one of them;  `{field}`, a field its list filters by.
+   * A read whose `where` a web server's list can't be asked all of, and which doesn't say how it's done:  an error.
+   * `{clauses}`, what the server can't take, as written;  `{types}`, the type's plural.
+   * - Its ending, `, filtered here`, is `list_filtered_here`'s words:  a change to one is a change to the other.
    */
   "where-stays-here":
-    'The server can\'t be asked {clauses}, so this reads every {type} and checks them here, which can be slow.  Ask the server with "its {field} is ...", or end the line with ", filtered here" if checking here is what you want',
-  /** The same, on a list that filters by no field:  `{clauses}`, `{type}`. */
-  "where-stays-here-no-filter":
-    'The server can\'t be asked {clauses}, so this reads every {type} and checks them here, which can be slow.  Say "the first 20 {types} where ..." to stop once there are enough, or end the line with ", filtered here" if checking here is what you want',
+    'The server doesn\'t support this filter:  {clauses}.\nIt is possible to have the Spell server pre-fetch rows and filter them here, but this will be slow.\nOptions:\n- Change to another filter.\n- End the line with ", filtered here" to pre-fetch all rows and filter in the Spell server.\n- Say "the first 20 {types} where ..." to pre-fetch only the first 20 matching rows.',
+  /**
+   * A sort of a web server's list its server can't do that way, which doesn't say how it's done:  an error.
+   * `{sort}`, the sort as written.
+   * - Its ending, `, sorted here`, is `list_sorted_here`'s words:  a change to one is a change to the other.
+   */
+  "sort-stays-here":
+    'The server doesn\'t support this sort:  {sort}.\nIt is possible to have the Spell server pre-fetch rows and sort them here, but this will be slow.\nOptions:\n- Change to another sort.\n- End the line with ", sorted here" to pre-fetch all rows and sort in the Spell server.',
   /** A sort key that waits:  won't compile. */
   "sort-key-waits":
     "A sort can't wait for its key:  it would sort in no order.  Sort by a field of its own, or work the key out first",

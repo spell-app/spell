@@ -777,18 +777,20 @@ a "recipe" is a thing
                   <code>the first job where ...</code> stops at one.
                 </li>
                 <li>
-                  <code>every job where ...</code> with a part left to the page reads every page, up to a limit, and the
-                  editor warns, naming what stays and what to say instead.
+                  <code>every job where ...</code> with a part the server can't take is an error (in the editor and
+                  <code>spell lint</code>), naming that part, <code>The server doesn't support this filter: ...</code>,
+                  and the ways out: another filter, <code>, filtered here</code>, or <code>the first 20 jobs where ...</code>.
                 </li>
                 <li>
                   To filter on the Spell server on purpose (the server matches ids exactly, or the list is small), end
                   the read with <code>, filtered here</code> (Spanish <code>, filtrado aquí</code>): nothing of the
-                  <code>where</code> goes to the server, every row is fetched, and there's no warning.
+                  <code>where</code> goes to the server, every row is fetched, and it's no error.
                 </li>
                 <li>
-                  A sort goes to a list that sorts by that field, or has a name for that order; else it's done on the
-                  Spell server, after reading every page. A read says it means that with <code>, sorted here</code>
-                  (Spanish <code>, ordenado aquí</code>) after its sort.
+                  A sort goes to a list that sorts by that field, or has a name for that order. A sort it can't do is
+                  an error, <code>The server doesn't support this sort: ...</code>, unless the read ends
+                  <code>, sorted here</code> (Spanish <code>, ordenado aquí</code>): then every row is fetched and sorted
+                  on the Spell server. A sort a page sets as it runs isn't checked.
                 </li>
                 <li>
                   Text sorts one way everywhere: the page, a place that can't sort, saved answers and the ingest,

@@ -4560,7 +4560,7 @@
           "ruleNames": ["list_sorted_by"],
           "internal": false,
           "file": "src/spell/rules/lists/ListSortedBy.ts",
-          "line": 28,
+          "line": 31,
           "purpose": "A list in order of something about each item (epic `data` P10).",
           "syntaxes": [
             {
@@ -5164,7 +5164,7 @@
           "ruleNames": ["list_sorted_here"],
           "internal": false,
           "file": "src/spell/rules/lists/ListSortedHere.ts",
-          "line": 19,
+          "line": 22,
           "purpose": "A read of a place sorted on the Spell server, when its server can't sort it that way.",
           "syntaxes": [
             {
@@ -6480,7 +6480,7 @@
           "ruleNames": ["every_thing_where"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThingWhere.ts",
-          "line": 48,
+          "line": 36,
           "purpose": "Every thing of a type that fits (epic `data` P10, a short form of `list_filter`).",
           "syntaxes": [
             {

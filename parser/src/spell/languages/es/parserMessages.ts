@@ -134,9 +134,9 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "where-looks-through":
     "Esto no se puede enviar al lugar, que solo busca valores exactos:  lee cada {type} y las revisa aquí, hasta un límite",
   "where-stays-here":
-    'Al servidor no se le puede preguntar {clauses}, así que esto lee cada {type} y lo revisa aquí, lo que puede ser lento.  Pregúntale al servidor con "su {field} es ...", o termina la línea con ", filtrado aquí" si revisarlo aquí es lo que quieres',
-  "where-stays-here-no-filter":
-    'Al servidor no se le puede preguntar {clauses}, así que esto lee cada {type} y lo revisa aquí, lo que puede ser lento.  Para parar cuando haya suficientes, di cuántos quieres, como "los primeros 20 ... donde ...", o termina la línea con ", filtrado aquí" si revisarlo aquí es lo que quieres',
+    'El servidor no admite este filtro:  {clauses}.\nSe puede hacer que el servidor de Spell traiga las filas antes y las filtre aquí, pero será lento.\nOpciones:\n- Cambia a otro filtro.\n- Termina la línea con ", filtrado aquí" para traer todas las filas y filtrarlas en el servidor de Spell.\n- Di "los primeros 20 {types} donde ..." para traer solo las 20 primeras filas que coincidan.',
+  "sort-stays-here":
+    'El servidor no admite este orden:  {sort}.\nSe puede hacer que el servidor de Spell traiga las filas antes y las ordene aquí, pero será lento.\nOpciones:\n- Cambia a otro orden.\n- Termina la línea con ", ordenado aquí" para traer todas las filas y ordenarlas en el servidor de Spell.',
   "sort-key-waits":
     "Un orden no puede esperar a su clave:  ordenaría sin ningún orden.  Ordena por un campo propio, o calcula antes la clave",
   "rider-needs-a-line-above": "Esto va debajo de la línea a la que se refiere, como una lectura de un lugar",

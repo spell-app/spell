@@ -38,12 +38,12 @@ pokedex is an app
 		// Any Pokémon at all
 		open (a random pokemon in (every pokemon))
 
-	its "kinds to pick" is every type where it is real
+	its "kinds to pick" is every type where it is real, filtered here
 
 	its "found" is
 		// Pokémon names are all small letters:  so the search is too
 		set looking for to its search as lower case
-		return every pokemon where its name includes looking for
+		return every pokemon where its name includes looking for, filtered here
 
 	to draw it
 		<stack direction="horizontal" wrap align="center" justify="between">

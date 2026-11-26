@@ -81,26 +81,88 @@ describe("a `where`, sent in parts", () => {
       `core.filter(await core.savedThings(Job, { filter: { status: "open", kind: "big" }, search: { name: "x" } }, "looks through"), (job) => job.status === "open" && core.includes(job.name, "x") && job.kind === "big")`
     )
     // the search narrows the read:  nothing to warn of
-    expect(warnings.join("\n")).not.toContain("can't be asked")
+    expect(warnings.join("\n")).not.toContain("doesn't support")
   })
 
   test("`its id is not nothing` is dropped:  every row a place holds has its id", () => {
     const { compiled: code, warnings } = compiled(PLACE(`every job where its id is not nothing`))
     expect(code).toContain("return await core.savedThings(Job)")
-    expect(warnings.join("\n")).not.toContain("can't be asked")
+    expect(warnings.join("\n")).not.toContain("doesn't support")
   })
 
-  test("a clause the list can't be asked warns, naming it, and a field it filters by", () => {
-    const { warnings } = compiled(PLACE(`every job where its status is "open" and its kind is not "small"`))
-    expect(warnings.join("\n")).toContain(
-      `The server can't be asked "its kind is not "small"", so this reads every job and checks them here, which can be slow.  Ask the server with "its status is ...", or end the line with ", filtered here" if checking here is what you want`
+  test("a clause the list can't be asked is an error, naming it, and how to opt in", () => {
+    const { errors } = compiled(PLACE(`every job where its status is "open" and its kind is not "small"`))
+    expect(errors.join("\n")).toContain(
+      [
+        `The server doesn't support this filter:  its kind is not "small".`,
+        `It is possible to have the Spell server pre-fetch rows and filter them here, but this will be slow.`,
+        `Options:`,
+        `- Change to another filter.`,
+        `- End the line with ", filtered here" to pre-fetch all rows and filter in the Spell server.`,
+        `- Say "the first 20 jobs where ..." to pre-fetch only the first 20 matching rows.`
+      ].join("\n")
     )
   })
 
   test("an exact value on a field the list doesn't filter by stays here too, and says so", () => {
-    const { warnings } = compiled(PLACE(`every note where its status is "open"`))
-    expect(warnings.join("\n")).toContain(`The server can't be asked "its status is "open""`)
-    expect(warnings.join("\n")).toContain(`Say "the first 20 notes where ..." to stop once there are enough`)
+    const { errors } = compiled(PLACE(`every note where its status is "open"`))
+    expect(errors.join("\n")).toContain(`The server doesn't support this filter:  its status is "open".`)
+    expect(errors.join("\n")).toContain(`Say "the first 20 notes where ..."`)
+  })
+
+  test("opted in:  `, filtered here`, or `the first N ... where`, and nothing said", () => {
+    for (const read of [
+      `every job where its kind is not "small", filtered here`,
+      `the first 20 jobs where its kind is not "small"`,
+      `every note where its status is "open", filtered here`
+    ]) {
+      const { errors, warnings } = compiled(PLACE(read))
+      expect(errors).toEqual([])
+      expect(warnings.join("\n")).not.toContain("doesn't support")
+    }
+  })
+
+  test("`, filtered here` before a sort or after it:  the sort's key knows the items, and both sort here", () => {
+    const sorted = `core.sortedBy(core.filter(await core.savedThings(Job, {}, "looks through"), (job) => job.kind !== "small"), (item) => item.sessionId)`
+    for (const read of [
+      `every job where its kind is not "small", filtered here, sorted by its session id`,
+      `every job where its kind is not "small", sorted by its session id, filtered here`
+    ]) {
+      const { errors, compiled: code } = compiled(PLACE(read))
+      expect(errors).toEqual([])
+      expect(code).toContain(sorted)
+    }
+  })
+
+  test("`the first X where`:  its `where` knows the thing's fields, a name of several words too", () => {
+    const { errors, compiled: code } = compiled(PLACE(`the first job where its session id is "s1" and its kind is "big"`))
+    expect(errors).toEqual([])
+    expect(code).toContain(`(job) => job.sessionId === "s1" && job.kind === "big"`)
+  })
+
+  test("`there are ... where` opts in the same way", () => {
+    const where = `there are no jobs where its kind is not "small"`
+    expect(compiled(PLACE(where)).errors.join("\n")).toContain(`doesn't support this filter:  its kind is not "small"`)
+    expect(compiled(PLACE(`${where}, filtered here`)).errors).toEqual([])
+  })
+
+  test("Spanish:  `, filtrado aquí`", () => {
+    const { errors } = compiled(
+      [
+        `acme es un servidor web en "https://acme.test"`,
+        `\tfiltra por estado`,
+        `un "trabajo" es una cosa:`,
+        `\t- se guarda en acme`,
+        `\t- su "estado" es texto`,
+        `\t- su "tipo" es texto`,
+        `poner x a cada trabajo donde su tipo es "x"`,
+        `poner y a cada trabajo donde su tipo es "x", filtrado aquí`
+      ],
+      "/A.es.spell"
+    )
+    expect(errors).toHaveLength(1)
+    expect(errors[0]).toContain(`El servidor no admite este filtro:  su tipo es "x".`)
+    expect(errors[0]).toContain(`- Termina la línea con ", filtrado aquí"`)
   })
 })
 
@@ -118,10 +180,10 @@ describe("`, filtered here` beside a sort, after `there are`, and `the first X w
     }
   })
 
-  test("after `there are ... where`:  nothing's warned of", () => {
+  test("after `there are ... where`:  nothing's said", () => {
     const where = `there are no jobs where its kind is not "small"`
-    expect(compiled(PLACE(where)).warnings.join("\n")).toContain(`can't be asked "its kind is not "small""`)
-    expect(compiled(PLACE(`${where}, filtered here`)).warnings.join("\n")).not.toContain("can't be asked")
+    expect(compiled(PLACE(where)).errors.join("\n")).toContain(`doesn't support this filter:  its kind is not "small"`)
+    expect(compiled(PLACE(`${where}, filtered here`)).errors).toEqual([])
   })
 
   test("`the first X where`:  its `where` knows the thing's fields, a name of several words too", () => {
@@ -147,7 +209,7 @@ describe("a field of two words its list filters by (epic `data` I65)", () => {
       `\t\treturn every job where its session id is wanted`
     ])
     expect(errors).toEqual([])
-    expect(warnings.join("\n")).not.toContain("can't be asked")
+    expect(warnings.join("\n")).not.toContain("doesn't support")
     expect(code).toContain(`core.savedThings(Job, { filter: { sessionId: "s1" } })`)
     expect(code).toContain(
       `core.savedThings(Job, { filter: { status: "open", sessionId: (await core.answerOf(this, "picked"))?.id } })`
@@ -248,7 +310,7 @@ describe("the first few", () => {
     expect(code).toMatch(
       /core\.savedThings\(\s*Job,\s*\{\},\s*"looks through",\s*\{ first: 8, where: \(job\) => job\.kind !== "small" \}\s*\)/
     )
-    expect(warnings.join("\n")).not.toContain("can't be asked")
+    expect(warnings.join("\n")).not.toContain("doesn't support")
     const first = compiled(PLACE(`the first job where its kind is not "small"`))
     expect(first.compiled).toMatch(/\{ first: 1, where: \(job\) => job\.kind !== "small" \}/)
     expect(first.warnings.join("\n")).not.toContain("can't be asked")
@@ -261,7 +323,7 @@ describe("the first few", () => {
     expect(code).toMatch(
       /core\.savedThings\(\s*Job,\s*\{ filter: \{ status: "open" \} \},\s*"looks through",\s*\{ first: 8, where: \(job\) => job\.status === "open" && job\.kind === "x" \}\s*\)/
     )
-    expect(warnings.join("\n")).not.toContain("can't be asked")
+    expect(warnings.join("\n")).not.toContain("doesn't support")
   })
 
   test("a type kept in memory:  `the first 8 piles` is still nothing of its own", () => {
@@ -281,7 +343,7 @@ describe("`, filtered here`", () => {
     expect(code).toContain(
       `core.filter(await core.savedThings(Job, {}, "looks through"), (job) => job.status === "open" && job.kind !== "small")`
     )
-    expect(warnings.join("\n")).not.toContain("can't be asked")
+    expect(warnings.join("\n")).not.toContain("doesn't support")
   })
 
   test("in Spanish, `, filtrado aquí`", () => {

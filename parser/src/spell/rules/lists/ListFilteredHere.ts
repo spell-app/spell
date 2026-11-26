@@ -17,8 +17,8 @@ import { isItemScope } from "./lists.shared"
  * - e.g. `every job where its session id is the session's id, filtered here`;  Spanish `, filtrado aquí`
  * - For when the place's own filter isn't what's meant:  it matches ids exactly, or capitals its own way;
  *   or the list is small, and one read beats many.
- * - So it reads every page, and its `where` warns of nothing (`EveryThingWhere.warnAboutWhere()`);  after a sort
- *   too, `, sorted by its title, filtered here`, and after `there are ... where`.
+ * - So it reads every page, and its `where` is opted in:  without it, a `where` a web server can't take all of is an
+ *   error (`EveryThingWhere.warnAboutWhere()`).  After `there are ... where` too.
  * - Compiles to the read made again with nothing handed over (`EveryThing.filteredHereAST()`):
  *   `core.filter(await core.savedThings(Job, {}, "looks through"), (job) => ...)`.
  * - After anything else, the list as it is:  a list in memory is always checked here.

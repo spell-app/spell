@@ -200,6 +200,28 @@ export function namedSortsOf(saved: P.SavedPlace | undefined): { name: string; a
 }
 
 /**
+ * Does the place what's saved in `saved` is in sort a list of it by `field` (as compiled code names it, or a named
+ * sort's name), that way round, itself?
+ * - A named sort (`NamedSorts`) newest first;  the other way round, by its field.
+ * - A field its list sorts by, its own lines' else its place's (`it sorts by`, `can be sorted by any field`):  either
+ *   way round, unless its direction lines name only one (`SortsByAnyField`).
+ */
+export function sortsOnItsServer(saved: P.SavedPlace | undefined, field: string, descending: boolean): boolean {
+  const details = placeLinesOf(saved)
+  const own = details?.collections?.[saved!.collection]
+  const orders = own?.sortOrders ?? []
+  const named = orders.find(({ name }) => name === field)
+  if (named && descending) return true
+  // its field, newest first, is the named sort itself
+  if (!named && descending && orders.some((order) => order.field === field)) return true
+  const byField = named?.field ?? field
+  const sorts = own?.sorts ?? details?.sorts
+  if (!sorts || (sorts !== "every field" && !sorts.includes(byField))) return false
+  const directions = own?.sortDirections
+  return !directions || (descending ? directions.descending : directions.ascending) !== undefined
+}
+
+/**
  * Is what's saved in `saved` found only by name, with no list of them all?
  * - e.g. `wiki pages are found at "/page/summary/{name}"` (epic `data` P27)
  */

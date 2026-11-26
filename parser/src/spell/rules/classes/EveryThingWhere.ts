@@ -1,11 +1,10 @@
-import { proto, snakeCase } from "spell/util"
+import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { getWhereMethod, getWhereScope } from "spell/parser/spell/rules/lists/lists.shared"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
 import {
-  filtersOf,
   ownListAST,
   ownListOf,
   savedPlaceOfMatch,
@@ -16,17 +15,6 @@ import { canNeverBeTrue, EveryThing, handedPartsOf } from "./EveryThing"
 
 /** What `, filtered here` notes on the read it follows (`ListFilteredHere`):  nothing's asked of the place. */
 export type FilteredHereData = { filteredHere?: boolean }
-
-/** The fields a list of `saved` filters by, by its lines:  none for none said, or for every field. */
-function filterFieldsOf(saved: P.SavedPlace | undefined): readonly string[] {
-  const filters = filtersOf(saved)
-  return Array.isArray(filters) ? filters : []
-}
-
-/** A field's words, from its name:  `jobId` => `job id`. */
-function wordsOfName(field: string): string {
-  return snakeCase(field).replace(/_/g, " ")
-}
 
 /** Declared, so a subclass's `@proto` reads its own. */
 export interface EveryThingWhere {
@@ -87,12 +75,11 @@ export class EveryThingWhere extends SpellExpression<"type|where|body?", { own?:
 
   /**
    * SIDE EFFECT:  a warning, for a `where` on a saved type that can't all go to its place:  it's done here, up to a ceiling.
-   * - A web server's list (epic `data`, the filters phase):  naming each clause its list can't be asked
-   *   (`EveryThing.clausesStayingIn()`), and how to ask it instead, `its job id is ...` on a field its list filters by,
-   *   or that `, filtered here` says it's meant.
-   * - Any other place:  when none of it can go.
+   * - A web server's list (epic `data`, the filters phase):  an error, naming each clause its list can't be asked
+   *   (`EveryThing.clausesStayingIn()`), unless the read says how it's done:  `, filtered here` (`ListFilteredHere`),
+   *   or `the first N ... where`, a rule of its own.  A read on the Spell server is opted into, never fallen into.
+   * - Any other place:  a warning, when none of it can go.
    * - None when a search can go instead (`it searches names with "search"`):  the server narrows what's read.
-   * - None after `, filtered here` (`ListFilteredHere`):  it's what's wanted.
    * - `predicate`:  the test, made when the warnings are gathered.
    */
   static warnAboutWhere(match: P.Match, type: P.Match, predicate: () => P.ASTMethodDefinition): void {
@@ -109,21 +96,16 @@ export class EveryThingWhere extends SpellExpression<"type|where|body?", { own?:
       return !parts?.filter.length && !parts?.search.length
     })
     const staying = () => EveryThing.clausesStayingIn(type, predicate())
-    const stays = () => {
-      const clauses = staying() ?? []
-      const [field] = filterFieldsOf(savedPlaceOfMatch(type))
-      const params = {
-        clauses: clauses.map((clause) => `"${clause}"`).join(", "),
-        type: SP.singularIn(scope, words),
+    const stays = () =>
+      language.parserMessage("where-stays-here", {
+        clauses: (staying() ?? []).join(", "),
         types: P.pluralize(words)
-      }
-      return field === undefined
-        ? language.parserMessage("where-stays-here-no-filter", params)
-        : language.parserMessage("where-stays-here", { ...params, field: wordsOfName(field) })
-    }
-    SP.SpellWarnings.noteIf(match, stays, () => !isFilteredHere() && !!staying(), match, "where-stays-here")
-    // given only to a search:  this `where` has to be one
+      })
+    // given only to a search:  this `where` has to be one, and that refusal is the one said
     if (savedPlaceOfMatch(type)) EveryThing.refusedUnlessSearched(match, type, predicate)
+    // its own spot, the `where`:  one refusal a spot, and the whole read's is the search's
+    const where = (match.groups as { where?: P.Match }).where ?? match
+    SP.SpellWarnings.refuseIf(match, stays, () => !isFilteredHere() && !!staying(), where)
     const never = SP.Language.of(scope).parserMessage("never-both")
     SP.SpellWarnings.noteIf(match, never, () => canNeverBeTrue(predicate().body))
   }

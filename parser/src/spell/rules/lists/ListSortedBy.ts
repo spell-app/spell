@@ -12,6 +12,9 @@ import {
   type ItemVariableData
 } from "./lists.shared"
 import { sortNameOf } from "./SortKeyField"
+import type { SortedHereData } from "./ListSortedHere"
+import { sortsOnItsServer } from "spell/parser/spell/rules/places/places.shared"
+
 
 /** What a sort key's code calls the item:  in spell, only `it` and `its` name it. */
 const ITEM_VARIABLE = "item"
@@ -49,7 +52,35 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
       () =>
         getWhereMethod(match, match, this.getBody(match)).waitsItself || readsAPropertyThatWaits(this.getBody(match))
     )
+    ListSortedBy.refuseUnlessItsServerSorts(match)
     return match
+  }
+
+  /**
+   * SIDE EFFECT:  an error, for a sort of a web server's list its server can't do that way, unless the read says
+   * it means it done on the Spell server, `, sorted here` (`ListSortedHere`):  that reads every row.
+   * - Asked when the errors are gathered, once it's compiled:  the place's lines may be anywhere in the project.
+   * - A key that's more than a field (`sorted by its name's length`) is never the server's.
+   */
+  private static refuseUnlessItsServerSorts(match: P.Match): void {
+    const left = SuffixLeft.current
+    if (!left) return
+    const language = SP.Language.of(match.scope)
+    const written = match.inputText.trim().replace(/^,\s*/, "")
+    const message = () => language.parserMessage("sort-stays-here", { sort: written })
+    SP.SpellWarnings.refuseIf(match, message, () => {
+      if ((left.data as SortedHereData).sortedHere || !isARead(left)) return false
+      const saved = savedOfKey(match)
+      if (saved?.placeType.placeKind !== "web server") return false
+      const { field, descending = false } = fieldOfKey(getWhereMethod(match, match, ListSortedBy.bodyOf(match))) ?? {}
+      return field === undefined || !sortsOnItsServer(saved, P.JSWriter.instance.nameOf(field), descending)
+      // its own spot, its key:  one refusal a spot, and the whole sort's is a key that waits
+    }, ListSortedBy.bodyOf(match) ?? match)
+  }
+
+  /** The key's match. */
+  private static bodyOf(match: P.Match): P.Match | undefined {
+    return (match.rule as ListSortedBy).getBody(match as P.MatchFor<ListSortedBy>)
   }
 
   /**
@@ -174,4 +205,22 @@ function fieldOfKey(key: P.ASTMethodDefinition): { field: string; descending: bo
   if (body.object.name !== item) return undefined
   // a sort its place has a name for goes by that name:  the place knows its field
   return { field: sortNameOf(body) ?? body.property.value, descending }
+}
+
+/** The place what `match`'s key sorts is saved in:  its item's, as its key's scope knows it. */
+function savedOfKey(match: P.Match): P.SavedPlace | undefined {
+  const variable = (match.data as ItemVariableData).itemVariable
+  const datatype = variable?.datatype
+  return datatype ? match.scope.getType(datatype)?.savedPlace() : undefined
+}
+
+/** Is `left` a read of a place, made right there:  `every job`, `the first 20 jobs where ...`?  Not a list in memory. */
+function isARead(left: P.Match): boolean {
+  try {
+    const ast = left.AST
+    return ast instanceof P.ASTCoreMethodInvocation && ast.methodName === "savedThings"
+  } catch {
+    // a suffix's own match compiles only with what it follows
+    return false
+  }
 }

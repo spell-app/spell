@@ -55,7 +55,7 @@ describe("a list's named sorts", () => {
           ...TYPE,
           ...PAGE(
             `the first 20 measurements sorted by completion, newest first`,
-            `every measurement, sorted by completion, oldest first`,
+            `every measurement, sorted by completion, oldest first, sorted here`,
             `every measurement, sorted by its created at, newest first`
           )
         ]
@@ -69,7 +69,7 @@ describe("a list's named sorts", () => {
   })
 
   test("a name wins over a field of the same name", () => {
-    const [file] = compiled([{ path: "/A.spell", lines: [...PLACE, ...TYPE, ...PAGE(`every measurement, sorted by name`)] }])
+    const [file] = compiled([{ path: "/A.spell", lines: [...PLACE, ...TYPE, ...PAGE(`every measurement, sorted by name, sorted here`)] }])
     expect(file!.errors).toEqual([])
     expect(file!.compiled).toContain(`sort: [{ field: "name" }]`)
   })
@@ -213,5 +213,68 @@ describe("a list that sorts by any field (forms 1-3)", () => {
     expect(file!.compiled).toMatch(
       /trabajos: \{\s*at: "\/api\/jobs",\s*sorts: "every field",\s*sortedWith: "sort",\s*sortDirections: \{\s*param: "order",\s*descending: "desc",\s*ascending: "asc"\s*\}/
     )
+  })
+})
+
+describe("a sort its server can't do is an error, unless it ends `, sorted here`", () => {
+  const errorsOf = (...reads: string[]) =>
+    compiled([{ path: "/A.spell", lines: [...PLACE, ...TYPE, ...PAGE(...reads)] }])[0]!.errors
+
+  test("named, the other way round:  the error, in the person's words", () => {
+    expect(errorsOf(`every measurement, sorted by completion, oldest first`).join("\n")).toContain(
+      [
+        `The server doesn't support this sort:  sorted by completion, oldest first.`,
+        `It is possible to have the Spell server pre-fetch rows and sort them here, but this will be slow.`,
+        `Options:`,
+        `- Change to another sort.`,
+        `- End the line with ", sorted here" to pre-fetch all rows and sort in the Spell server.`
+      ].join("\n")
+    )
+    expect(errorsOf(`the first 20 measurements sorted by completion, oldest first`)).toHaveLength(1)
+  })
+
+  test("none for what it sorts, nor with `, sorted here`", () => {
+    expect(
+      errorsOf(
+        `the first 20 measurements sorted by completion, newest first`,
+        `every measurement, sorted by its created at, newest first`,
+        `every measurement, sorted by its end time, sorted here`
+      )
+    ).toEqual([])
+  })
+
+  test("a way round its direction lines don't name", () => {
+    const lines = (read: string) => [
+      `acme is a web server at "https://acme.test":`,
+      `\t- jobs live at "/api/jobs"`,
+      `\t\t- jobs can be sorted by any field, with "sort"`,
+      `\t\t\t- newest first with "order" as "desc"`,
+      `a "job" is a thing:`,
+      `\t- it is saved in acme`,
+      `\t- its "name" is text`,
+      `jobs page is an app:`,
+      `\t- its "rows" is ${read}`
+    ]
+    expect(compiled([{ path: "/A.spell", lines: lines(`every job, sorted by its name, newest first`) }])[0]!.errors).toEqual(
+      []
+    )
+    expect(
+      compiled([{ path: "/A.spell", lines: lines(`every job, sorted by its name`) }])[0]!.errors.join("\n")
+    ).toContain(`doesn't support this sort:  sorted by its name.`)
+  })
+
+  test("Spanish:  `, ordenado aquí`", () => {
+    const lines = (read: string) => [
+      `acme es un servidor web en "https://acme.test"`,
+      `un "trabajo" es una cosa:`,
+      `\t- se guarda en acme`,
+      `\t- su "nombre" es texto`,
+      `poner x a ${read}`
+    ]
+    const [refused] = compiled([{ path: "/A.es.spell", lines: lines(`cada trabajo, ordenado por su nombre`) }])
+    expect(refused!.errors.join("\n")).toContain(`El servidor no admite este orden:  ordenado por su nombre.`)
+    expect(refused!.errors.join("\n")).toContain(`- Termina la línea con ", ordenado aquí"`)
+    const [opted] = compiled([{ path: "/A.es.spell", lines: lines(`cada trabajo, ordenado por su nombre, ordenado aquí`) }])
+    expect(opted!.errors).toEqual([])
   })
 })

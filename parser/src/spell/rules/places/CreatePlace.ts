@@ -407,17 +407,20 @@ export class CreatePlace extends TypeDeclaration<
   static importedDetailsOf(type: P.TypeScope): P.ImportedPlaceDetails | undefined {
     const { declaredBy } = type
     if (!declaredBy) return undefined
-    const { checkedEvery, searches, collections, filters } = CreatePlace.detailsOf(declaredBy)
+    const { checkedEvery, searches, collections, filters, sorts } = CreatePlace.detailsOf(declaredBy)
     const collectionsKept = Object.fromEntries(
       Object.entries(collections ?? {})
-        .map(([name, { at, searches: own, searchedOnly, askedBy, filters: filtersOwn, sortOrders }]) => {
+        .map(([name, each]) => {
+          const { at, searches: own, searchedOnly, askedBy, filters: filtersOwn, sortOrders } = each
           const kept: P.ImportedPlaceCollection = definedProps({
             at,
             searches: own,
             searchedOnly,
             askedBy,
             filters: filtersOwn,
-            sortOrders
+            sortOrders,
+            sorts: each.sorts,
+            sortDirections: each.sortDirections
           })
           return [name, kept] as const
         })
@@ -427,6 +430,7 @@ export class CreatePlace extends TypeDeclaration<
       checkedEvery,
       searches,
       filters,
+      sorts,
       readOnly: isPlaceTypeReadOnly(type) || undefined,
       collections: Object.keys(collectionsKept).length ? collectionsKept : undefined
     })

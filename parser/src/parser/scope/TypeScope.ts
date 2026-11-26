@@ -38,6 +38,8 @@ export type ImportedPlaceDetails = {
   readOnly?: boolean
   /** The fields it filters by itself, for every list:  `it filters by cuisine`.  Left out:  none. */
   filters?: "every field" | string[]
+  /** The fields it sorts by itself, for every list:  `it sorts by title`.  Left out:  none. */
+  sorts?: "every field" | string[]
   /** What its lines say of each collection, by the name a type's `savedIn` knows it by:  only what's said. */
   collections?: Record<string, ImportedPlaceCollection>
 }
@@ -64,6 +66,10 @@ export type ImportedPlaceCollection = {
   filters?: "every field" | string[]
   /** The sorts it has names of its own for:  `{ name: "creation", as: "created_at", field: "createdAt" }`. */
   sortOrders?: { name: string; as: string; field: string }[]
+  /** The fields this one sorts by itself:  `jobs can be sorted by any field, with "sort"`. */
+  sorts?: "every field" | string[]
+  /** How it's asked which way round:  `- newest first with "order" as "desc"`;  a way left out isn't its. */
+  sortDirections?: { param: string; descending?: string; ascending?: string }
 }
 
 /** How a type's records are published, as `- it is published as "..."` says. */
