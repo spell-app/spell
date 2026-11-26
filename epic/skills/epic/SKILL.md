@@ -128,6 +128,7 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
     epic `epic-engine` T88, T108).
   - `fresh`:  `/epic fresh [--force]` hands THIS session's epic to a new session in this window, which picks it up
     from the page:  NOT a new epic.  Go to "16. Fresh" (epic `epic-engine` T110).
+    - Its agents still running:  it waits for them, then goes by itself (T172).
     - `/epic fresh all`, typed in ANY session:  every running epic session does, each at its next clear moment.
       Go to "16. Fresh", "All epics" (epic `epic-engine` T113).
     - `/epic fresh all --pause`:  every session pauses and saves its agents first, then all go.
@@ -670,6 +671,15 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
     - In Codex:  the same steps, by the session itself, after each item.
 - `epic merge` and `epic worktree merge-main` take their own turn (`epic turns`):  one merge at a time on the machine,
   each saying who has it while it waits.
+- A FRESH WAITING for this session's agents (`epic fresh later`, "16. Fresh", step 1;  epic `epic-engine` T172):
+  the session starts NO new work:  no agent, item started, phase, test or merge (`epic agents add` refuses).
+  - Each new ask, in the chat or from the page (a mark, a Send):  its item (`epic add <epic>#T "<title>" --requested
+    --details "<their words>"`, `#I` for a bug;  or the item it's about), then
+    `epic queue <epic> <id> "after the fresh"`.
+    - That's the POST-FRESH LIST:  the new session takes it up first ("8. Resume", step 4).
+  - Reply one line each:  "queued for the fresh session:  <what>".
+  - Quick read-only answers still go.
+  - In Codex:  no fresh waits (nothing runs in the background):  take the ask up as usual.
 
 ### Bells & Whistles:  steps the person may switch off
 
@@ -1679,6 +1689,12 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
      2. start that agent:  `Agent`, its full name first in the description, the whole printed brief as its prompt
      3. `epic agents set <name> --task-id <its id>`, then `epic agents wait` in the background once
      - In Codex:  no background agents:  do each one's work here, one at a time, from the printed brief.
+   - The POST-FRESH LIST (epic `epic-engine` T172):  `epic fresh queued <name>`, what the person asked for while the
+     last session waited to go fresh ("16. Fresh", step 1).  Take it up first, before anything else new:
+     - each one as any request ("The session answers;  agents build"), then `epic unqueue <name> <id>`,
+       so the list empties
+     - name them in step 5's reply:  they're the person's own asks, so ask nothing about them
+     - In Codex:  do each one here, one at a time.
 5. Reply, for someone who remembers nothing:  three lines at most.
    - What the epic is, where it stopped, and what's waiting on the person (open questions, issues, tests).
    - Uncommitted work in bold.
@@ -2092,10 +2108,24 @@ A NEW session takes this session's epic on, in this window, from its page;  this
 
 0. Which epic:  this session's, its title (`🚧 <name>`), else its worktree's (`epic worktree path <name>`).
    None:  say so, and stop.
-1. Agents:  `epic agents`.  Any listed but not `paused`:  refuse, in one line naming them;  closing this tab would
-   cut them off.  Paused ones don't count:  they're saved, and the new session starts them ("8. Resume").
-   - A pause under way:  `epic window fresh` refuses until all are quiet.  Never `--force` past it.
-   - Wait for their notices, then `/epic fresh` again;  or the person types `/epic fresh --force`.
+1. Agents:  `epic agents`.  Any listed but not `paused`:  WAIT for them, then go by yourself;  closing this tab now
+   would cut them off (epic `epic-engine` T172;  Owen, 2026-11-26:  "if agents are running when I ask, it
+   automatically does the epic fresh when the agents are complete").
+   - `epic fresh later <name>`, then reply ONE line, "fresh as soon as <names> finish", and end the turn.
+     - Until it goes:  start NO new work;  new asks go on the post-fresh list ("The session answers;  agents build",
+       "A fresh waiting").
+   - Each agent's notice:  `epic agents done <name>`, as always.  The last one's prints "go fresh now":
+     steps 2-4, in that turn.
+     - It prints "the fresh still waits" (a question of yours waits on the person, they wrote in the last 5 minutes):
+       end the turn;  the end-of-turn hook ([fresh-wait.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/fresh-wait.mjs)) wakes this
+       session once it's clear, idle or not, with a line saying to run steps 2-4.
+   - `epic fresh status` shows it waiting, and the post-fresh list.
+   - `epic fresh drop` calls it off:  take the post-fresh list up yourself then (`epic fresh queued <name>`,
+     `epic unqueue <name> <id>` as you start each).
+   - `/epic fresh --force`:  go now, as before (step 2's "Cut off" cards).
+   - In Codex:  no background agents, so nothing to wait for:  go on with step 2.
+   - Paused ones don't count:  they're saved, and the new session starts them ("8. Resume").
+   - A pause under way:  `epic window fresh` and `epic fresh later` refuse until all are quiet.  Never `--force` past it.
    - Background waits (`epic agents wait`) don't count:  the new session starts its own.
 2. Write down what's open but NOT on the page yet:  the new session knows only the page.
    - a question asked of the person and not answered yet (in the chat, or on a details page):  a Q item,
@@ -2106,7 +2136,9 @@ A NEW session takes this session's epic on, in this window, from its page;  this
      item saying where it stopped, and the uncommitted files by name
    - agents still running (only with `--force`):  a Noted card on each one's item, "Cut off by /epic fresh"
 3. `epic window fresh <name> [--force]`:  records the handoff.
-   - Exit 1 (agents, the end-of-turn hook won't run, no window):  say why, and stop.
+   - Exit 1, agents running:  step 1, `epic fresh later <name>`.
+   - Exit 1, the end-of-turn hook won't run, or no window:  say why, and stop (woken by the hook:  `epic fresh drop`
+     too).
 4. Reply in one line:  "a new session takes `<name>` on in this window, `/epic resume <name>` typed in:  press Enter
    there".  Then END THE TURN, at once, as `/isolate` does after `handoff`:
    - the `Stop` hook ([handoff.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/handoff.mjs)) opens a NEW Claude tab in this window,
