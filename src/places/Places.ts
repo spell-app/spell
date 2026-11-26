@@ -310,7 +310,7 @@ export class Places {
    * - Then whoever's listening hears (`onSaved()`).
    */
   tellSaved(saved: PlaceSaved): void {
-    this.reads.forgetReleased(saved.placeName, ({ handled }) => isWorkedOut(handled))
+    this.reads.forgetReleased(saved.placeName, ({ answer }) => isWorkedOut(answer.handled))
     for (const listener of this.savedListeners) listener(saved)
   }
   /** Who hears a confirmed save. */

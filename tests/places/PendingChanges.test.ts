@@ -575,6 +575,21 @@ describe("PendingChanges, reading your own write", () => {
     reading.leave()
   })
 
+  test("a list off screen its place sorted itself is out of date once a save is confirmed:  read again, not kept (Q5)", async () => {
+    const { places, pending } = cookbook()
+    const ask = { placeName: "cookbook", collection: "recipes", type: "Recipe", query: { sort: [{ field: "title" }] } }
+    const plain = { placeName: "cookbook", collection: "recipes", type: "Recipe" }
+    for (const props of [ask, plain]) {
+      const reading = places.read(props)
+      await reading.load()
+      reading.leave()
+    }
+    pending.setField(titleWrite("Broth", "Soup"))
+    await allSent(pending)
+    expect(places.read(ask).status).toBe("still waiting")
+    expect(places.read(plain).status).toBe("from an earlier visit")
+  })
+
   test("a new thing shows in a list, a deleted one doesn't, and a filter still holds", () => {
     const { pending } = cookbook({}, { wait: 10_000 })
     const rows = [
