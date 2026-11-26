@@ -1050,7 +1050,7 @@ function sameOfEvery<Value>(
  * What a program calls a collection:  its type, more than one, `characters` for a `character`.
  * - Not the source's own name for it, `people`:  a person may rename the type, and the collection goes with it.
  */
-function collectionWords({ type }: CollectionDescription): string {
+export function collectionWords({ type }: CollectionDescription): string {
   return type
     .split(" ")
     .map((word, index, words) => (index === words.length - 1 ? P.pluralize(word) : word))

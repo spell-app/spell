@@ -222,8 +222,12 @@ describe("spell place verify (epic `data` P49)", () => {
     return { fetch, asked }
   }
 
-  /** An ingest of the description, then its verify, on `fetch`, with `deployments` in the project's file. */
-  async function ingested(fetch: typeof globalThis.fetch, deployments?: Record<string, Deployment>) {
+  /** An ingest of the description, then its verify, on `fetch`, with `deployments` in the project's file, at `now`. */
+  async function ingested(
+    fetch: typeof globalThis.fetch,
+    deployments?: Record<string, Deployment>,
+    now = new Date("2026-11-17T12:00:00Z")
+  ) {
     const { files, texts, descriptions } = memoryFiles()
     if (deployments) files.deploymentsOf = async () => deployments
     const ingest = new PlaceIngest({
@@ -232,7 +236,7 @@ describe("spell place verify (epic `data` P49)", () => {
       files,
       readThrough: readThroughSpell,
       sleep: async () => {},
-      now: () => new Date("2026-11-17T12:00:00Z")
+      now: () => now
     })
     await ingest.add({ address: NETBOX, spec: SPEC_AT, into: "NetBox.api.spell", name: "netbox" })
     return { ingest, texts, descriptions }
@@ -287,6 +291,7 @@ describe("spell place verify (epic `data` P49)", () => {
       return Response.json({ count: 0, next: null, results: [] })
     }) as typeof globalThis.fetch
     const { ingest, texts, descriptions } = await ingested(fetch)
+    expect(descriptions.get("NetBox.api.json5")!.spellCantSay.join("\n")).toMatch(/Rows kept somewhere different/)
     await ingest.verify("NetBox.api.spell", { triesWrites: true })
     expect(texts.get("NetBox.api.spell")).toMatch(
       /^a "background task" is a thing\n\tit lives in netbox\n\tthis type is verified$/m
@@ -301,6 +306,81 @@ describe("spell place verify (epic `data` P49)", () => {
       `DELETE ${NETBOX}/api/tenancy/tenants/2/`
     ])
     expect(canDo.write).toMatch(/^Yes:  it took a write of each kind, tried on tenants/)
+    // what it read, said (epic `data` I138):  never "never read", nor rows kept differently once they're all in results
+    expect(canDo.read).toBe("Yes:  verify read 6 of its 6 lists.")
+    const { spellCantSay, notes } = descriptions.get("NetBox.api.json5")!
+    expect(spellCantSay.join("\n")).not.toMatch(/Rows kept somewhere different/)
+    expect(notes.join("\n")).not.toMatch(/OpenAPI description only/)
+  })
+
+  test("what it finds new is dated the day it is where the person is, not in UTC (epic `data` I139)", async () => {
+    const zone = process.env.TZ
+    process.env.TZ = "America/New_York"
+    try {
+      const fetch = (async (input: RequestInfo | URL) => {
+        const url = `${input instanceof Request ? input.url : input}`
+        if (url === SPEC_AT) return Response.json(DOCUMENT)
+        const path = url.replace(NETBOX, "").replace(/\?.*$/, "")
+        if (path === "/api/core/background-tasks/") return Response.json([{ id: "t-9", status: "queued" }])
+        if (path === "/api/core/background-tasks/t-9/") return Response.json({ id: "t-9" })
+        return Response.json({ count: 0, next: null, results: [] })
+      }) as typeof globalThis.fetch
+      // 21:15 in New York on the 18th:  already the 19th in UTC
+      const { ingest, texts } = await ingested(fetch, undefined, new Date("2026-11-19T02:15:00Z"))
+      await ingest.verify("NetBox.api.spell")
+      const spell = texts.get("NetBox.api.spell")!
+      expect(spell).toContain("-- NEW as of 2026-11-18")
+      expect(spell).not.toContain("2026-11-19")
+    } finally {
+      if (zone === undefined) delete process.env.TZ
+      else process.env.TZ = zone
+    }
+  })
+
+  test("writes tried on each list named, each its state;  a refusal keeps the server's reason (epic `data` I108, I137)", async () => {
+    const STAGING = "https://staging.netbox.test"
+    const sent: Array<{ request: string; body?: unknown }> = []
+    const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = `${input instanceof Request ? input.url : input}`
+      const method = init?.method ?? "GET"
+      if (method !== "GET") {
+        const body = typeof init?.body === "string" ? (JSON.parse(init.body) as unknown) : undefined
+        sent.push({ request: `${method} ${url}`, ...(body !== undefined && { body }) })
+      }
+      if (url === SPEC_AT) return Response.json(DOCUMENT)
+      const path = url.replace(STAGING, "").replace(/\?.*$/, "")
+      // NetBox's own refusal of a copy, as it answered on 2026-11-25
+      if (method === "POST") {
+        return Response.json({ non_field_errors: ["Tenant with this Name already exists."] }, { status: 400 })
+      }
+      if (path === "/api/tenancy/tenants/") return Response.json({ count: 1, next: null, results: [TENANT] })
+      if (path === "/api/tenancy/tenants/1/") return Response.json(TENANT)
+      return Response.json({ count: 0, next: null, results: [] })
+    }) as typeof globalThis.fetch
+    const { ingest, descriptions } = await ingested(fetch, { staging: { at: STAGING } })
+    const result = await ingest.verify("NetBox.api.spell", { deployment: "staging", triesWrites: ["tenants"] })
+    // only the fields its write takes, by its schema:  never its id, address or display
+    expect(sent).toEqual([
+      { request: `POST ${STAGING}/api/tenancy/tenants/`, body: { name: "Acme", slug: "acme" } },
+      { request: `PATCH ${STAGING}/api/tenancy/tenants/1/`, body: { name: "Acme" } }
+    ])
+    const { collections, canDo } = descriptions.get("NetBox.api.json5")!
+    const { add, change, delete: remove } = collections.tenants!.operations!
+    expect(add!.state).toEqual({
+      is: "failed",
+      at: "2026-11-17T12:00:00.000Z",
+      deployment: "staging",
+      status: 400,
+      reason: "Tenant with this Name already exists"
+    })
+    expect(change!.state).toMatchObject({ is: "verified", deployment: "staging", status: 200 })
+    // nothing added, nothing deleted
+    expect(remove!.state).toEqual({ is: "unverified" })
+    expect(collections.contacts!.operations!.add!.state).toEqual({ is: "unverified" })
+    expect(canDo.write).toBe(
+      'It refused some writes, tried on tenants (adding 400:  "Tenant with this Name already exists", changing 200).'
+    )
+    expect(result.changes).toContain('tenants:  adding 400:  "Tenant with this Name already exists", changing 200.')
   })
 
   test("a bare list is its rows, though its description wraps them under a field", async () => {

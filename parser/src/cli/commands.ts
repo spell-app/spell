@@ -361,10 +361,10 @@ export default function languageCommands(spell: Command): void {
         'goes:  "cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg"'
     )
     .option(
-      "--try-writes",
+      "--try-writes [lists]",
       "try one write of each kind -- adding, changing, deleting -- and say what each answered, and whether it keeps " +
-        "them:  only for a server that keeps nothing (JSONPlaceholder) or one you don't mind writing to;  without it, " +
-        "it never writes"
+        "them:  on its first list, or on each list named, comma-separated (posts,comments);  only for a server that " +
+        "keeps nothing (JSONPlaceholder) or one you don't mind writing to;  without it, it never writes"
     )
     .option("--no-ai", "ask no agent:  only what can be worked out from what comes back")
     .action((address: string, _options, command: Command) =>
@@ -434,7 +434,11 @@ export default function languageCommands(spell: Command): void {
       "which of the place's deployments, as the project's file lists them under \"places\":  dev, staging, " +
         "production -- default SPELL_DEPLOYMENT, else the first listed, else the place's own address"
     )
-    .option("--try-writes", "try a write of each kind too:  never on a deployment marked read only")
+    .option(
+      "--try-writes [lists]",
+      "try a write of each kind too, on its first list or on each list named, comma-separated (tenants,sites):  " +
+        "each write's state goes in its description;  never on a deployment marked read only"
+    )
     .option(
       "--fixtures [folder]",
       "save what it reads as the place's saved answers, scrubbed of tokens, keys, cookies and emails, one file an " +

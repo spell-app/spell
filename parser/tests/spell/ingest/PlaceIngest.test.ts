@@ -540,6 +540,28 @@ describe("adding a source", () => {
     expect(collections.countries!.fields.currencies).toMatchObject({ isListInside: true, isByCode: true })
   })
 
+  test("a place named as its list is refused, saying the names meet, before anything is written (epic `data` I77)", async () => {
+    const fetch = (async (input: RequestInfo | URL) => {
+      const url = new URL(`${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`)
+      return url.pathname === "/countries.json"
+        ? Response.json([{ name: "France", cca2: "FR" }, { name: "Aruba", cca2: "AW" }])
+        : new Response("nope", { status: 404 })
+    }) as typeof globalThis.fetch
+    const { ingest, texts } = ingestOf({}, { fetch })
+    await expect(
+      ingest.add({
+        address: "https://countries.test",
+        kind: "web server",
+        into: "/C.spell",
+        name: "countries",
+        collections: ["countries=/countries.json"]
+      })
+    ).rejects.toThrow(
+      `the place's name, "countries", is its countries list's too, so Spell can't tell them apart and nothing was written:  name the place something else with --name`
+    )
+    expect(texts.get("/C.spell")).toBeUndefined()
+  })
+
   test("a list of names, each whole at its address, PokéAPI's way:  read whole, inside things in words", async () => {
     const at = (path: string) => `${API}${path}`
     const pikachu = {

@@ -13,6 +13,7 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 import JSON5 from "json5"
 
 import { json5Edited } from "spell/util/node/json5"
+import { commaList } from "spell/util/string"
 import { peekProp, schemaOf, whileOnlyShowing } from "spell/util/reactive"
 import { CLI } from "spell/cli"
 import type { KeyGoes } from "spell/places/keyGoes"
@@ -27,7 +28,8 @@ import {
   type PlaceDescription,
   type PlaceDescriptionOnDisk,
   type ReadOfType,
-  type ReadThrough
+  type ReadThrough,
+  type WritesAsked
 } from "spell/parser/spell/ingest/ingest.types"
 
 import { claudeRunnerFor } from "./claudeRunners"
@@ -73,7 +75,8 @@ export type PlaceIngestOptions = {
   collections?: string
   samples?: string
   pictures?: string
-  tryWrites?: boolean
+  /** `--try-writes [lists]`:  on its first list, or each named, comma-separated. */
+  tryWrites?: boolean | string
   ai?: boolean
 }
 
@@ -115,7 +118,7 @@ export async function placeIngest(address: string, options: PlaceIngestOptions):
       ...(collections && { collections: collectionsIn(collections) }),
       ...(samples && { samples: samples.split(",").map((each) => each.trim()) }),
       ...(pictures && { pictures: pictures.split(",").map((each) => each.trim()) }),
-      ...(tryWrites && { triesWrites: true }),
+      ...(tryWrites && { triesWrites: writesAskedIn(tryWrites) }),
       ...(readOnly && { readOnly: true }),
       ...(rows !== undefined && { rows: rowsFrom(rows) }),
       ...(checkEvery !== undefined && { checkEvery: secondsIn(checkEvery) })
@@ -123,6 +126,11 @@ export async function placeIngest(address: string, options: PlaceIngestOptions):
     printAdded(result)
     return CLI.EXIT.OK
   })
+}
+
+/** `--try-writes [lists]`:  bare, its first list that can take them;  else each collection named, comma-separated. */
+export function writesAskedIn(tryWrites: true | string): WritesAsked {
+  return tryWrites === true ? true : commaList(tryWrites)
 }
 
 /** `--rows`, a whole number above 0.  - throws `CliError` for anything else */
@@ -191,13 +199,13 @@ export async function placeVerify(
     deployment = process.env.SPELL_DEPLOYMENT || undefined,
     tryWrites,
     fixtures
-  }: { deployment?: string; tryWrites?: boolean; fixtures?: string | boolean }
+  }: { deployment?: string; tryWrites?: boolean | string; fixtures?: string | boolean }
 ): Promise<number> {
   return stoppedAsCliError(async () => {
     const ingest = await ingestFor(false, describesSession(file))
     const result = await ingest.verify(file, {
       ...(deployment && { deployment }),
-      ...(tryWrites && { triesWrites: true }),
+      ...(tryWrites && { triesWrites: writesAskedIn(tryWrites) }),
       ...(fixtures && { savesAnswers: fixtures })
     })
     const { description, descriptionPath, changes, couldntChange } = result

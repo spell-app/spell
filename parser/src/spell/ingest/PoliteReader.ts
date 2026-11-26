@@ -281,7 +281,7 @@ export class PoliteReader {
    * - NEVER through `fetch`:  a read through the Spell still can't write.
    * - NEVER throws for an answer, whatever its status;  as `read()` otherwise
    */
-  async tryWrite(url: string, method: "POST" | "PATCH" | "DELETE", body?: unknown): Promise<ReadAnswer> {
+  async tryWrite(url: string, method: "POST" | "PATCH" | "PUT" | "DELETE", body?: unknown): Promise<ReadAnswer> {
     const sent =
       body === undefined ? {} : { headers: { "content-type": "application/json" }, body: JSON.stringify(body) }
     return this.answerTo(url, { method, ...sent }, "may write")
