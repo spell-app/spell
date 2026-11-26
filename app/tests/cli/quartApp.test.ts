@@ -127,8 +127,8 @@ describe("a Python spell app, in a real browser", () => {
     const turned = patches[0]![0]!
     expect(patches[0]).toEqual([expect.objectContaining({ $type: "Card", direction: "up" })])
     const cardId = turned["$id"] as string
-    // what the page sent:  a call of the card's own click handler, `<on click>`, by its Python name (epic item J69),
-    // naming the card by reference, its name (epic `python-target` P27):  the card's `its rank + " of " + its suit`
+    // what the page sent:  a call of the card's own click handler, `on click`, by its Python name (epic item J69),
+    // naming the card by reference, its name (epic `python-target` P27):  the card's `its rank && "of" && its suit`
     const reference = `Card#${turned.rank} of ${turned.suit}`
     expect(page.sent).toEqual([{ call: "on_click", on: reference, args: [{ type: "click" }] }])
     // and asked the page to play its sound, not waiting for it (epic `mockup` P28)

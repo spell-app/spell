@@ -1059,7 +1059,7 @@ export class Inspector {
 
   /**
    * How `thing`'s type writes its property `name` (its compiled name), for the All Cards fields (epic `editor` P23, Q29):
-   * - `spell`:  where the Spell that works it out is (`<property "name">its rank + ...</>`), to show and edit there
+   * - `spell`:  where the Spell that works it out is (`its "name" is its rank && ...`), to show and edit there
    * - `oneOf`:  its values, as its `one-of` says them (`ace, 2 ... 10, jack ...`)
    * - `undefined`:  the program doesn't declare it, e.g. a built-in type's
    */
@@ -1392,8 +1392,7 @@ export class Inspector {
   /**
    * Add DOM event `event` (`click`) to `element`:  an empty handler, written in its place in the program,
    * as a step of `editor.history` (epic `editor`, Events In Code).
-   * - A drawn thing's:  in its own type, `- on click:` after its outline header's lines (`a card:`),
-   *   else `<on click>` ... `</on>` before its tag's end.
+   * - A drawn thing's:  in its own type, its event's words (`on click`) after its type's lines (`newEventIn()`).
    * - A Spell UI element's:  `onClick={}` on its tag.
    * - Its row then shows with the cursor in its code (`Inspector.justAdded`).
    * - Nothing happens where it can't be written:  an element with no place in the program.

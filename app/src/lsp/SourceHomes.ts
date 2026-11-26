@@ -223,8 +223,9 @@ export class SourceHomes {
 
   /**
    * The value `type` declares for property `name`, if it does:
-   * - as its value, `its "layout" is stacked` (`<property "layout">stacked</>`)
-   * - or as a typed property's start, `its "count" is a number starting at 0` (`<property "count" type="number">0</>`)
+   * - as its value, `its "layout" is stacked`
+   * - as a typed property's start, `its "count" is a number starting at 0`
+   * - or on its type's own line, `a "foundation" is a pile with layout "stacked"`
    */
   private static valueDeclared(root: P.Match, type: string, name: string): P.Match | undefined {
     const declared = findMatch(
@@ -238,6 +239,17 @@ export class SourceHomes {
       wordsMean((match.groups as { property?: P.Match }).property?.raw?.replace(/"/g, ""), name)
     const property = findMatch(declared, (match) => match.rule?.name === DECLARED_VALUE && named(match))
     if (property) return (property.groups as { body?: P.Match }).body
+    // on its type's line, after `with`
+    const defaults = (declared.groups as { defaults?: P.Match }).defaults
+    const said =
+      defaults &&
+      findMatch(
+        defaults,
+        (match) =>
+          match.rule?.name === SAID_DEFAULT &&
+          wordsMean((match.groups as { property?: P.Match }).property?.raw?.trim(), name)
+      )
+    if (said) return (said.groups as { value?: P.Match }).value
     // a typed property's start:  its specifier's `start`, never a range's (`one-of="ace, 2 ... 10"`)
     const typed = findMatch(declared, (match) => match.rule?.name === DEFINED_PROPERTY && named(match))
     const start =
@@ -381,6 +393,8 @@ const CREATE = "create"
 const CREATE_TYPE = "create_type"
 const DECLARED_VALUE = "property_value_getter"
 const DEFINED_PROPERTY = "define_property_has"
+/** A default said on a type's own line, after `with`:  `a "foundation" is a pile with layout "stacked"`. */
+const SAID_DEFAULT = "said_object_literal_property"
 /** The specifiers that say where a stored value starts:  `a number starting at 0`, `a percent starting at 18%`. */
 const STARTING_SPECIFIERS = new Set(["outline_specifier_datatype", "outline_specifier_percent"])
 

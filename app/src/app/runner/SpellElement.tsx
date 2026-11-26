@@ -122,7 +122,7 @@ const STATES_CSS = `
  *   - The page builds the tag on that class (`core.useElement()`), so both targets draw the same element.
  *   - It reaches compiled code as `@spell/elements`:  see `spellElements.ts`.
  * - Dragging is opt-in, by the program's own words (epic `outline-spell` P28):
- *   - `- it is draggable` (`<view "card" draggable>`):
+ *   - `it is draggable`, or `a "card" is a draggable view`:
  *     a card its list will give up can be dragged, with a mouse or a finger;
  *     it, and its list's items after it, follow the pointer
  *   - `- it is droppable`:  a pile that will take the card glows as it comes over (`:state(accepting-drop)`)
@@ -407,7 +407,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   }
 
   /**
-   * Does a click do something to our thing now?  It's clickable (`- on click:`, `<on click>`, a double click, or
+   * Does a click do something to our thing now?  It's clickable (`when clicked`, a double click, or
    * `clickable`, by its condition if it has one), or selectable;  it shows the pointer cursor (`STATES_CSS`), and the
    * grab cursor once draggable.
    * - A click its thing hands up (`pass event`) to its list isn't counted:  the list's element shows it instead.

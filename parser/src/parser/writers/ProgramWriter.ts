@@ -1011,7 +1011,7 @@ export abstract class ProgramWriter extends Writer {
   /**
    * The kind of a loop's item `name`, from its list's class, e.g. `Square` for a board's -- `undefined` if not a loop's.
    * - What a loop's variable is when spell couldn't tell as it parsed:
-   *   a list type declared further down, `for square in its board` above `<thing "board" template="list of squares">`
+   *   a list type declared further down, `for square in its board` above `a "board" is a list of squares`
    *   (epic `language` T85).
    */
   protected loopItemKind(name: string, depth: number): string | undefined {
@@ -1330,7 +1330,7 @@ export abstract class ProgramWriter extends Writer {
 
   /**
    * Does `node` read a property whose value is one saved thing, which the place may not hold?  See `mayBeNothing()`.
-   * - Yes for `its person`, a page's `<property "person">the jsonplaceholder user whose id is 1</property>`:
+   * - Yes for `its person`, a page's `its "person" is the jsonplaceholder user whose id is 1`:
    *   a getter that returns `core.savedThingWithId()` or `core.savedThingAt()`.
    * - Only what it returns itself, never through a variable:  the getter's variables aren't the ones being written.
    */
