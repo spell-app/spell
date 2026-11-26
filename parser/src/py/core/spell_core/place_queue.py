@@ -9,12 +9,16 @@ await queue.wait_until_sent()   # before a read of the place, or as the program 
 
 - Under Quart one loop serves every visitor, so a send waits in a thread, as a read does.
 - In the order made.  An `in one go:`'s changes are always a send of their own.
-- A place that makes a send all or none (`makes_all_or_none`) is sent what's waiting as one.
-  - Refused, so none of it was kept:  sent again one change at a time, so only what it refuses is lost (J304).
-  - NEVER for another failure:  it may have been kept, and would reach the place twice.
-- Any other place, a data folder, gets a send per change:
-  it keeps what came before a refusal, so nothing sent there can be sent again.
-- Where nothing can wait (no loop running, a drawing), `send_now()` sends right there.
+- What's waiting goes as one send, up to `MOST_AT_ONCE` changes, to a place that either:
+  - makes a send all or none (`makes_all_or_none`):  a database on this device, a sheet, an atmosphere account
+    - refused, so none of it was kept:  sent again one change at a time, so only what it refuses is lost (J304)
+  - or says how many it kept before a failure (`says_what_it_kept`):  a data folder (J304)
+    - what it kept is over, the one it refused failed, and only what it never tried waits to go again
+  - NEVER sent again after another failure:  it may have been kept, and would reach the place twice.
+- Any other place gets a send per change.
+- A send is taken off the queue only once it's over:  one sender at a time (`_lock`), so none goes twice.
+- Where nothing can wait (no loop running), `send_now()` sends right there.
+  A drawing doesn't wait at all:  it reads what the place has, with what's on its way laid over it (`on_its_way()`).
 - What's heard of each send is heard on the program's own thread (`hear()`), never the one that sent it.
 - Imports only `place_kinds`:  knows nothing of things, or of the core.
 """
@@ -93,6 +97,13 @@ class PlaceQueue:
             await asyncio.to_thread(self.send_now)
         self.hear()
 
+    def on_its_way(self) -> list[Change]:
+        """Every change not yet kept, in order:  waiting, or being sent now.  For a read that can't wait (I158).
+
+        - Never waits for the lock:  a copy of what's waiting, taken at once (a deque's `copy()` holds the GIL).
+        """
+        return [change for sending in self.waiting.copy() for change in sending.changes]
+
     def stop_waiting_for(self, sending: Sending) -> None:
         """SIDE EFFECT:  who waited for `sending` has gone:  its failure is reported, even one that's been heard."""
         sending.is_waited_for = False
@@ -127,20 +138,21 @@ class PlaceQueue:
             count = len(self.waiting)
             while count > 0:
                 batch = self._next_batch(count)
-                self._send(batch)
-                for sending in batch:
+                # only what's over leaves the queue:  what a place never tried stays first in line
+                for sending in batch[: self._send(batch)]:
                     sending.is_done = True
                     self.answered.append(sending)
                     self.waiting.popleft()
-                count -= len(batch)
+                    count -= 1
 
     def _next_batch(self, count: int) -> list[Sending]:
         """The next send:  an `in one go:` alone, else the changes in a row up to the next one.
 
-        - A place that doesn't make all or none:  one change.
+        - A place that neither makes all or none nor says what it kept:  one change.
         """
         batch = [self.waiting[0]]
-        if batch[0].is_waited_for or not self.behind.makes_all_or_none:
+        goes_together = self.behind.makes_all_or_none or self.behind.says_what_it_kept
+        if batch[0].is_waited_for or not goes_together:
             return batch
         # by index:  the program's thread may add as this runs, which iterating doesn't allow
         for index in range(1, min(count, MOST_AT_ONCE)):
@@ -150,21 +162,28 @@ class PlaceQueue:
             batch.append(sending)
         return batch
 
-    def _send(self, batch: list[Sending]) -> None:
-        """SIDE EFFECT:  `batch` sent as one `apply()`.
+    def _send(self, batch: list[Sending]) -> int:
+        """SIDE EFFECT:  `batch` sent as one `apply()`:  how many of it, from the first, are over.
 
-        - Sent again, each alone, only when the place says it kept none of it (`PlaceError.has_kept_nothing`).
+        - From a place that makes all or none, sent again, each alone, only when it says it kept none of it
+          (`PlaceError.has_kept_nothing`).
+        - From a place that says what it kept (`PlaceError.kept`):  those are over, and so is the one it failed;
+          the rest it never tried, so they aren't over.
         - Any other error is each one's failure:  there's no telling whether it was sent.
         """
         try:
             self.behind.apply([change for sending in batch for change in sending.changes])
         except Exception as error:
-            if len(batch) > 1 and isinstance(error, PlaceError) and error.has_kept_nothing:
-                for sending in batch:
-                    self._send([sending])
-                return
+            if len(batch) > 1 and isinstance(error, PlaceError):
+                if self.behind.makes_all_or_none and error.has_kept_nothing:
+                    for sending in batch:
+                        self._send([sending])
+                    return len(batch)
+                if self.behind.says_what_it_kept and error.kept is not None:
+                    return _over_after(batch, error, error.kept)
             for sending in batch:
                 sending.error = error
+        return len(batch)
 
     def hear(self) -> None:
         """SIDE EFFECT:  each send that's over is heard:  kept, or reported.  On the program's thread only."""
@@ -175,3 +194,20 @@ class PlaceQueue:
                     self.report(sending)
             elif sending.when_kept:
                 sending.when_kept()
+
+
+def _over_after(batch: list[Sending], error: Exception, kept: int) -> int:
+    """SIDE EFFECT:  in `batch`, the sending holding the change after the first `kept` failed with `error`.
+
+    - How many are over:  those kept, and that one.  The rest were never tried.
+    - `kept` past the last change:  every one failed, as nothing says which.
+    """
+    changes_before = 0
+    for index, sending in enumerate(batch):
+        changes_before += len(sending.changes)
+        if changes_before > kept:
+            sending.error = error
+            return index + 1
+    for sending in batch:
+        sending.error = error
+    return len(batch)
