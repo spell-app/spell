@@ -42,6 +42,9 @@ const FIELDS_REMEMBERED = 10_000
 /** How often it pings its sockets, in seconds:  a sleeping laptop or a proxy doesn't drop them. */
 const PING_SECONDS = 30
 
+/** How often a room asks again whether each page in it may still read it (`RefereeProps.mayStay`):  every 30 seconds. */
+export const ROOM_RECHECK_SECONDS = 30
+
 /** The header `Guard` reads the token from. */
 const TOKEN_HEADER = "x-server-token"
 
@@ -65,6 +68,8 @@ type ProgramVersion = {
 export type RoomMember = {
   /** It sent this. */
   receive(text: string): void
+  /** What closes its connection, when the room lets it go (`Referee.checkWhoMayStay()`):  a socket's. */
+  closeWith(closeIt: () => void): void
   /** It's gone. */
   leave(): void
 }
@@ -114,6 +119,9 @@ export type RoomMember = {
  *     and nothing's kept across a restart, as the pages say it again.
  *   - A page running what isn't that is told to reload, and what it sends is "no answer":  kept there, not lost, for after.
  *   - A page that says no version:  never out of date.
+ * - WHO MAY STAY (`mayStay`, epic `data` I153):  whether a page may still read the room is asked again, not only as it
+ *   joins:  every `ROOM_RECHECK_SECONDS`, and at once when its host says the members changed (`checkWhoMayStay()`).
+ *   A page that may not is let go, its socket closed;  coming back, it's refused as it joins.
  * - NOT `StateMirror` (`spell/parser/core/state`), which it doesn't grow from:  see the docstring there.
  * - Node only.  Knows nothing of what a place is, or of Things.
  ****************/
@@ -165,11 +173,16 @@ export class Referee {
   private queue: Promise<unknown> = Promise.resolve()
   /** What stops hearing the store. */
   private readonly stops: (() => void)[] = []
+  /** Whether a page may still be here, by who it writes as:  `RefereeProps.mayStay`. */
+  private readonly mayStay: RefereeProps["mayStay"]
+  /** What closes each page's connection, for those that came by a socket. */
+  private readonly closers = new Map<(text: string) => void, () => void>()
 
-  constructor({ path, place, collections, guard, actions = {}, signIn, identityOf }: RefereeProps) {
+  constructor({ path, place, collections, guard, actions = {}, signIn, identityOf, mayStay }: RefereeProps) {
     this.path = path
     this.signIn = signIn
     this.identityOf = identityOf
+    this.mayStay = mayStay
     this.place = place
     this.collections = collections
     this.guard = guard
@@ -201,12 +214,41 @@ export class Referee {
       }
     }
     this.copy.replaceWith(snapshot)
+    if (this.mayStay)
+      this.stops.push(every(ROOM_RECHECK_SECONDS, () => void this.checkWhoMayStay(), { inBackground: true }))
     return this
   }
 
   /** Stop hearing the store.  Its sockets are its server's to close. */
   close(): void {
     this.stops.splice(0).forEach((stop) => stop())
+  }
+
+  /**
+   * Ask again whether each page here may still read the room (`mayStay`), and let go of those that may not:
+   * their connection closes (epic `data` I153).
+   * - Its host calls it as members change, or a space is taken down;  it runs by itself every `ROOM_RECHECK_SECONDS`.
+   * - Returns how many it let go.
+   * - NEVER throws:  a check that fails keeps the page, and is logged.
+   */
+  async checkWhoMayStay(): Promise<number> {
+    const { mayStay } = this
+    if (!mayStay) return 0
+    let letGo = 0
+    for (const [send, closeIt] of [...this.closers]) {
+      try {
+        if (await mayStay(this.writers.get(send) ?? this.signedIn.get(send))) continue
+      } catch (ignored) {
+        console.error(
+          `Referee.checkWhoMayStay():  couldn't ask whether a page may stay in ${this.path};  it stays`,
+          ignored
+        )
+        continue
+      }
+      letGo++
+      closeIt()
+    }
+    return letGo
   }
 
   /** Every row of `collection`, page after page. */
@@ -246,6 +288,7 @@ export class Referee {
     )
     const listeners = { onText: (text: string) => member.receive(text), ...(protocol && { protocol }) }
     if (!SRV.acceptWebSocket(raw, socket, listeners)) return member.leave()
+    member.closeWith(() => socket.destroy())
     const stopPinging = every(PING_SECONDS, () => {
       if (!socket.destroyed) socket.write(SRV.pingFrame())
     })
@@ -300,7 +343,9 @@ export class Referee {
     if (identity) this.writers.set(send, identity)
     return {
       receive: (text) => this.heard(text, send),
+      closeWith: (closeIt) => void this.closers.set(send, closeIt),
       leave: () => {
+        this.closers.delete(send)
         this.members.delete(send)
         this.signedIn.delete(send)
         this.writers.delete(send)
@@ -717,6 +762,12 @@ export type RefereeProps = {
    * - throws to refuse the page, its message the reason
    */
   identityOf?: (request: SRV.Request) => string | undefined
+  /**
+   * May a page that writes as `identity` (`undefined`:  nobody signed in) still read the room?  Asked again after it
+   * joined, so someone taken off the space's list, or a space taken down, stops hearing it (epic `data` I153).
+   * - Left out:  whoever joined stays.
+   */
+  mayStay?: (identity: string | undefined) => Promise<boolean>
 }
 
 /** One batch to make:  what it changes, who sent it, who it's written as, and what it answers. */

@@ -716,3 +716,23 @@ describe("a batch sent again, holding more than the one before it", () => {
     place.close()
   })
 })
+
+describe("who may stay (I153)", () => {
+  test("a page whose person may no longer read the room is let go, its connection closed;  the rest stay", async () => {
+    const readers = new Set(["ana@rs", "bo@rs"])
+    const referee = await new Referee({
+      path: "/api/rooms/recipes",
+      place: new MemoryPlace({ collections: { recipes: [] } }),
+      collections: { recipes: {} },
+      guard: new SRV.Guard({ token: "t" }),
+      mayStay: async (identity) => identity !== undefined && readers.has(identity)
+    }).open()
+    const closed: string[] = []
+    for (const person of ["ana@rs", "bo@rs"]) referee.join(() => {}, person).closeWith(() => closed.push(person))
+    expect(await referee.checkWhoMayStay()).toBe(0)
+    readers.delete("bo@rs")
+    expect(await referee.checkWhoMayStay()).toBe(1)
+    expect(closed).toEqual(["bo@rs"])
+    referee.close()
+  })
+})
