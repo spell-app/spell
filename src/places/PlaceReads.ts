@@ -112,6 +112,13 @@ export class PlaceReads {
     }
   }
 
+  /** Forget what's kept of `placeName`'s released reads that `isOutOfDate` says no longer stand:  their next reader asks again. */
+  forgetReleased(placeName: string, isOutOfDate: (kept: ReleasedRead) => boolean): void {
+    for (const [asked, kept] of [...this.released]) {
+      if (kept.placeName === placeName && isOutOfDate(kept)) this.released.delete(asked)
+    }
+  }
+
   /** Everyone reading from `placeName` now:  including one whose last read failed, as it's still waiting for rows. */
   readersOf(placeName: string): PlaceResult[] {
     return [...this.readOfReader].filter(([, read]) => read.placeName === placeName).map(([reader]) => reader)

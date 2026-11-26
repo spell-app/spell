@@ -321,3 +321,30 @@ describe("where someone else's change lands", () => {
     expect((soups.items as InstanceType<typeof Recipe>[]).map(({ id }) => id)).toEqual(["r1", "r3"])
   })
 })
+
+describe("after my own save (Q5)", () => {
+  test("a list on screen its place sorted itself is asked again once, and shows the new order", async () => {
+    const place = new MemoryPlace({ capabilities: WITH_IDS })
+    await place.apply([
+      { kind: "insert", collection: "recipes", id: "r1", fields: { id: "r1", title: "Apple pie" } },
+      { kind: "insert", collection: "recipes", id: "r2", fields: { id: "r2", title: "Bread" } }
+    ])
+    const { Recipe, someoneElse } = program(place)
+    let letGo = () => {}
+    const sorted = await createRoot((dispose) => {
+      letGo = dispose
+      return core.savedThings(Recipe, { sort: [{ field: "title" }] })
+    })
+    const plain = await core.savedThings(Recipe)
+    const lists = vi.spyOn(place, "list")
+    const [apple] = sorted.items as InstanceType<typeof Recipe>[]
+    apple!.title = "Zucchini bread"
+    await vi.waitFor(() => expect(lists).toHaveBeenCalledTimes(1))
+    await settled()
+    expect((sorted.items as InstanceType<typeof Recipe>[]).map(({ id }) => id)).toEqual(["r2", "r1"])
+    expect(lists.mock.calls[0]![1]).toMatchObject({ sort: [{ field: "title" }] })
+    expect(someoneElse).toEqual([])
+    expect(plain.items).toHaveLength(2)
+    letGo()
+  })
+})

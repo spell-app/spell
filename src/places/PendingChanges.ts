@@ -881,6 +881,12 @@ export class PendingChanges {
     const isByChange = rows.length === written.length
     const renamed = isByChange ? this.renameMade(written, rows) : []
     this.noteSaved(batch, renamed)
+    if (!this.placeAside) {
+      this.places.tellSaved({
+        placeName: this.placeName,
+        collections: [...new Set(batch.map(({ collection }) => collection))]
+      })
+    }
     const { idField } = this
     const place = this.placeNow
     for (const change of written) {
