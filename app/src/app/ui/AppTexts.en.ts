@@ -1008,6 +1008,9 @@ export const APP_TEXTS = {
   buildStepReading: "Reading your project…",
   buildStepCompiling: "Getting it ready…",
   buildStepStarting: "Starting it…",
+  // the editor's loading screen, opening a project until it runs (epic `editor` T176):  its own steps, around those
+  openingProject: "Opening {project}…",
+  openingChecking: "Checking your code…",
   buildMistakes: "This app has mistakes, so it can't run yet.",
   buildMistakesOpen: "Open it in the editor",
 

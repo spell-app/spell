@@ -91,9 +91,8 @@ render(
 // The hero over the page goes once what holds it is ready:  the bar and the code, on the editor's pages.
 PageLoading.start()
 
-// While a project it opens waits on a build (an import not built yet), the hero says each step, and stays:
-// the page server tells them over its live channel (epic `editor` P45).  Not in the static build, which has none.
-if (!isStaticBuild) {
-  joinLiveChannel()
-  stepsOnLoadingScreen()
-}
+// The hero says each step of opening a project, and stays until it runs (epic `editor` P45, T176):
+// the editor's own, and a build on the page server it waits on, told over its live channel;
+// the static build has no live channel, so only the editor's own
+stepsOnLoadingScreen({ opening: () => editor.opening, waitsOn: (projectId) => editor.waitsOnBuildOf(projectId) })
+if (!isStaticBuild) joinLiveChannel()

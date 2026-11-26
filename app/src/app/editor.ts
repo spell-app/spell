@@ -279,9 +279,17 @@ export class EditorStore extends Observable {
       editor.clearCompileAppSoon()
       // remember this project was selected for projectRoot
       editor.lastProjectForRoot(location.projectRoot, projectPath)
-      await project.load(undefined)
+      // the loading screen says each step, until it runs (`opening`)
+      editor.noteOpening(project, "opening")
+      try {
+        await project.load(undefined)
+      } catch (error) {
+        editor.openingDone(project)
+        throw error
+      }
       // another project was picked while this one loaded:  that one shows, not this
       if (comingProject !== project) return
+      editor.noteOpening(project, "reading")
     }
 
     // Figure out which file to show, using pref if not specified in `path`
@@ -294,7 +302,10 @@ export class EditorStore extends Observable {
     // TODO: what if no file???
 
     const file: EditorFile | undefined = project.getFile(filePath)
-    if (!file) throw new Error(`editor.selectPath('${path}'): no file found for '${filePath}'.`)
+    if (!file) {
+      editor.openingDone(project)
+      throw new Error(`editor.selectPath('${path}'): no file found for '${filePath}'.`)
+    }
     // if we landed on something else other than the original path, navigate to it --
     // but not in Run showing a site's page:  its URL names that page (`RunSite`, epic `mockup` P2)
     // the site editor's URL names the project, whichever file is shown (epic `mockup` P4)
@@ -589,6 +600,7 @@ export class EditorStore extends Observable {
       // off the page's thread, where the language worker has every edit (epic `solid-2-final` P18);  what it wrote is
       // kept in the compile cache for a reload, under the key of the text it compiled:  only when nothing was typed
       // while it compiled, so the key before and after agree (I57)
+      if (editor.opening?.projectId === project.projectId) editor.noteOpening(project, "checking")
       const keyBefore = editor.compileElsewhere ? await project.compileCacheKey() : undefined
       const elsewhere = await editor.compileElsewhere?.(project)
       const cacheKey = elsewhere && keyBefore && (await project.compileCacheKey()) === keyBefore ? keyBefore : undefined
@@ -621,10 +633,13 @@ export class EditorStore extends Observable {
           output.groupEnd()
         }
 
+        if (editor.opening?.projectId === project.projectId) editor.noteOpening(project, "starting")
         await editor.executeCompiledApp()
       }
     } finally {
       output.groupEnd()
+      // running, or nothing to run:  the loading screen can go (`opening`)
+      editor.openingDone(project)
     }
   }
 
@@ -730,6 +745,47 @@ export class EditorStore extends Observable {
 
   /** Does the next run start afresh?  Set by `restartApp()`, and cleared as the run starts. */
   startAfresh = false
+
+  /**
+   * How far the editor's got opening a project, until it runs:  the loading screen says it (`stepsOnLoadingScreen()`,
+   * epic `editor` P45, T176);  `undefined`:  nothing's being opened.
+   * - Set by `selectPath()` as a project is picked, then by its first `compileApp()`, which clears it once the
+   *   program has started (or has nothing to run).
+   * - Every project picked has one, but only the first is seen:  the loading screen has gone by the second.
+   */
+  @prop()
+  accessor opening: OpeningStep | undefined
+
+  /** Say how far opening `project` has got:  `opening`'s next step. */
+  noteOpening(project: SP.SpellProject, step: OpeningStepName): void {
+    editor.opening = { step, projectId: project.projectId, projectName: project.projectName ?? project.projectId }
+  }
+
+  /** Opening `project` is done (or failed):  `opening` goes, unless it's another project's by now. */
+  openingDone(project: SP.SpellProject): void {
+    if (editor.opening?.projectId === project.projectId) editor.opening = undefined
+  }
+
+  /**
+   * Does the project being opened, or the one open, wait on a build of `projectId`:  it, or one it imports,
+   * through other projects too?
+   * - The loading screen counts only these builds:  another tab opening another project builds others.
+   * - A project not loaded yet imports nothing:  its imports are read from its project file, once loaded.
+   */
+  waitsOnBuildOf(projectId: string): boolean {
+    const opened = editor.opening?.projectId ?? editor.project?.projectId
+    if (!opened) return false
+    const seen = new Set<string>()
+    const next = [opened]
+    while (next.length) {
+      const id = next.pop()!
+      if (id === projectId) return true
+      if (seen.has(id)) continue
+      seen.add(id)
+      next.push(...new SP.SpellProject(id).projectImports.map((it) => it.projectId))
+    }
+    return false
+  }
 
   /**
    * Why the program's last edit needs a restart to show, for the console's sake:  `undefined`:  no edit's waiting.
@@ -3155,3 +3211,22 @@ async function fetchCodeFile(module: string): Promise<string> {
  * - `"as typing pauses"`:  `compileAppSoon()`;  neither
  */
 export type CompileWay = "on purpose" | "as typing pauses"
+
+/**
+ * A step of the editor opening a project, in order (`editor.opening`):
+ * - `opening`:  picked, its project file loading
+ * - `reading`:  its files loading
+ * - `checking`:  compiling, in the language worker
+ * - `starting`:  compiled, the program starting
+ */
+export type OpeningStepName = "opening" | "reading" | "checking" | "starting"
+
+/** How far the editor's got opening a project:  `editor.opening`. */
+export type OpeningStep = {
+  /** How far. */
+  step: OpeningStepName
+  /** The project, by its address, e.g. `@spell/examples/Solitaire`. */
+  projectId: string
+  /** Its name, as the loading screen says it, e.g. `Solitaire`. */
+  projectName: string
+}

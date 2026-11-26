@@ -13,7 +13,8 @@
  * - `compiling`:  the compile has read the project, and is compiling it
  * - `checking`:  compiled, and being checked (its TypeScript, its scope pack)
  * - `built`:  done, its file there
- * - `mistakes`:  done, but the project has mistakes, so its file isn't there
+ * - `mistakes`:  done, but the project has mistakes:  its files are written all the same (epic `editor` J350),
+ *   so a run that then fails says the project has mistakes, rather than that it isn't there
  * - The page adds its own last one, starting it, once it has the file:  the server never sends that.
  */
 export type BuildStepName = (typeof BUILD_STEPS)[number]

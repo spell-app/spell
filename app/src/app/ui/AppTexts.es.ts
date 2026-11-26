@@ -959,6 +959,8 @@ const APP_TEXTS_ES: AppTextPack = {
   buildStepReading: "Leyendo tu proyecto…",
   buildStepCompiling: "Preparándolo…",
   buildStepStarting: "Iniciándolo…",
+  openingProject: "Abriendo {project}…",
+  openingChecking: "Revisando tu código…",
   buildMistakes: "Esta app tiene errores, así que todavía no puede funcionar.",
   buildMistakesOpen: "Ábrela en el editor",
 
