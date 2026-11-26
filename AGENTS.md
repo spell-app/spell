@@ -348,13 +348,22 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 ## The page server
 
 - ONE page server, the KIT's, started from the kit's root only:  `spell server start | status | stop`.
-- The SERVER KEEPER (epic `epic-engine` P82):  the epic hub keeps every project's servers up, and is the only one that
-  starts, stops or restarts a MAIN checkout's (`ServerKeeper`;  [epic's AGENTS.md](epic/AGENTS.md)).
+- The SERVER KEEPER:  ONE program per Mac keeps every project's servers up, and is the only one that starts, stops or
+  restarts a MAIN checkout's (`ServerKeeper`).
+  - It's Spell's since epic `editor` P48, the kit's [spell/server/keeper](src/server/keeper/index.ts):
+    `spell keeper start | ensure | add | status`, its list `~/.spell/keeper.json5` (each main checkout's
+    `spell server start` adds it;  `spell keeper add` registers a project's own server), its worktrees from git.
+  - The epic hub still runs it until epic `epic-engine` hands over (its P85, request r99:  the hub runs
+    `spell keeper ensure --take-over`);  the record (`~/.spell/server-keeper.json`) names which keeper wrote it, and a
+    keeper that finds another live one in charge stands aside, so one is always keeping.
   - Every session's start makes sure it runs, and has it look at once;  it looks again every 10 seconds.
   - `spell server start | stop`, `epic merge`'s restart, the side bar's Restart Page Server and `/airplane` ask it
     (`SRV.KeeperLink`);  `spell server stop` in the main checkout leaves it stopped until Start.
   - **An agent never starts, stops, restarts or kills a main checkout's servers by hand:  `epic servers
     start|stop|restart|status <server>` asks the keeper** (epic `epic-engine` P84).  Enforced twice:
+    - `spell server start | stop | restart | status <server>` asks it the same way (epic `editor` P48):  `page-server`,
+      `editor`, or a registered one;  the guard lets it through once epic `epic-engine` P85 lands, and `epic servers`
+      becomes another name for it
     - the COMMAND GUARD, the epic plugin's `PreToolUse` hook on Bash (`server-guard.mjs`, `ServerGuard`), Claude Code's
       and Codex's:  such a command is refused, naming the `epic servers` command to run instead;  let through while
       the Servers tab's hands-off switch is on
@@ -368,7 +377,8 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   - A worktree's page server and editor keep ONE port each, written down (`SRV.PortBook`), and stop after 30 minutes
     unused.
   - The top bar's Servers tab shows them all, what just reached `main`, and what waits;  a red dot when one is down.
-  - A project's own servers (a proxy server, say):  its `.epic/config.json5`'s `servers`.
+  - A project's own servers (a proxy server, say):  its `.epic/config.json5`'s `servers` (the hub's keeper), or
+    `spell keeper add <name> --check <url | port> [--start "<command>"]` (Spell's).
 - Each big folder declares ITS OWN part of its settings in its folder manifest, `"pageServer"`, paths from its folder.
 - The Epic repo's part is its `page-server.json5`:  the site's tabs, the writable folders, what's `gone`.
 - Merged:  the kit's, the epic repo's, each folder's (`workspaces` order), each peer `repos.json5` names

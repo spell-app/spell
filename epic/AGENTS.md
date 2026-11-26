@@ -103,7 +103,9 @@ a folder of the kit `spell`.
 - Removing a worktree stops its page and vite servers FIRST (`CheckoutServers`, epic `epic-engine` I53):
   - `epic worktree remove <name>`, never a bare `git worktree remove`, in the skills and anything new
   - the worktree hook and `epic worktree move` do it themselves;  the session-start hook stops the rest, hourly
-- The epic server, the hub, is also the SERVER KEEPER (epic `epic-engine` P82;  [ServerKeeper.ts](src/server/ServerKeeper.ts)):
+- The epic server, the hub, is also the SERVER KEEPER (epic `epic-engine` P82;  [ServerKeeper.ts](../src/server/keeper/ServerKeeper.ts),
+  the kit's since epic `editor` P48, which the hub hands its repos, their settings and its facts;  it stands aside while
+  Spell's own keeper, `spell keeper start`, is in charge, until epic `epic-engine` P85 takes it out of the hub):
   - every repo's main page server kept up on main's code, each worktree's page server stopped after 30 minutes unused,
     and the repo's own servers (its `.epic/config.json5`'s `servers`:  a name, a URL or port to check, and a `start`
     command if it wants Start and Restart) watched and started
@@ -124,7 +126,8 @@ a folder of the kit `spell`.
       epic `epic-engine` P84), the calls the Servers tab's buttons make;  the guard above refuses the other ways
     - what it starts carries its mark (`SPELL_KEEPER_START`), so main's page server and editor, which refuse an
       agent's start (`SRV.KeeperLink.refusedStart()`), know it was the keeper
-  - a stop by hand is held until Start (`~/.spell-epic/server-keeper.json`);  its own code changing, it hands over to a
+  - a stop by hand is held until Start (`~/.spell/server-keeper-holds.json` since epic `editor` P48, kept in step with
+    the old `~/.spell-epic/server-keeper.json`, which the command guard still reads);  its own code changing, it hands over to a
     fresh hub on its port
   - the page server's certificate WATCHED (epic `epic-engine` T164):  each look compares its two files
     (`~/.spell/localhost/`, `HttpsSwitch.filesStamp`) with the last;  made, made again or deleted (the tab's card, or
