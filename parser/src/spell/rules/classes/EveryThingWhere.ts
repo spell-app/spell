@@ -1,3 +1,4 @@
+import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { getWhereMethod, getWhereScope } from "spell/parser/spell/rules/lists/lists.shared"
@@ -10,7 +11,15 @@ import {
   searchesOf,
   type OwnList
 } from "spell/parser/spell/rules/places/places.shared"
-import { canNeverBeTrue, EveryThing, handedFilterOf, handedSearchOf } from "./EveryThing"
+import { canNeverBeTrue, EveryThing, handedPartsOf } from "./EveryThing"
+
+/** What `, filtered here` notes on the read it follows (`ListFilteredHere`):  nothing's asked of the place. */
+export type FilteredHereData = { filteredHere?: boolean }
+
+/** Declared, so a subclass's `@proto` reads its own. */
+export interface EveryThingWhere {
+  stopsEarly: boolean
+}
 
 /** How far in a type's name can start:  Spanish's `todas las recetas donde`. */
 const WORDS_TO_THE_TYPE = 3
@@ -25,6 +34,9 @@ const WORDS_TO_THE_TYPE = 3
  * - Compiles to `core.filter(core.everyThing(Recipe), (recipe) => ...)`.
  */
 export class EveryThingWhere extends SpellExpression<"type|where|body?", { own?: OwnList }> {
+  /** Does its read stop at the first that pass, and so warn of nothing it checks here:  `FirstThingWhere`'s. */
+  @proto static stopsEarly = false
+
   /** A list of the type, e.g. `list of recipes`:  as `every_thing`. */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
     return P.listOf(SP.typeName(`${match.groups.type.value}`))
@@ -51,7 +63,8 @@ export class EveryThingWhere extends SpellExpression<"type|where|body?", { own?:
     // `every recipe` is of the type, whatever else is called `recipe`
     match.data.own = SP.singularIn(scope, words) === words ? undefined : ownListOf(scope, words)
     if (!match.data.own && !EveryThing.kindOf(type)) return undefined
-    EveryThingWhere.warnAboutWhere(match, type, () => this.predicateOf(match))
+    if (!this.stopsEarly) EveryThingWhere.warnAboutWhere(match, type, () => this.predicateOf(match))
+    else if (savedPlaceOfMatch(type)) EveryThing.refusedUnlessSearched(match, type, () => this.predicateOf(match))
     return match
   }
 
@@ -61,23 +74,38 @@ export class EveryThingWhere extends SpellExpression<"type|where|body?", { own?:
   }
 
   /**
-   * SIDE EFFECT:  a warning, for a `where` on a saved type that can't go to its place:  it's done here, up to a ceiling.
+   * SIDE EFFECT:  a warning, for a `where` on a saved type that can't all go to its place:  it's done here, up to a ceiling.
+   * - A web server's list (epic `data`, the filters phase):  an error, naming each clause its list can't be asked
+   *   (`EveryThing.clausesStayingIn()`), unless the read says how it's done:  `, filtered here` (`ListFilteredHere`),
+   *   or `the first N ... where`, a rule of its own.  A read on the Spell server is opted into, never fallen into.
+   * - Any other place:  a warning, when none of it can go.
    * - None when a search can go instead (`it searches names with "search"`):  the server narrows what's read.
    * - `predicate`:  the test, made when the warnings are gathered.
    */
   static warnAboutWhere(match: P.Match, type: P.Match, predicate: () => P.ASTMethodDefinition): void {
     const { scope } = match
-    const message = SP.Language.of(scope).parserMessage("where-looks-through", {
-      type: SP.singularIn(scope, `${type.raw}`.trim())
-    })
+    const language = SP.Language.of(scope)
+    const words = `${type.raw}`.trim()
+    const isFilteredHere = () => !!(match.data as FilteredHereData).filteredHere
+    const isWebServer = () => savedPlaceOfMatch(type)?.placeType.placeKind === "web server"
+    const message = language.parserMessage("where-looks-through", { type: SP.singularIn(scope, words) })
     SP.SpellWarnings.noteIf(match, message, () => {
       const saved = savedPlaceOfMatch(type)
-      if (!saved) return false
-      const where = predicate()
-      return !handedFilterOf(where) && !handedSearchOf(where, searchesOf(saved)?.fields ?? []).length
+      if (!saved || isWebServer() || isFilteredHere()) return false
+      const parts = handedPartsOf(predicate(), searchesOf(saved)?.fields ?? [])
+      return !parts?.filter.length && !parts?.search.length
     })
-    // given only to a search:  this `where` has to be one
+    const staying = () => EveryThing.clausesStayingIn(type, predicate())
+    const stays = () =>
+      language.parserMessage("where-stays-here", {
+        clauses: (staying() ?? []).join(", "),
+        types: P.pluralize(words)
+      })
+    // given only to a search:  this `where` has to be one, and that refusal is the one said
     if (savedPlaceOfMatch(type)) EveryThing.refusedUnlessSearched(match, type, predicate)
+    // its own spot, the `where`:  one refusal a spot, and the whole read's is the search's
+    const where = (match.groups as { where?: P.Match }).where ?? match
+    SP.SpellWarnings.refuseIf(match, stays, () => !isFilteredHere() && !!staying(), where)
     const never = SP.Language.of(scope).parserMessage("never-both")
     SP.SpellWarnings.noteIf(match, never, () => canNeverBeTrue(predicate().body))
   }
@@ -91,7 +119,9 @@ export class EveryThingWhere extends SpellExpression<"type|where|body?", { own?:
         args: [ownListAST(match, own), this.predicateOf(match)]
       })
     }
-    const handed = EveryThing.savedAST(match, type, { predicate: this.predicateOf(match) })
+    // `, filtered here` may come after a sort:  the read is made checked here itself, so the sort is done here too
+    const filteredHere = !!(match.data as FilteredHereData).filteredHere
+    const handed = EveryThing.savedAST(match, type, { predicate: this.predicateOf(match), filteredHere })
     if (handed) return handed
     return new P.ASTCoreMethodInvocation(match, {
       methodName: "filter",

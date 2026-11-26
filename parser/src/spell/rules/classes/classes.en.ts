@@ -22,6 +22,8 @@ import { DimensionUnit } from "./DimensionUnit"
 import { OutlineSpecifierMeasure } from "./OutlineSpecifierMeasure"
 import { OutlineSpecifierPercent } from "./OutlineSpecifierPercent"
 import { OutlineSpecifierMedia } from "./OutlineSpecifierMedia"
+import { OutlineSpecifierSort, PageSortBy } from "./OutlineSpecifierSort"
+import { SORT_ORDER_WORDS } from "spell/parser/spell/rules/lists/sortOrderWords"
 import { CreateThing } from "./CreateThing"
 import { CreateType } from "./CreateType"
 import { CSSBlock } from "./CSSBlock"
@@ -2036,6 +2038,23 @@ classes.addRule(OutlineSpecifierMedia, {
   tests: [{ tests: [[`a sound at "sounds/slide.mp3"`, `core.media("sound", "sounds/slide.mp3")`]] }]
 })
 
+// a sort a page holds, and where it starts:  `its "order" is a sort:  completion, newest first` -- a read sorted by it
+// follows it, and a table's header click sets it -- before `a {type}`, which would make `sort` a type of its own
+classes.addRule(PageSortBy)
+
+classes.addRule(OutlineSpecifierSort, {
+  syntax: `a sort :? {by:page_sort_by} (, ${SORT_ORDER_WORDS.en})?`,
+  tests: [
+    {
+      tests: [
+        ["a sort:  completion, newest first", 'core.sort("completion", true)'],
+        ["a sort: created at", 'core.sort("created at")'],
+        ["a sort: name, a-z", 'core.sort("name")']
+      ]
+    }
+  ]
+})
+
 // a percent, kept as its fraction:  `its "tip" is a percent`, `<property "tip" type="percent">18%</>` (epic `language` P34)
 // -- before `a {type}`, which would make `percent` a type of its own
 classes.addRule(OutlineSpecifierPercent, {
@@ -3301,11 +3320,13 @@ classes.addRule(FirstThingWhere, {
       tests: [
         [
           "the first suite record where its rank is 1",
-          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord.rank === 1), 0)"
+          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord.rank === 1), 0)",
+          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord: SuiteRecord) => suiterecord.rank === 1), 0)"
         ],
         [
           "the first suite record which is not 1",
-          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord !== 1), 0)"
+          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord !== 1), 0)",
+          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord: SuiteRecord) => suiterecord !== 1), 0)"
         ]
       ]
     }

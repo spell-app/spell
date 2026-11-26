@@ -7,6 +7,7 @@ import {
   MovedVersions,
   PlaceError,
   type ApplyAnswer,
+  type FieldAbility,
   type ListAnswer,
   type ListHandled,
   type ListQuery,
@@ -18,6 +19,7 @@ import {
   type PlaceErrorKind,
   type PlaceRow,
   type SelectingContext,
+  type SortField,
   type WriteAnswer,
   type WriteKind,
   type WriteQuestion
@@ -145,6 +147,12 @@ export class RestPlace extends WebPlace implements Place {
   private readonly namesLike: NameStyle | undefined
   /** The query parameter it searches with, and which of our fields it searches. */
   private readonly searches: RestSearch | undefined
+  /** The orders it has a name of its own for, for every list. */
+  private readonly sortOrders: readonly RestSortOrder[]
+  /** How every list is asked which way round a sort goes:  `RestAsks.sortDirections`, a list's own winning. */
+  private readonly sortDirections: RestAsks["sortDirections"]
+  /** What every list calls a filter's field and value:  `RestAsks.filteredWith`, a list's own winning. */
+  private readonly filteredWith: RestAsks["filteredWith"]
   /** Each collection's field names, made when it's first used. */
   private readonly fieldNames = new Map<string, FieldNames>()
   /** Fields a program named for a collection after it was made:  `addFields()`. */
@@ -164,11 +172,17 @@ export class RestPlace extends WebPlace implements Place {
     operations,
     namesLike,
     searches,
+    sortOrders = [],
+    sortDirections,
+    filteredWith,
     ...rest
   }: RestPlaceProps) {
     super(rest)
     this.namesLike = namesLike
     this.searches = searches
+    this.sortOrders = sortOrders
+    this.sortDirections = sortDirections
+    this.filteredWith = filteredWith
     this.operations = operations ?? {}
     this.collections = collections
     this.allCollections = allCollections
@@ -198,6 +212,13 @@ export class RestPlace extends WebPlace implements Place {
   /** What it can do. */
   describe(): PlaceCapabilities {
     return this.capabilities
+  }
+
+  /** Which parts of `query` it would do itself, for `collection`:  what `list()` would say it `handled`. */
+  takes(collection: string, query: ListQuery): ListHandled {
+    const handled: ListHandled = {}
+    this.paramsFor(collection, query, handled)
+    return handled
   }
 
   /**
@@ -398,9 +419,21 @@ export class RestPlace extends WebPlace implements Place {
       withAsked(this.noted(collection, this.rowOf(collection, row)), askedValues)
     )
     if (query.under) this.noteReadUnder(collection, query.under, read)
+    const total = isOne
+      ? undefined
+      : totalIn(body, response, {
+          rowsAt,
+          rows: rows.length,
+          // told no count, a page is as long as the server makes it:  this first one, full
+          size: paging.sendsNoCount ? rows.length : size,
+          isFirst: !at,
+          nextPage,
+          lastPageOf: page === "offset" && !paging.pagesByLastId ? pageAt(paging) : undefined
+        })
     return {
       rows: read,
       ...(nextPage !== undefined && { nextPage }),
+      ...total,
       ...(kept.length < wanted.length && {
         notes: [
           `"${collection}" answered ${wanted.length} rows, and only the first ${mostRows} are kept:  ask for less, or raise its \`ceiling\``
@@ -533,18 +566,41 @@ export class RestPlace extends WebPlace implements Place {
     }
   }
 
-  /** The filter, sort and selection of `query` that it can do, as URL params.  Notes what it did in `handled`. */
+  /**
+   * The filter, search, sort and selection of `query` that it can do, as URL params.  Notes what it did in `handled`.
+   * - Each by what `collection` takes, said under its own line (`RestCollection.asks`), else by what the place takes.
+   * - A filter goes in parts:  each field it takes is sent, and `handled.filter` only when that's all of them.
+   *   The engine checks the rest over what comes back:  the server's narrowed it.
+   * - A sort it has a name for goes as that name (`RestSortOrder`):  `?order_by=recency`, newest first only;
+   *   the other way round, the engine sorts by its field (`sortFieldsOf()`).
+   */
   private paramsFor(collection: string, query: ListQuery, handled: ListHandled): Record<string, unknown> {
     const { filter = {}, search = {}, sort = [], select } = query
-    const { filter: canFilter, sort: canSort, select: canSelect, idOf } = this.capabilities
+    const { select: canSelect, idOf } = this.capabilities
+    const { filter: canFilter, sort: canSort, sortParam, sortOrders, sortDirections } = this.asksOf(collection)
+    const filteredWith = this.mappingOf(collection).asks?.filteredWith ?? this.filteredWith
     const data: Record<string, unknown> = {}
     const filtering = Object.keys(filter)
     const { askedBy } = this.mappingOf(collection)
     // what it's asked for by goes as the query:
     // the server's answer is the one for those values, whatever it says it holds
-    if (filtering.length && (canDoAll(canFilter, filtering) || isAskedBy(askedBy, filtering))) {
+    if (filteredWith && filtering.length && !isAskedBy(askedBy, filtering)) {
+      // a field and its value, two questions:  one field at a time, the rest the engine's
+      const taken = filtering.find((field) => canDoAll(canFilter, [field]))
+      if (taken !== undefined) {
+        const [sent] = Object.entries(this.onTheWire(collection, pickedFrom(filter, [taken])))
+        if (sent) {
+          data[filteredWith.field] = sent[0]
+          data[filteredWith.value] = sent[1]
+        }
+        if (filtering.length === 1) handled.filter = true
+      }
+    } else if (filtering.length && (canDoAll(canFilter, filtering) || isAskedBy(askedBy, filtering))) {
       Object.assign(data, this.onTheWire(collection, filter))
       handled.filter = true
+    } else if (filtering.length) {
+      const taken = filtering.filter((field) => canDoAll(canFilter, [field]))
+      if (taken.length) Object.assign(data, this.onTheWire(collection, pickedFrom(filter, taken)))
     }
     // one parameter, so one field's text:  two at once stay the engine's
     const searching = Object.values(search)
@@ -553,16 +609,30 @@ export class RestPlace extends WebPlace implements Place {
       data[searches.param] = searching[0]
       handled.search = true
     }
-    if (
+    const named = sort.length === 1 ? namedSortFor(sortOrders, sort[0]!) : undefined
+    // a sort it has a name for, asked the other way round:  by its field, if it sorts by that
+    const fields = this.sortFieldsOf(collection, sort)
+    if (named) {
+      data[sortParam] = named.as
+      handled.sort = true
+    } else if (
       sort.length &&
       canDoAll(
         canSort,
-        sort.map(({ field }) => field)
+        fields.map(({ field }) => field)
       )
     ) {
-      const order = sort.map(({ field, descending }) => `${descending ? "-" : ""}${this.wireName(collection, field)}`)
-      data[this.params.sort] = order.join(",")
-      handled.sort = true
+      // which way round in a question of its own:  only when it has a value for it, and every field goes that way
+      const way = sortDirections && wayAskedFor(sortDirections, fields)
+      if (!sortDirections) {
+        const order = fields.map(({ field, descending }) => `${descending ? "-" : ""}${this.wireName(collection, field)}`)
+        data[sortParam] = order.join(",")
+        handled.sort = true
+      } else if (way !== undefined) {
+        data[sortParam] = fields.map(({ field }) => this.wireName(collection, field)).join(",")
+        data[sortDirections.param] = way
+        handled.sort = true
+      }
     }
     if (select && canDoAll(canSelect, select)) {
       const versionField = this.versions && "field" in this.versions ? this.versions.field : undefined
@@ -575,6 +645,39 @@ export class RestPlace extends WebPlace implements Place {
       handled.select = true
     }
     return data
+  }
+
+  /**
+   * What `collection` takes, filtering and sorting:  its own lines' (`RestCollection.asks`), else the place's.
+   * - Its own sort's question name, else the place's;  the orders it names, its own and then the place's.
+   */
+  private asksOf(collection: string): {
+    filter: FieldAbility
+    sort: FieldAbility
+    sortParam: string
+    sortOrders: readonly RestSortOrder[]
+    sortDirections: RestAsks["sortDirections"]
+  } {
+    const { asks } = this.mappingOf(collection)
+    return {
+      filter: asks?.filter ?? this.capabilities.filter,
+      sort: asks?.sort ?? this.capabilities.sort,
+      sortParam: asks?.sortedWith ?? this.params.sort,
+      sortOrders: [...(asks?.sortOrders ?? []), ...this.sortOrders],
+      sortDirections: asks?.sortDirections ?? this.sortDirections
+    }
+  }
+
+  /**
+   * The fields `sort` is in order of, as `collection`'s rows hold them:  a sort it has a name for is its field
+   * (`RestSortOrder.field`);  a name wins over a field of the same name.
+   */
+  sortFieldsOf(collection: string, sort: readonly SortField[]): SortField[] {
+    const { sortOrders } = this.asksOf(collection)
+    return sort.map((each) => {
+      const named = sortOrders.find(({ name }) => name !== undefined && name === each.field)
+      return named ? { ...each, field: named.field } : each
+    })
   }
 
   /** Where a list of `collection` is asked for:  a search's own address, when it searched and has one (`RestSearch.at`). */
@@ -833,6 +936,85 @@ export type RestPlaceProps = WebPlaceProps & {
    * - Left out:  it doesn't, so a search reads every page, and the engine looks through them.
    */
   searches?: RestSearch
+  /**
+   * The orders it has a name of its own for, for every list:  a sort by that field, that way round, alone, is sent as
+   * that name, `?sort=recency` (`params.sort` names the question).
+   * - A list's own come first (`RestCollection.asks`).
+   */
+  sortOrders?: readonly RestSortOrder[]
+  /** How every list is asked which way round a sort goes, unless its own asks say:  `RestAsks.sortDirections`. */
+  sortDirections?: RestAsks["sortDirections"]
+  /** What every list calls a filter's field and value, unless its own asks say:  `RestAsks.filteredWith`. */
+  filteredWith?: RestAsks["filteredWith"]
+}
+
+/**
+ * A sort a web server has a name of its own for:  `{ name: "completion", as: "recency", field: "endTime" }`, said
+ * `- "completion" as "recency", by end time` under `measurements can be sorted by:`.
+ */
+export type RestSortOrder = {
+  /** What a read calls it:  a sort by this, as if it were a field, is this one.  Left out:  only by its field. */
+  name?: string
+  /** The field it's in order of, by our name. */
+  field: string
+  /** Newest, highest or last first.  Left out:  newest first, the only way a named sort runs. */
+  descending?: boolean
+  /** What the server calls it, sent as the sort. */
+  as: string
+}
+
+/**
+ * The value `directions` sends for the way round `fields` go:  `undefined` when they go different ways, or it has
+ * none for theirs.
+ */
+function wayAskedFor(
+  directions: NonNullable<RestAsks["sortDirections"]>,
+  fields: readonly SortField[]
+): string | undefined {
+  const ways = new Set(fields.map(({ descending }) => !!descending))
+  if (ways.size !== 1) return undefined
+  return ways.has(true) ? directions.descending : directions.ascending
+}
+
+/**
+ * The sort of `orders` that `asked` is:  by its name, whichever way a read asks it;  else by its field.
+ * - Only the way round it runs (`RestSortOrder.descending`):  the other way is the engine's.
+ * - A name wins over a field of the same name.
+ */
+function namedSortFor(orders: readonly RestSortOrder[], asked: SortField): RestSortOrder | undefined {
+  const runs = (order: RestSortOrder) => (order.descending ?? true) === !!asked.descending
+  const byName = orders.find(({ name }) => name !== undefined && name === asked.field)
+  if (byName) return runs(byName) ? byName : undefined
+  return orders.find((order) => order.field === asked.field && runs(order))
+}
+
+/**
+ * What one list takes, when it isn't what the place takes:  said one step in under its `live at` line,
+ * `it filters by job-id`, `it sorts by created-at with "order_by"`.
+ * - Each part left out:  the place's.
+ */
+export type RestAsks = {
+  /** Which fields it filters by itself. */
+  filter?: FieldAbility
+  /**
+   * What it calls a filter's field and its value, asked as two questions:  `{ field: "field", value: "value" }`, said
+   * `jobs can be filtered by any field, with "field" and "value"`, sends `?field=status&value=open`.
+   * - One field at a time:  the rest of a filter is the engine's.
+   */
+  filteredWith?: { field: string; value: string }
+  /** Which fields it sorts by itself. */
+  sort?: FieldAbility
+  /** What it calls a sort:  its own question name. */
+  sortedWith?: string
+  /** The orders it has a name of its own for. */
+  sortOrders?: readonly RestSortOrder[]
+  /**
+   * How it's asked which way round a sort goes, in a question of its own:  `{ param: "order", descending: "desc",
+   * ascending: "asc" }`, said `- newest first with "order" as "desc"` under `jobs can be sorted by any field, with "sort"`.
+   * - Then each field goes as it is, `?sort=created_at&order=desc`, never `-created_at`.
+   * - A way round it has no value for isn't its:  the engine sorts.
+   */
+  sortDirections?: { param: string; descending?: string; ascending?: string }
 }
 
 /**
@@ -907,6 +1089,8 @@ export type RestCollection = {
    * - `users are searched with "q" at "/search/users"`
    */
   searches?: RestSearch
+  /** What this list takes, filtering and sorting, when it isn't what the place takes:  see `RestAsks`. */
+  asks?: RestAsks
   /**
    * How this collection pages, when it isn't the place's way (epic `data` P56):
    * a FastAPI list asked with `?take=&skip=` beside lists asked with `?limit=&offset=`.
@@ -967,6 +1151,11 @@ function listed(items: readonly string[]): string {
   return items.length > 1 ? `${items.slice(0, -1).join(", ")} and ${items.at(-1)}` : (items[0] ?? "")
 }
 
+/** `filter`, with only these `fields`. */
+function pickedFrom(filter: Record<string, unknown>, fields: readonly string[]): PlaceRow {
+  return Object.fromEntries(fields.map((field) => [field, filter[field]]))
+}
+
 /** The values of `filter` for the fields a list is asked for by (`RestCollection.askedBy`):  none, `undefined`. */
 function askedValuesIn(
   askedBy: readonly string[] | undefined,
@@ -1007,6 +1196,108 @@ function bracesFrom(template: string, address: string): Record<string, string> {
     else if (words[at] !== said[at]) break
   }
   return filled
+}
+
+/** The fields an answer says how many there are in all, beside its rows:  FastAPI's `total`, GitHub's `total_count`. */
+const TOTAL_FIELDS = [
+  "total",
+  "total_count",
+  "totalCount",
+  "total_results",
+  "totalResults",
+  "total_items",
+  "totalItems"
+]
+
+/** The fields an answer says how many pages there are in. */
+const PAGES_FIELDS = ["total_pages", "totalPages", "page_count", "pageCount", "num_pages", "pages"]
+
+/** The headers a server says how many there are in all in. */
+const TOTAL_HEADERS = ["X-Total-Count", "X-Total"]
+
+/**
+ * How many the whole query matches, as an answer says (`ListAnswer.total`):  nothing when it doesn't.
+ * - A total beside its rows, `{ items: [...], total: 1234 }`, or a count header, `X-Total-Count: 1234`.
+ * - Beside its rows wherever they are:  at its top, or beside a nested `rowsAt`'s,
+ *   `{ data: { items: [...], total: 1234 } }`.  Its top first.
+ * - A `count`:  Django's is the total, but Arena-like servers' is this page's rows.  So only one that can't be this
+ *   page's:  more than its rows, or a first page with nothing after it.
+ * - Only how many pages:  its pages times its size, an estimate, and where its last page is, to count exactly;
+ *   a page of one row, or a first page with none after, exactly.
+ */
+function totalIn(
+  body: unknown,
+  response: Response,
+  ask: TotalAsk
+): Pick<ListAnswer, "total" | "totalIsEstimate" | "lastPage"> {
+  for (const header of TOTAL_HEADERS) {
+    const said = response.headers.get(header)
+    if (said !== null && /^\d+$/.test(said.trim())) return { total: Number(said) }
+  }
+  const { rowsAt } = ask
+  const holdsRowsAt = rowsAt?.includes(".") ? rowsAt.slice(0, rowsAt.lastIndexOf(".")) : undefined
+  const holders = holdsRowsAt === undefined ? [body] : [body, valueAt(body, holdsRowsAt)]
+  for (const holder of holders) {
+    const total = totalBeside(holder, ask)
+    if (total.total !== undefined) return total
+  }
+  return {}
+}
+
+/** What `totalIn()` looks at, besides the answer. */
+type TotalAsk = {
+  /** Where its rows are:  `RestCollection.rowsAt`. */
+  rowsAt: string | undefined
+  /** How many rows this page holds. */
+  rows: number
+  /** How many rows a page holds. */
+  size: number
+  /** This is the first page. */
+  isFirst: boolean
+  /** Where its next page is:  `undefined` for none. */
+  nextPage: string | undefined
+  /** Where the page that's this many pages in is, `0` the first:  `undefined` when it can't be asked for straight. */
+  lastPageOf: ((pagesBefore: number, size: number) => string) | undefined
+}
+
+/**
+ * Where the page this many pages in is, on a list paged by offset:  its number, or its first row's place.
+ * - SEE:  `nextPageOf()`, which steps from one page to the next the same way.
+ */
+function pageAt({ firstPageNumber }: Paging): (pagesBefore: number, size: number) => string {
+  return (pagesBefore, size) =>
+    firstPageNumber === undefined ? String(pagesBefore * size) : String(firstPageNumber + pagesBefore)
+}
+
+/**
+ * How many the whole query matches, as the fields of `holder`, beside its rows, say:  `totalIn()`.
+ * - Only how many pages, and more than one:  the estimate says where its last page is (`ListAnswer.lastPage`).
+ */
+function totalBeside(
+  holder: unknown,
+  { rows, size, isFirst, nextPage, lastPageOf }: TotalAsk
+): Pick<ListAnswer, "total" | "totalIsEstimate" | "lastPage"> {
+  if (!holder || typeof holder !== "object" || Array.isArray(holder)) return {}
+  const counted = (value: unknown) =>
+    typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : undefined
+  const fields = holder as Record<string, unknown>
+  const total = TOTAL_FIELDS.map((field) => counted(fields[field])).find((each) => each !== undefined)
+  if (total !== undefined) return { total }
+  const count = counted(fields.count)
+  if (count !== undefined && (count > rows || (isFirst && nextPage === undefined))) return { total: count }
+  const pages = PAGES_FIELDS.map((field) => counted(fields[field])).find((each) => each !== undefined)
+  if (pages === undefined) return {}
+  if (size === 1) return { total: pages }
+  if (isFirst && nextPage === undefined) return { total: rows }
+  const rowsBefore = (pages - 1) * size
+  return {
+    total: pages * size,
+    totalIsEstimate: true,
+    ...(lastPageOf &&
+      pages > 1 && {
+        lastPage: { at: lastPageOf(pages - 1, size), size, rowsBefore }
+      })
+  }
 }
 
 /** Is this one thing's row, not a list:  a plain object? */

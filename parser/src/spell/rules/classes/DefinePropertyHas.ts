@@ -10,6 +10,7 @@ import {
   MustRule,
   OutlineSpecifierEnum,
   OutlineSpecifierMedia,
+  OutlineSpecifierSort,
   OutlineSpecifierList,
   PropertyBodyMust,
   QuotedPropertyFormula,
@@ -438,6 +439,10 @@ export class DefinePropertyHas extends SpellStatement<
     else if (match.groups.specifier?.is(OutlineSpecifierMedia)) {
       initializer = OutlineSpecifierMedia.madeAs(match.groups.specifier, `${property.raw ?? property.value}`)
       early = true
+    }
+    // a sort a page holds, and where it starts:  `its "order" is a sort:  completion, newest first`
+    else if (match.groups.specifier?.is(OutlineSpecifierSort)) {
+      initializer = P.asAST<P.ASTExpression>(match.groups.specifier.AST)
     }
     // a value kind, e.g. `a suit`:  one of its list, e.g. `Deck.Suits` -- its values are plain text.  Read when set:
     // the list's class names ours (`static instanceType = Card`), so one of the two is defined second

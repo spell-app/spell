@@ -1,5 +1,7 @@
+import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
+import { getWhereScope } from "spell/parser/spell/rules/lists/lists.shared"
 import { EveryThing } from "./EveryThing"
 import { EveryThingWhere } from "./EveryThingWhere"
 
@@ -8,13 +10,26 @@ import { EveryThingWhere } from "./EveryThingWhere"
  * - e.g. `the first recipe where its title is "Soup"`, `the first suite record where its name is the picked`
  * - The same as `the first item of (every recipe where ...)`, which said it before.
  * - A saved type's place is asked for one, when the whole `where` goes to it (`EveryThing.savedAST()`, `first`), as
- *   `the first 20 recipes where ...` asks for 20.
+ *   `the first 20 recipes where ...` asks for 20;  else it's read page by page, until one passes.
  * - Compiles to `core.getItemAt(core.filter(core.everyThing(Recipe), (recipe) => ...), 0)`.
  */
 export class FirstThingWhere extends EveryThingWhere {
+  /** It reads until one passes:  so nothing to warn of, reading every page. */
+  @proto static stopsEarly = true
+
   /** One of the type, e.g. `Recipe`. */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
     return SP.typeName(`${match.groups.type.value}`)
+  }
+
+  /**
+   * Nested scope for the predicate:  `it` is one of the list it's the first of, so its fields are known --
+   * `its root component id` too, not `its root` (we are one thing, not the list).
+   */
+  getNestedScopeForMatch(match: P.MatchFor<this>): P.MethodScope {
+    const { type } = match.groups
+    const thing = SP.typeName(`${type.value}`)
+    return getWhereScope(match, type, { datatype: P.listOf(thing) }, P.instanceCase(thing))
   }
 
   getAST(match: P.MatchFor<this>): P.ASTExpression {

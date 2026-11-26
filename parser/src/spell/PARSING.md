@@ -2428,8 +2428,14 @@ What a program's lines about where data lives compile to, and what reads the res
 - The words people already know read the record when the project compiles, in `getAST()`, off the record a type match found
   while parsing (`data.scopeType`), as a kind's list is read:  so a line above the type's line means the place too.
   - `every recipe`, `the recipes`:  `core.savedThings(Recipe)`, `EveryThing.savedAST()`.
-  - `where`:  each part that says `its X is <a value>`, joined by `and`, goes to the place as a filter (`handedFilterOf()`).
-    Anything else stays `core.filter()`, over everything the place holds, with a third argument that checks the ceiling, and a warning.
+  - `where`:  in parts (`handedPartsOf()`):  each `its X is <a value>`, joined by `and`, goes to the place as a filter;
+    each `its X includes <a value>` on a field it searches, as a search;  `its id is not nothing` is dropped.
+    The rest stays `core.filter()`, over what the place sent, with a third argument that checks the ceiling;
+    on a web server, a warning naming each clause its list can't be asked (`EveryThing.clausesStayingIn()`).
+    - `the first N Xs where ...` with a part staying:  a fourth argument, `{ first: N, where }`, so the read goes page
+      by page and stops at N that pass;  `the first N Xs` alone, one page of N.
+    - `, filtered here` after it (`ListFilteredHere`):  the read made again with nothing handed over, and no warning.
+    - `, sorted here` after a sort (`ListSortedHere`):  the read as it is, a sort the place can't do opted into.
   - `sorted by`, with a plain field for a key, on a read of a place:  the query's `sort`;  `newest first` says `descending`.
   - `add`, `remove`:  `core.saveThing()`, `core.removeSaved()`, with no list.
   - By its plural alone (`recipes`, `all recipes`, `recipes where ...`;  epic `data` P15):  the same read, the plural looked up first as what the program has by that name (`ownListOf()`):

@@ -11,6 +11,11 @@ import {
   readsAPropertyThatWaits,
   type ItemVariableData
 } from "./lists.shared"
+import { sortNameOf } from "./SortKeyField"
+import type { SortedHereData } from "./ListSortedHere"
+import { sortsOnItsServer } from "spell/parser/spell/rules/places/places.shared"
+// Import directly to avoid circular import
+import { OutlineSpecifierSort } from "spell/parser/spell/rules/classes/OutlineSpecifierSort"
 
 /** What a sort key's code calls the item:  in spell, only `it` and `its` name it. */
 const ITEM_VARIABLE = "item"
@@ -22,11 +27,15 @@ const ITEM_VARIABLE = "item"
  * - A postfix suffix, the list before it, binding last:  `every recipe where ...` is sorted whole.
  * - Its key is an `{inline_expression}?`, so it eats the rest of the line, as a `where` does.
  * - Not inside a `where` or another key:  the comma after a predicate belongs to the list.
+ * - Its key may be a sort a page holds, `sorted by the order` (`its "order" is a sort:  ...`), Spanish
+ *   `ordenadas según el orden`:  the list follows it (`sortedByPageSort()`).
  * - Compiles to `core.sortedBy(list, (item) => ...)`;  a read of a place with a plain field's name for a key goes to the place.
  */
-export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
+export class ListSortedBy extends PostfixOperatorSuffix<"body?" | "bySort?"> {
   @proto static precedence = Precedence.ternary
   @proto static datatype: P.Datatype | undefined = undefined
+  /** The same list, in another order:  `, filtered here` after it is about the read it sorts. */
+  @proto static handsOnItsLeft = true
 
   /**
    * Not inside a predicate or a key -- see the class docs.
@@ -38,6 +47,12 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
     ListSortedBy.warnIfItDoesntAgree(match, tokens)
+    // Spanish's `según` goes only with a sort a page holds:  `ordenadas según el orden`
+    const body = this.getBody(match)
+    if (match.groups.bySort && body) {
+      const notASort = SP.Language.of(scope).parserMessage("sorted-by-not-a-sort", { words: body.inputText.trim() })
+      SP.SpellWarnings.refuseIf(match, notASort, () => !OutlineSpecifierSort.holdsASort(body))
+    }
     const message = SP.Language.of(scope).parserMessage("sort-key-waits")
     SP.SpellWarnings.refuseIf(
       match,
@@ -46,7 +61,40 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
       () =>
         getWhereMethod(match, match, this.getBody(match)).waitsItself || readsAPropertyThatWaits(this.getBody(match))
     )
+    ListSortedBy.refuseUnlessItsServerSorts(match)
     return match
+  }
+
+  /**
+   * SIDE EFFECT:  an error, for a sort of a web server's list its server can't do that way, unless the read says
+   * it means it done on the Spell server, `, sorted here` (`ListSortedHere`):  that reads every row.
+   * - Asked when the errors are gathered, once it's compiled:  the place's lines may be anywhere in the project.
+   * - A key that's more than a field (`sorted by its name's length`) is never the server's.
+ * - Not a sort a page holds, `sorted by the order`:  never checked.
+   */
+  private static refuseUnlessItsServerSorts(match: P.Match): void {
+    const left = SuffixLeft.current
+    if (!left) return
+    const language = SP.Language.of(match.scope)
+    const written = match.inputText.trim().replace(/^,\s*/, "")
+    const message = () => language.parserMessage("sort-stays-here", { sort: written })
+    SP.SpellWarnings.refuseIf(match, message, () => {
+      if ((left.data as SortedHereData).sortedHere || !isARead(left)) return false
+      // a sort a page holds, `sorted by the order`:  it changes as the page runs, and what the server can't do of it
+      // is done over what was read (`core.savedThingsSortedBy()`)
+      const key = ListSortedBy.bodyOf(match)
+      if (key && OutlineSpecifierSort.holdsASort(key)) return false
+      const saved = savedOfKey(match)
+      if (saved?.placeType.placeKind !== "web server") return false
+      const { field, descending = false } = fieldOfKey(getWhereMethod(match, match, ListSortedBy.bodyOf(match))) ?? {}
+      return field === undefined || !sortsOnItsServer(saved, P.JSWriter.instance.nameOf(field), descending)
+      // its own spot, its key:  one refusal a spot, and the whole sort's is a key that waits
+    }, ListSortedBy.bodyOf(match) ?? match)
+  }
+
+  /** The key's match. */
+  private static bodyOf(match: P.Match): P.Match | undefined {
+    return (match.rule as ListSortedBy).getBody(match as P.MatchFor<ListSortedBy>)
   }
 
   /**
@@ -104,12 +152,46 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
   }
 
   compileASTExpression(match: P.MatchFor<this>, { lhs }: { lhs?: P.ASTExpression }): P.ASTCoreMethodInvocation {
+    const pageSort = ListSortedBy.pageSortOf(match)
+    if (pageSort) return ListSortedBy.sortedByPageSort(match, lhs!, pageSort)
     const handed = ListSortedBy.handedToPlace(match, lhs!, getWhereMethod(match, match, this.getBody(match)))
     if (handed) return handed
     return new P.ASTCoreMethodInvocation(match, {
       methodName: "sortedBy",
       args: [lhs!, getWhereMethod(match, match, this.getBody(match))]
     })
+  }
+
+  /**
+   * The sort a page holds that the key is, `sorted by the order` (`its "order" is a sort:  ...`):  its value's
+   * expression;  `undefined` for any other key.
+   */
+  static pageSortOf(match: P.Match): P.ASTExpression | undefined {
+    const body = (match.groups as { body?: P.Match }).body
+    if (!body || !OutlineSpecifierSort.holdsASort(body)) return undefined
+    return P.asAST<P.ASTExpression>(body.AST)
+  }
+
+  /**
+   * `lhs` sorted by `sort`, a sort a page holds:  the read asks again each time it changes.
+   * - A read of a place, `the first 50 measurements sorted by the order`:  `core.savedThingsSortedBy(this.order,
+   *   Measurement, { page: { size: 50 } })`, which hands the place what it can sort, and sorts the rest here.
+   * - Any other list:  `core.sortedByValue(list, this.order)`.
+   */
+  private static sortedByPageSort(
+    match: P.Match,
+    lhs: P.ASTExpression,
+    sort: P.ASTExpression
+  ): P.ASTCoreMethodInvocation {
+    if (lhs instanceof P.ASTCoreMethodInvocation && lhs.methodName === "savedThings") {
+      const [type, query, ...rest] = lhs.args?.args ?? []
+      const asked = query ?? new P.ASTObjectLiteral(match)
+      return new P.ASTCoreMethodInvocation(match, {
+        methodName: "savedThingsSortedBy",
+        args: [sort, type as P.ASTExpression, asked as P.ASTExpression, ...(rest as P.ASTExpression[])]
+      })
+    }
+    return new P.ASTCoreMethodInvocation(match, { methodName: "sortedByValue", args: [lhs, sort] })
   }
 
   /**
@@ -157,6 +239,7 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
 /**
  * The field `key`, a sort's function, reads, when that's all it does:  `(item) => item.title`.
  * - `descending` when it reads it backwards, `newest first`:  `(item) => core.descending(item.sent)`.
+ * - A sort its place names (`sort_key_field`):  that name, `completion`, not the field it reads.
  */
 function fieldOfKey(key: P.ASTMethodDefinition): { field: string; descending: boolean } | undefined {
   const item = (key.args?.[0] as P.ASTVariableExpression | undefined)?.name
@@ -167,5 +250,25 @@ function fieldOfKey(key: P.ASTMethodDefinition): { field: string; descending: bo
   const descending = body instanceof P.ASTCoreMethodInvocation && body.methodName === "descending"
   if (descending) body = (body as P.ASTCoreMethodInvocation).args?.args?.[0]
   if (!(body instanceof P.ASTPropertyExpression) || !(body.object instanceof P.ASTVariableExpression)) return undefined
-  return body.object.name === item ? { field: body.property.value, descending } : undefined
+  if (body.object.name !== item) return undefined
+  // a sort its place has a name for goes by that name:  the place knows its field
+  return { field: sortNameOf(body) ?? body.property.value, descending }
+}
+
+/** The place what `match`'s key sorts is saved in:  its item's, as its key's scope knows it. */
+function savedOfKey(match: P.Match): P.SavedPlace | undefined {
+  const variable = (match.data as ItemVariableData).itemVariable
+  const datatype = variable?.datatype
+  return datatype ? match.scope.getType(datatype)?.savedPlace() : undefined
+}
+
+/** Is `left` a read of a place, made right there:  `every job`, `the first 20 jobs where ...`?  Not a list in memory. */
+function isARead(left: P.Match): boolean {
+  try {
+    const ast = left.AST
+    return ast instanceof P.ASTCoreMethodInvocation && ast.methodName === "savedThings"
+  } catch {
+    // a suffix's own match compiles only with what it follows
+    return false
+  }
 }

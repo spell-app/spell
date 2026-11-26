@@ -82,6 +82,15 @@ export class TableRows {
     return Number.isFinite(span) && span > 1 ? span : 1
   }
 
+  /**
+   * The sort a header cell asks for, its `sort`:  a sort name or a field, `completion`;  `undefined` with none.
+   * - A native `<th sort="...">` reads the same, by its attribute.
+   */
+  static sortOf(cell: Element): string | undefined {
+    const value = TableRows.value(cell, SORT)
+    return typeof value === "string" && value.trim() ? value.trim() : undefined
+  }
+
   ////////////////
   // ## Reading the elements
   ////////////////
@@ -131,3 +140,6 @@ const FOOTER = "footer"
 
 /** A cell's `span`. */
 const SPAN = "span"
+
+/** A header cell's `sort`:  what its column asks to be sorted by. */
+const SORT = "sort"

@@ -1801,11 +1801,11 @@ a "recipe" is a thing:
 
 counting box is an app:
 	- to draw it:
-		if there are no recipes where its title is "nothing called this":
+		if there are no recipes where its title is "nothing called this", filtered here:
 			<ui-text class="none">None like that</ui-text>
 		if there are more than 100000 recipes:
 			<ui-text class="many">Too many</ui-text>
-		<ui-text class="count">{the number of recipes where its title is "nothing called this"}</ui-text>
+		<ui-text class="count">{the number of recipes where its title is "nothing called this", filtered here}</ui-text>
 
 start the counting box`
       const { page, problems } = await opened(serve("there-are", { path: "/Counting.spell", source, field: "title" }))

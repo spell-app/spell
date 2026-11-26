@@ -6,6 +6,7 @@ import type {
   CollectionLook,
   FieldDescription,
   FieldKind,
+  ListTakes,
   ListUnderSeen,
   OperationDescription,
   PagesWith,
@@ -39,6 +40,12 @@ const OFFSET_NAMES = /^(offset|skip|start)$/i
 
 /** What a search's question is called:  `q`, `query`, `search`. */
 const SEARCH_NAMES = /^(q|query|search|term|keywords?|text)$/i
+
+/** What a list's question naming its order is called:  `order_by`, `sort`. */
+const ORDER_NAMES = /^(order_?by|order|sort_?by|sort|ordering)$/i
+
+/** The kinds a filter's question may ask, one value of:  never a list. */
+const ONE_VALUE_KINDS: ReadonlySet<string> = new Set(["string", "integer", "number", "boolean"])
 
 /** Why an object that's a map by name is left out:  `custom_fields`. */
 const MAP_BY_NAME = "Its schema says it's a map by name, each key its own:  read it by hand, a type of its own."
@@ -139,6 +146,7 @@ export class PlaceSpec {
       const pages = search || one ? undefined : this.offsetPagingOf(item.get, rows.answer)
       if (pages) paged.push(pages)
       const fields = this.withAskedFields(this.fieldsOf(rows.item, rows.schemaAt ?? path), item.get, askedBy, path)
+      const takes = one || search ? undefined : this.listTakesOf(path, item.get, fields, askedBy, pages)
       const oneAt = one ? undefined : oneAtOf(path, at, paths)
       // its id, as its read by id names it:  `/types/{type_id}` is read by its `type_id`
       const byId = oneAt && /\{([^{}/]+)\}/.exec(oneAt)?.[1]
@@ -153,6 +161,7 @@ export class PlaceSpec {
         ...(rows.nextAt !== undefined && { nextAt: rows.nextAt }),
         ...(!one && this.takesLimit(item) && { takesLimit: true }),
         ...(pages && { pagesWith: pages }),
+        ...(takes && { takes }),
         ...(one && { isOne: true }),
         ...(askedBy && { askedBy }),
         ...(rows.schemaAt !== undefined && { schemaAt: rows.schemaAt }),
@@ -318,6 +327,77 @@ export class PlaceSpec {
       )
     }
     return askedBy
+  }
+
+  /**
+   * What a list takes besides paging, from the questions its description gives it that it can be read without
+   * (a list's own lines):  `undefined` for none.
+   * - A question named as a field of its rows, asking one value (text, a number, yes or no;  never a list), is a
+   *   filter:  `?job_id=` on jobs that each have a `job_id`.  One its rows don't have (`design_name`, `include_emulated`)
+   *   isn't:  nothing in a row says what it does.  A list no schema typed keeps each, for a verify's read to say.
+   * - A question naming its order (`order_by`), with the values it takes, is its orders:  each a field's name is in
+   *   that field's order, which way round left for a verify to try;  one naming no field (`recency`) is said in the
+   *   notes, for a person to say what it sorts by.
+   * - Its search question, `search`:  which field it looks in is left for a verify to find.
+   * - Its paging, the questions it's asked for by, and its search when it can't be read without it, are said elsewhere.
+   */
+  private listTakesOf(
+    path: string,
+    operation: OpenApiOperation,
+    fields: Readonly<Record<string, FieldDescription>>,
+    askedBy: Record<string, string> | undefined,
+    pages: PagesWith | undefined
+  ): ListTakes | undefined {
+    const takes: ListTakes = {}
+    for (const param of this.queryParamsOf(operation)) {
+      const name = param.name!
+      if (param.required || name in (askedBy ?? {})) continue
+      if (LIMIT_NAMES.test(name) || OFFSET_NAMES.test(name) || name === pages?.limit || name === pages?.offset) continue
+      const kinds = this.kindsOf(param.schema)
+      if (SEARCH_NAMES.test(name) && !takes.search && kinds.every((kind) => kind === "string")) {
+        takes.search = { param: name }
+        continue
+      }
+      const values = this.valuesOf(param.schema)
+      if (ORDER_NAMES.test(name) && values.length && !takes.orders) {
+        takes.sortedWith = name
+        takes.orders = values.map((value) => {
+          const field = value.replace(/^-/, "")
+          if (!(field in fields)) return { as: value }
+          return { as: value, field, ...(value.startsWith("-") && { descending: true }) }
+        })
+        const unnamed = takes.orders.filter(({ field }) => field === undefined).map(({ as }) => `"${as}"`)
+        if (unnamed.length) {
+          this.notes.push(
+            `${path}'s "${name}" takes ${unnamed.join(" and ")}, which name${unnamed.length === 1 ? "s" : ""} no field:  say what each sorts by under its list's line, in \`<things> can be sorted by:\`, \`- "<name>" as ${unnamed[0]}, by <field>\`.`
+          )
+        }
+        continue
+      }
+      const isOneValue = kinds.length > 0 && kinds.every((kind) => ONE_VALUE_KINDS.has(kind))
+      // a list no schema typed may hold it:  kept, for a verify to try once a read gives its fields
+      const isUntyped = !Object.keys(fields).length
+      if ((isUntyped || name in fields) && isOneValue) (takes.filters ??= []).push(name)
+    }
+    return Object.keys(takes).length ? takes : undefined
+  }
+
+  /** The kinds a parameter's schema says it holds, besides nothing:  `["string"]` for `anyOf: [string, null]`. */
+  private kindsOf(schema: Schema | undefined): string[] {
+    const resolved = this.resolved(schema)
+    if (!resolved) return []
+    const own = [resolved.type ?? []].flat()
+    const each = (resolved.anyOf ?? resolved.oneOf ?? []).flatMap((one) => this.kindsOf(one))
+    return [...new Set([...own, ...each])].filter((kind) => kind !== "null")
+  }
+
+  /** The text values a parameter's schema takes, each by name:  its `enum`, or its one `const`;  none, any. */
+  private valuesOf(schema: Schema | undefined): string[] {
+    const resolved = this.resolved(schema)
+    if (!resolved) return []
+    const own = [...(resolved.enum ?? []), ...(resolved.const === undefined ? [] : [resolved.const])]
+    const each = (resolved.anyOf ?? resolved.oneOf ?? []).flatMap((one) => this.valuesOf(one))
+    return [...new Set([...own, ...each])].filter((value): value is string => typeof value === "string")
   }
 
   /**

@@ -52,6 +52,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `PlaceQuery`:  what the place didn't do is filtered, sorted, sliced or hidden here,
     up to a ceiling in rows and bytes, then a `PlaceError` naming the place.
     - A filter asking for `""` finds a row without that field too, as an unset text reads in Spell (epic `atmosphere` P37).
+    - What's left to it is asked of the list itself where a place says per list (`Place.takes()`, a web server's list
+      with its own `it filters by`), else of `describe()`.  A list that takes part of a filter is sent that part.
+    - Text sorts in ONE order, the page's too:  `compareValues()` in `spell/util/string`, capitals and accents aside.
   - `MemoryPlace`:  the place the engine's tests run against, doing only what its capabilities say.
   - `DevicePlace`:  this device, an adapter over a `PrefPlace`.  Preferences' code knows nothing of it.
     - `wholeRows`:  each key's value is a whole row, as JSON, for things:  `family cookbook is this device`.
@@ -92,12 +95,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     reached:  a deployment's `fixtures` folder, which the page server's `AuthenticatedPlaces` and `spell place verify`
     read (always, on an `offline` one), and `spell place verify --fixtures` writes.  Only its words here:  where each
     goes (`savedAnswerPath()`), a saved list answering a question (`answerFromSaved()`:  picked by a field its rows
-    hold, paged by `limit` and `offset`), and the scrub (`answerScrubber()`:  tokens, keys, cookies, emails).
+    hold, searched and sorted by the place's own question names with the page's matching and text order, paged by
+    `limit` and `offset`), and the scrub (`answerScrubber()`:  tokens, keys, cookies, emails).
   - [DeviceCopy](DeviceCopy.ts):  a copy, in the browser's database, of every answer a web place gives,
     only for a place whose line says `- keep a copy on this device` (epic `data` P36).
     - Fresh until the place's next check:  `WebPlace` answers from it with no request;  stale, at once, reading the
       server behind it.  A server's longer `max-age` wins;  `no-store` keeps nothing.
-    - 50 MB a place unless the line says (`DEVICE_COPY_MOST_BYTES`):  what was read least recently goes first.
+    - 50 MB a place unless the line says (`DEVICE_COPY_MAX_SIZE`):  what was read least recently goes first.
     - Its own database, `spell-device-copies`, so clearing preferences leaves it;  a person's copies are forgotten
       when they sign out (`forgetPerson()`).
   - [AtProtoPlace](AtProtoPlace.ts):  an atmosphere account:  one person's records, or everyone's put together, with no referee (epic `data` P16).

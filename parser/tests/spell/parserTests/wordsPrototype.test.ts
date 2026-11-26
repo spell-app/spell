@@ -720,7 +720,7 @@ a "person" is a thing:
 recipe box is an app:
 	- its "search" is text
 	- its "draft" is text
-	- its "matches" is every recipe where its title includes the search, sorted by its title
+	- its "matches" is every recipe where its title includes the search, filtered here, sorted by its title
 	- to add the draft:
 		if the draft is "" return
 		add (a new recipe with title = the draft, cook = them) to the recipes

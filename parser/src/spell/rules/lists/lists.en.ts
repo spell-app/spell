@@ -23,8 +23,12 @@ import { ListEmpty } from "./ListEmpty"
 import { ListFilter } from "./ListFilter"
 import { ListItemsIn } from "./ListItemsIn"
 import { ListSortedBy } from "./ListSortedBy"
+import { ListFilteredHere } from "./ListFilteredHere"
+import { ListSortedHere } from "./ListSortedHere"
+import { CountRoughly } from "./CountRoughly"
 import { SortKeyField } from "./SortKeyField"
 import { SortKeyOrder } from "./SortKeyOrder"
+import { SORT_ORDER_WORDS } from "./sortOrderWords"
 import { AddNewThing } from "./AddNewThing"
 import { EachInStatement } from "./EachInStatement"
 import { PluralCallStatement } from "./PluralCallStatement"
@@ -821,8 +825,7 @@ lists.addRule(SortKeyField, {
 })
 
 lists.addRule(SortKeyOrder, {
-  syntax:
-    ",? ((descending:(newest|latest|highest|largest|biggest|most) first|reversed|in reverse|z-a)|(ascending:(oldest|earliest|lowest|smallest|fewest|least) first|a-z))",
+  syntax: `,? ${SORT_ORDER_WORDS.en}`,
   tests: [
     {
       compileAs: "expression",
@@ -863,6 +866,12 @@ lists.addRule(ListSortedBy, {
     }
   ]
 })
+
+lists.addRule(ListFilteredHere, { roles: { match: "value" }, syntax: ",? filtered here" })
+
+lists.addRule(ListSortedHere, { roles: { match: "value" }, syntax: ",? sorted here" })
+
+lists.addRule(CountRoughly, { roles: { match: "value" }, syntax: ",? roughly" })
 
 lists.addRule(ListMembershipTest, {
   syntax: "{operator:has_or_has_no} {arg:plural_identifier} (where:where|which|that|who) {inline_expression}?",

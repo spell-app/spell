@@ -95,7 +95,11 @@ import { NextPageByOffset } from "./NextPageByOffset"
 import { NextPageByNumber } from "./NextPageByNumber"
 import { NextPageByLastId } from "./NextPageByLastId"
 import { FiltersBy } from "./FiltersBy"
+import { FiltersByAnyField } from "./FiltersByAnyField"
 import { SortsBy } from "./SortsBy"
+import { NamedSort, NamedSortField, NamedSorts } from "./NamedSorts"
+import { SortsWith } from "./SortsWith"
+import { SortDirection, SortsByAnyField } from "./SortsByAnyField"
 import { GivesFieldsNamedIn } from "./GivesFieldsNamedIn"
 import { IsReadOnly } from "./IsReadOnly"
 import { RowsIn } from "./RowsIn"
@@ -836,6 +840,34 @@ placesEs.addRule(FiltersBy, {
     }
   ]
 })
+placesEs.addRule(FiltersByAnyField, { syntax: "{type:subject_implied} se puede filtrar por cualquier campo ,? con {field:text} y {value:text}" })
+placesEs.addRule(FiltersByAnyField, {
+  syntax: `${THE}? {collection:plural_type} se pueden filtrar por cualquier campo ,? con {field:text} y {value:text}`,
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'recetario es un servidor web en "https://recetario.test"\n\t- las recetas están en "/api/recipes"\n\t\t- las recetas se pueden filtrar por cualquier campo, con "field" y "value"',
+          [
+            "export class Recetario extends Place {}",
+            "export const recetario = core.place(new Recetario(), {",
+            '  name: "recetario",',
+            '  kind: "web server",',
+            '  at: "https://recetario.test",',
+            "  collections: { recetas: {",
+            '    at: "/api/recipes",',
+            '    filters: "every field",',
+            '    filteredWith: { field: "field", value: "value" }',
+            "  } },",
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 placesEs.addRule(SortsBy, { syntax: "{type:subject_implied} ordena por todos los campos (con {param:text})?" })
 placesEs.addRule(SortsBy, {
   syntax: "{type:subject_implied} ordena por {fields:searched_fields} (con {param:text})?",
@@ -853,6 +885,78 @@ placesEs.addRule(SortsBy, {
             '  at: "https://recetario.test",',
             '  sorts: ["titulo", "fecha"],',
             '  sortedWith: "order",',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(SortsWith, { syntax: "{type:subject_implied} ordena con {param:text}" })
+placesEs.addRule(SortDirection, {
+  syntax:
+    "((descending:de más reciente a más antiguo|de mas reciente a mas antiguo)|(ascending:de más antiguo a más reciente|de mas antiguo a mas reciente)) con {param:text} como {value:text}"
+})
+placesEs.addRule(SortsByAnyField, { syntax: "{type:subject_implied} se puede ordenar por cualquier campo ,? con {param:text} {nested_statements}?" })
+placesEs.addRule(SortsByAnyField, {
+  syntax: `${THE}? {collection:plural_type} se pueden ordenar por cualquier campo ,? con {param:text} {nested_statements}?`,
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'recetario es un servidor web en "https://recetario.test"\n\t- las recetas están en "/api/recipes"\n\t\t- las recetas se pueden ordenar por cualquier campo, con "sort"\n\t\t\t- de más reciente a más antiguo con "order" como "desc"',
+          [
+            "export class Recetario extends Place {}",
+            "export const recetario = core.place(new Recetario(), {",
+            '  name: "recetario",',
+            '  kind: "web server",',
+            '  at: "https://recetario.test",',
+            "  collections: { recetas: {",
+            '    at: "/api/recipes",',
+            '    sorts: "every field",',
+            '    sortedWith: "sort",',
+            '    sortDirections: { param: "order", descending: "desc" }',
+            "  } },",
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(NamedSortField)
+placesEs.addRule(NamedSort, { syntax: "{name:text} como {value:text} (, por {field:named_sort_field})?" })
+placesEs.addRule(NamedSorts, { syntax: "{type:subject_implied} se puede ordenar por :? {nested_statements}" })
+placesEs.addRule(NamedSorts, {
+  syntax: `${THE}? {collection:plural_type} se pueden ordenar por :? {nested_statements}`,
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'recetario es un servidor web en "https://recetario.test"\n\t- las recetas están en "/api/recipes"\n\t\t- ordena con "order_by"\n\t\t- las recetas se pueden ordenar por:\n\t\t\t- "creación" como "created_at"\n\t\t\t- "última vez" como "recency", por cocinada-en',
+          [
+            "export class Recetario extends Place {}",
+            "export const recetario = core.place(new Recetario(), {",
+            '  name: "recetario",',
+            '  kind: "web server",',
+            '  at: "https://recetario.test",',
+            "  collections: { recetas: {",
+            '    sortedWith: "order_by",',
+            '    at: "/api/recipes",',
+            "    sortOrders: [{",
+            '      name: "creación",',
+            '      as: "created_at",',
+            '      field: "createdAt"',
+            "    }, {",
+            '      name: "últimaVez",',
+            '      as: "recency",',
+            '      field: "cocinadaEn"',
+            "    }]",
+            "  } },",
             '  unclearNumbers: ","',
             "})"
           ]
@@ -1785,6 +1889,7 @@ placesEs.addRule(EveryThingMatching, {
 placesEs.addRule(FirstFewWhere, {
   syntax: `(los|las) (primeros|primeras) {number} {type:plural_type} (where:donde|que) {inline_expression}?`
 })
+placesEs.addRule(FirstFewWhere, { syntax: `(los|las) (primeros|primeras) {number} {type:plural_type}` })
 placesEs.addRule(NumberOfThingsWhere, {
   syntax: "el número de {type:plural_type} (where:donde|que) {inline_expression}?"
 })

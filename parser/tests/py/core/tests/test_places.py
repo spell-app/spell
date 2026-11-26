@@ -151,6 +151,14 @@ def test_the_first_and_the_one_with_an_id(program: Core) -> None:
     assert asyncio.run(program.saved_thing_with_id(DeviceNote, "")) is None
 
 
+def test_the_first_few_that_pass(program: Core) -> None:
+    for text, stars in [("a", 1), ("b", 2), ("c", 2), ("d", 2)]:
+        program.save_thing(DeviceNote(text=text, stars=stars))
+    until = {"first": 2, "where": lambda note, *_: note.stars == 2}
+    found = asyncio.run(program.saved_things(DeviceNote, {}, "looks through", until))
+    assert [it.text for it in found] == ["b", "c"]
+
+
 def test_a_read_by_a_field(program: Core) -> None:
     program.save_thing(DeviceNote(text="a", stars=1))
     program.save_thing(DeviceNote(text="b", stars=2))

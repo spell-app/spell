@@ -31,6 +31,8 @@ import { DimensionUnit } from "./DimensionUnit"
 import { OutlineSpecifierMeasure } from "./OutlineSpecifierMeasure"
 import { OutlineSpecifierPercent } from "./OutlineSpecifierPercent"
 import { OutlineSpecifierMedia } from "./OutlineSpecifierMedia"
+import { OutlineSpecifierSort, PageSortBy } from "./OutlineSpecifierSort"
+import { SORT_ORDER_WORDS } from "spell/parser/spell/rules/lists/sortOrderWords"
 import { CreateThing } from "./CreateThing"
 import { CreateType } from "./CreateType"
 import { CSSBlock } from "./CSSBlock"
@@ -1987,6 +1989,22 @@ classesEs.addRule(OutlineSpecifierMedia, {
   tests: [{ tests: [[`un sonido en "sonidos/deslizar.mp3"`, `core.media("sound", "sonidos/deslizar.mp3")`]] }]
 })
 
+// un orden que guarda una página, y dónde empieza:  `su "orden" es un orden:  finalización, de más reciente a más antiguo`
+// -- before `un {type}`, which would make `orden` a type of its own
+classesEs.addRule(PageSortBy)
+
+classesEs.addRule(OutlineSpecifierSort, {
+  syntax: `un orden :? {by:page_sort_by} (, ${SORT_ORDER_WORDS.es})?`,
+  tests: [
+    {
+      tests: [
+        ["un orden:  finalización, de más reciente a más antiguo", 'core.sort("finalización", true)'],
+        ["un orden: nombre", 'core.sort("nombre")']
+      ]
+    }
+  ]
+})
+
 // un porcentaje, guardado como su fracción:  `su "propina" es un porcentaje` (epic `language` P34)
 // -- before `un {type}`, which would make `porcentaje` a type of its own
 classesEs.addRule(OutlineSpecifierPercent, {
@@ -2993,11 +3011,13 @@ classesEs.addRule(FirstThingWhere, {
       tests: [
         [
           "la primera receta donde sus minutos es 5",
-          "core.getItemAt(core.filter(core.everyThing(Receta), (receta) => receta.minutos === 5), 0)"
+          "core.getItemAt(core.filter(core.everyThing(Receta), (receta) => receta.minutos === 5), 0)",
+          "core.getItemAt(core.filter(core.everyThing(Receta), (receta: Receta) => receta.minutos === 5), 0)"
         ],
         [
           "el primer receta que no es 5",
-          "core.getItemAt(core.filter(core.everyThing(Receta), (receta) => receta !== 5), 0)"
+          "core.getItemAt(core.filter(core.everyThing(Receta), (receta) => receta !== 5), 0)",
+          "core.getItemAt(core.filter(core.everyThing(Receta), (receta: Receta) => receta !== 5), 0)"
         ]
       ]
     }

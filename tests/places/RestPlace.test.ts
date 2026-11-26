@@ -15,6 +15,7 @@ import {
   type PlaceConflict,
   type PlaceRow,
   type PlaceWriteFailure,
+  type RestAsks,
   type RestPlaceProps
 } from "spell/places"
 
@@ -1245,5 +1246,297 @@ describe("RestPlace, what a FastAPI service asks for (epic `data` P56)", () => {
       "https://shapes.test/api/jobs/6f1c/steps/3/retry",
       "https://shapes.test/api/jobs/6f1c/complete"
     ])
+  })
+})
+
+describe("a list's own filters and sorts, under its line", () => {
+  afterEach(() => void vi.unstubAllGlobals())
+
+  /** A place whose `jobs` filter by status and sort as their server names it, and whose `notes` take nothing:  every address it asks. */
+  function asking() {
+    const asked: string[] = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      asked.push(`${input instanceof Request ? input.url : input}`)
+      return Response.json([])
+    })
+    const place = new RestPlace({
+      url: "https://jobs.test",
+      collections: {
+        jobs: {
+          path: "/api/jobs{/id}",
+          asks: {
+            filter: ["status", "sessionId"],
+            sort: ["createdAt"],
+            sortedWith: "order_by",
+            sortOrders: [
+              { name: "creation", as: "created_at", field: "createdAt" },
+              { name: "completion", as: "recency", field: "endTime" }
+            ]
+          }
+        },
+        notes: { path: "/api/notes{/id}" }
+      },
+      namesLike: "snake"
+    })
+    return { place, asked }
+  }
+
+  test("each field the list filters by goes;  the rest is left, and the list says it didn't filter it all", async () => {
+    const { place, asked } = asking()
+    const whole = await place.list("jobs", { filter: { status: "open", sessionId: "s-1" } }, {})
+    expect(whole.handled.filter).toBe(true)
+    const part = await place.list("jobs", { filter: { status: "open", owner: "ana" } }, {})
+    expect(part.handled.filter).toBeUndefined()
+    await place.list("notes", { filter: { status: "open" } }, {})
+    expect(asked).toEqual([
+      "https://jobs.test/api/jobs?status=open&session_id=s-1",
+      "https://jobs.test/api/jobs?status=open",
+      "https://jobs.test/api/notes"
+    ])
+  })
+
+  test("a sort it has a name for goes as its value, newest first, with the list's own question", async () => {
+    const { place, asked } = asking()
+    const named = await place.list("jobs", { sort: [{ field: "completion", descending: true }] }, {})
+    expect(named.handled.sort).toBe(true)
+    // its field, that way round:  the same sort
+    await place.list("jobs", { sort: [{ field: "createdAt", descending: true }] }, {})
+    expect(asked).toEqual([
+      "https://jobs.test/api/jobs?order_by=recency",
+      "https://jobs.test/api/jobs?order_by=created_at"
+    ])
+  })
+
+  test("a named sort the other way round:  by its field, if the list sorts by it;  else left to the engine", async () => {
+    const { place, asked } = asking()
+    await place.list("jobs", { sort: [{ field: "creation" }] }, {})
+    const left = await place.list("jobs", { sort: [{ field: "completion" }] }, {})
+    expect(left.handled.sort).toBeUndefined()
+    expect(asked).toEqual(["https://jobs.test/api/jobs?order_by=created_at", "https://jobs.test/api/jobs"])
+    expect(place.sortFieldsOf("jobs", [{ field: "completion" }, { field: "name", descending: true }])).toEqual([
+      { field: "endTime" },
+      { field: "name", descending: true }
+    ])
+  })
+
+  test("a name wins over a field of the same name", async () => {
+    const asked: string[] = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      asked.push(`${input instanceof Request ? input.url : input}`)
+      return Response.json([])
+    })
+    const place = new RestPlace({
+      url: "https://jobs.test",
+      collections: {
+        jobs: {
+          path: "/api/jobs{/id}",
+          asks: { sort: "every field", sortOrders: [{ name: "name", as: "alphabetical", field: "title" }] }
+        }
+      }
+    })
+    await place.list("jobs", { sort: [{ field: "name", descending: true }] }, {})
+    await place.list("jobs", { sort: [{ field: "name" }] }, {})
+    expect(asked).toEqual(["https://jobs.test/api/jobs?sort=alphabetical", "https://jobs.test/api/jobs?sort=title"])
+  })
+
+  /** A place whose jobs sort by any field, with `asks`;  and the addresses it was asked. */
+  function sortingBy(asks: RestAsks) {
+    const asked: string[] = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      asked.push(`${input instanceof Request ? input.url : input}`)
+      return Response.json([])
+    })
+    const place = new RestPlace({
+      url: "https://jobs.test",
+      collections: { jobs: { path: "/api/jobs{/id}", fields: { createdAt: "created_at" }, asks } }
+    })
+    return { place, asked }
+  }
+
+  test("form 1, any field:  a field as it is, newest first `-field`", async () => {
+    const { place, asked } = sortingBy({ sort: "every field", sortedWith: "sort" })
+    await place.list("jobs", { sort: [{ field: "name" }] }, {})
+    await place.list("jobs", { sort: [{ field: "createdAt", descending: true }] }, {})
+    expect(asked).toEqual(["https://jobs.test/api/jobs?sort=name", "https://jobs.test/api/jobs?sort=-created_at"])
+  })
+
+  test("form 2, its direction lines:  the way round in its own question;  one it has no value for is the engine's", async () => {
+    const { place, asked } = sortingBy({
+      sort: "every field",
+      sortedWith: "sort",
+      sortDirections: { param: "order", descending: "desc", ascending: "asc" }
+    })
+    await place.list("jobs", { sort: [{ field: "createdAt", descending: true }] }, {})
+    await place.list("jobs", { sort: [{ field: "name" }] }, {})
+    expect(asked).toEqual([
+      "https://jobs.test/api/jobs?sort=created_at&order=desc",
+      "https://jobs.test/api/jobs?sort=name&order=asc"
+    ])
+    const newestOnly = sortingBy({ sort: "every field", sortDirections: { param: "order", descending: "desc" } })
+    expect(newestOnly.place.takes("jobs", { sort: [{ field: "name" }] })).toEqual({})
+    expect(newestOnly.place.takes("jobs", { sort: [{ field: "name", descending: true }] })).toEqual({ sort: true })
+  })
+
+  test("form 3, any field and named sorts:  a name goes as its value, a field as it is", async () => {
+    const { place, asked } = sortingBy({
+      sort: "every field",
+      sortedWith: "sort",
+      sortOrders: [{ name: "completion", as: "recency", field: "endTime" }]
+    })
+    await place.list("jobs", { sort: [{ field: "name" }] }, {})
+    await place.list("jobs", { sort: [{ field: "completion", descending: true }] }, {})
+    expect(asked).toEqual(["https://jobs.test/api/jobs?sort=name", "https://jobs.test/api/jobs?sort=recency"])
+  })
+
+  test("filtered by any field, with a field and a value:  one field at a time, the rest the engine's", async () => {
+    const { place, asked } = sortingBy({ filter: "every field", filteredWith: { field: "field", value: "value" } })
+    const one = await place.list("jobs", { filter: { status: "open" } }, {})
+    expect(one.handled.filter).toBe(true)
+    const two = await place.list("jobs", { filter: { createdAt: "2026-01-01", status: "open" } }, {})
+    expect(two.handled.filter).toBeUndefined()
+    expect(asked).toEqual([
+      "https://jobs.test/api/jobs?field=status&value=open",
+      "https://jobs.test/api/jobs?field=created_at&value=2026-01-01"
+    ])
+  })
+
+  test("`it can be ...` under the place's line:  every list's directions and field-and-value, unless its own say", async () => {
+    const asked: string[] = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      asked.push(`${input instanceof Request ? input.url : input}`)
+      return Response.json([])
+    })
+    const place = new RestPlace({
+      url: "https://jobs.test",
+      can: { sort: "every field", filter: "every field" },
+      sortDirections: { param: "order", descending: "desc", ascending: "asc" },
+      filteredWith: { field: "field", value: "value" },
+      collections: { jobs: { path: "/api/jobs{/id}" } }
+    })
+    await place.list("jobs", { sort: [{ field: "name" }] }, {})
+    await place.list("jobs", { filter: { status: "open" } }, {})
+    expect(asked).toEqual([
+      "https://jobs.test/api/jobs?sort=name&order=asc",
+      "https://jobs.test/api/jobs?field=status&value=open"
+    ])
+  })
+
+  test("what it would do is known before it's asked:  `takes()`", () => {
+    const { place } = asking()
+    expect(
+      place.takes("jobs", { filter: { status: "open" }, sort: [{ field: "createdAt", descending: true }] })
+    ).toEqual({ filter: true, sort: true })
+    expect(place.takes("jobs", { filter: { owner: "ana" } })).toEqual({})
+    expect(place.takes("notes", { filter: { status: "open" } })).toEqual({})
+  })
+
+  test("the engine sends the part a list takes, and checks the rest here, over what came back", async () => {
+    const asked: string[] = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      asked.push(`${input instanceof Request ? input.url : input}`)
+      return Response.json([
+        { id: "j-1", status: "open", owner: "ana" },
+        { id: "j-2", status: "open", owner: "bo" }
+      ])
+    })
+    const place = new RestPlace({ url: "https://jobs.test", collections: { jobs: { asks: { filter: ["status"] } } } })
+    const query = new PlaceQuery({
+      placeName: "jobs",
+      place,
+      collection: "jobs",
+      query: { filter: { status: "open", owner: "ana" } }
+    })
+    const answer = await query.answer(new AbortController().signal)
+    expect(answer.rows.map((row) => row.id)).toEqual(["j-1"])
+    expect(asked).toEqual(["https://jobs.test/jobs?status=open"])
+  })
+})
+
+describe("how many the whole query matches, as the server says (`ListAnswer.total`)", () => {
+  afterEach(() => void vi.unstubAllGlobals())
+
+  /** A place on a server answering `body` and `headers` to every read. */
+  function answering(body: unknown, headers: Record<string, string> = {}) {
+    vi.stubGlobal("fetch", async () => Response.json(body, { headers }))
+    return new RestPlace({
+      url: "https://jobs.test",
+      allCollections: { rowsAt: "items" },
+      can: { page: "offset" },
+      pageSize: 2
+    })
+  }
+
+  const TWO = [{ id: "a" }, { id: "b" }]
+
+  test("a total beside the rows, or a count header", async () => {
+    expect((await answering({ items: TWO, total: 1140 }).list("jobs", {}, {})).total).toBe(1140)
+    expect((await answering({ items: TWO, total_count: 9 }).list("jobs", {}, {})).total).toBe(9)
+    const header = await answering({ items: TWO }, { "X-Total-Count": "38161" }).list("jobs", {}, {})
+    expect(header).toMatchObject({ total: 38161 })
+    expect(header.totalIsEstimate).toBeUndefined()
+  })
+
+  test("a `count` only when it can't be this page's own:  more than its rows, or a first page with none after", async () => {
+    expect((await answering({ items: TWO, count: 50 }).list("jobs", {}, {})).total).toBe(50)
+    // a full page counting its own rows, with more after:  nothing said
+    expect((await answering({ items: TWO, count: 2 }).list("jobs", {}, {})).total).toBeUndefined()
+    expect((await answering({ items: [TWO[0]], count: 1 }).list("jobs", {}, {})).total).toBe(1)
+  })
+
+  test("only how many pages:  an estimate, pages times the page size;  a page of one, exactly", async () => {
+    const rough = await answering({ items: TWO, total_pages: 625 }).list("jobs", {}, {})
+    expect(rough).toMatchObject({ total: 1250, totalIsEstimate: true })
+    // where its last page is, to count exactly:  the place's own `at`
+    expect(rough.lastPage).toEqual({ at: "1248", size: 2, rowsBefore: 1248 })
+    const one = await answering({ items: [TWO[0]], total_pages: 1234 }).list("jobs", { page: { size: 1 } }, {})
+    expect(one.total).toBe(1234)
+    expect(one.totalIsEstimate).toBeUndefined()
+  })
+
+  test("only how many pages, counting pages:  its last page's number;  by cursor:  none", async () => {
+    vi.stubGlobal("fetch", async () => Response.json({ items: TWO, total_pages: 5 }))
+    const numbered = new RestPlace({
+      url: "https://jobs.test",
+      allCollections: { rowsAt: "items" },
+      can: { page: "offset" },
+      pageNumbers: { first: 1 },
+      pageSize: 2
+    })
+    expect((await numbered.list("jobs", {}, {})).lastPage).toEqual({ at: "5", size: 2, rowsBefore: 8 })
+    const next = { Link: '<https://jobs.test/jobs?cursor=c2>; rel="next"' }
+    vi.stubGlobal("fetch", async () => Response.json({ items: TWO, total_pages: 5 }, { headers: next }))
+    const cursor = new RestPlace({
+      url: "https://jobs.test",
+      allCollections: { rowsAt: "items" },
+      can: { page: "cursor" }
+    })
+    const answer = await cursor.list("jobs", { page: { size: 2 } }, {})
+    expect(answer).toMatchObject({ total: 10, totalIsEstimate: true })
+    expect(answer.lastPage).toBeUndefined()
+  })
+
+  test("only how many pages, on a first page with none after:  its rows, exactly", async () => {
+    const answer = await answering({ items: [TWO[0]], total_pages: 1 }).list("jobs", {}, {})
+    expect(answer.total).toBe(1)
+    expect(answer.totalIsEstimate).toBeUndefined()
+  })
+
+  test("none said:  none given", async () => {
+    expect((await answering({ items: TWO }).list("jobs", {}, {})).total).toBeUndefined()
+  })
+
+  test("a total beside rows found deeper, at a nested `rowsAt`;  its top's first", async () => {
+    vi.stubGlobal("fetch", async () => Response.json({ data: { items: TWO, total: 77 }, meta: {} }))
+    const place = new RestPlace({
+      url: "https://jobs.test",
+      allCollections: { rowsAt: "data.items" },
+      can: { page: "offset" },
+      pageSize: 2
+    })
+    expect((await place.list("jobs", {}, {})).total).toBe(77)
+    vi.stubGlobal("fetch", async () => Response.json({ data: { items: TWO, total_pages: 5 } }))
+    expect(await place.list("jobs", {}, {})).toMatchObject({ total: 10, totalIsEstimate: true })
+    vi.stubGlobal("fetch", async () => Response.json({ data: { items: TWO, total: 77 }, total: 80 }))
+    expect((await place.list("jobs", {}, {})).total).toBe(80)
   })
 })

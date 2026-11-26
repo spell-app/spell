@@ -92,7 +92,9 @@ a "recipe" is a thing
 	it lives in family cookbook
 	its "title" is text
 	its "servings" is a number or "unknown"</ui-code>
-          <table>
+          <table
+            data-align="free:  a left-aligned table;  its short cells only look like a centred column at phone width"
+          >
             <thead>
               <tr>
                 <th>The line</th>
@@ -310,8 +312,8 @@ a "recipe" is a thing
                   <ul>
                     <li>
                       A field whose schema doesn't fix its shape (any keys it likes, a <code>meta</code>) is
-                      <code>its "meta" is an object</code>: held whole, read as <code>the owner of its meta</code>.
-                      A key words can't say is read in quotes, as written: <code>the "run_by" of its meta</code>, or
+                      <code>its "meta" is an object</code>: held whole, read as <code>the owner of its meta</code>. A
+                      key words can't say is read in quotes, as written: <code>the "run_by" of its meta</code>, or
                       <code>its meta's "run_by"</code>.
                     </li>
                     <li>
@@ -319,9 +321,9 @@ a "recipe" is a thing
                       <code>a "provenance" is an object</code>, its named fields under it, typed.
                     </li>
                     <li>
-                      What's inside a row is saved under the server's own keys: a field read as <code>checked_at</code>
-                      goes back as <code>checked_at</code>, never <code>checkedAt</code>; one whose line says
-                      <code>stored as "note"</code>, as <code>note</code>.
+                      What's inside a row is saved under the server's own keys: a field read as
+                      <code>checked_at</code> goes back as <code>checked_at</code>, never <code>checkedAt</code>; one
+                      whose line says <code>stored as "note"</code>, as <code>note</code>.
                     </li>
                   </ul>
                 </li>
@@ -463,9 +465,77 @@ a "recipe" is a thing
                 </td>
               </tr>
               <tr>
+                <td>
+                  <code>jobs can be filtered by any field, with "field" and "value"</code>, or
+                  <code>it can be filtered by any field, with "field" and "value"</code>
+                </td>
+                <td>
+                  one step in under its list's line: the field and the value go as two questions,
+                  <code>every job where its status is "open"</code> sends <code>?field=status&amp;value=open</code>.
+                  One field at a time; the rest of a <code>where</code> is checked on the Spell server
+                </td>
+              </tr>
+              <tr>
                 <td><code>it sorts by title and date</code>, <code>it sorts by every field</code></td>
                 <td>
                   sorts for itself; <code>with "order"</code> added when its question isn't called <code>sort</code>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>jobs can be sorted by any field, with "sort"</code>, or
+                  <code>it can be sorted by any field, with "sort"</code>
+                </td>
+                <td>
+                  one step in under its list's line: sorts that list by any field, <code>sorted by its name</code> sends
+                  <code>?sort=name</code>, newest first <code>?sort=-created_at</code>. The older
+                  <code>it sorts by every field with "sort"</code> still reads
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  under it, <code>- newest first with "order" as "desc"</code> and
+                  <code>- oldest first with "order" as "asc"</code>
+                </td>
+                <td>
+                  says which way round in a question of its own: <code>?sort=created_at&amp;order=desc</code>. A way round
+                  no line names is sorted by Spell, over what it read
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>it sorts with "order_by"</code>, then <code>jobs can be sorted by:</code> (or
+                  <code>it can be sorted by:</code>) with one step in
+                  <code>- "completion" as "recency", by end time</code>
+                </td>
+                <td>
+                  names the sorts a list's server has values of its own for: <code>sorted by completion, newest first</code>
+                  sends <code>?order_by=recency</code>. Each runs newest first only; the other way round, Spell sorts what it
+                  read by its field. A sort's field is its value's (<code>"created_at"</code> is <code>created at</code>)
+                  unless <code>, by</code> says another; a name wins over a field of the same name. Beside
+                  <code>jobs can be sorted by any field, with "sort"</code>, the names go in its question
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>it can be sorted by:</code>, <code>it can be sorted by any field, with "sort"</code>,
+                  <code>it can be filtered by any field, with "field" and "value"</code>
+                </td>
+                <td>
+                  the same lines with <code>it</code>: one step in under a list's line, <code>it</code> is that list;
+                  under the place's line, every list. Spanish <code>se puede ordenar por:</code>,
+                  <code>se puede ordenar por cualquier campo, con "sort"</code>,
+                  <code>se puede filtrar por cualquier campo, con "field" y "value"</code>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>jobs live at "/api/jobs"</code>, then one step in <code>it filters by status</code>,
+                  <code>it sorts by created-at with "order_by"</code>, <code>it searches names with "search"</code>
+                </td>
+                <td>
+                  says what that one list takes, when its lists don't all take the same; the list's own lines win for
+                  it, the place's for the rest
                 </td>
               </tr>
               <tr>
@@ -633,6 +703,29 @@ a "recipe" is a thing
               </ul>
             </li>
             <li>
+              A sort a page holds, and a table that sets it:
+              <ul>
+                <li>
+                  <code>its "order" is a sort:  completion, newest first</code> (Spanish
+                  <code>su "orden" es un orden:  finalización, de más reciente a más antiguo</code>): a sort name or a
+                  field, and a direction, which leaves out to oldest first.
+                </li>
+                <li>
+                  <code>its "rows" is the first 50 measurements sorted by the order</code> (Spanish
+                  <code>... ordenadas según el orden</code>) follows it: a new sort reads again. A sort the server can do
+                  that way round goes to it, <code>?order_by=recency&amp;limit=50</code>; one it can't is done in the
+                  page, over the 50 it read, with no more read.
+                </li>
+                <li>
+                  <code>&lt;table sortable sort="the order"&gt;</code> shows it, and each header
+                  <code>&lt;cell sort="completion"&gt;</code> names the sort its column asks for; a header with no
+                  <code>sort</code> doesn't sort. Its first click starts the way round the server can do, if it can only
+                  one way (a named sort runs newest first); the next flips it.
+                  <code>sort</code> is the same word in every language, <code>&lt;celda sort="finalización"&gt;</code>.
+                </li>
+              </ul>
+            </li>
+            <li>
               Every saved type has <code>its created</code> and <code>its modified</code> by itself: two dates Spell
               stamps as things are saved.
               <ul>
@@ -716,6 +809,60 @@ a "recipe" is a thing
               <code>all artworks matching the search</code>, <code>artworks which match the search</code>, or a
               <code>where</code>
               looking for text in a field the server searches. The program still checks what comes back.
+            </li>
+            <li>
+              What goes in the request, and what stays in the page:
+              <ul>
+                <li>
+                  A <code>where</code> goes in parts. Each <code>its X is ...</code> on a field the list filters by goes
+                  as <code>?x=...</code>, and a search with it; the rest is checked in the page, over what came back.
+                </li>
+                <li>
+                  <code>its id is not nothing</code> is dropped (every row has an id), and so is a search for no text:
+                  with the search box empty, it's every one.
+                </li>
+                <li>
+                  <code>the first 8 jobs</code> asks for one page of 8. With a <code>where</code> left to the page,
+                  <code>the first 8 jobs where ...</code> reads page by page and stops at 8 that pass;
+                  <code>the first job where ...</code> stops at one.
+                </li>
+                <li>
+                  <code>every job where ...</code> with a part the server can't take is an error (in the editor and
+                  <code>spell lint</code>), naming that part, <code>The server doesn't support this filter: ...</code>,
+                  and the ways out: another filter, <code>, filtered here</code>, or <code>the first 20 jobs where ...</code>.
+                </li>
+                <li>
+                  To filter on the Spell server on purpose (the server matches ids exactly, or the list is small), end
+                  the read with <code>, filtered here</code> (Spanish <code>, filtrado aquí</code>): nothing of the
+                  <code>where</code> goes to the server, every row is fetched, and it's no error.
+                </li>
+                <li>
+                  A sort goes to a list that sorts by that field, or has a name for that order. A sort it can't do is
+                  an error, <code>The server doesn't support this sort: ...</code>, unless the read ends
+                  <code>, sorted here</code> (Spanish <code>, ordenado aquí</code>): then every row is fetched and sorted
+                  on the Spell server. A sort a page holds (<code>sorted by the order</code>) isn't checked: one the server can't do is done over what was read, <code>the first 50</code> sorting those 50.
+                </li>
+                <li>
+                  Text sorts one way everywhere: the page, a place that can't sort, saved answers and the ingest,
+                  capitals and accents aside (<code>apple</code> before <code>Zebra</code>).
+                </li>
+                <li>
+                  <code>the number of jobs where its status is "open"</code>, when the list filters by all of it, asks
+                  for one row and reads the server's own count (a <code>total</code> beside its rows, or a count
+                  header). A server that counts only its pages: its last page is read, for an exact count. A paged
+                  list that doesn't count at all isn't read page after page: one page is, and counted when it's the
+                  whole list; else there's no value (a tile shows its "—"). A list that doesn't page (a file, a list
+                  kept whole) is read and counted, as is a <code>where</code> left to the Spell server.
+                  <code>the number of jobs, roughly</code> (Spanish <code>el número de trabajos, más o menos</code>)
+                  takes a server's estimate, pages × page size, rather than reading its last page for an exact count.
+                </li>
+                <li>
+                  <code>spell place ingest</code> writes a list's own lines from its API description: each question
+                  named after a field of its rows is a filter, a sort question's values its orders, and its search
+                  question its search. <code>spell place verify</code> tries one filter on each list (one the server
+                  ignores is left off), which way each order goes, and which field the search looks in.
+                </li>
+              </ul>
             </li>
             <li>
               A field a server names its things by (GitHub names a person by their <code>login</code>) is their id, and
@@ -1044,7 +1191,7 @@ a "recipe" is a thing
                 <li>What works now, kind by kind: the table in <a href="#2-where">Saying where</a>.</li>
               </ul>
             </li>
-            <li>Sorting a table by asking the place; a Google Sheet's own locale.</li>
+            <li>A Google Sheet's own locale.</li>
             <li>
               Spell UI's Spanish attribute names are ASCII: <code>tamano</code>, not <code>tamaño</code>, though a tag
               can be typed with its accent (<code>&lt;botón&gt;</code>).

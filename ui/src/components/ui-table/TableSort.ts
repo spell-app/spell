@@ -89,9 +89,23 @@ export class TableSort {
     return undefined
   }
 
-  /** `header`'s `data-key`, for `ui-sorting`'s detail. */
+  /** `header`'s key, for `ui-sorting`'s detail:  its `sort` (`TableRows.sortOf()`), else its `data-key`. */
   static key(header: Element): string | undefined {
-    return header.getAttribute(UIT.TABLE_SORT_KEY) ?? undefined
+    return TableRows.sortOf(header) ?? header.getAttribute(UIT.TABLE_SORT_KEY) ?? undefined
+  }
+
+  /**
+   * The column of `table` whose header asks for `by` (its `sort`):  the lowest header row's, as `headerAt()` reads.
+   * - `undefined` when no header does.
+   */
+  static columnSortedBy(table: Element, by: string): number | undefined {
+    const shape = TableSort.shapeOf(table)
+    for (const row of shape.headerRows(table).reverse()) {
+      for (const cell of shape.cells(row)) {
+        if (shape.isHeader(cell) && TableRows.sortOf(cell) === by) return TableSort.column(table, cell)
+      }
+    }
+    return undefined
   }
 
   /**

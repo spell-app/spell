@@ -1014,6 +1014,73 @@
     },
     {
       "kind": "method",
+      "name": "sort",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "by"
+        },
+        {
+          "name": "descending"
+        }
+      ],
+      "section": "iteration",
+      "description": "A sort a page holds (`PageSort`):  `its \"order\" is a sort:  completion, newest first` starts as `core.sort(\"completion\", true)`."
+    },
+    {
+      "kind": "method",
+      "name": "sortedByValue",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "sort"
+        },
+        {
+          "name": "field"
+        }
+      ],
+      "section": "iteration",
+      "description": "`collection`, sorted by `sort`, a sort a page holds:  `the scores sorted by the order`, a list kept here."
+    },
+    {
+      "kind": "method",
+      "name": "sortShown",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "owner"
+        },
+        {
+          "name": "property"
+        }
+      ],
+      "section": "iteration",
+      "description": "The sort `owner`'s `property` holds, for a table to show:  `<ui-table sort=\"the order\">` is `\"prop:sort\": () => core.sortShown(this, \"order\")`."
+    },
+    {
+      "kind": "method",
+      "name": "nextSort",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "current"
+        },
+        {
+          "name": "by"
+        }
+      ],
+      "section": "iteration",
+      "description": "The sort after `current` once a table's header asking for `by` is clicked:"
+    },
+    {
+      "kind": "method",
       "name": "firstFew",
       "of": "core",
       "module": "collection-other",
@@ -4305,9 +4372,56 @@
         },
         {
           "name": "how"
+        },
+        {
+          "name": "until"
         }
       ],
       "description": "Every thing of `Class`, as a list, from the place it's saved in:  what `every recipe` compiles to, for a saved type."
+    },
+    {
+      "kind": "method",
+      "name": "savedThingsSortedBy",
+      "of": "core",
+      "module": "saved",
+      "waits": true,
+      "params": [
+        {
+          "name": "sort"
+        },
+        {
+          "name": "Class"
+        },
+        {
+          "name": "query"
+        },
+        {
+          "name": "how"
+        },
+        {
+          "name": "until"
+        }
+      ],
+      "description": "The things of `Class`, read from their place, in order of `sort`, a sort a page holds:  what `the first 50 measurements sorted by the order` compiles to (`core.savedThingsSortedBy(this.order, Measurement, ...)`)."
+    },
+    {
+      "kind": "method",
+      "name": "savedCount",
+      "of": "core",
+      "module": "saved",
+      "waits": true,
+      "params": [
+        {
+          "name": "Class"
+        },
+        {
+          "name": "query"
+        },
+        {
+          "name": "options"
+        }
+      ],
+      "description": "How many things of `Class` match `query`:  what `the number of jobs where its status is \"open\"` compiles to, when all of its `where` goes to the place (`NumberOfThingsWhere`)."
     },
     {
       "kind": "method",

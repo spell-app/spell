@@ -59,7 +59,7 @@
     {
       "type": "CajaDeRecetas",
       "superType": "App",
-      "defined": "/CajaDeRecetas.es.spell:619-1626"
+      "defined": "/CajaDeRecetas.es.spell:619-1641"
     },
     {
       "property": "búsqueda",
@@ -77,7 +77,7 @@
       "property": "coincidencias",
       "of": "CajaDeRecetas",
       "datatype": "list of recetas",
-      "defined": "/CajaDeRecetas.es.spell:709-803"
+      "defined": "/CajaDeRecetas.es.spell:709-818"
     },
     {
       "syntax": "agregar el borrador ((de|del) {thisArg:expression})?",
@@ -91,7 +91,7 @@
       "kind": "method",
       "name": "agregar el borrador",
       "returns": "nothing",
-      "defined": "/CajaDeRecetas.es.spell:807-969"
+      "defined": "/CajaDeRecetas.es.spell:822-984"
     }
   ],
   "codeLines": [

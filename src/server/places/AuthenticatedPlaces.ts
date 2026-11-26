@@ -10,7 +10,13 @@ import { join } from "node:path"
 
 import { putKeyOn, type KeyGoes } from "spell/places/keyGoes"
 import { PlaceToken, tokenEndOf, tokenRefreshMint, tokenServiceMint, type TokenState } from "spell/places/PlaceToken"
-import { answerFromSaved, isOffline, SAVED_ANSWER_HEADER, savedAnswerPath } from "spell/places/SavedAnswers"
+import {
+  answerFromSaved,
+  isOffline,
+  SAVED_ANSWER_HEADER,
+  savedAnswerPath,
+  type SavedAsks
+} from "spell/places/SavedAnswers"
 import { compilePattern } from "spell/util/addressPattern"
 import { CHANGE_ID_HEADER, TOKEN_HEADER } from "spell/places/WebPlace"
 import { SRV } from "spell/server"
@@ -266,7 +272,7 @@ export class AuthenticatedPlaces {
     const isGet = request.method === "GET" || request.method === "HEAD"
     // its saved answer, for a read its server won't answer:  `undefined` for none
     const saved = () =>
-      isGet && place.fixtures !== undefined ? savedAnswer(place.fixtures, `${rest}${query}`) : undefined
+      isGet && place.fixtures !== undefined ? savedAnswer(place.fixtures, `${rest}${query}`, place.asks) : undefined
     const answerSaved = (text: string) => {
       reply.status(200).noStore().set(SAVED_ANSWER_HEADER, "saved")
       reply.type("application/json")
@@ -477,6 +483,8 @@ export type AuthenticatedPlace = {
   refusal?: string
   /** Its write and action routes, under `at`:  a read only one refuses each, a `GET` too.  See `SP.ServedPlace.writes`. */
   writes?: readonly string[]
+  /** What its lines call its search and sort questions:  how its saved answers answer them.  See `SP.ServedPlace.asks`. */
+  asks?: SavedAsks
 }
 
 /** A place a request's path names, as a source finds it. */
@@ -548,12 +556,12 @@ function addressUnder(at: string, address: string): string {
 }
 
 /** The saved answer for `pathAndQuery` in `folder`, as it answers its question:  `undefined` for none. */
-async function savedAnswer(folder: string, pathAndQuery: string): Promise<string | undefined> {
+async function savedAnswer(folder: string, pathAndQuery: string, asks?: SavedAsks): Promise<string | undefined> {
   const file = savedAnswerPath(pathAndQuery)
   if (!file) return undefined
   const text = await readFile(join(folder, file), "utf8").catch(() => undefined)
   if (text === undefined) return undefined
-  return answerFromSaved(text, new URL(pathAndQuery, "http://saved.answer").searchParams)
+  return answerFromSaved(text, new URL(pathAndQuery, "http://saved.answer").searchParams, asks)
 }
 
 /** Where a page reads a place:  `/api/places/projects/@acme/jobs/jobs`. */

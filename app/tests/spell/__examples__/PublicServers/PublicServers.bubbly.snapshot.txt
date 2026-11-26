@@ -1311,6 +1311,7 @@
 |   **comments** live at _"/comments"_
 |   **jsonplaceholder users** live at _"/users"_
 |   **todos** live at _"/todos"_
+|     it filters by **user-id**
 |   a **post**'s **comments** live at _"/posts/{id}/comments"_
 |   a **jsonplaceholder user**'s **posts** live at _"/users/{id}/posts"_
 |   a **jsonplaceholder user**'s **todos** live at _"/users/{id}/todos"_
@@ -2093,7 +2094,7 @@
 |   |   set its **region** to _"Europe"_    ‾value(its region)
 |   |   set its **language** to _"fra"_    ‾value(its language)
 |   [property property_value_getter L1]
-|   | its «"countries"» is every **country** where its **region** is the **region**, sorted by its **name's common**
+|   | its «"countries"» is every **country** where its **region** is the **region**, sorted by its **name's common**, filtered here
 |   |   ⟦// The region's, looked through here:  REST Countries sends every one at once⟧
 
 |   [action to_do_something L1]

@@ -6685,6 +6685,16 @@ export interface UICellAttributes {
    */
   "prop:header"?: boolean | ""
   /**
+   * A header cell of a table with a `sort`:  the sort name or field its column asks for, `completion`, `name`.  With no `sort`, its column doesn't sort.
+   * - takes:  text
+   */
+  sort?: string
+  /**
+   * `sort`, as the DOM element's property.
+   * @deprecated write `sort` -- `prop:` stays only for compiled spell
+   */
+  "prop:sort"?: string
+  /**
    * How many columns it covers;  default 1.  Cells never span rows.
    * - takes:  number
    */
@@ -52299,13 +52309,14 @@ export interface UITableEventMap {
   "ui-editing": CustomEvent<UIT.TableEditDetail>
   /**
    * `ui-sorting`:  A header was activated;  `preventDefault()` keeps the current sort (and skips data / `client-sort` reordering).
-   * - `event.detail`:  `{ column: number, key?: string, direction: "ascending" | "descending", originalEvent?: Event }`
+   * - `event.detail`:  `{ column: number, key?: string, direction: "ascending" | "descending", sort?: TableSortValue, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-sorting": CustomEvent<{
     column: number
     key?: string
     direction: "ascending" | "descending"
+    sort?: UIT.TableSortValue
     originalEvent?: Event
   }>
 }
@@ -52630,6 +52641,17 @@ export interface UITableAttributes {
    * @deprecated write `sort-direction` -- `prop:` stays only for compiled spell
    */
   "prop:sortDirection"?: "ascending" | "descending"
+  /**
+   * The page's sort it shows and sets, `{ by, descending }` (`TableSortValue`):  the header whose `sort` is its `by` is the sorted one, so `sort-column` and `sort-direction` follow it.  A header click asks for the next (`ui-sorting`, with `sort`):  that header's again flips it, another's starts it `ascending`.  With it, a header with no `sort` doesn't sort.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  sort?: unknown
+  /**
+   * The page's sort it shows and sets, `{ by, descending }` (`TableSortValue`):  the header whose `sort` is its `by` is the sorted one, so `sort-column` and `sort-direction` follow it.  A header click asks for the next (`ui-sorting`, with `sort`):  that header's again flips it, another's starts it `ascending`.  With it, a header with no `sort` doesn't sort.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `sort` -- `prop:` stays only for compiled spell
+   */
+  "prop:sort"?: unknown
   /**
    * Slotted tables:  reorder the `tbody` rows by the sorted column's cell text on `ui-sorting` (numeric-aware).  Off, the app sorts its own rows.
    * - takes:  flag (present / absent)
@@ -52986,7 +53008,7 @@ export interface UITableAttributes {
   "on-ui-editing"?: (event: UITableEventMap["ui-editing"]) => void
   /**
    * `ui-sorting`:  A header was activated;  `preventDefault()` keeps the current sort (and skips data / `client-sort` reordering).
-   * - `event.detail`:  `{ column: number, key?: string, direction: "ascending" | "descending", originalEvent?: Event }`
+   * - `event.detail`:  `{ column: number, key?: string, direction: "ascending" | "descending", sort?: TableSortValue, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-sorting"?: (event: UITableEventMap["ui-sorting"]) => void

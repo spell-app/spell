@@ -97,7 +97,7 @@ export class ProjectPlaces implements AuthenticatedPlaceSource {
     if (!served.length) return []
     const project = projectId ?? projectIn(served[0]!.served.servedAt, served[0]!.name)
     const { deployments, refusal } = await this.deploymentsOf(project)
-    return served.map(({ name, served: { at, kind, keyNamed, keyGoes, tokenFrom, renewsAt, readOnly, writes } }) => {
+    return served.map(({ name, served: { at, kind, keyNamed, keyGoes, tokenFrom, renewsAt, readOnly, writes, asks } }) => {
       const deployed = deployments[name]
       const token = deployed?.tokenFrom ?? tokenFrom
       const fixtures = typeof deployed?.fixtures === "string" ? this.folderIn(project, deployed.fixtures) : undefined
@@ -115,7 +115,8 @@ export class ProjectPlaces implements AuthenticatedPlaceSource {
         ...(offline !== undefined && { offline }),
         ...((readOnly || deployed?.readOnly) && { readOnly: true }),
         ...(refusal !== undefined && { refusal }),
-        ...(writes && { writes })
+        ...(writes && { writes }),
+        ...(asks && { asks })
       }
     })
   }

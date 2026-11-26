@@ -65,7 +65,11 @@ import { NextPageByOffset } from "./NextPageByOffset"
 import { NextPageByNumber } from "./NextPageByNumber"
 import { NextPageByLastId } from "./NextPageByLastId"
 import { FiltersBy } from "./FiltersBy"
+import { FiltersByAnyField } from "./FiltersByAnyField"
 import { SortsBy } from "./SortsBy"
+import { NamedSort, NamedSortField, NamedSorts } from "./NamedSorts"
+import { SortsWith } from "./SortsWith"
+import { SortDirection, SortsByAnyField } from "./SortsByAnyField"
 import { GivesFieldsNamedIn } from "./GivesFieldsNamedIn"
 import { IsReadOnly } from "./IsReadOnly"
 import { WritesLike } from "./WritesLike"
@@ -900,6 +904,33 @@ places.addRule(FiltersBy, {
     }
   ]
 })
+places.addRule(FiltersByAnyField, { syntax: "{type:subject_it} can be filtered by any field ,? with {field:text} and {value:text}" })
+places.addRule(FiltersByAnyField, {
+  syntax: '{collection:plural_type} can be filtered by any field ,? with {field:text} and {value:text}',
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'cookbook is a web server at "https://cookbook.test"\n\t- recipes live at "/api/recipes"\n\t\t- recipes can be filtered by any field, with "field" and "value"',
+          [
+            "export class Cookbook extends Place {}",
+            "export const cookbook = core.place(new Cookbook(), {",
+            '  name: "cookbook",',
+            '  kind: "web server",',
+            '  at: "https://cookbook.test",',
+            "  collections: { recipes: {",
+            '    at: "/api/recipes",',
+            '    filters: "every field",',
+            '    filteredWith: { field: "field", value: "value" }',
+            "  } }",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 places.addRule(SortsBy, { syntax: "{type:subject_it} sorts by every field (with {param:text})?" })
 places.addRule(SortsBy, {
   syntax: "{type:subject_it} sorts by {fields:searched_fields} (with {param:text})?",
@@ -917,6 +948,79 @@ places.addRule(SortsBy, {
             '  at: "https://cookbook.test",',
             '  sorts: ["title", "date"],',
             '  sortedWith: "order"',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(SortsWith, { syntax: "{type:subject_it} sorts with {param:text}" })
+places.addRule(SortDirection, {
+  syntax: "((descending:newest first)|(ascending:oldest first)) with {param:text} as {value:text}"
+})
+places.addRule(SortsByAnyField, { syntax: "{type:subject_it} can be sorted by any field ,? with {param:text} {nested_statements}?" })
+places.addRule(SortsByAnyField, {
+  syntax: "{collection:plural_type} can be sorted by any field ,? with {param:text} {nested_statements}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'cookbook is a web server at "https://cookbook.test"\n\t- recipes live at "/api/recipes"\n\t\t- recipes can be sorted by any field, with "sort"\n\t\t\t- newest first with "order" as "desc"\n\t\t\t- oldest first with "order" as "asc"',
+          [
+            "export class Cookbook extends Place {}",
+            "export const cookbook = core.place(new Cookbook(), {",
+            '  name: "cookbook",',
+            '  kind: "web server",',
+            '  at: "https://cookbook.test",',
+            "  collections: { recipes: {",
+            '    at: "/api/recipes",',
+            '    sorts: "every field",',
+            '    sortedWith: "sort",',
+            "    sortDirections: {",
+            '      param: "order",',
+            '      descending: "desc",',
+            '      ascending: "asc"',
+            "    }",
+            "  } }",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(NamedSortField)
+places.addRule(NamedSort, { syntax: "{name:text} as {value:text} (, by {field:named_sort_field})?" })
+places.addRule(NamedSorts, { syntax: "{type:subject_it} can be sorted by :? {nested_statements}" })
+places.addRule(NamedSorts, {
+  syntax: "{collection:plural_type} can be sorted by :? {nested_statements}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'cookbook is a web server at "https://cookbook.test"\n\t- recipes live at "/api/recipes"\n\t\t- it sorts with "order_by"\n\t\t- recipes can be sorted by:\n\t\t\t- "creation" as "created_at"\n\t\t\t- "last cooked" as "recency", by cooked-at',
+          [
+            "export class Cookbook extends Place {}",
+            "export const cookbook = core.place(new Cookbook(), {",
+            '  name: "cookbook",',
+            '  kind: "web server",',
+            '  at: "https://cookbook.test",',
+            "  collections: { recipes: {",
+            '    sortedWith: "order_by",',
+            '    at: "/api/recipes",',
+            "    sortOrders: [{",
+            '      name: "creation",',
+            '      as: "created_at",',
+            '      field: "createdAt"',
+            "    }, {",
+            '      name: "lastCooked",',
+            '      as: "recency",',
+            '      field: "cookedAt"',
+            "    }]",
+            "  } }",
             "})"
           ]
         ]
@@ -1983,6 +2087,7 @@ places.addRule(EveryThingMatching, {
 places.addRule(FirstFewWhere, {
   syntax: "the first {number} {type:plural_type} (where:where|which|that|who) {inline_expression}?"
 })
+places.addRule(FirstFewWhere, { syntax: "the first {number} {type:plural_type}" })
 places.addRule(NumberOfThingsWhere, {
   syntax: "the number of {type:plural_type} (where:where|which|that|who) {inline_expression}?"
 })

@@ -695,6 +695,7 @@ const JSX_DETAIL_TYPES: Readonly<Record<string, string>> = {
   SidebarCloseReason: "UIT.SidebarCloseReason",
   StickyEdge: "UIT.StickyEdge",
   TableEditDetail: "UIT.TableEditDetail",
+  TableSortValue: "UIT.TableSortValue",
   ThemeChoices: "UIT.ThemeChoices",
   ToastCloseReason: "UIT.ToastCloseReason",
   TreeItemData: "UIT.TreeItemData",

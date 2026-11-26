@@ -5,12 +5,14 @@ import { SP } from "spell/parser/spell"
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
 import {
   askedByOf,
+  filtersOf as filtersOfPlace,
   isFoundByName,
   isSearchedOnly,
   isSearchedField,
   savedPlaceOfMatch,
   searchesOf
 } from "spell/parser/spell/rules/places/places.shared"
+import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 
 /**
  * `every_thing` rule:  every thing of a type the program has made, in the order made (epic page `outline-spell`, P16).
@@ -106,10 +108,10 @@ export class EveryThing extends SpellExpression<"type"> {
     const holds = () => {
       const asked = askedByOf(saved)
       if (asked.length) {
-        const said = where ? (handedFilterOf(where()) ?? []).map((part) => `${part.property.value}`) : []
+        const said = where ? (handedPartsOf(where(), [])?.filter ?? []).map(fieldOfPart) : []
         return !asked.every((field) => said.includes(field))
       }
-      return isSearchedOnly(saved) && !(where && handedSearchOf(where(), searchesOf(saved)?.fields ?? []).length)
+      return isSearchedOnly(saved) && !(where && handedPartsOf(where(), searchesOf(saved)?.fields ?? [])?.search.length)
     }
     return { message, holds }
   }
@@ -138,27 +140,91 @@ export class EveryThing extends SpellExpression<"type"> {
   /**
    * What's in the place `type` is saved in, for `match`:  `undefined` for a type kept in memory.
    * - Read off the type's record:  so a line above the type that says it's saved means the place too.
-   * - `predicate`, a `where`'s function:  each `its X is <a value>` it's made of goes to the place, as a filter, and with
-   *   all of it handed over, `first` too.
-   *   - Anything else stays here, `core.filter()`, over everything the place holds, up to the engine's ceiling.
-   *   - Each `its X includes <a value>` in it goes too, as a search, when a line under the place says it searches X
-   *     (`it searches names with "search"`, epic `data` P26):
-   *     the server narrows the read, and `core.filter()` still checks.
+   * - `predicate`, a `where`'s function, goes in parts (`handedPartsOf()`):
+   *   - each `its X is <a value>` goes to the place, as its filter:  the place sends the fields its list takes, and
+   *     checks the rest itself (`PlaceQuery`)
+   *   - each `its X includes <a value>` goes too, as a search, when a line says the list searches X
+   *     (`it searches names with "search"`, epic `data` P26):  the server narrows the read, and the page still checks
+   *   - `its id is not nothing` is dropped:  every row a place holds has its id
+   *   - the rest stays here, `core.filter()`, over what came back
+   * - All of it handed over:  `first` goes too, as a page of that many.
+   *   - With `first`, a web server's `its X is` on a field its list doesn't filter by isn't handed over:  it stays
+   *     here, so the read stops at that many (epic `data` I55).  Without, it goes, and the place checks it.
+   * - Some of it staying here, with `first`:  the read goes page by page, and stops once that many pass
+   *   (`core.savedThings()`'s `until`);  without, it reads every page, up to the engine's ceiling.
+   * - `filteredHere`:  nothing goes to the place, and every page is read (`ListFilteredHere`, `, filtered here`).
    */
+  /**
+   * How many there are of saved `type` that pass `predicate`, asked of its place, for `match`:
+   * `core.savedCount(Job, { filter: { status: "open" } })`, one row read and the server's own count of them all.
+   * - Only a web server's list, and only when all of the `where` goes to it, by the lines the compiler can see:
+   *   each `its X is` a field its list filters by.  Anything left to the page (a search too, which a server may
+   *   match more loosely than `includes`), and its count would be of rows the page then drops.
+   * - `undefined` otherwise:  every one is read and counted, as before.
+   * - `roughly`:  the place's estimate will do, `the number of jobs, roughly` (`CountRoughly`):
+   *   `core.savedCount(Job, {}, { roughly: true })`.
+   */
+  static countAST(
+    match: P.Match,
+    type: P.Match,
+    predicate?: P.ASTMethodDefinition,
+    roughly = false
+  ): P.ASTExpression | undefined {
+    const saved = savedPlaceOfMatch(type)
+    if (!saved || saved.placeType.placeKind !== "web server") return undefined
+    const parts = predicate ? handedPartsOf(predicate, searchesOf(saved)?.fields ?? []) : undefined
+    // a search is checked here too, as the server may match more loosely:  its count could be too many
+    if (predicate && !parts?.isWhole) return undefined
+    const filters = filtersOf(saved)
+    const filter = parts?.filter ?? []
+    if (!filter.every((part) => isFilteredBy(filters, part))) {
+      return undefined
+    }
+    const properties: P.ASTObjectLiteralProperty[] = []
+    if (filter.length) {
+      properties.push(queryProperty(match, "filter", new P.ASTObjectLiteral(match, { properties: filter })))
+    }
+    const query = new P.ASTObjectLiteral(match, { properties })
+    const how = new P.ASTObjectLiteral(match, {
+      properties: [
+        new P.ASTObjectLiteralProperty(match, {
+          property: "roughly" as never,
+          value: new P.ASTBooleanLiteral(match, { value: true })
+        })
+      ]
+    })
+    return new P.ASTCoreMethodInvocation(match, {
+      methodName: "savedCount",
+      args: [
+        P.matchAST<P.ASTTypeExpression>(type),
+        ...(properties.length || roughly ? [query] : []),
+        ...(roughly ? [how] : [])
+      ]
+    })
+  }
+
   static savedAST(
     match: P.Match,
     type: P.Match,
-    { predicate, first }: { predicate?: P.ASTMethodDefinition; first?: number } = {}
+    { predicate, first, filteredHere }: { predicate?: P.ASTMethodDefinition; first?: number; filteredHere?: boolean } = {}
   ): P.ASTExpression | undefined {
     const saved = savedPlaceOfMatch(type)
     if (!saved) return undefined
-    const filter = predicate && handedFilterOf(predicate)
-    const isWhole = !predicate || !!filter
+    const parts = predicate && !filteredHere ? handedPartsOf(predicate, searchesOf(saved)?.fields ?? []) : undefined
+    // a web server's list sends only the fields it filters by:  with `first`, one it doesn't stays here, so the read
+    // goes page by page and stops at that many, rather than reading every page to filter by it (epic `data` I55)
+    const isPaged = first !== undefined && saved.placeType.placeKind === "web server"
+    const filters = isPaged ? filtersOf(saved) : "every field"
+    const isTaken = (part: P.ASTObjectLiteralProperty) => isFilteredBy(filters, part)
+    const isWhole = !predicate || (!!parts?.isWhole && parts.filter.every(isTaken))
     const properties: P.ASTObjectLiteralProperty[] = []
-    if (filter) properties.push(queryProperty(match, "filter", new P.ASTObjectLiteral(match, { properties: filter })))
-    const searched = !filter && predicate ? handedSearchOf(predicate, searchesOf(saved)?.fields ?? []) : []
-    if (searched.length) {
-      properties.push(queryProperty(match, "search", new P.ASTObjectLiteral(match, { properties: searched })))
+    const { search = [] } = parts ?? {}
+    const filter = (parts?.filter ?? []).filter(isTaken)
+    if (filter.length) {
+      properties.push(queryProperty(match, "filter", new P.ASTObjectLiteral(match, { properties: filter })))
+    }
+    if (search.length) {
+      properties.push(queryProperty(match, "search", new P.ASTObjectLiteral(match, { properties: search })))
     }
     if (isWhole && first !== undefined) {
       const size = new P.ASTObjectLiteralProperty(match, {
@@ -167,26 +233,89 @@ export class EveryThing extends SpellExpression<"type"> {
       })
       properties.push(queryProperty(match, "page", new P.ASTObjectLiteral(match, { properties: [size] })))
     }
-    const read = new P.ASTCoreMethodInvocation(match, {
-      methodName: "savedThings",
-      args: [
-        P.matchAST<P.ASTTypeExpression>(type),
-        ...(properties.length ? [new P.ASTObjectLiteral(match, { properties })] : []),
-        ...(isWhole
+    const query = new P.ASTObjectLiteral(match, { properties })
+    let read: P.ASTExpression
+    if (isWhole) {
+      read = new P.ASTCoreMethodInvocation(match, {
+        methodName: "savedThings",
+        args: [P.matchAST<P.ASTTypeExpression>(type), ...(properties.length ? [query] : [])]
+      })
+    } else {
+      const looks = new P.ASTStringLiteral(match, { value: JSON.stringify("looks through") })
+      const until =
+        first === undefined
           ? []
           : [
-              ...(properties.length ? [] : [new P.ASTObjectLiteral(match, { properties: [] })]),
-              new P.ASTStringLiteral(match, { value: JSON.stringify("looks through") })
-            ])
-      ]
+              new P.ASTObjectLiteral(match, {
+                properties: [
+                  queryProperty(match, "first", new P.ASTNumericLiteral(match, { value: first })),
+                  queryProperty(match, "where", predicate!)
+                ]
+              })
+            ]
+      const reading = new P.ASTCoreMethodInvocation(match, {
+        methodName: "savedThings",
+        args: [P.matchAST<P.ASTTypeExpression>(type), query, looks, ...until]
+      })
+      // what it read up to `first` of is what passed:  the read checked each page as it came
+      read =
+        first === undefined
+          ? new P.ASTCoreMethodInvocation(match, { methodName: "filter", args: [reading, predicate!] })
+          : reading
+    }
+    HANDED_READS.set(read, { type, ...(predicate && { predicate }), ...(first !== undefined && { first }) })
+    return read
+  }
+
+  /**
+   * How many the read `savedAST()` made would read, counted by its place (`countAST()`):  `the number of jobs where
+   * its status is "open"`, `ListCount`'s.  `undefined` for anything else:  a read of the first few, or one the place
+   * doesn't do whole.
+   */
+  static countOfReadAST(match: P.Match, read: P.ASTNode, roughly = false): P.ASTExpression | undefined {
+    const made = HANDED_READS.get(read as P.ASTExpression)
+    if (!made || made.first !== undefined) return undefined
+    return EveryThing.countAST(match, made.type, made.predicate, roughly)
+  }
+
+  /**
+   * The read `savedAST()` made, made again with nothing handed to the place:  `, filtered here` after it
+   * (`ListFilteredHere`).  `undefined` for anything else.
+   */
+  static filteredHereAST(match: P.Match, read: P.ASTExpression): P.ASTExpression | undefined {
+    const made = HANDED_READS.get(read)
+    if (!made?.predicate) return undefined
+    return EveryThing.savedAST(match, made.type, { ...made, filteredHere: true })
+  }
+
+  /**
+   * The clauses of a `where` on a saved `type` its place's list can't be asked, and so are checked here, over every
+   * page:  `undefined` when none, or when it isn't a list of a paged place (a web server), or reads only the first few.
+   * - What the warning names (`where-stays-here`):  the clause as written, `its duration is over 5`.
+   * - An `its X is ...` its list doesn't filter by, by the lines the compiler can see, stays too.
+   * - A search it takes narrows the read:  none, then, as the server does the looking.
+   * - A field it's asked for by (`forecasts are asked for by their latitude and longitude`) goes, in its question.
+   */
+  static clausesStayingIn(type: P.Match, predicate: P.ASTMethodDefinition): string[] | undefined {
+    const saved = savedPlaceOfMatch(type)
+    if (!saved || saved.placeType.placeKind !== "web server") return undefined
+    const parts = handedPartsOf(predicate, searchesOf(saved)?.fields ?? [])
+    if (!parts) return undefined
+    if (parts.search.length) return undefined
+    const filters = filtersOf(saved)
+    // what it's asked for by goes in its question, as a filter does
+    const asked = askedByOf(saved)
+    const staying = [
+      ...parts.filter
+        .filter((part) => !isFilteredBy(filters, part) && !asked.includes(fieldOfPart(part)))
+        .flatMap((part) => (part.value ? [part.value] : [])),
+      ...parts.staying
+    ]
+    const said = staying.flatMap((each) => {
+      const text = clauseText(each, predicate)
+      return text ? [text] : []
     })
-    if (isWhole) return read
-    const filtered = new P.ASTCoreMethodInvocation(match, { methodName: "filter", args: [read, predicate!] })
-    if (first === undefined) return filtered
-    return new P.ASTCoreMethodInvocation(match, {
-      methodName: "firstFew",
-      args: [filtered, new P.ASTNumericLiteral(match, { value: first })]
-    })
+    return said.length ? said : undefined
   }
 
   /**
@@ -240,44 +369,40 @@ function queryProperty(match: P.Match, name: string, value: P.ASTExpression): P.
   return new P.ASTObjectLiteralProperty(match, { property: name as never, value })
 }
 
-/**
- * The parts of `predicate`, a `where`'s function, as a filter a place can be handed:  `undefined` if any part can't be.
- * - A place's filter is one thing:  this field holds this value (`ListQuery.filter`).
- * - So `its X is <a value>`, joined by `and`, where the value doesn't depend on the item.
- */
-export function handedFilterOf(predicate: P.ASTMethodDefinition): P.ASTObjectLiteralProperty[] | undefined {
-  const item = (predicate.args?.[0] as P.ASTVariableExpression | undefined)?.name
-  const expression = onlyExpressionOf(predicate.body)
-  if (!item || !expression) return undefined
-  const parts: P.ASTObjectLiteralProperty[] = []
-  const take = (written: P.ASTNode): boolean => {
-    const node = P.unparenthesized(written)
-    if (!(node instanceof P.ASTInfixExpression)) return false
-    if (node.operator === "and") return take(node.lhs) && take(node.rhs)
-    if (node.operator !== "equals") return false
-    const { lhs, rhs } = node
-    if (!(lhs instanceof P.ASTPropertyExpression) || !(lhs.object instanceof P.ASTVariableExpression)) return false
-    if (lhs.object.name !== item || mentions(rhs, item)) return false
-    parts.push(new P.ASTObjectLiteralProperty(node.match, { property: lhs.property.value as never, value: rhs }))
-    return true
-  }
-  return take(expression) ? parts : undefined
+/** What `savedAST()` made each read from, so `, filtered here` can make it again:  see `filteredHereAST()`. */
+const HANDED_READS = new WeakMap<P.ASTNode, { type: P.Match; predicate?: P.ASTMethodDefinition; first?: number }>()
+
+/** A `where`'s parts, as a place can be handed them:  see `handedPartsOf()`. */
+export type HandedParts = {
+  /** Each `its X is <a value>`:  the place's filter, `ListQuery.filter`. */
+  filter: P.ASTObjectLiteralProperty[]
+  /** Each `its X includes <a value>` on a field it searches:  `ListQuery.search`, filtered here too. */
+  search: P.ASTObjectLiteralProperty[]
+  /** Every other clause:  checked here, over what came back. */
+  staying: P.ASTNode[]
+  /** Does the filter say it all:  nothing staying, and no search to check here? */
+  isWhole: boolean
 }
 
 /**
- * The parts of `predicate`, a `where`'s function, a place that searches `fields` can be handed as a search:
- * each `its X includes <a value>`, alone or joined by `and`,
- * where X is one of `fields` and the value doesn't depend on the item.
- * - The rest of it is still checked here, all of it:  a search narrows the read, and the program decides.
+ * The parts of `predicate`, a `where`'s function, a place can be handed:  `undefined` if it isn't one expression.
+ * - Its clauses are what's joined by `and`;  each is one of:
+ *   - `its X is <a value>`, the value not depending on the item:  a filter (`ListQuery.filter` is one thing:  this
+ *     field holds this value)
+ *   - `its X includes <a value>`, X one of `fields` (what it searches, `it searches names with "search"`):  a search,
+ *     still checked here, as a server may match more loosely
+ *   - `its id is not nothing`:  dropped, as every row a place holds has its id
+ *   - anything else:  staying here
  */
-export function handedSearchOf(
-  predicate: P.ASTMethodDefinition,
-  fields: readonly string[]
-): P.ASTObjectLiteralProperty[] {
+export function handedPartsOf(predicate: P.ASTMethodDefinition, fields: readonly string[]): HandedParts | undefined {
   const item = (predicate.args?.[0] as P.ASTVariableExpression | undefined)?.name
   const expression = onlyExpressionOf(predicate.body)
-  if (!item || !expression || !fields.length) return []
-  const parts: P.ASTObjectLiteralProperty[] = []
+  if (!item || !expression) return undefined
+  const parts: HandedParts = { filter: [], search: [], staying: [], isWhole: true }
+  const ownField = (lhs: unknown): string | undefined =>
+    lhs instanceof P.ASTPropertyExpression && lhs.object instanceof P.ASTVariableExpression && lhs.object.name === item
+      ? `${lhs.property.value}`
+      : undefined
   const take = (written: P.ASTNode): void => {
     const node = P.unparenthesized(written)
     if (node instanceof P.ASTInfixExpression && node.operator === "and") {
@@ -285,16 +410,90 @@ export function handedSearchOf(
       take(node.rhs)
       return
     }
-    if (!(node instanceof P.ASTCoreMethodInvocation) || node.methodName !== "includes") return
-    const [lhs, rhs] = node.args?.args ?? []
-    if (!(lhs instanceof P.ASTPropertyExpression) || !(lhs.object instanceof P.ASTVariableExpression)) return
-    const field = `${lhs.property.value}`
-    if (lhs.object.name !== item || !rhs || mentions(rhs, item) || !isSearchedField(fields, field)) return
-    if (parts.some((part) => `${part.property.value}` === field)) return
-    parts.push(new P.ASTObjectLiteralProperty(node.match, { property: field as never, value: rhs as P.ASTExpression }))
+    if (node instanceof P.ASTInfixExpression && node.operator === "equals") {
+      const field = ownField(node.lhs)
+      if (field !== undefined && !mentions(node.rhs, item)) {
+        parts.filter.push(new P.ASTObjectLiteralProperty(node.match, { property: field as never, value: node.rhs }))
+        CLAUSE_OF_VALUE.set(node.rhs, node)
+        return
+      }
+    }
+    // every row a place holds has its id
+    if (
+      node instanceof P.ASTInfixExpression &&
+      node.operator === "not equals" &&
+      ownField(node.lhs) === ID_FIELD &&
+      node.rhs instanceof P.ASTNothingLiteral
+    ) {
+      return
+    }
+    if (node instanceof P.ASTCoreMethodInvocation && node.methodName === "includes") {
+      const [lhs, rhs] = node.args?.args ?? []
+      const field = ownField(lhs)
+      if (field !== undefined && rhs && !mentions(rhs, item) && fields.length && isSearchedField(fields, field)) {
+        if (!parts.search.some((part) => `${part.property.value}` === field)) {
+          const value = rhs as P.ASTExpression
+          parts.search.push(new P.ASTObjectLiteralProperty(node.match, { property: field as never, value }))
+        }
+        parts.isWhole = false
+        return
+      }
+    }
+    parts.staying.push(node)
+    parts.isWhole = false
   }
   take(expression)
   return parts
+}
+
+/**
+ * A clause of a `where` as written:  `its duration is over 5`.
+ * - `node`:  the clause, or a filter's value, whose clause is what holds it.
+ * - From the first to the last of what its parts matched, in the text of `predicate`, the whole `where`:
+ *   an operator's own match is only part of it, `is over 5`.
+ */
+function clauseText(node: P.ASTNode, predicate: P.ASTMethodDefinition): string {
+  const clause = CLAUSE_OF_VALUE.get(node) ?? node
+  let start = Infinity
+  let end = -Infinity
+  const take = ({ match }: P.ASTNode) => {
+    if (match?.start === undefined || match.end === undefined) return
+    start = Math.min(start, match.start)
+    end = Math.max(end, match.end)
+  }
+  take(clause)
+  P.forEachNode([clause], take)
+  const whole = predicate.match
+  const from = whole?.start
+  if (!whole || from === undefined || start === Infinity) return `${clause.match?.inputText ?? ""}`.trim()
+  return whole.inputText.slice(start - from, end - from).trim()
+}
+
+/** Each filter's value, by the clause it was said in:  `clauseText()`. */
+const CLAUSE_OF_VALUE = new WeakMap<P.ASTNode, P.ASTNode>()
+
+/**
+ * The field `part`, a part of a `where` handed to a place, is about, as the place's lines name it:  `sessionId` for
+ * `its session id is ...`, as `it filters by session-id` says it (epic `data` I65).  The part itself says `session_id`.
+ */
+function fieldOfPart(part: P.ASTObjectLiteralProperty): string {
+  return fieldNamed(`${part.property.value}`)
+}
+
+/** Does a list that filters by `filters` (`filtersOf()`) take `part` of a `where`? */
+function isFilteredBy(filters: "every field" | readonly string[], part: P.ASTObjectLiteralProperty): boolean {
+  return filters === "every field" || filters.includes(fieldOfPart(part))
+}
+
+/** The field every row a place holds has, its id. */
+const ID_FIELD = "id"
+
+/**
+ * The fields what's saved in `saved` is filtered by at its place, by the lines the compiler can see:
+ * its list's own `it filters by`, else its place's;  none said, none.
+ */
+function filtersOf(saved: P.SavedPlace): "every field" | readonly string[] {
+  return filtersOfPlace(saved) ?? []
 }
 
 /** Does `body`, a `where`'s, say one thing is two values at once:  `its title is "Ana" and its title is "Bo"` (epic `data` I13)? */

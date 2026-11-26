@@ -18,7 +18,7 @@ una "receta" es una vista:
 caja de recetas es una aplicación:
 	- su "búsqueda" es texto
 	- su "borrador" es texto
-	- sus "coincidencias" es cada receta donde su título incluye la búsqueda, ordenada por su título
+	- sus "coincidencias" es cada receta donde su título incluye la búsqueda, filtrado aquí, ordenada por su título
 	- para agregar el borrador:
 		si el borrador es "" devolver
 		agregar (una nueva receta con título = el borrador, porciones = 2) a las recetas

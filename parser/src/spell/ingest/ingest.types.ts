@@ -279,6 +279,34 @@ export type SearchSeen = {
   at?: string
 }
 
+/**
+ * What ONE list takes besides paging, said one step in under its `live at` line (epic `data` P56's way):
+ * from its OpenAPI description's questions, or seen when it was asked.
+ * - Each field by the source's name:  `job_id`.
+ * - Written as `it filters by job-id and session-id`, `it sorts with "order_by"` and `jobs can be sorted by:` with a
+ *   `- "created at" as "created_at"` under it, `it searches names with "search"`:  lines a list already reads.
+ */
+export type ListTakes = {
+  /** The fields it filters by, each asked one value:  `?job_id=...`. */
+  filters?: string[]
+  /** The filters its description gives that a try found it ignores:  left off, and kept off by every look again. */
+  ignored?: string[]
+  /** The fields it sorts by, a field's name as the sort, `-` before it the other way round:  `?_sort=title`. */
+  sorts?: string[]
+  /** What it calls its sort, when that isn't `sort`:  `order_by`. */
+  sortedWith?: string
+  /**
+   * The orders its sort question names, each a value it takes:  `order_by=created_at`.
+   * - `field`:  the field it's in order of, when the value names one;  left out, nothing says which (a `recency`),
+   *   and no line is written for it.
+   * - `descending`:  newest first;  left out, not known yet, so no line is written till a verify tries it.
+   *   Found oldest first, no line either:  a named sort runs newest first only.
+   */
+  orders?: Array<{ as: string; field?: string; descending?: boolean }>
+  /** Its search question, and the field a try found it searches:  no field, all of each thing, as far as it knows. */
+  search?: { param: string; field?: string }
+}
+
 /** One collection, as it came back. */
 export type CollectionLook = {
   /** Its name there:  the last part of its path, or a GraphQL field's. */
@@ -365,6 +393,8 @@ export type CollectionLook = {
    * says so one step in under its `live at` line.
    */
   pagesWith?: PagesWith
+  /** What it takes besides paging, said under its own line:  see `ListTakes`. */
+  takes?: ListTakes
 }
 
 /** Everything a look at a place found. */
@@ -707,11 +737,11 @@ export type CollectionDescription = {
   leftOut?: string
   /**
    * The most bytes verify and a look read of its one answer, when that's more than every other list's 2 MB:
-   * a list answered whole, too big for that, `mostBytes: 8000000`.
+   * a list answered whole, too big for that, `maxSize: 8000000`.
    * - Written by a person, in the description:  only verify and a look are held to a size;  a read through the Spell
    *   takes its answer whole.  Every look again keeps it.
    */
-  mostBytes?: number
+  maxSize?: number
   /**
    * Whether it was tried, and how it went (epic `data` P49):  a read through the Spell, or `spell place verify`.
    * - It was `readThrough`, which an older description still says:  read as this (`descriptionFromDisk()`).
@@ -728,6 +758,8 @@ export type CollectionDescription = {
    * where it isn't the place's way, its own line says it, under its `live at` line.
    */
   pagesWith?: PagesWith
+  /** What it takes besides paging, said one step in under its `live at` line:  see `ListTakes`. */
+  takes?: ListTakes
   /** Each field, by the source's name for it. */
   fields: Record<string, FieldDescription>
 }

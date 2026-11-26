@@ -663,14 +663,32 @@ class PlaceMethods:
         self._places.declare(thing, details)  # type: ignore[arg-type]
         return thing
 
-    async def saved_things(self, cls: type, query: Mapping[str, Any] | None = None, how: str | None = None) -> List:
+    async def saved_things(
+        self,
+        cls: type,
+        query: Mapping[str, Any] | None = None,
+        how: str | None = None,
+        until: Mapping[str, Any] | None = None,
+    ) -> List:
         """Every thing of `cls`, as a list, from the place it's saved in:  what `every note` compiles to.
 
         - The same list each time:  it follows this program's writes.
         - `query`:  its `filter` only, each field and the value it must be;  the rest, a page's paging, isn't Python's.
+        - `until`:  only the first `until["first"]` that pass `until["where"]`:  `the first 8 notes where ...`,
+          a list of their own.  Python's places hold things whole, so it's those of the whole list.
         - throws `PlaceError` for a place that refused, or didn't answer
         """
-        return await self._places.read(cls, (query or {}).get("filter"))
+        things = await self._places.read(cls, (query or {}).get("filter"))
+        if until is None:
+            return things
+        return self.first_few(self.filter(things, until["where"]), until["first"])  # type: ignore[attr-defined]
+
+    async def saved_count(self, cls: type, query: Mapping[str, Any] | None = None) -> int:
+        """How many things of `cls` match `query`:  `the number of notes where ...`, all of its `where` the place's.
+
+        - Python's places hold things whole, and say no count of their own:  every one, counted here.
+        """
+        return len((await self.saved_things(cls, query)).items)
 
     async def saved_thing_at(self, cls: type, place: int) -> Any:
         """The thing at `place` in `cls`'s place's order, from 1, `-1` the last:  `the first note`."""
