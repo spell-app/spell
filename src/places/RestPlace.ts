@@ -57,6 +57,9 @@ const PAST_OF: Readonly<Record<string, string>> = {
 /** How many rows it asks for at a time on a place that pages, when nobody says. */
 const REST_PAGE_SIZE = 100
 
+/** The most ids asked for in one request, by `manyAtOnceBy`:  an address with more grows past what servers take. */
+const MOST_IDS_AT_ONCE = 100
+
 /** The answers that mean "someone got there first", on a place with versions. */
 const OUT_OF_DATE_STATUSES = new Set([409, 412, 428])
 
@@ -108,7 +111,8 @@ const IS_PATH_WITH_QUERY = /^\/[^?]*\?|^\?/
  * ```
  *
  * - What it does for itself is what `can` says, and every list says so (`handled`):  the engine does the rest.
- * - Reads:  `list()` a page, `getMany()` one `GET` per id.
+ * - Reads:  `list()` a page;  `getMany()` one `GET` per id, or, given `manyAtOnceBy`, one `GET` of the list's
+ *   address for many ids at once (`?ids=r-1,r-2`;  epic `data` P57).
  *   A list under one thing is read at its own address (`ListQuery.under`):  a post's comments, `/posts/1/comments`.
  * - Paging:  the place's way, unless a collection says its own (`RestCollection.paging`, epic `data` P56).
  * - A named operation's braces:  from what's sent, else from where the thing was read (`call()`).
@@ -162,6 +166,8 @@ export class RestPlace extends WebPlace implements Place {
   private readonly fieldNames = new Map<string, FieldNames>()
   /** Fields a program named for a collection after it was made:  `addFields()`. */
   private readonly addedFields = new Map<string, Record<string, string>>()
+  /** The question its list is asked many ids with:  `RestPlaceProps.manyAtOnceBy`. */
+  private readonly manyAtOnceBy: string | undefined
 
   constructor({
     collections = {},
@@ -180,9 +186,11 @@ export class RestPlace extends WebPlace implements Place {
     sortOrders = [],
     sortDirections,
     filteredWith,
+    manyAtOnceBy,
     ...rest
   }: RestPlaceProps) {
     super(rest)
+    this.manyAtOnceBy = manyAtOnceBy
     this.namesLike = namesLike
     this.searches = searches
     this.sortOrders = sortOrders
@@ -448,11 +456,50 @@ export class RestPlace extends WebPlace implements Place {
     }
   }
 
-  /** The rows of `collection` with these ids:  one request each.  An id it doesn't hold is left out. */
+  /**
+   * The rows of `collection` with these ids.  An id it doesn't hold is left out.
+   * - One request each, at each thing's own address;
+   *   or, given `manyAtOnceBy`, several ids in one request of its list (`manyAtOnce()`).
+   * - throws `PlaceError` for an answer that means something, but "not found"
+   */
   async getMany(collection: string, ids: readonly string[], context: SelectingContext): Promise<PlaceRow[]> {
     this.refuseUnlessEnabled(collection, READ_OPERATION)
+    const { isOne } = this.mappingOf(collection)
+    if (this.manyAtOnceBy !== undefined && ids.length > 1 && !isOne) return this.manyAtOnce(collection, ids, context)
     const rows = await Promise.all(ids.map((id) => this.rowOrNothing(collection, id, context)))
     return rows.filter((row) => !!row)
+  }
+
+  /**
+   * The rows of `collection` with these ids, asked of its list with the ids joined by commas:
+   * `/recipes?ids=r-1,r-2,r-3` (`manyAtOnceBy`, epic `data` P57).
+   * - At most a page of ids a request, and never more than `MOST_IDS_AT_ONCE`:  40 ids are one request, 250 are three.
+   * - Its rows are read as a list's are:  where its rows are, its field names, its versions noted.
+   * - Only the ids asked for are kept, so a server that ignores the question costs a page, never a wrong row.
+   * - The fields wanted are asked for too, on a place that names them (`context.select`).
+   */
+  private async manyAtOnce(collection: string, ids: readonly string[], context: SelectingContext): Promise<PlaceRow[]> {
+    const paging = this.pagingOf(collection)
+    const most = Math.min(paging.most ?? paging.size, MOST_IDS_AT_ONCE)
+    const asked = this.paramsFor(collection, context.select ? { select: context.select } : {}, {})
+    const groups: string[][] = []
+    for (let start = 0; start < ids.length; start += most) groups.push(ids.slice(start, start + most))
+    const wanted = new Set(ids)
+    const { idOf } = this.capabilities
+    const answers = await Promise.all(
+      groups.map(async (group) => {
+        const data = { ...asked, [this.manyAtOnceBy!]: group.join(",") }
+        // a server that pages by its count gives its own page size unless it's told:  a whole group's worth
+        if (paging.page === "offset" && !paging.sendsNoCount) data[paging.limit] = group.length
+        const response = await this.answerTo({ url: this.pathOf(collection), urlData: {}, data }, context)
+        const rows = rowsOfAnswer(await jsonIn(response), this.mappingOf(collection).rowsAt)
+        return rows.map((row) => this.noted(collection, this.rowOf(collection, row)))
+      })
+    )
+    return answers.flat().filter((row) => {
+      const id = idOfRow(row, idOf)
+      return id !== undefined && wanted.has(id)
+    })
   }
 
   /** The version of this thing as it last read or wrote it. */
@@ -953,6 +1000,13 @@ export type RestPlaceProps = WebPlaceProps & {
   sortDirections?: RestAsks["sortDirections"]
   /** What every list calls a filter's field and value, unless its own asks say:  `RestAsks.filteredWith`. */
   filteredWith?: RestAsks["filteredWith"]
+  /**
+   * The question its list takes many ids in, joined by commas:  `ids`, for `/recipes?ids=r-1,r-2` (epic `data` P57).
+   * - A program's line:  `it gives many at once by "ids"`.
+   * - `getMany()` then asks for many things in one request, a page of ids at a time.
+   * - Left out:  one request per thing, at its own address.
+   */
+  manyAtOnceBy?: string
 }
 
 /**
@@ -1308,6 +1362,21 @@ function totalBeside(
 }
 
 /** Is this one thing's row, not a list:  a plain object? */
+/**
+ * The rows of a list's answer:  at `rowsAt`, else as they're wrapped (`rowsIn()`), else the answer itself.
+ * - Nothing there is no rows;  one row alone is a list of it.
+ * - throws `TypeError` for an answer that holds no list
+ */
+function rowsOfAnswer(body: unknown, rowsAt: string | undefined): unknown[] {
+  const held = valueAt(body, rowsAt)
+  if (held === null || held === undefined) return []
+  if (Array.isArray(held)) return held
+  const wrapped = rowsAt === undefined ? rowsIn(body)?.rows : undefined
+  if (wrapped) return wrapped
+  if (isOneRow(held)) return [held]
+  throw new TypeError(`RestPlace.getMany():  its list didn't answer with a list${rowsAt ? ` at "${rowsAt}"` : ""}`)
+}
+
 function isOneRow(value: unknown): value is PlaceRow {
   return !!value && typeof value === "object" && !Array.isArray(value)
 }

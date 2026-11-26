@@ -113,6 +113,7 @@ describe("priority and precedence", () => {
         "filters_by:  Priority.declaration",
         "filters_by_any_field:  Priority.declaration",
         "gives_fields_named_in:  Priority.declaration",
+        "gives_many_at_once:  Priority.declaration",
         "gt_lt:  Precedence.comparison",
         "has_slots:  Priority.declaration",
         "helpful_word:  priority -2",

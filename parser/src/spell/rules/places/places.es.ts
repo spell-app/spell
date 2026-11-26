@@ -101,6 +101,7 @@ import { NamedSort, NamedSortField, NamedSorts } from "./NamedSorts"
 import { SortsWith } from "./SortsWith"
 import { SortDirection, SortsByAnyField } from "./SortsByAnyField"
 import { GivesFieldsNamedIn } from "./GivesFieldsNamedIn"
+import { GivesManyAtOnce } from "./GivesManyAtOnce"
 import { IsReadOnly } from "./IsReadOnly"
 import { RowsIn } from "./RowsIn"
 import { ListsGiveOnly } from "./ListsGiveOnly"
@@ -840,7 +841,9 @@ placesEs.addRule(FiltersBy, {
     }
   ]
 })
-placesEs.addRule(FiltersByAnyField, { syntax: "{type:subject_implied} se puede filtrar por cualquier campo ,? con {field:text} y {value:text}" })
+placesEs.addRule(FiltersByAnyField, {
+  syntax: "{type:subject_implied} se puede filtrar por cualquier campo ,? con {field:text} y {value:text}"
+})
 placesEs.addRule(FiltersByAnyField, {
   syntax: `${THE}? {collection:plural_type} se pueden filtrar por cualquier campo ,? con {field:text} y {value:text}`,
   tests: [
@@ -898,7 +901,9 @@ placesEs.addRule(SortDirection, {
   syntax:
     "((descending:de más reciente a más antiguo|de mas reciente a mas antiguo)|(ascending:de más antiguo a más reciente|de mas antiguo a mas reciente)) con {param:text} como {value:text}"
 })
-placesEs.addRule(SortsByAnyField, { syntax: "{type:subject_implied} se puede ordenar por cualquier campo ,? con {param:text} {nested_statements}?" })
+placesEs.addRule(SortsByAnyField, {
+  syntax: "{type:subject_implied} se puede ordenar por cualquier campo ,? con {param:text} {nested_statements}?"
+})
 placesEs.addRule(SortsByAnyField, {
   syntax: `${THE}? {collection:plural_type} se pueden ordenar por cualquier campo ,? con {param:text} {nested_statements}?`,
   tests: [
@@ -980,6 +985,29 @@ placesEs.addRule(GivesFieldsNamedIn, {
             '  kind: "web server",',
             '  at: "https://paises.test",',
             '  fieldsNamedIn: "response_fields",',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(GivesManyAtOnce, {
+  syntax: "{type:subject_implied} da muchos a la vez por {param:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'tienda es un servidor web en "https://example.com/api"\n\t- da muchos a la vez por "ids"',
+          [
+            "export class Tienda extends Place {}",
+            "export const tienda = core.place(new Tienda(), {",
+            '  name: "tienda",',
+            '  kind: "web server",',
+            '  at: "https://example.com/api",',
+            '  manyAtOnceBy: "ids",',
             '  unclearNumbers: ","',
             "})"
           ]

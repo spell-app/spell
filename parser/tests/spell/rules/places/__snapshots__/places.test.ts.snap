@@ -24,6 +24,7 @@ exports[`testing spell module places > rule group specs > match snapshot -- if t
   "filters_by_any_field": "collection?|field|value|type?",
   "first_few_where": "number|type|where?|body?",
   "gives_fields_named_in": "type|param",
+  "gives_many_at_once": "type|param",
   "id_column": "type|column",
   "if_that_fails": "body?",
   "if_that_fails_say": "text",

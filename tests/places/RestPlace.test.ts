@@ -568,6 +568,70 @@ describe("RestPlace paging", () => {
 })
 
 ////////////////
+// ## Many at once
+////////////////
+
+describe("RestPlace.getMany(), many at once (epic `data` P57)", () => {
+  test("with no line, one request per thing, at its own address", async () => {
+    const { place, box } = await served()
+    const rows = await place.getMany("recipes", ["r-1", "r-3"], {})
+    expect(rows.map(({ id }) => id)).toEqual(["r-1", "r-3"])
+    expect(box.asks.map(({ path }) => path)).toEqual(["/recipes/r-1", "/recipes/r-3"])
+  })
+
+  test("given `manyAtOnceBy`, ONE request of its list, the ids joined, an unknown one left out", async () => {
+    const { place, box } = await served({ versions: "field" }, { manyAtOnceBy: "ids", versions: { field: "version" } })
+    const rows = await place.getMany("recipes", ["r-2", "r-4", "r-9"], {})
+    expect(rows.map(({ id }) => id)).toEqual(["r-2", "r-4"])
+    expect(rows[0]).toMatchObject({ title: "Dal" })
+    expect(box.asks).toHaveLength(1)
+    expect(box.asks[0]).toMatchObject({ path: "/recipes", query: { ids: "r-2,r-4,r-9" } })
+    expect(place.versionOf("recipes", "r-2")).toBe(`${box.recipes.get("r-2")!.version}`)
+  })
+
+  test("one id still goes to its own address", async () => {
+    const { place, box } = await served({}, { manyAtOnceBy: "ids" })
+    await place.getMany("recipes", ["r-1"], {})
+    expect(box.asks.at(-1)!.path).toBe("/recipes/r-1")
+  })
+
+  test("a page of ids at a time:  asked for by its count, on a place that pages by one", async () => {
+    const { place, box } = await served(
+      { paging: "offset" },
+      { manyAtOnceBy: "ids", can: { page: "offset" }, pageSize: 2 }
+    )
+    const rows = await place.getMany("recipes", ALL_IDS, {})
+    expect(rows.map(({ id }) => id)).toEqual(ALL_IDS)
+    expect(box.asks.map(({ query }) => query.ids)).toEqual(["r-1,r-2", "r-3,r-4", "r-5"])
+    expect(box.asks[0]!.query).toMatchObject({ limit: "2" })
+  })
+
+  test("rows wrapped in its answer are read as its lists' are;  the fields wanted are asked for", async () => {
+    const { place, box } = await served(
+      { paging: "cursor" },
+      {
+        manyAtOnceBy: "ids",
+        can: { page: "cursor", select: "every field" },
+        collections: { recipes: { rowsAt: "data", fields: { title: "name" } } }
+      }
+    )
+    const rows = await place.getMany("recipes", ["r-1", "r-5"], { select: ["title"] })
+    expect(rows).toEqual([
+      { id: "r-1", title: "Tomato soup" },
+      { id: "r-5", title: expect.any(String) }
+    ])
+    expect(box.asks.at(-1)!.query).toEqual({ ids: "r-1,r-5", fields: "name,id" })
+  })
+
+  test("a collection its line switched reading off for is refused before anything's sent", async () => {
+    const { place, box } = await served({}, { manyAtOnceBy: "ids" })
+    place.limitOperations("recipes", ["add"])
+    await expect(place.getMany("recipes", ["r-1", "r-2"], {})).rejects.toThrow(PlaceError)
+    expect(box.asks).toEqual([])
+  })
+})
+
+////////////////
 // ## Aborting
 ////////////////
 

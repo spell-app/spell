@@ -82,6 +82,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       filled from the thing sent (epic `data` P49);  each collection's enabled operations (`limitOperations()`, a
       thing's `enabled operations are ...` and its collection's switch), refused before they're sent, and
       `canWrite()` per collection;  versions, if the server has them (`If-Match`);  without, the last save wins the whole record.
+      Reading many things:  one `GET` each, at its own address;  with `manyAtOnceBy` (`it gives many at once by "ids"`,
+      epic `data` P57), one `GET` of the list for a page of them, `?ids=a,b,c`.
     - `GraphPlace`:  a plain `POST`, selecting only what's asked;  mutations named in its mapping;
       versions, if a line names their field (`versions: { field }`, sent back in an update's `input`;  epic `data` T19).
     - Their tests run in node, against [the recipe servers](../server/test/recipeServers.ts).
