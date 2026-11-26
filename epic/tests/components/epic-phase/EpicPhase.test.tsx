@@ -733,7 +733,8 @@ describe("<epic-phase> ⌥-click", () => {
 })
 
 // epic `epic-engine` I161 (Owen, 2026-10-29:  "Should show pointer when over content in these headers, drag cursor when
-// over whitespace")
+// over whitespace");  I480 (Owen, 2026-11-26:  "you don't see the drag cursor when over the phase title, only when over
+// the background"):  a to-do phase's title grabs too
 describe("<epic-phase> its title row's cursors", () => {
   /** The cursor over each piece of `phase`'s title row. */
   function cursors(phase: Element) {
@@ -747,7 +748,7 @@ describe("<epic-phase> its title row's cursors", () => {
     }
   }
 
-  test("a to-do phase on a reviewed page:  grab over the empty space, the pointer over its content", async () => {
+  test("a to-do phase on a reviewed page:  grab over its title and the empty space, the pointer over its time", async () => {
     await adoptWorking([])
     try {
       const section = await render(
@@ -757,7 +758,7 @@ describe("<epic-phase> its title row's cursors", () => {
       )
       const todo = section.querySelector("#p-todo")!
       await vi.waitFor(() => expect(todo.matches(":state(movable)")).toBe(true))
-      expect(cursors(todo)).toEqual({ space: "grab", row: "grab", chevron: "pointer", time: "pointer" })
+      expect(cursors(todo)).toEqual({ space: "grab", row: "grab", chevron: "grab", time: "pointer" })
       // done:  it never drags, and a click on its empty space folds it:  the pointer all over
       expect(cursors(section.querySelector("#p-done")!)).toEqual({
         space: "pointer",
