@@ -11,9 +11,12 @@ import { SRV } from "spell/server"
 import { BUILD_STEPS_VARIABLE, buildStepIn, type BuildStep } from "spell/app/spaces/models/buildSteps"
 import environment from "spell/app/spaces/server/node/environment"
 import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
+import * as responseUtils from "spell/app/spaces/server/node/projects/response-utils"
+import { SitePages } from "spell/app/spaces/server/node/projects/SitePages"
 import { SP } from "spell/parser/spell"
 import { projectFileIn } from "spell/parser/spell/node/projectFile"
 import { appDir } from "spell/app/spaces/server/node/people/localPerson"
+import { SitePagesBuild } from "./SitePagesBuild"
 
 /**
  * Builds spell projects when the API needs what they build:  their compiled output and scope packs are in `build/`
@@ -35,6 +38,17 @@ import { appDir } from "spell/app/spaces/server/node/people/localPerson"
  *   - only a project that's there (it has a project file):  an unknown one 404s at once
  *   - a file that's there is served at once, even if its sources changed since:
  *     `start()` and `spell compile --stale` catch those
+ * - A SITE is compiled page by page while it has no whole build (epic `editor` P46):  `SitePages`, spaces' projects'.
+ *   - What a `<spell-viewer>` asks of it (`?pages=lazy`, its declarations, words, scope pack and map) is its FRAME:
+ *     the site without its pages alone in their files;  `?page=<Class>` is one page, compiled the first time it's asked
+ *   - both by ONE child kept running, `spell compile --pages` (`SitePagesBuild`):  started as the startup compile
+ *     ends (`warmsSites`), so the first page waits for no start
+ *   - each served from the site's `__pages/` folder, by `builtFirst()` itself
+ *   - out of date by its own fingerprints, checked on each request (`SitePages.frameStaleBecause()`,
+ *     `pageStaleBecause()`):  a page edited compiles again as it's next asked for
+ *   - a whole build, once there (`spell compile`, the editor's Save), is served as before:  `<Project>.spell.js`
+ *     asked with no query compiles the whole site, as for any project
+ *   - a project the child says has no page alone in its file (`whole`) is compiled whole from then on
  * - Each step of a request's compile is told to whoever listens (`onStep()`), which the route module passes on to
  *   every open page:  `reading` as it starts, `compiling` and `checking` as `spell compile` says it reaches them
  *   (its `spell-step:` lines, `BUILD_STEPS_VARIABLE`), then `built`, or `mistakes`
@@ -78,11 +92,34 @@ export class ProjectBuild {
   /** who hears each step of a request's compile (`onStep()`) */
   private stepListeners = new Set<(step: BuildStep) => void>()
 
-  constructor({ root = CHECKOUT_ROOT, app, timeout = COMPILE_WAIT_MS, spawn = nodeSpawn }: ProjectBuildProps = {}) {
+  /** does `start()` start the sites' child as its compile ends (`SitePagesBuild.warm()`)? */
+  readonly warmsSites: boolean
+
+  /** the ONE child compiling sites page by page, kept running */
+  readonly sitePages: SitePagesBuild
+
+  /** each project the sites' child said has no page alone in its file:  compiled whole */
+  private wholeProjects = new Set<string>()
+
+  /** each site's compile by the sites' child, by what it asks, while it runs:  one at a time */
+  private pageCompiles = new Map<string, Promise<boolean>>()
+
+  constructor({
+    root = CHECKOUT_ROOT,
+    app,
+    timeout = COMPILE_WAIT_MS,
+    spawn = nodeSpawn,
+    warmsSites = true
+  }: ProjectBuildProps = {}) {
     this.root = root
     this.app = app ?? appDir()
     this.timeout = timeout
     this.spawn = spawn
+    this.warmsSites = warmsSites
+    this.sitePages = new SitePagesBuild({
+      start: () => this.startChild(["compile", "--pages"], { steps: true, stdin: true }),
+      onLine: (line) => this.lineFromChild(line)
+    })
   }
 
   /** the checkout's own `spell`:  the kit's `bin/spell.mjs`, as `root`'s install resolves it (`kitSpell()`) */
@@ -105,6 +142,8 @@ export class ProjectBuild {
     this.startup = startup
     void startup.then(() => {
       if (this.startup === startup) this.startup = undefined
+      // ready for a site's first page, once the libraries are:  it then waits for no `spell` to start
+      if (this.warmsSites) this.sitePages.warm()
     })
     return this
   }
@@ -167,22 +206,87 @@ export class ProjectBuild {
   }
 
   /**
+   * Once the startup compile is done, when project `projectId` imports what it compiles (`STARTUP_PROJECTS`):
+   * two compiles never write the same library at once.  At once otherwise.
+   */
+  private async untilLibrariesFor(projectId: string): Promise<void> {
+    const projectFile = projectFileIn(SP.SpellLocation.getProjectLocation(projectId).serverPath)
+    if (this.startup && projectFile && importsAny(projectFile, STARTUP_PROJECTS)) {
+      await within(this.startup, this.timeout / 1000)
+    }
+  }
+
+  /**
    * A route's handler, ahead of the one that serves the file:  makes sure the built file it names is there.
    * - The file is the request's URL's, `/spaces/<project>/<file>` (`projectUtils.locationForUrl()`),
    *   when that's a file spell builds (`projectUtils.isBuiltFile()`), e.g. `Solitaire.spell.js`.
    * - A bad URL goes on to the next handler, which says what's wrong.
    */
   builtFirst(): SRV.Handler {
-    return async (request, _reply, next) => {
+    return async (request, reply, next) => {
       let location: SP.SpellLocation
       try {
         location = projectUtils.locationForUrl(request.originalUrl)
       } catch {
         return next()
       }
-      if (projectUtils.isBuiltFile(location)) await this.untilBuilt(location)
+      if (!projectUtils.isBuiltFile(location)) return next()
+      const page = typeof request.query.page === "string" ? request.query.page : undefined
+      const sitePath = await this.siteFileFor(location, { page, lazy: request.query.pages === "lazy" })
+      if (sitePath) return await responseUtils.sendFile(reply, sitePath, { dotfiles: "allow" })
+      await this.untilBuilt(location)
       next()
     }
+  }
+
+  /**
+   * Where built file `location` of a site is served from while it has no whole build:  its frame's copy, or page
+   * `page`'s chunk, compiled first when it's missing or out of date (see the class);
+   * `undefined` when it's a whole build's to serve, as any project's.
+   * - `lazy`:  the program asked as a main chunk (`?pages=lazy`);  asked with neither, the program is the whole one
+   * - waits at most `timeout` ms;  then it's served as it is, maybe a 404, while the compile carries on
+   */
+  async siteFileFor(
+    location: SP.SpellLocation,
+    { page, lazy = false }: { page?: string; lazy?: boolean } = {}
+  ): Promise<string | undefined> {
+    const { projectId, file = "" } = location
+    if (this.wholeProjects.has(projectId) || !SitePages.mayBeSite(projectId)) return undefined
+    const program = SP.SpellLocation.getFileLocation(projectId, `${location.projectName}${SP.COMPILED_JS_SUFFIX}`)
+    if (existsSync(program.serverPath)) return undefined
+    if (file.endsWith(SP.COMPILED_JS_SUFFIX) && !lazy && !page) return undefined
+    const pages = new SitePages(projectId)
+    const path = page ? pages.chunkFor(page) : pages.fileFor(file)
+    const stale = page ? pages.pageStaleBecause(page) : pages.frameStaleBecause()
+    // not there with the frame up to date:  its scope pack, written once the frame's answer is sent, so asking waits
+    if (stale || !existsSync(path)) await this.untilSiteBuilt(pages, page)
+    if (this.wholeProjects.has(projectId)) return undefined
+    return path
+  }
+
+  /**
+   * Have the sites' child compile `pages`' frame, and `page` if asked:  one compile per thing asked at a time.
+   * - `true`:  written;  `false`:  not, e.g. it has no page alone in its file (then `wholeProjects`), or took too long
+   */
+  private untilSiteBuilt(pages: SitePages, page: string | undefined): Promise<boolean> {
+    const { projectId } = pages
+    const key = `${projectId}?${page ?? ""}`
+    let compile = this.pageCompiles.get(key)
+    if (!compile) {
+      this.say({ projectId, step: "reading" })
+      compile = this.untilLibrariesFor(projectId)
+        .then(() => this.sitePages.ask({ projectId, page }))
+        .then((result) => {
+          if (result === "whole") this.wholeProjects.add(projectId)
+          else if (result !== "no page") this.say({ projectId, step: result === "built" ? "built" : "mistakes" })
+          if (result !== "built" && result !== "mistakes")
+            this.log.debug(`${projectId}:  ${page ?? "frame"}, ${result}`)
+          return result === "built" || result === "mistakes"
+        })
+      this.pageCompiles.set(key, compile)
+      void compile.then(() => this.pageCompiles.delete(key))
+    }
+    return within(compile, this.timeout / 1000).then((done) => done ?? false)
   }
 
   /**
@@ -193,32 +297,8 @@ export class ProjectBuild {
    * - `steps`:  it prints each step it reaches (`BUILD_STEPS_VARIABLE`), told to `onStep()`'s listeners, not logged
    */
   private run(args: string[], { steps = false }: { steps?: boolean } = {}): Promise<number | undefined> {
-    const cli = this.cli
-    if (!cli || !existsSync(cli)) return Promise.resolve(undefined)
-    // each run its own group, from its first line shown
-    this.log.groupNext()
-    this.log.debug(`spell ${args.join(" ")}`)
-    let child: ChildProcess
-    try {
-      child = this.spawn(process.execPath, [cli, ...args], {
-        cwd: this.root,
-        // not this server's `TSX_TSCONFIG_PATH`:  the CLI registers its own `tsconfig.json`;
-        // this server's app, so a project outside the kit is known by its org's groups
-        env: {
-          ...process.env,
-          INIT_CWD: this.root,
-          SPELL_APP_DIR: this.app,
-          TSX_TSCONFIG_PATH: undefined,
-          [BUILD_STEPS_VARIABLE]: steps ? "1" : undefined
-        },
-        stdio: ["ignore", "pipe", "pipe"],
-        detached: true
-      })
-    } catch (error) {
-      this.log.error("couldn't start the compile:", error)
-      return Promise.resolve(undefined)
-    }
-    this.children.add(child)
+    const child = this.startChild(args, { steps })
+    if (!child) return Promise.resolve(undefined)
     for (const stream of [child.stdout, child.stderr]) {
       if (stream) createInterface({ input: stream }).on("line", (line) => this.lineFromChild(line))
     }
@@ -235,6 +315,43 @@ export class ProjectBuild {
         done(code ?? undefined)
       })
     })
+  }
+
+  /**
+   * Start the CLI with `args`, in the checkout, in a process group of its own (`detached`), kept for `stop()`;
+   * `undefined` when it can't, e.g. a checkout without the CLI (a test's temp folder).
+   * - `steps`:  it prints each step it reaches (`BUILD_STEPS_VARIABLE`)
+   * - `stdin`:  piped, for a child asked on it (`spell compile --pages`);  else ignored
+   */
+  private startChild(args: string[], { steps = false, stdin = false } = {}): ChildProcess | undefined {
+    const cli = this.cli
+    if (!cli || !existsSync(cli)) return undefined
+    // each run its own group, from its first line shown
+    this.log.groupNext()
+    this.log.debug(`spell ${args.join(" ")}`)
+    let child: ChildProcess
+    try {
+      child = this.spawn(process.execPath, [cli, ...args], {
+        cwd: this.root,
+        // not this server's `TSX_TSCONFIG_PATH`:  the CLI registers its own `tsconfig.json`;
+        // this server's app, so a project outside the kit is known by its org's groups
+        env: {
+          ...process.env,
+          INIT_CWD: this.root,
+          SPELL_APP_DIR: this.app,
+          TSX_TSCONFIG_PATH: undefined,
+          [BUILD_STEPS_VARIABLE]: steps ? "1" : undefined
+        },
+        stdio: [stdin ? "pipe" : "ignore", "pipe", "pipe"],
+        detached: true
+      })
+    } catch (error) {
+      this.log.error("couldn't start the compile:", error)
+      return undefined
+    }
+    this.children.add(child)
+    child.once("exit", () => this.children.delete(child))
+    return child
   }
 
   /** A line of a compile's output:  a step, told to `onStep()`'s listeners;  else logged (`COMPILE_LINES`). */
@@ -290,8 +407,15 @@ export type SpawnBuild = (command: string, args: string[], options: SpawnOptions
  * - `app`:  the app the page server runs for (default:  `appDir()`, this server's)
  * - `timeout`:  ms a request waits (default `COMPILE_WAIT_MS`)
  * - `spawn`:  starts a child (default `child_process`'s);  tests pass a stub
+ * - `warmsSites`:  start the sites' child as the startup compile ends (default `true`)
  */
-export type ProjectBuildProps = { root?: string; app?: string; timeout?: number; spawn?: SpawnBuild }
+export type ProjectBuildProps = {
+  root?: string
+  app?: string
+  timeout?: number
+  spawn?: SpawnBuild
+  warmsSites?: boolean
+}
 
 /**
  * The kit's `spell` command (`spell`'s `bin/spell.mjs`), as checkout `root`'s install resolves the kit:

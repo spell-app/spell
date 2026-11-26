@@ -44,3 +44,23 @@ describe("SP.PageChunks.split():  a built site's pages, each a chunk of its own 
     expect(SP.PageChunks.split(whole)).toEqual({ main: whole, pages: new Map() })
   })
 })
+
+describe("SP.PageChunks for a site compiled page by page (editor P46)", () => {
+  test("withLazyPages():  the frame names every page alone, after its code, so no line moves", () => {
+    const frame = SP.PageChunks.withLazyPages(COMPILED, ["Home", "Grammar"])
+    expect(frame).toMatch(/^\/\/ spell-lazy-pages: Home,Grammar$/m)
+    expect(frame.split("\n").slice(0, SITE.split("\n").length)).toEqual(SITE.split("\n"))
+    expect(frame.endsWith("// spell-lazy-pages: Home,Grammar\n//# sourceMappingURL=Guide.spell.js.map\n")).toBe(true)
+    expect(SP.PageChunks.withLazyPages(COMPILED, [])).toBe(COMPILED)
+  })
+
+  test("chunkOfPage():  a page's file under the program's imports, the first file's too", () => {
+    expect(SP.PageChunks.chunkOfPage(COMPILED, "Notes")).toBe(
+      `import { core, Page, Site, h } from "@spell/core"\nexport class Notes extends Page {}\nexport const notes = new Notes()`
+    )
+    const home = SP.PageChunks.chunkOfPage(COMPILED, "Home")!
+    expect(home.match(/^import /gm)).toHaveLength(1)
+    expect(home).toContain("export const home = new Home()")
+    expect(SP.PageChunks.chunkOfPage(COMPILED, "Missing")).toBeUndefined()
+  })
+})

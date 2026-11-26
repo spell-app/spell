@@ -33,6 +33,10 @@ export default function languageCommands(spell: Command): void {
     .option("--target <name>", 'compile to this target too, e.g. ts/solid -- default the project file\'s "targets"')
     .option("--force", "recompile the projects it imports too, even those already compiled")
     .option("--stale", "compile only the projects whose build is missing or older than what it's built from")
+    .option(
+      "--pages",
+      "keep running, compiling a site's frame and each page asked for on standard input, one by one:  the page server's"
+    )
     .addHelpText("after", PROJECT_HELP)
     .action((projects: string[], _options, command: Command) => language("compile", projects, command))
 

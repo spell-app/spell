@@ -104,12 +104,15 @@ export type TranslateTimeOptions = GlobalOptions & {
  * - `force`:  recompile the projects it imports, too, even those already compiled
  * - `stale`:  compile only the projects whose build is missing or out of date
  * - `target`:  compile to this target, this run, instead of the project file's (`SP.TARGETS`)
+ * - `pages`:  keep running, compiling a site page by page as it's asked on standard input (the app's
+ *   `SitePagesCompiler`, the page server's;  epic `editor` P46)
  */
 export type CompileOptions = GlobalOptions & {
   stdout?: boolean
   force?: boolean
   stale?: boolean
   target?: string
+  pages?: boolean
 }
 
 /**

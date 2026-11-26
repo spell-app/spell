@@ -16,6 +16,12 @@
  *   - it starts nothing (`if (!core.isCarryingOver) ...`) and imports nothing
  *   - so the first cut is by file:  a page sharing its file with another page stays in the main chunk
  * - The editor's live run stays ONE module:  carrying things over and the Thing Explorer want every class.
+ * - A site compiled page by page (epic `editor` P46) uses the same shapes, from a compile of part of the site:
+ *   - `withLazyPages(frame, names)`:  the FRAME, the site compiled without its pages alone in their files
+ *     (`SpellProject.pagesInPlay` empty), marked with every one of them, so the runner loads each as its main chunk's
+ *   - `chunkOfPage(compiled, className)`:  one page's chunk, out of a compile with that page in play
+ *   - which files stand alone is then the language's own rule, read from each file's text before it parses
+ *     (`SpellProject.headFor()`), not the cut above
  * - Pure, plain text:  imports nothing.
  ****************/
 export class PageChunks {
@@ -53,6 +59,38 @@ export class PageChunks {
       })
       .join(FILE_SEPARATOR)
     return { main: main + map, pages }
+  }
+
+  /**
+   * `frame` marked as the main chunk of a site whose pages `names` each come as a chunk of their own:
+   * `frame` as it is when `names` is empty.
+   * - The mark goes after the code, before the source map's line:  no line above it moves, so the map still holds.
+   */
+  static withLazyPages(frame: string, names: Iterable<string>): string {
+    const list = [...names]
+    if (!list.length) return frame
+    const mark = `${LAZY_PAGES_MARK}${list.join(",")}\n`
+    const mapAt = frame.search(SOURCE_MAP_LINE)
+    if (mapAt < 0) return `${frame.endsWith("\n") ? frame : `${frame}\n`}${mark}`
+    return frame.slice(0, mapAt) + mark + frame.slice(mapAt)
+  }
+
+  /**
+   * The chunk of page `className` out of `compiled`, a compile with that page in play:  its file's code, under the
+   * program's imports, as `split()` cuts one;  `undefined` when no file of `compiled` declares that page.
+   */
+  static chunkOfPage(compiled: string, className: string): string | undefined {
+    const mapAt = compiled.search(SOURCE_MAP_LINE)
+    const code = mapAt >= 0 ? compiled.slice(0, mapAt) : compiled
+    const imports = code.match(IMPORT_LINES)?.join("\n") ?? ""
+    for (const section of code.split(FILE_SEPARATOR)) {
+      const declared = [...section.matchAll(PAGE_CLASS)].some(([, name]) => name === className)
+      if (!declared) continue
+      // the first file holds the program's imports too:  the chunk gets them once
+      const own = section.replace(IMPORT_LINES, "").replace(/^\n+/, "")
+      return `${imports}\n${own}`
+    }
+    return undefined
   }
 
   /**

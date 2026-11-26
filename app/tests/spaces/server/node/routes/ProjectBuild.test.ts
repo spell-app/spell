@@ -9,6 +9,8 @@ import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vit
 import { locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
 import { SP } from "spell/parser/spell"
 import type { BuildStep } from "spell/app/spaces/models/buildSteps"
+import { compilerVersion } from "spell/app/spaces/server/node/projects/compilerCode"
+import { SitePages, sourceHashOf, type FramePrint } from "spell/app/spaces/server/node/projects/SitePages"
 import { ProjectBuild } from "spell/app/spaces/server/node/routes/ProjectBuild"
 
 ////////////////
@@ -17,6 +19,7 @@ import { ProjectBuild } from "spell/app/spaces/server/node/routes/ProjectBuild"
 
 /** A compile's child process:  output streams, `exit` when the test says. */
 class FakeChild extends EventEmitter {
+  stdin = new PassThrough()
   stdout = new PassThrough()
   stderr = new PassThrough()
   pid = 4242
@@ -159,7 +162,8 @@ describe("ProjectBuild", () => {
 
   test("while the startup compile runs:  a project importing a library waits for it first, then compiles", async () => {
     const { spawn, children } = spawnStub()
-    const build = new ProjectBuild({ root, spawn }).start()
+    // the sites' child left out:  it would start as the startup compile ends
+    const build = new ProjectBuild({ root, spawn, warmsSites: false }).start()
     const waiting = build.untilBuilt(importerCompiled)
     await new Promise((resolve) => setTimeout(resolve, 20))
     expect(spawn).toHaveBeenCalledOnce()
@@ -210,5 +214,142 @@ describe("ProjectBuild", () => {
     expect(await build.untilBuilt(compiled)).toBe(false)
     expect(spawn).toHaveBeenCalledOnce()
     children[0]!.exit(0)
+  })
+
+  ////////////////
+  // ## A site, page by page (editor P46)
+  ////////////////
+
+  describe("a site with no whole build:  its frame and each page, from the sites' child kept running", () => {
+    const siteFolder = join(root, "projects", "Site")
+    put(join(siteFolder, SP.PROJECT_FILE), JSON.stringify({ imports: [{ path: "/Home.spell", active: true }] }))
+    put(join(siteFolder, "Home.spell"), '"home" is a notebook page\n\t<header>Hi</>\n')
+    const siteId = locationForDiskPath(join(siteFolder, SP.PROJECT_FILE))!.projectId
+    const built = (suffix: string) => SP.SpellLocation.getFileLocation(siteId, `Site${suffix}`)
+    const pages = new SitePages(siteId)
+
+    afterEach(() => rmSync(pages.folder, { recursive: true, force: true }))
+
+    /** What the child would write for the frame, and page `page` if asked. */
+    function writeAsTheChild(page?: string): void {
+      const print: FramePrint = {
+        compiler: compilerVersion(),
+        imports: {},
+        sources: {
+          [SP.PROJECT_FILE]: sourceHashOf(join(siteFolder, SP.PROJECT_FILE), "whole"),
+          "Home.spell": sourceHashOf(join(siteFolder, "Home.spell"), "alone")
+        },
+        pages: { Home: "Home.spell" }
+      }
+      put(pages.framePrintFile, JSON.stringify(print))
+      put(pages.fileFor("Site.declarations.json5"), "{}")
+      put(pages.fileFor(`Site${SP.COMPILED_JS_SUFFIX}`), "// spell-lazy-pages: Home\n")
+      if (!page) return put(pages.pagePrintsFile, "{}")
+      put(pages.chunkFor(page), "export class Home {}\n")
+      const source = sourceHashOf(join(siteFolder, "Home.spell"), "whole")
+      put(
+        pages.pagePrintsFile,
+        JSON.stringify({ [page]: { frame: sourceHashOf(pages.framePrintFile, "whole"), source } })
+      )
+    }
+
+    /** The child's next request, once it's asked. */
+    async function nextRequest(child: FakeChild): Promise<{ projectId: string; page?: string }> {
+      const line = await new Promise<string>((done) => child.stdin.once("data", (data: Buffer) => done(String(data))))
+      return JSON.parse(line) as { projectId: string; page?: string }
+    }
+
+    /** Answer `request` as the child does. */
+    function answer(child: FakeChild, request: object, result: string): void {
+      child.stdout.write(`spell-pages: ${JSON.stringify({ ...request, result })}\n`)
+    }
+
+    test("start():  the sites' child starts once the startup compile ends:  `spell compile --pages`, asked on its standard input", async () => {
+      const { spawn, children } = spawnStub()
+      const build = new ProjectBuild({ root, spawn }).start()
+      children[0]!.exit(0)
+      await vi.waitFor(() => expect(spawn).toHaveBeenCalledTimes(2))
+      expect(spawn).toHaveBeenLastCalledWith(
+        process.execPath,
+        [build.cli, "compile", "--pages"],
+        expect.objectContaining({ stdio: ["pipe", "pipe", "pipe"], detached: true })
+      )
+    })
+
+    test("its declarations, first of what a <spell-viewer> asks:  the frame, compiled by the child, from its folder", async () => {
+      const { spawn, children } = spawnStub()
+      const build = new ProjectBuild({ root, spawn, warmsSites: false })
+      const steps: string[] = []
+      build.onStep(({ step }) => steps.push(step))
+      const served = build.siteFileFor(built(".declarations.json5"))
+      await vi.waitFor(() => expect(spawn).toHaveBeenCalledOnce())
+      const request = await nextRequest(children[0]!)
+      expect(request).toEqual({ projectId: siteId })
+      writeAsTheChild()
+      answer(children[0]!, request, "built")
+      expect(await served).toBe(pages.fileFor("Site.declarations.json5"))
+      expect(steps).toEqual(["reading", "built"])
+      // up to date now:  nothing asked
+      expect(await build.siteFileFor(built(SP.COMPILED_JS_SUFFIX), { lazy: true })).toBe(
+        pages.fileFor(`Site${SP.COMPILED_JS_SUFFIX}`)
+      )
+      expect(spawn).toHaveBeenCalledOnce()
+    })
+
+    test("a page's chunk (`?page=Home`):  asked for by its class, compiled once, then served as it is", async () => {
+      const { spawn, children } = spawnStub()
+      const build = new ProjectBuild({ root, spawn, warmsSites: false })
+      writeAsTheChild()
+      const served = build.siteFileFor(built(SP.COMPILED_JS_SUFFIX), { page: "Home" })
+      await vi.waitFor(() => expect(spawn).toHaveBeenCalledOnce())
+      const request = await nextRequest(children[0]!)
+      expect(request).toEqual({ projectId: siteId, page: "Home" })
+      writeAsTheChild("Home")
+      answer(children[0]!, request, "built")
+      expect(await served).toBe(pages.chunkFor("Home"))
+      expect(await build.siteFileFor(built(SP.COMPILED_JS_SUFFIX), { page: "Home" })).toBe(pages.chunkFor("Home"))
+      expect(spawn).toHaveBeenCalledOnce()
+    })
+
+    test("the child says `whole`:  compiled as any project, from then on, and never asked again", async () => {
+      const { spawn, children } = spawnStub()
+      const build = new ProjectBuild({ root, spawn, warmsSites: false })
+      const served = build.siteFileFor(built(".declarations.json5"))
+      await vi.waitFor(() => expect(spawn).toHaveBeenCalledOnce())
+      answer(children[0]!, await nextRequest(children[0]!), "whole")
+      expect(await served).toBeUndefined()
+      expect(await build.siteFileFor(built(".declarations.json5"))).toBeUndefined()
+      expect(spawn).toHaveBeenCalledOnce()
+    })
+
+    test("the child restarts (a file changed):  a new one is asked the same again", async () => {
+      const { spawn, children } = spawnStub()
+      const build = new ProjectBuild({ root, spawn, warmsSites: false })
+      const served = build.siteFileFor(built(".declarations.json5"))
+      await vi.waitFor(() => expect(spawn).toHaveBeenCalledOnce())
+      answer(children[0]!, await nextRequest(children[0]!), "restart")
+      children[0]!.exit(0)
+      await vi.waitFor(() => expect(spawn).toHaveBeenCalledTimes(2))
+      const again = await nextRequest(children[1]!)
+      expect(again).toEqual({ projectId: siteId })
+      writeAsTheChild()
+      answer(children[1]!, again, "built")
+      expect(await served).toBe(pages.fileFor("Site.declarations.json5"))
+    })
+
+    test("a whole build there, or the whole program asked (no query):  a whole build's to serve, the child never asked", async () => {
+      const { spawn } = spawnStub()
+      const build = new ProjectBuild({ root, spawn, warmsSites: false })
+      expect(await build.siteFileFor(built(SP.COMPILED_JS_SUFFIX))).toBeUndefined()
+      put(built(SP.COMPILED_JS_SUFFIX).serverPath, "export {}\n")
+      try {
+        expect(await build.siteFileFor(built(".declarations.json5"))).toBeUndefined()
+      } finally {
+        rmSync(built(SP.COMPILED_JS_SUFFIX).serverPath, { force: true })
+      }
+      // a project with no page file:  not a site
+      expect(await build.siteFileFor(compiled, { lazy: true })).toBeUndefined()
+      expect(spawn).not.toHaveBeenCalled()
+    })
   })
 })

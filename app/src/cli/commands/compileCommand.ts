@@ -42,6 +42,8 @@ import { CLI } from "spell/app/cli"
  * - With `SPELL_COMPILE_STEPS=1` in its environment (`BUILD_STEPS_VARIABLE`), it prints each step it reaches on stderr,
  *   `spell-step: compiling @spell/examples/Solitaire`:  the page server's compiles, which pass them on to the page
  *   waiting (spaces' `ProjectBuild`, epic `editor` P45).
+ * - `--pages`:  keeps running, compiling sites page by page as the page server asks on standard input:
+ *   each site's frame, then each page the first time it's visited (`CLI.SitePagesCompiler`, epic `editor` P46).
  * - Returns the exit code:  `EXIT.ERRORS` if anything had errors.
  *   Warnings, e.g. a property with no type (`SP.SpellWarnings`), are listed under the errors, never counted:
  *   a project with only warnings compiles clean, its scope pack too.
@@ -54,6 +56,11 @@ export async function compileCommand(
 ): Promise<number> {
   if (options.stale && options.stdout)
     throw new CLI.CliError("--stale writes only what's out of date;  --stdout writes nothing")
+  // the page server's:  a site page by page, as it asks on standard input (epic `editor` P46)
+  if (options.pages) {
+    if (args.length) throw new CLI.CliError("--pages takes no projects:  it reads which on standard input")
+    return await new CLI.SitePagesCompiler(session).serve()
+  }
   const resolvedProjects = await session.projects(args)
   const status = new CLI.StatusReporter(session.isInteractive)
   // printed once `status` is done, so the two don't interleave

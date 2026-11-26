@@ -164,6 +164,11 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
 - [PageChunks.ts](PageChunks.ts):  a built site's compiled program cut into its main chunk and a chunk per page alone in
   its file (epic `solid-2-final` P13), by its text alone:  the page server cuts a built file as it serves it
   (`?pages=lazy`, `?page=<Class>`), and the runner's `LazyPages` loads each page as it's first shown.
+  - A site with no whole build is compiled page by page instead (epic `editor` P46):  its FRAME, the site with its
+    pages alone in their files left out (`SpellProject.pagesInPlay` empty), marked by `withLazyPages()`;  then each
+    page's chunk, `chunkOfPage()`, out of a compile with it in play.
+    Which files stand alone is then the language's own rule, read before anything parses (`SpellProject.headFor()`).
+    The app's `SitePagesCompiler` (`spell compile --pages`) does it, for the page server.
 - [targets.ts](targets.ts):  the TARGETS spell compiles to, `SP.TARGETS`.
   Each is a language, the runtime its code runs on, and the writer that writes it.
   - Only `js/solid`'s writer is there from the start;  every other target's loads on first use (epic `solid-2-final`

@@ -108,8 +108,12 @@ export type BuildFingerprint = {
 // ## Helpers
 ////////////////
 
-/** Paths on disk of what `project` is built from, besides its imports' declarations:  see `staleBecause()`. */
-async function sourcesOf(project: SP.SpellProject): Promise<string[]> {
+/**
+ * Paths on disk of what `project` is built from, besides its imports' declarations:  see `staleBecause()`.
+ * - Its project file, its files, and those of each project it imports with `source: true`;
+ *   a site built page by page fingerprints the same files (`CLI.SitePagesCompiler`).
+ */
+export async function sourcesOf(project: SP.SpellProject): Promise<string[]> {
   const sourceImports = project.projectImports.filter((it) => it.source).map((it) => new SP.SpellProject(it.projectId))
   const sources: string[] = []
   for (const each of [project, ...sourceImports]) {
