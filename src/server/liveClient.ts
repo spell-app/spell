@@ -490,6 +490,9 @@ export function liveClient(scrollKey: string): void {
       }
       if (event === "change" && data.path)
         onChange(data.path, typeof data.html === "string" ? { html: data.html, etag: data.etag } : undefined)
+      // a rebuild after an update holds what a page loads (`BUNDLES_WAITING_EVENT`, a literal:  this function is served
+      // as it is):  a page held by it says so
+      if (event === "bundles-waiting") rebuildNotice(data as { build?: string; waiting?: boolean })
       // a route module's own event (`LiveReload.send()`):  handed on as `spell-server:<event>` on `window`,
       // its data the detail, for the page's own code to follow, e.g. a person's pref saved (`PREF_SAVED_EVENT`,
       // spell/util's persist types)
@@ -511,6 +514,66 @@ export function liveClient(scrollKey: string): void {
       const retry = opened ? 500 : wait
       setTimeout(() => connect(Math.min(retry * 2, 10_000)), retry)
     })
+  }
+
+  /** The rebuilds holding what pages load now, by the build's id (`rebuildNotice()`). */
+  const rebuilding = new Set<string>()
+  /** The box saying so, while it shows. */
+  let rebuildBox: HTMLDivElement | undefined
+  /** What looks again whether the page is still held, while a rebuild runs. */
+  let rebuildTimer: ReturnType<typeof setInterval> | undefined
+  /** How often the page looks again, while a rebuild runs, in ms:  the box shows no sooner, so a quick one never flashes it. */
+  const REBUILD_LOOK_MS = 500
+
+  /**
+   * A rebuild after an update holds what pages load, or ended (`BUNDLES_WAITING_EVENT`;  epic `editor` T178):
+   * while one runs and this page is still held by it, a small box at the top says
+   * "Spell was just updated.  Getting this page ready…";  it goes once the page is ready or every rebuild has ended.
+   * - held:  its scripts haven't all loaded (`document.readyState`), or a Spell UI element still waits for its code
+   *   (`:state(pending)`)
+   * - a page the page server serves, only:  the editor joins the channel too (`joinLiveChannel()`, no token), and its
+   *   own dev server builds what it loads
+   * - plain DOM, as the find bar is:  what's being rebuilt may be the very code that draws Spell UI's elements
+   * - outside `main`'s patching:  a live update never touches it (`data-spell-added`)
+   */
+  function rebuildNotice({ build, waiting }: { build?: string; waiting?: boolean }) {
+    if (!build || !config!.token) return
+    if (waiting) rebuilding.add(build)
+    else rebuilding.delete(build)
+    clearInterval(rebuildTimer)
+    rebuildTimer = undefined
+    if (!rebuilding.size) return showRebuild(false)
+    rebuildTimer = setInterval(() => showRebuild(isHeld()), REBUILD_LOOK_MS)
+  }
+
+  /** Is the page still waiting on code it loads:  its scripts, or a Spell UI element's? */
+  function isHeld(): boolean {
+    if (document.readyState !== "complete") return true
+    try {
+      return !!document.querySelector(":state(pending)")
+    } catch {
+      // a browser that can't ask:  only its scripts
+      return false
+    }
+  }
+
+  /** Show the rebuild's box, or take it away. */
+  function showRebuild(isShown: boolean) {
+    if (!isShown) {
+      rebuildBox?.remove()
+      rebuildBox = undefined
+      return
+    }
+    if (rebuildBox || !document.body) return
+    rebuildBox = document.createElement("div")
+    rebuildBox.dataset.spellAdded = ""
+    rebuildBox.setAttribute("role", "status")
+    rebuildBox.style.cssText =
+      "position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:2147483647;max-width:calc(100% - 32px);" +
+      "padding:8px 16px;border-radius:8px;background:Canvas;color:CanvasText;box-shadow:0 2px 10px rgb(0 0 0 / 25%);" +
+      "font:14px/1.4 system-ui,sans-serif;white-space:pre-line;text-align:center"
+    rebuildBox.textContent = "Spell was just updated.\nGetting this page ready…\nIt shows up by itself in a moment."
+    document.body.append(rebuildBox)
   }
 
   /**
@@ -1698,6 +1761,14 @@ export const LIVE_EVENTS = `${SERVER_API}/live`
 
 /** Where a live page loads its live client from (`liveClientScript()`). */
 export const LIVE_SCRIPT = `${SERVER_API}/live.js`
+
+/**
+ * The live channel's event saying a rebuild after an update holds what pages load, or has ended
+ * (`BundleBuild`;  epic `editor` T178):  `{ build, waiting }`, `build` the checkout being rebuilt.
+ * - a standing event (`LiveReload.keep()`):  a page that connects while one waits hears it too
+ * - the live client shows a box while its page is held (`rebuildNotice()`);  it writes the name as a literal
+ */
+export const BUNDLES_WAITING_EVENT = "bundles-waiting"
 
 /**
  * Where a live page asks what its scripts hold now (`WebServer.versionsOf()`),

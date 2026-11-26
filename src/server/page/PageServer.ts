@@ -196,7 +196,8 @@ export class PageServer {
     const unserved = (tab: SiteTab) =>
       tab.path.startsWith(`${COMPONENTS_PREFIX}/`) && !tab.sets?.some((set) => served.has(set))
     this.siteTabs = siteTabs?.filter((tab) => !unserved(tab))
-    this.bundles = new BundleBuild({ root: this.root })
+    // a request waiting on it tells the open pages, through live reload (epic `editor` T178)
+    this.bundles = new BundleBuild({ root: this.root, live: () => this.web.live })
     this.hashed = builtNames(this.root)
     this.web = new SRV.WebServer({
       root: this.root,
@@ -746,7 +747,7 @@ export class PageServer {
     let build = this.worktreeBuilds.get(root)
     if (build || lookOnly) return build
     try {
-      build = new BundleBuild({ root })
+      build = new BundleBuild({ root, live: () => this.web.live })
     } catch (error) {
       this.bundles.log.error(`can't read worktree ${name}'s settings:`, error)
       return undefined

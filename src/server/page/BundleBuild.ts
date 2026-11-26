@@ -38,6 +38,8 @@ import {
  *   at most `timeout` ms, then is served as usual;  a file that's there is served at once
  *   - and with none running, such a request STARTS one when a bundle lost a file (`repairIfMissing()`):
  *     nothing else notices a deletion, as no source changed (epic `epic-engine` I364)
+ * - while a request waits, every open page hears it (`BUNDLES_WAITING_EVENT`, through `live`), until the build ends:
+ *   a page held by it says "Spell was just updated.  Getting this page ready…" (the live client;  epic `editor` T178)
  * - when it ends, live reload reloads the open pages that load a bundle:  the page server watches both folders
  * - `watch()`:  and again whenever a bundle's SOURCES change while it runs (a merge into this checkout, an edit), once
  *   they've been quiet `REBUILD_QUIET_MS`:  so a merge never leaves pages on an old bundle (epic `epic-engine`, 2026-10-25:
@@ -92,10 +94,17 @@ export class BundleBuild {
   /** a source changed while the build ran:  check again once it ends */
   private again = false
 
-  constructor({ root, timeout = BUNDLE_WAIT_MS, spawn = nodeSpawn }: BundleBuildProps) {
+  /** the page server's live reload, which tells open pages a request waits on the build (`pagesWait()`) */
+  private live: () => SRV.LiveReload | undefined
+
+  /** a request waits on the build now, and the pages were told (`pagesWait()`) */
+  private isHolding = false
+
+  constructor({ root, timeout = BUNDLE_WAIT_MS, spawn = nodeSpawn, live = () => undefined }: BundleBuildProps) {
     this.root = root
     this.timeout = timeout
     this.spawn = spawn
+    this.live = live
     const settings = pageServerSettings(root)
     this.folders = settings.bundles ?? []
     this.sets = componentSets(settings)
@@ -164,11 +173,13 @@ export class BundleBuild {
       child.once("error", (error) => {
         this.log.error("the build failed to run:", error)
         this.child = undefined
+        this.pagesWait(false)
         done()
       })
       child.once("exit", (code, signal) => {
         if (code !== 0) this.log.error(`the build failed (${signal ?? `exit ${code}`});  see above`)
         this.child = undefined
+        this.pagesWait(false)
         done()
         if (this.again) {
           this.again = false
@@ -287,8 +298,27 @@ export class BundleBuild {
    */
   wait: Handler = async (request, _reply, next) => {
     if (request.method !== "GET" && request.method !== "HEAD") return next()
-    if (this.repairIfMissing(request.path)) await this.untilBuilt()
+    if (this.repairIfMissing(request.path)) {
+      if (this.child) this.pagesWait(true)
+      await this.untilBuilt()
+    }
     next()
+  }
+
+  /**
+   * Tell every open page whether a request waits on the build now (`BUNDLES_WAITING_EVENT`):  once as it starts
+   * waiting, once as the build ends;  a page that connects meanwhile hears it too (`LiveReload.keep()`).
+   * - its `build` is this checkout's folder, so a worktree's build and main's are told apart
+   * - NEVER throws
+   */
+  private pagesWait(waiting: boolean) {
+    if (waiting === this.isHolding) return
+    this.isHolding = waiting
+    const live = this.live()
+    const data = { build: this.root, waiting }
+    const key = `${SRV.BUNDLES_WAITING_EVENT}:${this.root}`
+    if (waiting) live?.keep(SRV.BUNDLES_WAITING_EVENT, data, key)
+    else live?.drop(SRV.BUNDLES_WAITING_EVENT, data, key)
   }
 
   /** The built file URL path `path` names (`places`), through the sets' and engine routes' overlays;  else `undefined`. */
@@ -331,8 +361,15 @@ export type SpawnBuild = (command: string, args: string[], options: SpawnOptions
  * - `root`:  the checkout served
  * - `timeout`:  ms a request waits (default `BUNDLE_WAIT_MS`)
  * - `spawn`:  starts the child (default `node:child_process`'s);  tests pass a stub
+ * - `live`:  the page server's live reload, asked when there's something to tell its pages (`pagesWait()`);
+ *   none:  no page is told
  */
-export type BundleBuildProps = { root: string; timeout?: number; spawn?: SpawnBuild }
+export type BundleBuildProps = {
+  root: string
+  timeout?: number
+  spawn?: SpawnBuild
+  live?: () => SRV.LiveReload | undefined
+}
 
 /**
  * The kit's `spell` command (`spell`'s `bin/spell.mjs`), as checkout `root`'s install resolves the kit:

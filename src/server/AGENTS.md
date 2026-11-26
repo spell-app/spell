@@ -123,6 +123,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - the app's `pref-saved`, when a person's pref is saved (their theme, epic `debut` P21):
         `spell-server:pref-saved` (the kit's `PREF_SAVED_EVENT` / `PREF_SAVED_PAGE_EVENT`)
       - the app's `build-step`, each step of a project made ready to run (epic `editor` P45)
+    - A STATE every page hears, those that connect later too, after their `hello` (`LiveReload.keep()` / `drop()`):
+      the kit's own `bundles-waiting` (`BUNDLES_WAITING_EVENT`), while a request waits on the bundles' rebuild
+      (`BundleBuild`);  the live client then shows a page it holds a small box, "Spell was just updated.
+      Getting this page ready…" (epic `editor` T178), plain DOM, as what's rebuilt may be what draws Spell UI
     - Each socket opens with `hello` and the server's `run` (`LiveReload.run`, also `SPELL_SERVER.run`).
       A page from an earlier run (the server restarted:  every merge into main does it) does NOT reload by itself
       (epic `epic-engine` I293;  Owen:  "can we avoid reloading the epic pages when that happens?"):

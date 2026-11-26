@@ -340,3 +340,57 @@ describe("liveClient's changes to files the page never loaded", () => {
     await page.close()
   }, 30_000)
 })
+
+// epic `editor` T178:  a rebuild after an update holds what a page loads
+describe("liveClient's box while a rebuild holds the page", () => {
+  /** A page whose element still waits for its code, as a Spell UI element does (`:state(pending)`), until `ready()`. */
+  const HELD = `<!doctype html><html><head><title>Held</title></head><body><x-held></x-held><script>
+    customElements.define("x-held", class extends HTMLElement {
+      constructor() { super(); this.internals = this.attachInternals(); this.internals.states.add("pending") }
+    })
+    window.ready = () => document.querySelector("x-held").internals.states.delete("pending")
+  </script></body></html>\n`
+
+  /** The box's words, or `null` while there's none. */
+  const box = (page: Page) =>
+    page.evaluate(() => document.querySelector<HTMLElement>('[role="status"][data-spell-added]')?.innerText ?? null)
+
+  it("says Spell was just updated while the page is held;  gone once it's ready, or the rebuild ends", async () => {
+    writeFileSync(join(root, "docs", "held.html"), HELD)
+    const page = await browser.newPage()
+    await page.goto(`http://127.0.0.1:${server.info.port}/docs/held.html`)
+    await page.waitForFunction(() => (window as { SPELL_SERVER?: { connected?: boolean } }).SPELL_SERVER?.connected)
+    const live = server.web.live!
+    live.keep("bundles-waiting", { build: root, waiting: true }, "t178")
+    await page.waitForFunction(() => !!document.querySelector('[role="status"][data-spell-added]'))
+    expect(await box(page)).toBe(
+      "Spell was just updated.\nGetting this page ready…\nIt shows up by itself in a moment."
+    )
+    await page.evaluate(() => (window as unknown as { ready(): void }).ready())
+    await page.waitForFunction(() => !document.querySelector('[role="status"][data-spell-added]'))
+    // held again, then the rebuild ends:  gone at once
+    await page.evaluate(() =>
+      (document.querySelector("x-held") as HTMLElement & { internals: ElementInternals }).internals.states.add(
+        "pending"
+      )
+    )
+    await page.waitForFunction(() => !!document.querySelector('[role="status"][data-spell-added]'))
+    live.drop("bundles-waiting", { build: root, waiting: false }, "t178")
+    await page.waitForFunction(() => !document.querySelector('[role="status"][data-spell-added]'))
+    await page.close()
+  })
+
+  it("a page that connects while the rebuild runs hears it too;  one not held shows nothing", async () => {
+    writeFileSync(join(root, "docs", "held.html"), HELD)
+    const live = server.web.live!
+    live.keep("bundles-waiting", { build: root, waiting: true }, "t178")
+    const held = await browser.newPage()
+    await held.goto(`http://127.0.0.1:${server.info.port}/docs/held.html`)
+    await held.waitForFunction(() => !!document.querySelector('[role="status"][data-spell-added]'))
+    const plain = await opened()
+    await plain.waitForTimeout(1200)
+    expect(await box(plain)).toBeNull()
+    live.drop("bundles-waiting", { build: root, waiting: false }, "t178")
+    await Promise.all([held.close(), plain.close()])
+  })
+})

@@ -60,6 +60,31 @@ describe("LiveReload", () => {
     live.close()
   })
 
+  // epic `editor` T178:  a page that connects while a rebuild holds what pages load hears it too
+  it("keeps a state for pages that connect later, after `hello`, until it's dropped", async () => {
+    mkdirSync(join(temp, "keep"), { recursive: true })
+    const web = new SRV.WebServer({ root: join(temp, "keep"), mounts: [], live: true })
+    const { port } = await web.listen({ port: 0 })
+    /** the events a page connecting now hears in its first 200ms:  `hello`, then what stands */
+    const heard = async (): Promise<string[]> => {
+      const socket = new WebSocket(`ws://127.0.0.1:${port}${SRV.LIVE_EVENTS}`)
+      const events: string[] = []
+      socket.addEventListener("message", ({ data }) => {
+        const { event, data: detail } = JSON.parse(String(data)) as { event: string; data: { waiting?: boolean } }
+        events.push(event === "hello" ? event : `${event} ${detail.waiting}`)
+      })
+      await new Promise((done) => socket.addEventListener("open", done))
+      await new Promise((done) => setTimeout(done, 200))
+      socket.close()
+      return events
+    }
+    web.live!.keep("bundles-waiting", { waiting: true }, "a")
+    expect(await heard()).toEqual(["hello", "bundles-waiting true"])
+    web.live!.drop("bundles-waiting", { waiting: false }, "a")
+    expect(await heard()).toEqual(["hello"])
+    await web.close()
+  })
+
   // epic `epic-engine` P40:  the page that shows it patches itself without fetching it
   it("sends a page's change WITH the page, as `pages` renders it;  anything else alone", async () => {
     mkdirSync(join(temp, "push"), { recursive: true })

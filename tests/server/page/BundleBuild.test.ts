@@ -86,10 +86,15 @@ describe("BundleBuild", () => {
     put(root, "guides/page.html", "<p>page</p>")
   })
 
+  /** what the build tells open pages, through the page server's live reload (`keep()`, `drop()`) */
+  let live: { keep: ReturnType<typeof vi.fn>; drop: ReturnType<typeof vi.fn> }
+
   /** a page server's shape:  the wait before the static files, the sets' overlay;  `timeout` ms per wait */
   async function serve(timeout?: number): Promise<number> {
     child = new FakeChild()
-    build = new BundleBuild({ root, timeout, spawn: spawnOf(child) })
+    live = { keep: vi.fn(), drop: vi.fn() }
+    const pages = () => live as unknown as SRV.LiveReload
+    build = new BundleBuild({ root, timeout, spawn: spawnOf(child), live: pages })
     web = new SRV.WebServer({ root, mounts: [{ prefix: "/", dir: root }] })
     web.files.overlays.push((path) => componentSetPath(path, componentSets({ componentSets: SETS })))
     web.router.use(build.wait)
@@ -138,6 +143,25 @@ describe("BundleBuild", () => {
     child.exit(0)
     expect(await waiting).toMatchObject({ status: 200, text: "export const NEW = 1" })
     expect(build.isBuilding).toBe(false)
+  })
+
+  // epic `editor` T178:  a page held by it says "Spell was just updated.  Getting this page ready…"
+  test("a request waiting on the build tells every open page, once, until the build ends;  one that waits on nothing doesn't", async () => {
+    const port = await serve()
+    quiet()
+    expect((await ask(port, "GET", "/components/ui/_assets/missing.js")).status).toBe(404)
+    expect(live.keep).not.toHaveBeenCalled()
+    build.start()
+    const key = `${SRV.BUNDLES_WAITING_EVENT}:${root}`
+    const first = ask(port, "GET", "/components/ui/_assets/site.js")
+    const second = ask(port, "GET", "/components/ui/_assets/other.js")
+    await vi.waitFor(() => expect(live.keep).toHaveBeenCalledTimes(1))
+    expect(live.keep).toHaveBeenCalledWith(SRV.BUNDLES_WAITING_EVENT, { build: root, waiting: true }, key)
+    expect(live.drop).not.toHaveBeenCalled()
+    child.exit(0)
+    await Promise.all([first, second])
+    expect(live.keep).toHaveBeenCalledTimes(1)
+    expect(live.drop).toHaveBeenCalledExactlyOnceWith(SRV.BUNDLES_WAITING_EVENT, { build: root, waiting: false }, key)
   })
 
   test("a wait gives up after `timeout` ms:  the request is answered as it stands", async () => {

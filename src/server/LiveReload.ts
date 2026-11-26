@@ -20,6 +20,7 @@ import { acceptWebSocket, pingFrame, textFrame } from "./webSocket"
  *     `{ path, html, etag }` (`pages`, `PAGE_LIMIT`;  epic `epic-engine` P40), so the page that shows it patches
  *     itself without fetching it
  * - a page's socket opens with `{ event: "hello", data: { run } }`:  this server's `run`
+ *   - then each state kept for pages that connect later (`keep()`)
  *   - a page served by an EARLIER run (the server restarted:  a merge changed its code) reloads,
  *     so it gets the new `/api/server/live.js` and write token
  * - websockets, not server-sent events:  an `EventSource` holds one of Chrome's 6 connections per host for good,
@@ -86,6 +87,7 @@ export class LiveReload {
   events: UpgradeHandler = (raw, socket) => {
     if (!acceptWebSocket(raw, socket)) return
     socket.write(textFrame(JSON.stringify({ event: "hello", data: { run: this.run } })))
+    for (const { event, data } of this.standing.values()) socket.write(textFrame(JSON.stringify({ event, data })))
     this.clients.add(socket)
     socket.on("close", () => this.clients.delete(socket))
   }
@@ -173,6 +175,25 @@ export class LiveReload {
   send(event: string, data: unknown): void {
     this.write(textFrame(JSON.stringify({ event, data })))
   }
+
+  /**
+   * Send event `event` with JSON `data` to every page now, AND to every page that connects from now on, after its
+   * `hello`, until `drop()`:  a state, not a moment, e.g. a rebuild holding what pages load (epic `editor` T178).
+   * - `key`:  which state it is, so several of one event stand at once (one per checkout's rebuild);  default `event`
+   */
+  keep(event: string, data: unknown, key = event): void {
+    this.standing.set(key, { event, data })
+    this.send(event, data)
+  }
+
+  /** The state `key` is over:  `event` with `data` goes to every page now, and to none that connects later. */
+  drop(event: string, data: unknown, key = event): void {
+    this.standing.delete(key)
+    this.send(event, data)
+  }
+
+  /** what every page hears as its socket opens, after `hello` (`keep()`), by key */
+  private standing = new Map<string, { event: string; data: unknown }>()
 
   /** stop watching, close every socket */
   close(): void {
