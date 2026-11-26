@@ -7,6 +7,7 @@ import { fmtConfig, packageLint } from "spell/toolchain/lint"
 import { KeeperLink } from "spell/server/KeeperLink"
 import environment from "spell/app/spaces/server/node/environment"
 import { editorPageFor } from "spell/app/spaces/server/node/routes/editorPaths"
+import { moreSpacesFrom, orgGroupFolders } from "spell/app/spaces/server/node/spellSpacesDir"
 import { appConfig, pageServerProxy } from "./vite.shared.ts"
 
 /** Name of the runtime's entry in a build:  `dist/spell-runtime.js` -- see `editor.loadRuntime()`. */
@@ -146,7 +147,8 @@ function runPageInDev(): Plugin {
     configureServer(server) {
       server.middlewares.use((request, response, next) => {
         const url = request.url ?? ""
-        const page = editorPageFor(url.split("?")[0]!)
+        // a group's own page:  the more spaces file read again, as this server outlives the page server's restarts
+        const page = editorPageFor(url.split("?")[0]!, orgGroupFolders(moreSpacesFrom()))
         if (request.method !== "GET" || page === "index.html" || !/text\/html/.test(request.headers.accept ?? "")) {
           return next()
         }

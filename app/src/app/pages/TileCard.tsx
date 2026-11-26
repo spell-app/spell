@@ -50,7 +50,14 @@ export function TileCard(props: TileCardProps) {
           when={props.edit}
           fallback={
             <span class="text">
-              <span class="title">{props.title}</span>
+              <span class="title">
+                {props.title}
+                <Show when={props.badge}>
+                  <ui-label class="badge" size="small" appearance="basic">
+                    {props.badge}
+                  </ui-label>
+                </Show>
+              </span>
               <Show when={props.line}>
                 <span class="description">{props.line}</span>
               </Show>
@@ -158,6 +165,8 @@ export type TileCardProps = {
   title: string
   /** The quiet line under its title. */
   line?: string
+  /** A small label after its title:  a group's own page's, "Group page" (epic `editor` P47). */
+  badge?: string
   /** What its tile's hue comes from:  a project's path, a page's name. */
   hueFrom: string
   /** A picture in place of its tile:  a page's screenshot. */

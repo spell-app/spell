@@ -4,6 +4,7 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { beforeNextPaint } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
+import { SPACES } from "spell/app/spaces"
 import {
   Actions,
   AppBarMenus,
@@ -63,6 +64,7 @@ import { NotebookHeader } from "spell/app/app/solid/notebook/NotebookHeader"
 import { NotebookPage } from "spell/app/app/solid/notebook/NotebookPage"
 import { editorHotkeys } from "./editorHotkeys"
 import { followRoute } from "./followRoute"
+import { PageViews } from "./pageViews"
 import type { EditorPage } from "./pages.types"
 
 import "./SpellEditor.css"
@@ -695,15 +697,32 @@ const INSPECT_APP_ID = "InspectApp"
  *   so switching between Run and Edit, or between files, doesn't redraw the page.
  * - Nothing stays selected in Run:  its ants would sit over the app alone (Owen, 2026-11-07).
  *   - So the switch to Run lets go of what's selected, as the address leaves for `/run/` (`letGoForRun()`).
+ * - An org's or an org group's address alone (`/edit/@acme`, `/run/@acme/org-spell`):  its page, `<GroupPage>`
+ *   (epic `editor` P47, Q99):  the editor never jumps from a group to its first project's file.
  ****************/
 export function ProjectPageRoute(props: RouteSectionProps) {
-  const page = (): EditorPage => (props.params.page === RUN_PAGE ? "runner" : "editor")
-  const isDesigning = () => props.params.page === DESIGN_PAGE
-  followRoute(() => props.params, page, isDesigning)
+  // an org's or an org group's address alone, `/edit/@acme`, `/run/@acme/org-spell`:  its page, never a file (P47)
+  const orgPage = () => SPACES.orgPageFor(props.params.address ?? "")
+  return (
+    <Show when={orgPage()} keyed fallback={<EditorRoute route={props} />}>
+      {(page) => <GroupPage page={page} mode={props.params.page === RUN_PAGE ? "run" : "edit"} />}
+    </Show>
+  )
+}
+
+/** `<ProjectPageRoute>`'s editor:  the project or file its address names, in Edit, Design or Run. */
+function EditorRoute(props: { route: RouteSectionProps }) {
+  const params = () => props.route.params
+  const page = (): EditorPage => (params().page === RUN_PAGE ? "runner" : "editor")
+  const isDesigning = () => params().page === DESIGN_PAGE
+  followRoute(params, page, isDesigning)
   useBeforeLeave(letGoForRun)
   useBeforeLeave(askBeforeLeavingExample)
   return <SpellEditor mode={page() === "runner" ? "run" : isDesigning() ? "design" : "edit"} />
 }
+
+/** `<GroupPage>`, loaded the first time an org's or a group's page shows (`PageViews`). */
+const GroupPage = PageViews.group.view("GroupPage")
 
 /**
  * Let go of what's selected when the address is leaving for Run (`/run/...`), from any other page.

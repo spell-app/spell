@@ -1,15 +1,13 @@
+import { existsSync, readdirSync } from "fs"
 import { basename, delimiter, dirname, join, resolve } from "path"
 import { fileURLToPath } from "url"
 
 // The server's checkout finder, node built-ins only:  the main checkout from any worktree.
 import { checkoutOf } from "spell/server/checkout"
 // the more spaces file's reader, node built-ins and json5 only
-import {
-  MORE_SPACES_FILE,
-  moreSpacesInFile,
-  servedSpaces,
-  type MoreSpaces
-} from "spell/server/MoreSpaces"
+import { MORE_SPACES_FILE, moreSpacesInFile, servedSpaces, type MoreSpaces } from "spell/server/MoreSpaces"
+// constants only, from a module that imports nothing:  by its `.ts` name, as the app's Vite config loads this in plain node
+import { GROUP_PAGE_PROJECT } from "spell/app/spaces/models/spaceNames.ts"
 
 export type { MoreSpaces }
 
@@ -17,7 +15,8 @@ export type { MoreSpaces }
  * Where this checkout is, and where spell.spaces is:  the part of `environment` that loads anywhere.
  * - Apart from `environment` because that file reads `import.meta.resolve`, which Vitest's global setup can't run:
  *   the check of the real space after a test run (`tests/realSpaceCheck.ts`) needs only this.
- * - NEVER imports anything of spell-app's.
+ * - NEVER imports anything of spell-app's but one constant, from a module that imports nothing (`spaceNames.ts`):
+ *   the app's Vite config loads it too, for an org group's page (`orgGroupFolders()`).
  * - Reads the MORE SPACES folders too (`moreSpaces`):  the orgs this machine serves from folders of their own.
  */
 
@@ -95,4 +94,69 @@ export const moreSpaces: MoreSpaces[] = moreSpacesFrom()
  */
 export function spacesDirForOrg(org: string, more: MoreSpaces[] = moreSpaces, spaces = spellSpacesDir): string {
   return more.find((each) => each.orgs.includes(org))?.dir ?? spaces
+}
+
+////////////////
+// ## An org group's own page
+////////////////
+
+/**
+ * What the editor's servers ask of an org group's address on disk, to pick the page it opens (`editorPageFor()`):
+ * `orgGroupFolders(more)` answers from the spaces folders serving each org (`spacesDirForOrg()`).
+ * - `more`:  default this program's own (`moreSpaces`);  the editor's dev server passes the file read again
+ *   (`moreSpacesFrom()`), as it outlives the page server that started it.
+ */
+export function orgGroupFolders(more: MoreSpaces[] = moreSpaces): OrgGroupFolders {
+  return {
+    isGroup: (group) => isOrgGroup(group, more),
+    hasOwnPage: (group) => groupHasOwnPage(group, more)
+  }
+}
+
+/** What `orgGroupFolders()` answers, for an org group's address, `@acme/org-spell`. */
+export type OrgGroupFolders = {
+  /** is it an org's group:  a folder of projects, not a project itself */
+  isGroup: (group: string) => boolean
+  /** does it hold its own page (`groupHasOwnPage()`) */
+  hasOwnPage: (group: string) => boolean
+}
+
+/**
+ * Is `group`, `@acme/org-spell`, an org's GROUP on disk:  a folder in the org's, not a project itself (no project
+ * file), holding at least one project?  As the page server finds them (`orgGroupsIn()`).
+ * - `false` for an address that isn't `@<org>/<group>`.  NEVER throws.
+ */
+export function isOrgGroup(group: string, more: MoreSpaces[] = moreSpaces): boolean {
+  const folder = groupFolder(group, more)
+  if (!folder || !existsSync(folder) || existsSync(join(folder, PROJECT_FILE))) return false
+  try {
+    return readdirSync(folder, { withFileTypes: true }).some(
+      (entry) => entry.isDirectory() && existsSync(join(folder, entry.name, PROJECT_FILE))
+    )
+  } catch {
+    return false
+  }
+}
+
+/** Where org group `group`, `@acme/org-spell`, is on disk;  `undefined` for an address that isn't `@<org>/<group>`. */
+function groupFolder(group: string, more: MoreSpaces[]): string | undefined {
+  const org = ORG_GROUP_ADDRESS.exec(group)?.[1]
+  return org ? join(spacesDirForOrg(org, more), group) : undefined
+}
+
+/** A project's file, spell's `SP.PROJECT_FILE`:  spell's barrel won't load in plain node, as this does for Vite. */
+const PROJECT_FILE = "__project.json5"
+
+/** An org group's address:  `@acme/org-spell`. */
+const ORG_GROUP_ADDRESS = /^@([a-z][a-z0-9_]*)\/[a-z][a-z0-9_-]*$/i
+
+/**
+ * Does org group `group`, `@acme/org-spell`, hold its OWN PAGE:  a project named `home` (`GROUP_PAGE_PROJECT`),
+ * in the spaces folder serving its org (`spacesDirForOrg()`)?
+ * - Read from disk each time it's asked.
+ * - `false` for an address that isn't `@<org>/<group>`.  NEVER throws.
+ */
+export function groupHasOwnPage(group: string, more: MoreSpaces[] = moreSpaces): boolean {
+  const folder = groupFolder(group, more)
+  return !!folder && existsSync(join(folder, GROUP_PAGE_PROJECT, PROJECT_FILE))
 }

@@ -1,0 +1,21 @@
+/*
+ * An org's or an org group's page (`<GroupPage>`, epic `editor` P47):  the home page's look (`ProjectChooser.css`),
+ * its sections from the top, and the group's README under its cards.
+ */
+.Home.GroupPage {
+  padding-top: 24px;
+}
+
+/* the README, as Spell's docs draw Markdown:  a quiet card across the page, its text no wider than reads well */
+.GroupPage .GroupReadme {
+  padding: 20px 24px;
+  border-radius: var(--spell-pane-radius, var(--ui-radius-l, 12px));
+  /* the cards' own surface, so it keeps its edge in dark too (`TileCard.css`) */
+  background: var(--spell-pane-background);
+  border: 1px solid var(--spell-pane-border-color);
+  box-shadow: var(--spell-pane-shadow);
+
+  ui-markdown {
+    max-width: 72ch;
+  }
+}

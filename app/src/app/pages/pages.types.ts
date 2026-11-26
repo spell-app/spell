@@ -1,3 +1,4 @@
+import { SP } from "spell/parser/spell"
 import type { EditorStore } from "spell/app/app/editor"
 
 // ## Shared types for app pages.
@@ -59,3 +60,11 @@ export type SpellRouteParams = {
 
 /** Which page shows a project:  `editor.projectPage`, set by `followRoute()`. */
 export type EditorPage = EditorStore["projectPage"]
+
+/**
+ * An org's or an org group's own page, its address alone (epic `editor` P47, Q99):  `/@acme`, `/@acme/org-spell`.
+ * - `<GroupPage>`, in the editor;  a group holding its own page (`SPACES.GROUP_PAGE_PROJECT`) runs that instead.
+ */
+export function groupPageUrlFor(address: string): string {
+  return `/${SP.SpellUrls.encodeAddress(address)}`
+}

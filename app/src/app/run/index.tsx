@@ -4,7 +4,14 @@ import { render } from "@solidjs/web"
 import { SpellUrls } from "spell/parser/spell/SpellUrls"
 import { SpellSetup } from "spell/parser/spell/SpellSetup"
 // Import directly:  spell's project groups alone (for `@spell/examples/...`), without spaces' or spell's barrels
-import { addOrgGroups, setLocalPerson } from "spell/app/spaces/models/projectGroups"
+import {
+  addGroupPages,
+  addOrgGroups,
+  groupPages,
+  orgPageFor,
+  setLocalPerson
+} from "spell/app/spaces/models/projectGroups"
+import { GROUP_PAGE_PROJECT } from "spell/app/spaces/models/spaceNames"
 import { AppTexts } from "spell/app/app/ui/AppTexts"
 import { RunPage } from "./RunPage"
 import { OpenedFile } from "./RunSiteHost"
@@ -26,6 +33,10 @@ import builtInsUrl from "spell/parser/core/core.scopes.js?url"
  *   `spell-runtime.js`, the editor's (`runtimeUrl()`).
  * - An address only an org's own group holds (`@acme/tools/dashboard`):  the org's groups read first
  *   (`orgGroupsRead()`), else it'd be taken for the org's program `tools`.
+ * - An org group's own address (`/run/@acme/org-spell`, or `/@acme/org-spell`, which the server sends here when the
+ *   group holds its own page;  epic `editor` P47, Q99):
+ *   - a group that holds its own page, a project named `home`:  that project runs, the address kept
+ *   - any other group, or an org (`/run/@acme`):  its page in the editor, `/@acme/org-spell`, never a file
  */
 AppTexts.namePageLanguage()
 
@@ -36,20 +47,29 @@ void start()
 /** Draw the run page for the project the URL names, once its group is known. */
 async function start(): Promise<void> {
   await orgGroupsRead(address)
+  const orgPage = orgPageFor(address)
+  if (orgPage && !(orgPage.group && groupPages.includes(orgPage.group))) {
+    // the group's or org's page is the editor's:  from `/run/...` its own address;  from that address, the editor's
+    const pageUrl = `/${SpellUrls.encodeAddress(address)}`
+    location.replace(location.pathname.startsWith("/run/") ? pageUrl : `/edit${pageUrl}`)
+    return
+  }
   let projectId: string | undefined
   try {
-    projectId = SpellUrls.split(address).projectId
+    projectId = orgPage?.group ? `${orgPage.group}/${GROUP_PAGE_PROJECT}` : SpellUrls.split(address).projectId
   } catch {
     projectId = undefined
   }
   if (projectId) {
-    document.title = projectId.slice(projectId.lastIndexOf("/") + 1)
+    // a group's own page goes by the group's name;  its address stays the group's, the project's inside the page
+    const runs = orgPage?.group ? projectId : address
+    document.title = (orgPage?.group ?? projectId).slice((orgPage?.group ?? projectId).lastIndexOf("/") + 1)
     // a page by its file, as the editor's Run names it:  `/run/<project>/home.spell`
-    const opened = await OpenedFile.of(address.slice(projectId.length), projectSource(projectId).declarationsUrl!)
+    const opened = await OpenedFile.of(runs.slice(projectId.length), projectSource(projectId).declarationsUrl!)
     render(
       () => (
         <RunPage
-          address={address}
+          address={runs}
           projectId={projectId}
           opened={opened}
           runtimeUrl={runtimeUrl()}
@@ -102,18 +122,22 @@ async function orgGroupsRead(address: string): Promise<void> {
   try {
     const response = await fetch("/api/people/local", { headers: { accept: "application/json" } })
     if (!response.ok) throw new Error(`${response.status} ${response.statusText}`)
-    const answer = (await response.json()) as { id?: string; org: string; orgGroups?: string[] }
+    const answer = (await response.json()) as { id?: string; org: string; orgGroups?: string[]; groupPages?: string[] }
     if (answer.id) setLocalPerson({ id: answer.id, org: answer.org })
     addOrgGroups(answer.orgGroups ?? [])
+    addGroupPages(answer.groupPages ?? [])
   } catch (error) {
     console.error("/api/people/local didn't answer, so an org's own groups are unknown:", error)
   }
 }
 
-/** The address a run page's `pathname` names, decoded:  `/run/@spell/examples/Solitaire` => `@spell/examples/Solitaire`. */
+/**
+ * The address a run page's `pathname` names, decoded:  `/run/@spell/examples/Solitaire` => `@spell/examples/Solitaire`.
+ * - A group's own address, `/@acme/org-spell`, names `@acme/org-spell`.
+ */
 function addressIn(pathname: string): string {
   return pathname
-    .replace(/^\/run\//, "")
+    .replace(/^\/(?:run\/)?/, "")
     .replace(/\/+$/, "")
     .split("/")
     .map((part) => {

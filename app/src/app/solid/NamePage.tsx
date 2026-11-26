@@ -33,10 +33,11 @@ export const LocalPerson = {
     }
   },
 
-  /** Set what `answer` says on spaces' models:  the person, once named, and the org's groups. */
+  /** Set what `answer` says on spaces' models:  the person, once named, every org group served, and their own pages. */
   take(answer: SPACES.LocalPersonAnswer): void {
     if (answer.id) SPACES.setLocalPerson({ id: answer.id, org: answer.org })
     SPACES.addOrgGroups(answer.orgGroups)
+    SPACES.addGroupPages(answer.groupPages ?? [])
   },
 
   /**

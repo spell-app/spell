@@ -12,4 +12,22 @@ describe("editorPageFor():  the page an address opens (epic `solid-2-final` P12)
     expect(editorPageFor("/runner/x")).toBe("index.html")
     expect(editorPageFor("/")).toBe("index.html")
   })
+
+  test("an org group's address:  the run page when the group holds its own page;  else the editor's page of it (P47)", () => {
+    const folders = {
+      isGroup: (group: string) => ["@acme/org-spell", "@acme/portal"].includes(group),
+      hasOwnPage: (group: string) => group === "@acme/portal"
+    }
+    expect(editorPageFor("/@acme/portal", folders)).toBe("run.html")
+    expect(editorPageFor("/run/@acme/portal/", folders)).toBe("run.html")
+    expect(editorPageFor("/@acme/org-spell", folders)).toBe("index.html")
+    expect(editorPageFor("/run/@acme/org-spell", folders)).toBe("index.html")
+    expect(editorPageFor("/run/@acme", folders)).toBe("index.html")
+    expect(editorPageFor("/@acme", folders)).toBe("index.html")
+    // a project in a group, an org's own program, edits:  as before
+    expect(editorPageFor("/run/@acme/org-spell/dashboard", folders)).toBe("run.html")
+    expect(editorPageFor("/run/@rs/OrgAdmin", folders)).toBe("run.html")
+    expect(editorPageFor("/edit/@acme/portal", folders)).toBe("index.html")
+    expect(editorPageFor("/@acme/portal")).toBe("index.html")
+  })
 })

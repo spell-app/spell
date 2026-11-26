@@ -310,8 +310,10 @@ export const getProjectList = async (domainId: string): Promise<SP.ProjectList> 
   const domain = SP.SpellLocation.getProjectRoot(domainId)
   if (!(await fileUtils.pathExists(domain.serverPath))) return []
   const options = { includeFolders: true, includeFiles: false, namesOnly: true, ignoreEmptyFolders: true }
+  // an org's own list (`@acme`) never lists its groups (`@acme/tools`) as projects:  each is a group of its own
+  const isGroup = (name: string) => `${domain.projectRoot}/${name}` in SP.SpellSetup.projectRoots
   const projectNames = (await fileUtils.getFolderContents(domain.serverPath, options)).filter(
-    (name) => !SPACES.isSpaceName(name) && SP.SpellLocation.isValidPathSegment(name)
+    (name) => !SPACES.isSpaceName(name) && SP.SpellLocation.isValidPathSegment(name) && !isGroup(name)
   )
   return Promise.all(
     projectNames.map(async (projectName) => {
@@ -356,6 +358,20 @@ async function holdsSite(folder: string, files: string[]): Promise<boolean> {
   }
   return false
 }
+
+/**
+ * `GET /api/projects/readme/<group>` -- an org group's README, for its page (epic `editor` P47, Q99 A):
+ * `{ readme }`, the text of `README.md` in the group's folder;  `{}` when it has none.
+ * - Only an org's group (`SPACES.orgGroups`):  anything else, 404.
+ */
+export const request_getGroupReadme = respondWithJSON(async (request): Promise<SPACES.GroupReadme> => {
+  const group = decodeURIComponent(tailOf(request, SPACES.GROUP_README_URL)).replace(/\/+$/, "")
+  if (!SPACES.orgGroups.includes(group as SP.ProjectRootPath))
+    throw new SRV.HttpError(404, `${group} isn't an org's group`)
+  const file = resolve(SP.SpellLocation.getProjectRoot(group).serverPath, SPACES.GROUP_README_FILE)
+  const readme = await fileUtils.loadTextFile(file, "OPTIONAL").catch(() => null)
+  return readme ? { readme } : {}
+})
 
 /**
  * `GET /api/projects/list/<group>` -- list projects in a group, e.g. `/api/projects/list/@spell/examples`.

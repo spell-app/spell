@@ -189,8 +189,10 @@ export type LocalPersonAnswer = {
   id?: string
   /** Their org:  the app's setting (`"spell": { "org" }` in its `package.json`), else `spell`. */
   org: string
-  /** The org's own groups in spell.spaces, by address:  `["@acme/tools"]`. */
+  /** Every org group the server serves, by address, whatever its org:  `["@acme/tools", "@beta/apps"]`. */
   orgGroups: string[]
+  /** Those of them that hold their own page, a project named `home` (`GROUP_PAGE_PROJECT`):  `["@acme/tools"]`. */
+  groupPages: string[]
   /** The people who already have a space in the org here, by id:  `["alice"]`. */
   people: string[]
   /** git's email on this machine (`git config user.email`), for the name page to start from;  none:  left out. */

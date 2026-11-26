@@ -19,7 +19,7 @@ import { stripVTControlCharacters } from "node:util"
 
 import { SRV } from "spell/server"
 import environment from "spell/app/spaces/server/node/environment"
-import { defaultSpellSpacesDir, spellSpacesDir } from "spell/app/spaces/server/node/spellSpacesDir"
+import { defaultSpellSpacesDir, orgGroupFolders, spellSpacesDir } from "spell/app/spaces/server/node/spellSpacesDir"
 import {
   PAGE_SERVER_PREFIXES,
   SERVER_TOKEN_HEADER,
@@ -472,7 +472,7 @@ export class EditorServer {
     // a build from before the run page has none, and runs it in the editor
     web.fallback.use((request, reply, next) => {
       if (request.method !== "GET") return next()
-      const page = editorPageFor(request.path)
+      const page = editorPageFor(request.path, orgGroupFolders())
       const file = existsSync(join(dir, page)) ? page : "index.html"
       return reply.set("Cache-Control", "no-cache").sendFile(join(dir, file))
     })

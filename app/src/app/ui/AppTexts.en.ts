@@ -683,6 +683,10 @@ export const APP_TEXTS = {
     "Apps for an org:\nits Admin page, chat, feed, inbox and events.\nOpen one, change it, give it to your own org.",
   homeProjectsLine: "What you've made, and where to start the next one.",
   homeOrgLine: "For everyone at @{org}.",
+  // an org group's page, and its row on the home page (epic `editor` P47):  a group with no projects;  its own page's card
+  groupPageNone:
+    "No projects here yet.\nTo add one, move its folder into the {folder} folder, the folder this group is made from.\nIt will show up here as a card.",
+  groupOwnPage: "Start here",
   editorPieceBroken:
     "The editor's {piece} doesn't compile, so the editor runs the last one that did.\nFix it and publish again:\n{problem}",
   editorNameNeeded:

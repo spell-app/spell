@@ -114,22 +114,31 @@ describe("the home page's rows", () => {
     expect(rowIds(host)).toEqual(["projects", "start", "examples", "guides", "spanish"])
   })
 
-  test("an org's group:  its own section under your projects, saying its apps are for everyone at the org (T65)", async () => {
+  test("the org's groups:  right under the hero, a heading per org, each group a titled row, for everyone at its org (P47, T65)", async () => {
     const was = { id: SPACES.localPerson.id, org: SPACES.localPerson.org }
     SPACES.setLocalPerson({ id: was.id, org: "acme" })
-    SPACES.addOrgGroups(["@acme/tools"])
+    SPACES.addOrgGroups(["@acme/tools", "@beta/apps"])
     LISTS["@acme/tools"] = [{ path: "@acme/tools/dashboard", title: "Dashboard" }]
+    LISTS["@beta/apps"] = [{ path: "@beta/apps/board", title: "Board" }]
     cleanups.push(() => {
       SPACES.setLocalPerson(was)
-      SPACES.orgGroups.splice(SPACES.orgGroups.indexOf("@acme/tools" as never), 1)
+      for (const group of ["@acme/tools", "@beta/apps"])
+        SPACES.orgGroups.splice(SPACES.orgGroups.indexOf(group as never), 1)
       delete LISTS["@acme/tools"]
+      delete LISTS["@beta/apps"]
     })
     ownProjects = [{ path: `${SPACES.localPerson.address}/my-app`, title: "My App" }]
     const host = await mountHome()
-    expect(rowIds(host)).toEqual(["projects", "org-tools", "start", "examples", "guides", "spanish"])
-    expect(cardsIn(host, "org-tools")).toEqual(["Dashboard"])
-    expect(host.querySelector("#org-tools h2 .line")?.textContent?.trim()).toBe("For everyone at @acme.")
-    expect(host.querySelector("#org-tools h2 .line ui-icon")?.getAttribute("name")).toBe("users")
+    // your own org first, then by name;  then your projects
+    expect(rowIds(host)).toEqual(["org-acme", "org-beta", "projects", "start", "examples", "guides", "spanish"])
+    expect(cardsIn(host, "org-acme")).toEqual(["Dashboard"])
+    expect([...host.querySelectorAll("#org-acme .subhead")].map((title) => title.textContent)).toEqual(["Tools"])
+    expect(host.querySelector("#org-acme .subhead a")?.getAttribute("href")).toBe("/@acme/tools")
+    expect(host.querySelector("#org-acme h2 a")?.getAttribute("href")).toBe("/@acme")
+    expect(host.querySelector("#org-acme h2 .line")?.textContent?.trim()).toBe("For everyone at @acme.")
+    // the group's own org, never yours
+    expect(host.querySelector("#org-beta h2 .line")?.textContent?.trim()).toBe("For everyone at @beta.")
+    expect(host.querySelector("#org-acme h2 .line ui-icon")?.getAttribute("name")).toBe("users")
   })
 
   test("the examples:  ONE set in Spell's order, no line over a kind of them (I48);  each card its description's first phrase", async () => {

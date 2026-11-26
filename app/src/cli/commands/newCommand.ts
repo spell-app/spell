@@ -14,7 +14,10 @@ import { thisMachinesPerson } from "spell/app/spaces/server/node/people/localPer
  * `<name>.spell` which prints a hello, so `spell run` shows something straight away.
  * - `--site`:  a site instead (epic `mockup` T40), as the editor's Site card makes one (`SPACES.STARTER_PROGRAMS.site`):
  *   its routing in `<name>.site.spell`, its main page layout in `main.page-layout.spell`, its home page in `home.spell`
- * - In `--in <folder>`, or by default this machine's person's folder, your space in spell-spaces (`@spell/owen@/`).
+ * - In `--in <folder>`, or by default this machine's person's folder, your space in spell-spaces (`@spell/owen@/`),
+ *   made when it isn't there yet.
+ *   - Run in an org's repo, the spaces are the repo's own (`serveSpaces()`, epic `editor` P47, Q100):
+ *     `@acme/alice@/` at its top, where it holds an org's folder or has no spaces yet;  else its `spaces/`.
  * - Writes the files itself:  `projectUtils.createProject()` would go through `getIndex()`, which adds an
  *   `Untitled.spell`.
  * - Refuses a folder that's already there with anything in it.
@@ -25,7 +28,7 @@ export async function newCommand(session: CLI.CliSession, args: string[], option
   CLI.checkProjectName(name)
   const { id, org } = thisMachinesPerson()
   const parent = options.in ? resolve(options.in) : resolve(environment.spellSpacesDir, `@${org}`, `${id}@`)
-  if (!existsSync(parent)) throw new CLI.CliError(`No such folder:  ${options.in ?? parent}`)
+  if (options.in && !existsSync(parent)) throw new CLI.CliError(`No such folder:  ${options.in}`)
   const folder = resolve(parent, name)
   if (existsSync(folder) && readdirSync(folder).length) {
     const what = hasProjectFile(folder) ? "a project" : "files"

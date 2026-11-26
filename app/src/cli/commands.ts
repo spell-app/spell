@@ -91,6 +91,8 @@ export default function appCommands(spell: Command): void {
     .action((name: string, _options, command: Command) =>
       CLI.runCommand(async () => {
         checkProjectName(name)
+        // in an org's repo, its own spaces, `@acme/` at its top (epic `editor` P47, Q100):  before the app loads
+        if (!command.optsWithGlobals<{ in?: string }>().in) await serveOwnSpaces({ forNew: true })
         return (await loadApp()).appCommands.create([name], command.optsWithGlobals())
       })
     )
@@ -120,13 +122,7 @@ export default function appCommands(spell: Command): void {
     .action((project: string | undefined, _options, command: Command) =>
       CLI.runCommand(async () => {
         // the project's own spaces, before the app loads:  its `environment` reads them once, as it loads
-        const options = command.optsWithGlobals<{ spaces?: string }>()
-        const { serveSpaces } = await import("./servePageServer")
-        const { pageServerRoot } = await import("spell/server/page")
-        const root = pageServerRoot(dirname(fileURLToPath(import.meta.url)))
-        const env = process.env.SPELL_SPACES_DIR
-        const spaces = serveSpaces({ given: options.spaces, env, cwd: process.cwd(), root })
-        if (spaces) process.env.SPELL_SPACES_DIR = spaces
+        await serveOwnSpaces({ given: command.optsWithGlobals<{ spaces?: string }>().spaces })
         return (await loadApp()).appCommands.serve(project ? [project] : [], command.optsWithGlobals())
       })
     )
@@ -305,9 +301,7 @@ export default function appCommands(spell: Command): void {
   const spaces = spell
     .command("spaces")
     .description("which spaces folders the page server serves, by org;  `use` switches one")
-    .action(() =>
-      CLI.runCommand(async () => (await import("spell/app/cli/commands/spacesCommand")).spacesCommand())
-    )
+    .action(() => CLI.runCommand(async () => (await import("spell/app/cli/commands/spacesCommand")).spacesCommand()))
   spaces
     .command("use")
     .description("serve a spaces folder (a project's main, or a worktree's), then restart the page server")
@@ -770,4 +764,24 @@ function runChanges(args: string[], command: Command): Promise<void> {
     const { changesCommand } = await import("spell/app/cli/commands/changesCommand")
     return changesCommand(args, command.optsWithGlobals())
   })
+}
+
+/**
+ * Serve the spaces of the checkout a command runs in (`serveSpaces()`), set as `SPELL_SPACES_DIR`:
+ * `--spaces` when `given`;  an org's repo's own (`@acme/` at its top, else its `spaces/`);  else the kit's own.
+ * - MUST run before the app loads:  its `environment` reads the spaces once, as it loads.
+ * - `forNew`:  an org's repo with no spaces yet gets its root (`spell app create`).
+ */
+async function serveOwnSpaces({ given, forNew }: { given?: string; forNew?: boolean }): Promise<void> {
+  const { serveSpaces, otherCheckoutRoot } = await import("./servePageServer")
+  const { pageServerRoot } = await import("spell/server/page")
+  const root = pageServerRoot(dirname(fileURLToPath(import.meta.url)))
+  const env = process.env.SPELL_SPACES_DIR
+  const spaces = serveSpaces({ given, env, cwd: process.cwd(), root, forNew })
+  if (!spaces) return
+  process.env.SPELL_SPACES_DIR = spaces
+  // ... and the app is that checkout, whose org the page server it starts reads (`SPELL_APP_DIR`):
+  // that server runs in the kit's folder, which would be taken for the app, org `spell`, with no org groups
+  const app = otherCheckoutRoot(process.cwd(), root)
+  if (app && !process.env.SPELL_APP_DIR) process.env.SPELL_APP_DIR = app
 }

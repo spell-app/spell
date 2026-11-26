@@ -102,7 +102,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   | `@spell/test` | `spaces/@spell/test/`, committed and frozen (spell-parser's `tests/spaces/` until epic `spanish` P18) |
   | `owen@spell` | spell.spaces' `@spell/owen@/`, outside git |
   | `alice@acme`, this machine's person in another org | spell.spaces' `@acme/alice@/`, outside git (epic `repo-split` P27) |
-  | `@acme/tools`, an org's own group | spell.spaces' `@acme/tools/`:  found as the server starts (`orgGroupsIn()`), listed on the home page (`SPACES.orgGroups`, P27) |
+  | `@acme/tools`, an org's own group | a spaces folder's `@acme/tools/`, spell.spaces' or a more spaces folder's:  found ONCE as the server starts (`servedOrgGroups()`), listed on the home page (`SPACES.orgGroups`, P27;  below, "Org groups") |
   | `ana@acme`, any other person's space | spell.spaces' `@acme/ana@/`:  found by its address (`personSpaceGroup()`), opened but not listed (epic `repo-split` P26) |
 
   - spell.spaces:  beside the kit's main checkout (`~/www/spell.spaces`):
@@ -128,6 +128,35 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - e.g. `@spell/examples/Solitaire`
     - a file in it:  its name, which has a dot (Q41), e.g. `@spell/examples/Solitaire/Solitaire.spell`
   - A `@local/<folder>` group, added at runtime for a folder an editor opened, says its own folder (`serverPath`).
+- ORG GROUPS (epic `editor` P47, Q97-Q100):  an org's folders of projects, `@acme/org-spell`, as an org keeps its
+  projects in a repo of its own.
+  - Found ONCE, by the server, in each spaces folder it serves:  ONE function, `servedOrgGroups()`
+    ([localPerson.ts](server/node/people/localPerson.ts)), which the page server, the compile it starts and the
+    `spell` command all read.
+    - spell.spaces:  this machine's person's org's;  each more spaces folder:  every org it serves.
+    - A group:  a folder of the org's that isn't a project itself and holds one (`orgGroupsIn()`);  never a person's
+      space (`alice@`), nor one of spaces' own (`__admin`).
+    - The browser takes them from `GET /api/people/local` (`orgGroups`), the editor, its language worker and the run
+      page alike;  each registered as a listed group (`SPACES.addOrgGroups()`).
+    - Before, each program guessed the app and the spaces folder its own way, and each guess lost them somewhere new.
+  - The home page:  right under the hero, whatever the saved order, a section per org (`SPACES.orgsWithGroups()`:
+    this machine's person's org first, then by name), each group a titled row of cards;  "For everyone at @acme."
+    names the group's own org.
+  - Their pages, the editor's `<GroupPage>`:  `/@acme` the org's, every group of it;  `/@acme/org-spell` a group's,
+    its projects as cards, then its `README.md` (`GET /api/projects/readme/<group>`).
+    - The same under `/run/` and `/edit/`:  never a file (`SPACES.orgPageFor()`).
+    - An org's own list (`@acme`) never lists its groups as projects.
+  - A GROUP'S OWN PAGE:  a project named `home` in it (`SPACES.GROUP_PAGE_PROJECT`), `@acme/org-spell/home/`.
+    - `/@acme/org-spell` and `/run/@acme/org-spell` run it, the address kept:  the editor's servers send the run page
+      (the app's `editorPageFor()`, asking spaces' `orgGroupFolders()` on disk).
+    - `/edit/@acme/org-spell` stays the built-in page, the home card first, marked "Start here".
+    - Nothing to register;  `GET /api/people/local`'s `groupPages` says which groups have one.
+  - WHERE AN ORG'S REPO KEEPS THEM (Q100 A):  `@acme/` at the repo's top, beside its `package.json`;
+    `spaces/@acme/` still works.  Addresses don't change.
+    - `spell app serve` and `spell app create`, run in an org's repo, serve its own spaces (the cli's `serveSpaces()`):
+      the repo itself when it holds an org's folder, else its `spaces/`;  `create` in a repo that names its org and has
+      neither, the repo's top.
+    - The page server they start is told that repo is the app (`SPELL_APP_DIR`), so its org's groups are found.
 - Where the folders are:  [environment.ts](server/node/environment.ts).
 
   | Name | Folder | Tests set it with |

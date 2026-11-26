@@ -305,13 +305,15 @@ function personSpaceGroup(place: string): SP.ProjectRootSpec | undefined {
 
 SpellSetup.addProjectRootFinder(personSpaceGroup)
 
-/** An org's group kept in spell.spaces:  `@acme/tools`, a folder of projects in the org's folder. */
+/** An org's group kept in a spaces folder:  `@acme/tools`, a folder of projects in the org's folder. */
 const ORG_GROUP = /^@([a-z][a-z0-9_]*)\/([a-z][a-z0-9_-]*)$/i
 
 /**
- * The groups of this machine's person's org that the server found in spell.spaces, by address:
- * `@acme/tools` (epic `repo-split` P27).
- * - The home page lists each, after the person's own projects.
+ * Every org group the server serves, by address, whatever its org:  `@acme/tools` (epic `repo-split` P27).
+ * - Found ONCE, by the server, in each spaces folder it serves (`servedOrgGroups()`, spaces' node `localPerson.ts`;
+ *   epic `editor` P47, Q97):  this machine's person's org's in spell.spaces, and every org's in the more spaces folders.
+ * - The editor, its language worker and the run page take them from `GET /api/people/local`.
+ * - The home page shows them right under its hero, a section per org (`orgsWithGroups()`).
  */
 export const orgGroups: SP.ProjectRootPath[] = []
 
@@ -341,3 +343,75 @@ export function addOrgGroups(paths: string[]): void {
     if (!orgGroups.includes(path as SP.ProjectRootPath)) orgGroups.push(path as SP.ProjectRootPath)
   }
 }
+
+/** An org's own address, `@acme`:  no group or project after it. */
+const ORG_ADDRESS = /^@([a-z][a-z0-9_]*)$/i
+
+/** The org an org group is in:  `acme` for `@acme/org-spell`;  `undefined` for anything else. */
+export function orgOfGroup(path: string): string | undefined {
+  return ORG_GROUP.exec(path)?.[1]
+}
+
+/**
+ * The orgs that have groups here (`orgGroups`), each once:  this machine's person's org first, then by name
+ * (epic `editor` P47, Q98 A).
+ * - `["acme", "beta"]`, for `@acme/org-spell`, `@acme/ops` and `@beta/tools`.
+ */
+export function orgsWithGroups(): string[] {
+  const orgs = [...new Set(orgGroups.map((path) => orgOfGroup(path)!))].sort()
+  const own = orgs.indexOf(localPerson.org)
+  return own <= 0 ? orgs : [orgs[own]!, ...orgs.filter((_, index) => index !== own)]
+}
+
+/** Org `org`'s groups here, by address, in name order:  `["@acme/ops", "@acme/org-spell"]`. */
+export function groupsOfOrg(org: string): SP.ProjectRootPath[] {
+  return orgGroups.filter((path) => orgOfGroup(path) === org).sort()
+}
+
+/**
+ * The org groups that hold their OWN PAGE, a project named `home` (`GROUP_PAGE_PROJECT`), as the server found them:
+ * `@acme/org-spell` for `@acme/org-spell/home/`.
+ * - `/@acme/org-spell` runs that project;  `/edit/@acme/org-spell` lists it first, marked.
+ * - Set with `addGroupPages()`, from `GET /api/people/local`'s `groupPages`.
+ */
+export const groupPages: SP.ProjectRootPath[] = []
+
+/** Add `paths` to `groupPages`:  org groups that hold their own page.  One already there is left as it is. */
+export function addGroupPages(paths: readonly string[]): void {
+  for (const path of paths)
+    if (!groupPages.includes(path as SP.ProjectRootPath)) groupPages.push(path as SP.ProjectRootPath)
+}
+
+/**
+ * The org or org group an address names ALONE, for its page (epic `editor` P47, Q99):  `undefined` for anything else.
+ * - `@acme`, an org with groups here:  `{ org: "acme" }`, the org's page
+ * - `@acme/org-spell`, one of `orgGroups`:  `{ org: "acme", group: "@acme/org-spell" }`, the group's page
+ * - A project in a group (`@acme/org-spell/dashboard`), an org with no groups here (`@rs`), Spell's own groups:  none.
+ */
+export function orgPageFor(address: string): OrgPage | undefined {
+  const bare = address.replace(/\/+$/, "")
+  const org = ORG_ADDRESS.exec(bare)?.[1]
+  if (org) return orgsWithGroups().includes(org) ? { org } : undefined
+  if (!orgGroups.includes(bare as SP.ProjectRootPath)) return undefined
+  return { org: orgOfGroup(bare)!, group: bare as SP.ProjectRootPath }
+}
+
+/** What `orgPageFor()` finds:  an org's page, or one of its group's. */
+export type OrgPage = {
+  /** the org, `acme` */
+  org: string
+  /** the group, `@acme/org-spell`;  none:  the org's own page */
+  group?: SP.ProjectRootPath
+}
+
+/**
+ * Where an org group's README is read, for its page:  `GET /api/projects/readme/<group>`, answering `GroupReadme`.
+ * - The README is `README.md` in the group's own folder (`GROUP_README_FILE`), `@acme/org-spell/README.md`.
+ */
+export const GROUP_README_URL = "/api/projects/readme/"
+
+/** The README's file in a group's folder:  `README.md`. */
+export const GROUP_README_FILE = "README.md"
+
+/** What `GROUP_README_URL` answers:  the README's text;  none, when the group has no README. */
+export type GroupReadme = { readme?: string }

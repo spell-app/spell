@@ -39,7 +39,7 @@ export const HOME_SECTIONS_KEY = "sections"
  * - `start`:  the ways to start something new
  * - `examples`, `library`, `guides`:  Spell's own groups, their projects in English
  * - `spanish`:  the examples and guides written in Spanish, "En español" (Owen, epic `mockup` I46)
- * - `org`:  each of their org's own groups (`orgGroups`), one section each;  none in Spell's own org
+ * - `org`:  the org groups served (`orgGroups`), a section per org (epic `editor` P47, Q98 A);  none while there are none
  * - `editor`:  the editor's own pieces, in dev only
  * - Any of them may be left off the page, in the saved list's `HOME_HIDDEN_KEY` (`library` and `editor`, for now).
  */
@@ -50,8 +50,10 @@ export type HomeSection = (typeof HOME_SECTIONS)[number]
 
 /**
  * The home page's sections, in order (epic `repo-split` P28):  `order`'s list of them, then any it leaves out.
+ * - The org groups' sections (`org`) ALWAYS first, right under the hero, whatever the saved order says
+ *   (epic `editor` P47, Q97 A):  in Spell's own editor too, which shows an org from a more spaces folder.
  * - `inOrg`, in an app made for an org (its org isn't Spell's own, `localPerson.org`):
- *   the person's own projects and the org's groups come first (`HOME_ORG_FIRST`), and the library isn't shown.
+ *   the person's own projects come next (`HOME_ORG_FIRST`), and the library isn't shown.
  *   (Owen, 2026-11-16:  "Your own projects and the org's projects AT THE TOP.  NOT Library there.")
  * - A name the list holds that isn't a section is skipped:  an old list never breaks the page.
  * - A section `order` hides (`HOME_HIDDEN_KEY`) isn't there.
@@ -62,10 +64,13 @@ export function homeSections(
 ): HomeSection[] {
   const saved = (order[HOME_SECTIONS_KEY] ?? []).filter(isHomeSection)
   const all = [...new Set([...saved, ...HOME_SECTIONS])].filter((section) => isOnHome(section, order))
-  if (!inOrg) return all
-  const first = all.filter((section) => HOME_ORG_FIRST.includes(section))
-  return [...first, ...all.filter((section) => !HOME_ORG_FIRST.includes(section) && section !== "library")]
+  const firsts = inOrg ? HOME_ORG_FIRST : HOME_FIRST
+  const first = firsts.filter((section) => all.includes(section))
+  return [...first, ...all.filter((section) => !first.includes(section) && !(inOrg && section === "library"))]
 }
+
+/** The section that always comes first, right under the hero:  the org groups' (`org`). */
+const HOME_FIRST: readonly HomeSection[] = ["org"]
 
 /** Is `name` one of the home page's sections? */
 export function isHomeSection(name: string): name is HomeSection {
@@ -73,10 +78,10 @@ export function isHomeSection(name: string): name is HomeSection {
 }
 
 /**
- * The sections an org's app shows first, in their saved order:  the person's own, then the org's.
+ * The sections an org's app shows first:  the org's groups, then the person's own.
  * - Right under the home page's hero, which always comes first (`<ProjectChooser>`;  epic `repo-split` T64).
  */
-const HOME_ORG_FIRST: readonly HomeSection[] = ["projects", "org"]
+const HOME_ORG_FIRST: readonly HomeSection[] = ["org", "projects"]
 
 /**
  * `projects` of group `group` in the home page's order, `order` (default:  the saved one).

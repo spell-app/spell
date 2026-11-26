@@ -113,6 +113,7 @@
   .description {
     font-size: 13px;
     line-height: 1.4;
+    text-wrap: pretty;
     color: var(--ui-text-muted);
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -208,4 +209,12 @@
     height: auto;
     color: inherit;
   }
+}
+
+/* a group's own page's card:  its label after the title, on the title's line, centred on it (T18) */
+.TileCard .title:has(.badge) {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
 }

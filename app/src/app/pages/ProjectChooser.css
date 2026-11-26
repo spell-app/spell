@@ -308,3 +308,26 @@
   outline: 1px dashed var(--ui-border-color);
   outline-offset: 3px;
 }
+
+/* a heading or a group's title that opens its page:  the heading's own colour, underlined as it's pointed at */
+.Home .ProjectCards .PageLink {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+}
+
+/* an org group's title over its row (`<OrgSection>`):  a step up from a plain subhead, as it opens the group's page */
+.Home .ProjectCards .subhead:has(.PageLink) {
+  font-size: 15px;
+  color: var(--ui-text-color);
+
+  .PageLink {
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 30%, transparent);
+    text-underline-offset: 4px;
+  }
+}

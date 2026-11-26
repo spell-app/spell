@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, realpathSync, rmSync } from "fs"
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "fs"
 import { createServer, type Server } from "http"
 import { tmpdir } from "os"
 import { join } from "path"
@@ -20,6 +20,9 @@ let kit: string
 let project: string
 let bare: string
 let loose: string
+/** An org's repos:  `@acme/` at its top, beside `spaces/` too;  one new, naming its org, with neither yet. */
+let orgRepo: string
+let newOrgRepo: string
 
 beforeAll(() => {
   base = realpathSync(mkdtempSync(join(tmpdir(), "serve-page-server-")))
@@ -32,6 +35,12 @@ beforeAll(() => {
   mkdirSync(join(project, "src", "deep"), { recursive: true })
   mkdirSync(join(kit, "app"), { recursive: true })
   mkdirSync(loose, { recursive: true })
+  orgRepo = join(base, "acme-spell")
+  newOrgRepo = join(base, "beta-spell")
+  for (const checkout of [orgRepo, newOrgRepo]) mkdirSync(join(checkout, ".git"), { recursive: true })
+  mkdirSync(join(orgRepo, "@acme", "org-spell", "dashboard"), { recursive: true })
+  mkdirSync(join(orgRepo, "spaces"), { recursive: true })
+  writeFileSync(join(newOrgRepo, "package.json"), JSON.stringify({ spell: { org: "beta" } }))
 })
 
 afterAll(() => rmSync(base, { recursive: true, force: true }))
@@ -66,6 +75,18 @@ describe("serveSpaces()", () => {
   test("else a project's checkout's own spaces/, from any folder of it", () => {
     expect(serveSpaces({ cwd: project, root: kit })).toBe(join(project, "spaces"))
     expect(serveSpaces({ cwd: join(project, "src", "deep"), root: kit })).toBe(join(project, "spaces"))
+  })
+
+  test("an org's repo with `@acme/` at its top:  the repo itself, spaces/ or not (Q100)", () => {
+    expect(serveSpaces({ cwd: orgRepo, root: kit })).toBe(orgRepo)
+    expect(serveSpaces({ cwd: join(orgRepo, "@acme", "org-spell"), root: kit })).toBe(orgRepo)
+  })
+
+  test("`spell app create` in an org's repo with no spaces yet:  its root;  any other repo, the kit's own", () => {
+    expect(serveSpaces({ cwd: newOrgRepo, root: kit })).toBeUndefined()
+    expect(serveSpaces({ cwd: newOrgRepo, root: kit, forNew: true })).toBe(newOrgRepo)
+    expect(serveSpaces({ cwd: bare, root: kit, forNew: true })).toBeUndefined()
+    expect(serveSpaces({ cwd: project, root: kit, forNew: true })).toBe(join(project, "spaces"))
   })
 
   test("the kit's own:  from the kit, from a checkout with no spaces/, and from a folder in no checkout", () => {
@@ -144,12 +165,20 @@ describe("planPageServer():  never replaces another root's server", () => {
   test("--page-port there doesn't apply, and says so", async () => {
     const plan = await planPageServer({ root: kit, cwd: bare, pagePort: 5123, probe: probeWith() })
     expect(plan.use).toBe("running")
-    expect(plan.notes).toEqual([`--page-port applies only to a page server this checkout owns:  ${kit}'s is used as it is`])
+    expect(plan.notes).toEqual([
+      `--page-port applies only to a page server this checkout owns:  ${kit}'s is used as it is`
+    ])
   })
 
   test("--page-port held by another root's page server:  says whose, and takes a free one", async () => {
     const probe = probeWith([infoOf(kit, 5123)])
-    const plan = await planPageServer({ root: kit, cwd: project, spaces: join(project, "spaces"), pagePort: 5123, probe })
+    const plan = await planPageServer({
+      root: kit,
+      cwd: project,
+      spaces: join(project, "spaces"),
+      pagePort: 5123,
+      probe
+    })
     expect(plan).toEqual({
       use: "own",
       port: 0,
@@ -160,9 +189,17 @@ describe("planPageServer():  never replaces another root's server", () => {
   test("--page-port held by another project's server on the same kit:  says whose, and takes a free one", async () => {
     const theirs = join(bare, "spaces")
     const probe = probeWith([infoOf(kit, 5123, theirs)])
-    const plan = await planPageServer({ root: kit, cwd: project, spaces: join(project, "spaces"), pagePort: 5123, probe })
+    const plan = await planPageServer({
+      root: kit,
+      cwd: project,
+      spaces: join(project, "spaces"),
+      pagePort: 5123,
+      probe
+    })
     expect(plan.use === "own" && plan.port).toBe(0)
-    expect(plan.notes).toEqual([`Port 5123 is held by the page server of ${kit}, for ${theirs}:  using a free port instead`])
+    expect(plan.notes).toEqual([
+      `Port 5123 is held by the page server of ${kit}, for ${theirs}:  using a free port instead`
+    ])
   })
 
   describe("on the machine:  a real server answering for another root", () => {

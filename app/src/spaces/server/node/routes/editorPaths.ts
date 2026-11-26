@@ -42,13 +42,48 @@ export const SERVER_TOKEN_HEADER = "x-server-token"
 /**
  * Which of the editor's pages a browser opening `pathname` gets (epic `solid-2-final` P12):
  * - `run.html`, the run page, for `/run/<project>...`:  the project running alone, with no editor in the page
+ * - an org's or an org group's address alone (epic `editor` P47, Q99), as `folders` say (spaces' `orgGroupFolders()`):
+ *   - `/@acme/org-spell` and `/run/@acme/org-spell`:  `run.html` when the group holds its own page, a project named
+ *     `home`, which the run page runs, the address kept;  else `index.html`, whose `<GroupPage>` shows the group
+ *   - `/run/@acme`, an org alone:  `index.html`, the org's page;  nothing runs at an org's address
  * - `index.html`, the editor, for every other address
  * - The built editor's server (`EditorServer.builtServer()`) and the dev server (`runPageInDev()`, the app's
  *   `vite.config.ts`) both ask it, so they send the same page for an address.
  * - Inside the editor, a switch to Run asks no server:  the editor's page stays, live edits and all.
  */
-export function editorPageFor(pathname: string): EditorPage {
-  return RUN_ADDRESS.test(pathname) ? "run.html" : "index.html"
+export function editorPageFor(pathname: string, folders: GroupFolders = NO_GROUPS): EditorPage {
+  const isRun = RUN_ADDRESS.test(pathname)
+  const address = ORG_ADDRESS.exec(pathname.replace(/^\/run\//, "/"))
+  if (address && !address[2]) return "index.html"
+  if (address) {
+    const group = safelyDecoded(address[1]!)
+    if (folders.hasOwnPage(group)) return "run.html"
+    if (folders.isGroup(group)) return "index.html"
+  }
+  return isRun ? "run.html" : "index.html"
+}
+
+/** What `editorPageFor()` asks of an org group's address on disk:  spaces' `OrgGroupFolders`. */
+export type GroupFolders = {
+  /** is it an org's group, a folder of projects */
+  isGroup: (group: string) => boolean
+  /** does it hold its own page, a project named `home` */
+  hasOwnPage: (group: string) => boolean
+}
+
+/** No org groups at all:  `editorPageFor()`'s default. */
+const NO_GROUPS: GroupFolders = { isGroup: () => false, hasOwnPage: () => false }
+
+/** An org's address alone, `/@acme`, or an org group's, `/@acme/org-spell`:  a slash after it or not. */
+const ORG_ADDRESS = /^\/(@[^/]+(\/[^/]+)?)\/?$/
+
+/** `part` decoded;  as it is, when it won't decode. */
+function safelyDecoded(part: string): string {
+  try {
+    return decodeURIComponent(part)
+  } catch {
+    return part
+  }
 }
 
 /** One of the editor's pages, a file at its build's root. */

@@ -21,7 +21,7 @@ import {
   trackProjectRoot,
   type ProjectRootState
 } from "spell/app/app/solid"
-import { GUIDES_PAGE, guideUrlFor, siteEditorUrlFor } from "./pages.types"
+import { GUIDES_PAGE, groupPageUrlFor, guideUrlFor, siteEditorUrlFor } from "./pages.types"
 import { readGuideList, startHereLine } from "./GuideList"
 import { navigate } from "./navigation"
 import { EditableText } from "./EditableText"
@@ -48,8 +48,10 @@ import "./ProjectChooser.css"
  *   run it, rename, duplicate, its versions, export, its picture, delete (`<CardMenu>`, epic `mockup` T47).
  * - Spell's own order also leaves some out, sections and projects (`SPACES.HOME_HIDDEN_KEY`, epic `mockup` I40):
  *   the library, the editor's pieces, the examples that need a sign-in ...
+ * - The org groups the server serves, right under the hero, a section per org (`<OrgGroups>`;  epic `editor` P47):
+ *   in Spell's own editor too, which shows an org from a more spaces folder.
  * - In an app made for an org (`"spell": { "org": "acme" }` in its `package.json`):
- *   your own projects and each of the org's groups first, right under the hero;  no library.
+ *   your own projects next, after the org's groups;  no library.
  * - The hero always comes first, every section after it
  *   (Owen, epic `repo-split` T64:  the org's apps below the "read out loud" header).
  * - Laid out as the facelift boards' home (epic `debut` P4):  a hero with the first example a click away,
@@ -147,7 +149,8 @@ export function ProjectChooser() {
           />
         )
       case "org":
-        return <OrgGroups drag={drag()} />
+        // right under the hero, always (`SPACES.homeSections()`):  never dragged elsewhere
+        return <OrgGroups />
       case "editor":
         // a dev-only root is there in every build -- just not listed outside dev
         return (
@@ -167,32 +170,51 @@ export function ProjectChooser() {
 
 /****************
  * ### `<OrgGroups>`
- * The org's own groups, a section each (epic `repo-split` P28):  `@acme/tools`, as the server found them in
- * spell.spaces (`SPACES.orgGroups`).
- * - None in Spell's own org.
- * - Each group's cards by folder name:  Spell's own order never names an org's projects.
- * - Its line says plainly whose its apps are, "For everyone at @acme.", after a people icon
- *   (Owen, epic `repo-split` T65:  "apps should say that they are for everyone in the org").
+ * The org groups the server serves, a section per org, right under the hero (epic `editor` P47, Q97 A, Q98 A):
+ * `@acme`, then each of its groups' cards under the group's title (`<OrgSection>`).
+ * - This machine's person's org first, then by name (`SPACES.orgsWithGroups()`).
+ * - None while there are no org groups.
  ****************/
-function OrgGroups(props: { drag?: TileCardDrag }) {
-  const org = SPACES.localPerson.org
+function OrgGroups() {
+  return <For each={SPACES.orgsWithGroups()}>{(org) => <OrgSection org={org} />}</For>
+}
+
+/****************
+ * ### `<OrgSection>`
+ * One org's groups:  its name as the heading, `@acme`, then each group a row of cards under its title,
+ * as "En español" shows its examples and guides (Q98 A).
+ * - Its line says plainly whose its apps are, "For everyone at @acme.", the group's own org, never yours
+ *   (Owen, epic `repo-split` T65:  "apps should say that they are for everyone in the org").
+ * - The heading opens the org's page, `/@acme`;  each group's title its page, `/@acme/org-spell` (`<GroupPage>`).
+ * - Each group's cards by folder name:  Spell's own order never names an org's projects;  its own page, first.
+ * - The home page's, and the org's page's (`<GroupPage>`).
+ ****************/
+export function OrgSection(props: { org: string }) {
+  const groups = SPACES.groupsOfOrg(props.org).map((path) => {
+    const projectRoot = new SPACES.SpellProjectRoot(path)
+    return { projectRoot, root: trackProjectRoot(() => projectRoot) }
+  })
   return (
-    <For each={SPACES.orgGroups}>
-      {(path) => {
-        const group = new SPACES.SpellProjectRoot(path)
-        // the group's own title, `Tools` for `@acme/tools`:  its projects' word ("Apps") would name every org group alike
-        return (
-          <ProjectCards
-            id={`org-${SPACES.folderNameOf(path)}`}
-            projectRoot={group}
-            heading={group.title}
-            line={appTexts.text("homeOrgLine", { org })}
-            lineIcon="users"
-            sectionDrag={props.drag}
+    <HomeSection
+      id={`org-${props.org}`}
+      heading={`@${props.org}`}
+      href={groupPageUrlFor(`@${props.org}`)}
+      line={appTexts.text("homeOrgLine", { org: props.org })}
+      lineIcon="users"
+    >
+      <For each={groups}>
+        {(group) => (
+          <GroupCards
+            projectRoot={group.projectRoot}
+            root={group.root()}
+            title={group.projectRoot.title}
+            titleHref={groupPageUrlFor(group.projectRoot.path)}
+            ownPage={SPACES.groupPages.includes(group.projectRoot.path)}
+            empty={appTexts.text("groupPageNone", { folder: SPACES.folderNameOf(group.projectRoot.path) })}
           />
-        )
-      }}
-    </For>
+        )}
+      </For>
+    </HomeSection>
   )
 }
 
@@ -382,9 +404,11 @@ function HomeGuides(props: { drag?: TileCardDrag }) {
  * - Its header and line as changed in this language (`HomeArrangement`), typed in where they are while it's rearranged.
  * - The shape every section shares:  the ways to start, a group's cards, a language's.
  ****************/
-function HomeSection(props: {
+export function HomeSection(props: {
   id: string
   heading: string
+  /** Its heading as a link to this address, opened in the app:  an org's (`<OrgSection>`). */
+  href?: string
   line?: string
   /** An icon before its quiet line:  an org's group, `users`. */
   lineIcon?: string
@@ -410,7 +434,10 @@ function HomeSection(props: {
           when={HomeArrangement.isRearranging}
           fallback={
             <h2>
-              {heading()}.{" "}
+              <Show when={props.href} fallback={heading()}>
+                {(href) => <PageLink href={href()}>{heading()}</PageLink>}
+              </Show>
+              .{" "}
               <span class="line">
                 <Show when={props.lineIcon}>
                   <ui-icon name={props.lineIcon} />{" "}
@@ -536,7 +563,7 @@ function LanguageCards(props: {
  * - `empty`:  what its one card says while it has none;  none:  nothing at all.
  * - Still loading, or it failed:  one quiet card saying so.
  */
-function GroupCards(props: {
+export function GroupCards(props: {
   projectRoot: SPACES.SpellProjectRoot
   root: ProjectRootState
   language?: string
@@ -544,9 +571,21 @@ function GroupCards(props: {
   sitesOnly?: boolean
   cardMenu?: boolean
   title?: string
+  /** Its title as a link to this address, opened in the app:  an org group's page (`<OrgSection>`). */
+  titleHref?: string
+  /** The group holds its own page (`SPACES.GROUP_PAGE_PROJECT`):  that project's card first, marked (Q99 B). */
+  ownPage?: boolean
   empty?: string
 }) {
-  const listed = () => cardsOf(props, props.root)
+  const ownPagePath = () => `${props.projectRoot.path}/${SPACES.GROUP_PAGE_PROJECT}`
+  const listed = () => {
+    const cards = cardsOf(props, props.root)
+    if (!props.ownPage) return cards
+    return [
+      ...cards.filter((card) => card.path === ownPagePath()),
+      ...cards.filter((card) => card.path !== ownPagePath())
+    ]
+  }
   // a card's drag among the group's, while the page is rearranged:  never on a page of sites, nor an org's group
   const dragFor = (project: CardProject): TileCardDrag | undefined => {
     if (props.sitesOnly || !isSpellsOwn(props.projectRoot.path)) return undefined
@@ -578,12 +617,19 @@ function GroupCards(props: {
         fallback={props.empty === undefined ? undefined : <EmptyCard>{props.empty}</EmptyCard>}
       >
         <Show when={props.title}>
-          <h3 class="subhead">{props.title}</h3>
+          {(title) => (
+            <h3 class="subhead">
+              <Show when={props.titleHref} fallback={title()}>
+                {(href) => <PageLink href={href()}>{title()}</PageLink>}
+              </Show>
+            </h3>
+          )}
         </Show>
         <For each={listed()}>
           {(project) => (
             <ProjectCard
               project={project}
+              badge={props.ownPage && project.path === ownPagePath() ? appTexts.text("groupOwnPage") : undefined}
               useRunner={props.useRunner}
               sitesOnly={props.sitesOnly}
               banner={banner()}
@@ -604,6 +650,8 @@ function GroupCards(props: {
  */
 function ProjectCard(props: {
   project: CardProject
+  /** A small label beside its title:  a group's own page's (`<GroupCards>`' `ownPage`). */
+  badge?: string
   useRunner?: boolean
   sitesOnly?: boolean
   banner?: boolean
@@ -622,6 +670,7 @@ function ProjectCard(props: {
         <TileCard
           title={title()}
           line={line()}
+          badge={props.badge}
           hueFrom={project().path}
           banner={props.banner}
           drag={props.drag}
@@ -1103,5 +1152,26 @@ export function ChooserToolbar(props: { isHome?: boolean }) {
         </ui-menu>
       </Submenu>
     </AppMenu>
+  )
+}
+
+/**
+ * A link to one of the app's own pages, `/@acme`:  a click opens it in the app (`navigate()`), not a new page load;
+ * with a modifier key or the middle button, the browser's own, a new tab.
+ * - A plain `<a>`, as `<TileCard>`'s links are:  the router takes only `<a link>` clicks (`routes.tsx`).
+ */
+function PageLink(props: { href: string; children: JSX.Element }) {
+  return (
+    <a
+      class="PageLink"
+      href={props.href}
+      onClick={(event) => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
+        event.preventDefault()
+        navigate(props.href)
+      }}
+    >
+      {props.children}
+    </a>
   )
 }

@@ -11,7 +11,7 @@
 export const SPACE_NAMES = [
   "__me.json5",
   "__org.json5",
-  "__project.json5",
+  "__project.json5", // a project's file:  spell's `SP.PROJECT_FILE`
   "__members",
   "__settings",
   "__sessions",
@@ -135,3 +135,12 @@ export function isSpaceName(name: string): boolean {
  *   (`project-utils`' `savesInPlace()`).
  */
 export const HOUSE_SITE_HEADER = "x-spell-house-site"
+
+/**
+ * The project that is an org group's OWN PAGE, `home` (epic `editor` P47, Q99 B):
+ * `@acme/org-spell/home/` is what `/@acme/org-spell` and `/run/@acme/org-spell` run, the address kept.
+ * - A group without one gets the editor's built-in page of its projects (`<GroupPage>`).
+ * - Nothing to register:  a project of that name is enough.
+ * - `/edit/@acme/org-spell` stays the built-in page, so every project is a click away, this one's card first.
+ */
+export const GROUP_PAGE_PROJECT = "home"

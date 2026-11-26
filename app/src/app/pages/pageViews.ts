@@ -21,6 +21,8 @@ export class PageViews {
   static readonly place = new LazyPiece(() => import("./PlaceReference"))
   /** `<GuidesPage>`, `/guides`. */
   static readonly guides = new LazyPiece(() => import("./GuidesPage"))
+  /** `<GroupPage>`, an org's or an org group's page:  `/@acme`, `/@acme/org-spell` (epic `editor` P47). */
+  static readonly group = new LazyPiece(() => import("./GroupPage"))
   /** `<PaletteGroupsPage>`, `/palette`. */
   static readonly palette = new LazyPiece(() => import("./PaletteGroupsPage"))
 }

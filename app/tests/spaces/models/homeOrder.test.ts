@@ -46,20 +46,23 @@ describe("the home page's order", () => {
 
 /** The home page's sections, in order (epic `repo-split` P28):  `SPACES.homeSections()`. */
 describe("the home page's sections", () => {
-  test("Spell's own org:  the saved list as it is, every section in it but those it hides", () => {
+  test("Spell's own org:  the org groups first, then the saved list as it is, every section in it but those it hides", () => {
     const hidden = SPACES.HOME_ORDER[SPACES.HOME_HIDDEN_KEY] ?? []
     const saved = SPACES.HOME_ORDER[SPACES.HOME_SECTIONS_KEY]!
-    expect(SPACES.homeSections(false)).toEqual(saved.filter((section) => !hidden.includes(section)))
+    expect(SPACES.homeSections(false)).toEqual([
+      "org",
+      ...saved.filter((section) => !hidden.includes(section) && section !== "org")
+    ])
     expect([...SPACES.homeSections(false), ...hidden.filter(SPACES.isHomeSection)].toSorted()).toEqual(
       [...SPACES.HOME_SECTIONS].toSorted()
     )
   })
 
-  test("today's page (I40, I46):  your projects first under the hero, starting, examples, guides, Spanish, the org's;  no library or editor", () => {
-    expect(SPACES.homeSections(false)).toEqual(["projects", "start", "examples", "guides", "spanish", "org"])
+  test("today's page (I40, I46, P47):  the org groups right under the hero, your projects, starting, examples, guides, Spanish;  no library or editor", () => {
+    expect(SPACES.homeSections(false)).toEqual(["org", "projects", "start", "examples", "guides", "spanish"])
   })
 
-  test("an org's app:  your projects and the org's groups first, in the saved order;  no library", () => {
+  test("an org's app:  the org's groups, then your projects, whatever the saved order;  no library", () => {
     const order = { sections: ["examples", "org", "guides", "projects", "start", "library", "editor"] }
     expect(SPACES.homeSections(true, order)).toEqual([
       "org",
@@ -70,19 +73,22 @@ describe("the home page's sections", () => {
       "editor",
       "spanish"
     ])
-    expect(SPACES.homeSections(true)).toEqual(["projects", "org", "start", "examples", "guides", "spanish"])
+    expect(SPACES.homeSections(true)).toEqual(["org", "projects", "start", "examples", "guides", "spanish"])
   })
 
   test("an old list with no sections, or one naming what isn't one:  the rest in their first order", () => {
-    expect(SPACES.homeSections(false, {})).toEqual([...SPACES.HOME_SECTIONS])
+    expect(SPACES.homeSections(false, {})).toEqual([
+      "org",
+      ...SPACES.HOME_SECTIONS.filter((section) => section !== "org")
+    ])
     expect(SPACES.homeSections(false, { sections: ["guides", "gone", "examples"] })).toEqual([
+      "org",
       "guides",
       "examples",
       "projects",
       "start",
       "library",
       "spanish",
-      "org",
       "editor"
     ])
   })

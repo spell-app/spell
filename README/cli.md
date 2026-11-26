@@ -1407,7 +1407,7 @@ owen@spell       Projects       ...
 | `spell app serve <project>` | opens the editor on that project, e.g. `@spell/examples/Solitaire`;  default:  the project here, else the chooser |
 | `spell app serve --port <n>` | the editor's port, for a page server this starts;  default 3000, else any free one |
 | `spell app serve --headless` | doesn't open a browser:  just prints the address |
-| `spell app serve --spaces <dir>` | the spaces its page server serves:  a project's own;  default the `spaces/` of the project's checkout it runs in |
+| `spell app serve --spaces <dir>` | the spaces its page server serves:  a project's own;  default the spaces of the project's checkout it runs in, the checkout itself when it holds an org's folder (`@acme/`), else its `spaces/` |
 | `spell app serve --page-port <n>` | the page server's port, for one this starts;  taken by another server or program, it says so and takes a free one |
 | `spell app vscode build` | makes the `.vsix`, in `spell-app`'s `vscode/` folder:  `yarn install`, `yarn build`, `yarn package` there |
 | `spell app vscode install` | installs the built `.vsix` into VS Code |
@@ -1416,6 +1416,11 @@ owen@spell       Projects       ...
 `app create`
 - The name starts with a letter, then letters, digits, `-` or `_`:  `Snake`.
 - It refuses a folder with anything in it, and prints the next step:  `Made Snake:  try  spell run ...`.
+- Run in an org's repo, it makes the project in that repo's own spaces, in your space there:  `@acme/alice@/Snake/`.
+  - The repo's spaces:  the repo itself when it holds an org's folder (`@acme/`), else its `spaces/`.
+  - A repo with neither, whose `package.json` names its org (`"spell": { "org": "acme" }`), starts the new layout:
+    `@acme/` at its top.
+  - Your space's folder is made when it isn't there yet.
 
 `app serve`
 - Two servers:
@@ -1428,6 +1433,10 @@ owen@spell       Projects       ...
 - Which page server:
   - run in a project's own checkout (one whose `node_modules/spell` is the kit), or with `--spaces <dir>`:
     that project's own, as `spell server local --spaces spaces` runs it, on any free port:  never the kit's 4747
+    - its spaces:  an org's repo keeps its groups at its top (`@acme/org-spell/`), or in `spaces/` (`spaces/@acme/...`);
+      the addresses are the same either way, `@acme/org-spell/dashboard`
+    - the page server is told the checkout is the app (`SPELL_APP_DIR`), so it reads that repo's org and finds its
+      groups
   - it never starts, stops or restarts a page server another checkout owns:  run from a project's checkout with no
     `spaces/`, it uses the kit's only while it's running, as it is
 - It starts the page server only if it isn't running.

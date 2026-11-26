@@ -4073,6 +4073,10 @@
       ],
       "usedIn": [
         {
+          "name": "GroupPage",
+          "file": "src/app/pages/GroupPage.tsx"
+        },
+        {
           "name": "GuidesPage",
           "file": "src/app/pages/GuidesPage.tsx"
         },

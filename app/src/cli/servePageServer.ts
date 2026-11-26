@@ -1,4 +1,4 @@
-import { existsSync, statSync } from "fs"
+import { existsSync, readdirSync, readFileSync, statSync } from "fs"
 import { join, resolve } from "path"
 
 import { SRV } from "spell/server"
@@ -25,22 +25,67 @@ export type ServeSpacesInput = {
   cwd: string
   /** the kit's root, whose page server it is (`pageServerRoot()`) */
   root: string
+  /** a checkout with no spaces yet gets its root (`orgRepoSpaces()`'s `forNew`):  `spell app create`'s */
+  forNew?: boolean
 }
 
 /**
  * The spaces folder `spell app serve` serves;  `undefined`:  the kit's own (spell.spaces).
  * - `--spaces <dir>`, from `cwd`
  * - else `SPELL_SPACES_DIR`, as the page server reads it
- * - else, run in a git checkout other than the kit's (a project's):  that checkout's `spaces/` folder, when it has one
+ * - else, run in a git checkout other than the kit's (a project's):  its spaces folder (`orgRepoSpaces()`),
+ *   the checkout itself when it holds an org's folder (`@acme/`), else its `spaces/` folder, when it has one
+ * - `forNew`:  an org's checkout with neither gets the layout to start, its root (`spell app create`)
  * - MUST be set (`SPELL_SPACES_DIR`) before the app's `environment` loads:  it reads the spaces once, as it loads
  */
-export function serveSpaces({ given, env, cwd, root }: ServeSpacesInput): string | undefined {
+export function serveSpaces({ given, env, cwd, root, forNew = false }: ServeSpacesInput): string | undefined {
   if (given) return resolve(cwd, given)
   if (env) return resolve(env)
   const caller = SRV.checkoutOf(cwd)
   if (!caller || !isOtherCheckout(cwd, root)) return undefined
-  const spaces = join(caller.root, "spaces")
-  return existsSync(spaces) && statSync(spaces).isDirectory() ? spaces : undefined
+  return orgRepoSpaces(caller.root, { forNew })
+}
+
+/**
+ * The spaces folder of an org's repo at `root` (epic `editor` P47, Q100 A):  the repo itself when it holds an org's
+ * folder (`@acme/`, beside its `package.json`), else its `spaces/` when it has one;  `undefined`:  neither.
+ * - So `<root>/@acme/org-spell/dashboard/` is `@acme/org-spell/dashboard`, as `<root>/spaces/@acme/...` was:
+ *   addresses don't change, nor links and imports between projects.
+ * - `forNew`:  a repo that has neither yet, and names its org (`"spell": { "org" }` in its `package.json`), gets the
+ *   layout to start, the root (`spell app create`);  any other repo, none, as before.
+ * - Here, not in spaces' `spellSpacesDir.ts`:  that file reads the spaces as it loads, and this decides them first.
+ */
+export function orgRepoSpaces(root: string, { forNew = false }: { forNew?: boolean } = {}): string | undefined {
+  if (orgFoldersIn(root).length) return root
+  const spaces = join(root, "spaces")
+  if (existsSync(spaces) && statSync(spaces).isDirectory()) return spaces
+  return forNew && namesItsOrg(root) ? root : undefined
+}
+
+/** Does the repo at `root` name its org, `"spell": { "org": "acme" }` in its `package.json`?  NEVER throws. */
+function namesItsOrg(root: string): boolean {
+  try {
+    const settings = JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as { spell?: { org?: unknown } }
+    return typeof settings.spell?.org === "string" && !!settings.spell.org
+  } catch {
+    return false
+  }
+}
+
+/** The org folders in `dir`, by name:  `["@acme"]`;  none when it isn't there. */
+function orgFoldersIn(dir: string): string[] {
+  if (!existsSync(dir)) return []
+  return readdirSync(dir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && ORG_FOLDER.test(entry.name))
+    .map((entry) => entry.name)
+}
+
+/** An org's folder in a spaces folder:  `@acme`. */
+const ORG_FOLDER = /^@[a-z][a-z0-9_]*$/
+
+/** The root of the git checkout `cwd` is in, when it's another than kit `root`'s (`isOtherCheckout()`):  a project's. */
+export function otherCheckoutRoot(cwd: string, root: string): string | undefined {
+  return isOtherCheckout(cwd, root) ? SRV.checkoutOf(cwd)?.root : undefined
 }
 
 /**

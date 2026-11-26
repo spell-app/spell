@@ -1,7 +1,15 @@
-import { onCleanup, onSettled } from "solid-js"
+import { Show, onCleanup, onSettled } from "solid-js"
 import type { JSX } from "@solidjs/web"
-import { createRouter, defineRoutes, useNavigate, type RouterHistory, type RouterInstance } from "@solidjs/router"
+import {
+  createRouter,
+  defineRoutes,
+  useNavigate,
+  type RouteSectionProps,
+  type RouterHistory,
+  type RouterInstance
+} from "@solidjs/router"
 
+import { SPACES } from "spell/app/spaces"
 import { editor } from "spell/app/app/editor"
 import { setNavigator } from "./navigation"
 import { PageViews } from "./pageViews"
@@ -21,6 +29,8 @@ import { GUIDES_PAGE, PALETTE_PAGE, PLACE_PAGE, SITE_PAGE, THEME_PAGE } from "./
  * - `/site/<group>`:  the group's sites (`<SiteGroupPage>`);  a registered group's address, else it's a project's
  * - `/place/<description>`:  a place's reference page (`<PlaceReferencePage>`, epic `data` P52), e.g.
  *   `/place/@spell/examples/StarWars/StarWars.api.json5`
+ * - `/@<org>`, `/@<org>/<group>`:  an org's or an org group's page (`<GroupPage>`, epic `editor` P47), e.g.
+ *   `/@acme/org-spell`;  so are `/edit/@acme` and `/run/@acme/org-spell` (`<ProjectPageRoute>`)
  * - `/guides`:  the guides that ship with Spell (`<GuidesPage>`, epic `epic-engine` P79);  `/guides/<path>` one of them,
  *   e.g. `/guides/data/data.html`
  * - ONE route for all three (`ProjectPageRoute`), so switching between them keeps the page.
@@ -41,8 +51,40 @@ export const ROUTES = defineRoutes([
   { path: `${SITE_PAGE}/*address`, component: PageViews.site.view("SiteEditorRoute") },
   { path: `${PLACE_PAGE}/*address`, component: PageViews.place.view("PlaceReferencePage") },
   { path: [GUIDES_PAGE, `${GUIDES_PAGE}/*path`], component: PageViews.guides.view("GuidesPage") },
+  { path: "/*address", matchFilters: { address: isOrgPageAddress }, component: GroupPageRoute },
   { path: "*", component: HomeRoute }
 ])
+
+/** Is `address` (as the router hands it, maybe still encoded) an org's or an org group's alone:  `@acme`, `@acme/ops`? */
+function isOrgPageAddress(address: string): boolean {
+  return !!orgPageAt(address)
+}
+
+/** The org or group page `address` names (`SPACES.orgPageFor()`), decoded first;  `undefined`:  none. */
+function orgPageAt(address: string | undefined): SPACES.OrgPage | undefined {
+  try {
+    return address ? SPACES.orgPageFor(decodeURIComponent(address)) : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/****************
+ * ### `<GroupPageRoute>`
+ * An org's page, `/@acme`, or an org group's, `/@acme/org-spell` (epic `editor` P47, Q99):  `<GroupPage>`,
+ * the address left as typed.
+ * - Only for an org with groups here, or one of its groups (`SPACES.orgPageFor()`):  any other address goes home.
+ ****************/
+function GroupPageRoute(props: RouteSectionProps) {
+  return (
+    <Show when={orgPageAt(props.params.address)} keyed>
+      {(page) => <GroupPage page={page} mode="page" />}
+    </Show>
+  )
+}
+
+/** `<GroupPage>`, loaded the first time an org's or a group's page shows (`PageViews`). */
+const GroupPage = PageViews.group.view("GroupPage")
 
 /****************
  * ### `<HomeRoute>`
