@@ -103,6 +103,7 @@ export class ServerFacts {
   static epicWorktrees(checkout: string, base: string, epics = epicsFolderOf(checkout)): EpicWorktree[] {
     const turns = Turns.held()
     const running = new RunningEpics(checkout)
+    const sessions = running.runningNames()
     const worktrees = running.list().map((epic) => {
       const ahead = Number(SRV.Git.out(["rev-list", "--count", `${base}..${epic.worktree}`], checkout) || 0)
       const turn = turns.find(({ holder }) => holder.label.includes(epic.worktree))
@@ -119,6 +120,7 @@ export class ServerFacts {
         ...(epic.active && { phase: epic.active }),
         ...(open && { open }),
         ...(epic.agents && { agents: epic.agents }),
+        ...((sessions.has(epic.name) || sessions.has(epic.worktree)) && { session: true }),
         ...(turn && { turn: turn.kind }),
         ...(worked && { worked })
       }

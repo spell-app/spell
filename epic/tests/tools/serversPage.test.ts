@@ -8,6 +8,7 @@ import {
   stateLook,
   withSecureAddress,
   inCardOrder,
+  isActiveWorktree,
   worktreeCards,
   worktreeOrder
 } from "spell/epic/tools/_assets/servers-page.js"
@@ -77,6 +78,21 @@ describe("a worktree's cards (epic `epic-engine` I465)", () => {
     const servers = [server("page server", "ast-markup"), server("editor", "ast-markup", stopped)]
     expect(worktreeCards(servers).map((one: { name: string }) => one.name)).toEqual(["page server", "editor"])
     expect(worktreeCards([server("page server", "x", { state: "down" })])).toHaveLength(1)
+  })
+})
+
+describe("only active worktrees listed (epic `epic-engine` J369)", () => {
+  test("isActiveWorktree():  a server not stopped, a session, agents, a turn or a phase;  commits alone, no", () => {
+    const stopped = { state: "stopped" }
+    const idle = (more: Record<string, unknown> = {}) => ({ epic: epic("w", more), servers: [] })
+    expect(isActiveWorktree(idle())).toBe(false)
+    expect(isActiveWorktree(idle({ ahead: 851 }))).toBe(false)
+    expect(isActiveWorktree({ ...idle(), servers: [server("page server", "w", stopped)] })).toBe(false)
+    expect(isActiveWorktree({ ...idle(), servers: [server("page server", "w", { state: "down" })] })).toBe(true)
+    expect(isActiveWorktree({ epic: undefined, servers: [server("page server", "w")] })).toBe(true)
+    for (const more of [{ session: true }, { agents: 2 }, { turn: "test" }, { phase: "P19 · Review Chunking" }]) {
+      expect(isActiveWorktree(idle(more))).toBe(true)
+    }
   })
 })
 
