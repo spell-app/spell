@@ -5,7 +5,7 @@ import { P } from "spell/parser/parser"
 import * as pyText from "./pyText"
 import { pyNativeName } from "./pyFunctions"
 
-const { attributeName, isCoreCall, kindFromDatatype, textValue, unwrapped } = P.jsShapes
+const { attributeName, isCoreCall, kindFromDatatype, loopBody, textValue, unwrapped } = P.jsShapes
 
 /****************
  * ### `PyBaseWriter`
@@ -1837,16 +1837,6 @@ function typingImport(code: string): string | false {
 /** The kind (`kindOf()`'s word) of a value spell declares as `datatype`:  `text`, `number`, a class's name. */
 function kindOfDatatype(datatype: P.Datatype | RegExpConstructor | undefined): string | undefined {
   return kindFromDatatype(datatype)
-}
-
-/**
- * What a loop's function does each turn, as `PyBaseWriter.loop()` writes it:  its body --
- * but an inline one that's a lone `return x` is `x`, a statement.
- */
-function loopBody(method: P.ASTMethodDefinition): P.ASTStatementBlock | P.ASTNode {
-  const [only, ...rest] = method.body.statements ?? []
-  if (!method.inline || rest.length || !(only instanceof P.ASTReturnStatement) || !only.value) return method.body
-  return only.value
 }
 
 /** `group`'s statements, and those of the groups in it, in order. */
