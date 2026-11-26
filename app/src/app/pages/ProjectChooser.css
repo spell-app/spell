@@ -41,7 +41,8 @@
 /*
  * The hero:  the pitch, then a picture of real Spell (`<Hero>`).
  * - Wide windows:  the picture beside the pitch;  narrower, under it, centred.
- * - The picture as spell.app shows it:  521px wide at most, on white, 4px in, 16px corners, the page's shadow.
+ * - The picture as spell.app shows it:  521px wide at most, on white, 12px in, 16px corners, the page's shadow
+ *   (12px:  Owen, epic `editor` I371, so the code's bands don't run up against the card's edges).
  */
 .Home .Hero {
   position: relative;
@@ -50,7 +51,8 @@
   align-items: center;
   justify-content: center;
   gap: 36px;
-  padding: 44px;
+  /* less room above and below than at its sides (Owen, epic `editor` I371:  "Less vertical padding") */
+  padding: 24px 44px;
   border-radius: calc(var(--Home-radius) + 12px);
 
   /* its ✕, in its top right corner, a step in from the rounding (epic `editor` T186) */
@@ -121,9 +123,9 @@
       display: block;
       box-sizing: content-box;
       width: 521px;
-      max-width: calc(100% - 8px);
+      max-width: calc(100% - 24px);
       height: auto;
-      padding: 4px;
+      padding: 12px;
       border-radius: 16px;
       background: #fff;
       /* raised in every theme, Studio's flat panes too:  white on a light pane needs its edge */
@@ -189,6 +191,14 @@
     padding: 12px 0 0 0;
     overflow: clip;
     overflow-clip-margin: 40px;
+  }
+  /* folded, its title row alone:  no room under it for the content, and 20px to the next section, not the page's 28px
+     (Owen, epic `editor` I371:  "Less space between when collapsed") */
+  &.folded {
+    margin-bottom: -8px;
+  }
+  &.folded::part(content) {
+    padding: 0;
   }
   .line {
     font-family: var(--Home-serif);

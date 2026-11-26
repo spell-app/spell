@@ -418,6 +418,7 @@ function HomeGuides(props: { drag?: TileCardDrag }) {
  * - A `<ui-section>` that folds by the chevron before its title, folded or not remembered by its id
  *   across reloads (`HomeFolds`;  Owen, epic `editor` T186).
  *   - Not while the page is rearranged:  every section open, its title typed in where it is.
+ *   - Folded, it's its title row alone:  `folded`, so folded sections stack close (Owen, epic `editor` I371).
  * - `drag`:  moving the whole section by its title, among the page's, while it's rearranged;
  *   none:  it stays put.
  * - Its header and line as changed in this language (`HomeArrangement`), typed in where they are while it's rearranged.
@@ -443,7 +444,11 @@ export function HomeSection(props: {
   return (
     <ui-section
       id={props.id}
-      class={["ProjectCards", { small: !!props.small }, sectionDragClasses(props.drag)]}
+      class={[
+        "ProjectCards",
+        { small: !!props.small, folded: folds() && HomeFolds.isFolded(props.id) },
+        sectionDragClasses(props.drag)
+      ]}
       level="2"
       appearance="basic"
       collapsible={folds()}
