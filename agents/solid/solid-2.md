@@ -210,6 +210,9 @@ count() // 1
   - on host pages with their own Solid / Spell UI:  an import-map variant of `<spell-viewer>` (bare specifiers)
     (planned, epic page T5:  not shipped -- such a page gets a second Solid today)
   - two copies on one page FAIL SILENTLY:  the fork's `register()` swaps `existing.Component` across copies
+  - `spell-solid.js` re-exports `solid-js` and `@solidjs/web` with `export *`:  a name BOTH export by different paths
+    is dropped, silently (2.0.4's `heldRead`, and `<spell-viewer>` stopped loading);  the entry names it
+    (`vite.solid.config.ts`), and `element.build.test.ts` fails on any name a build imports that the shared file lacks
 - NEVER put Things (class instances) in a Solid store:  stores wrap them in proxies, `===` breaks.
 
 ```ts
@@ -304,6 +307,9 @@ draw() {
   - component setup + teardown:  `onSettled(() => { ...; return cleanup })`, not `onMount`
 - Memos:  eager by default;  create them inside a component / owner, NEVER at module scope (unowned memos recompute
   forever).  `lazy: true` autodisposes when unobserved.
+  - a component's field memo (`readonly step = createMemo(...)`) runs as the component is built, and again as what it
+    read changes, read or not, before the first render too:  one that reads Spell UI's runtime (its texts, `UI.i18n`)
+    waits for `isReady` (`<epic-page>`'s `labelText()`;  on 2.0.4 one ran before the runtime loaded, and the page failed)
 - Stores:  draft setters only.  A direct `store.x = 1` is IGNORED:
   dev warns `STORE_WRITE_OUTSIDE_SETTER` once per store and key (rc.17), production says nothing.
   - a derived store needs no seed (rc.16):  `createStore(fn)`, `createProjection(fn)`

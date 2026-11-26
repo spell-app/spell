@@ -299,8 +299,11 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   /**
    * The text for `key`, for the derived labels below:  empty until the runtime's texts are there (`isReady`),
    * then read again.
-   * - Why:  they're memos made with the component, so they run before its first render;  Solid 2.0.4 runs one again
-   *   as the layout changes, unread, and the runtime's texts (`UI.i18n`) throw until it has loaded.
+   * - Why:  they're memos made with the component, so they may run before its first render, and the runtime's texts
+   *   (`UI.i18n`) throw until it has loaded.
+   *   - On Solid 2.0.4 one ran again in a flush as the layout changed, before the runtime loaded, and the page failed
+   *     (`EpicFocus.test.tsx`'s first test);  on rc.21 it didn't.  Why 2.0.4 differs isn't pinned down:  a plain unread
+   *     memo re-runs on both.
    */
   private labelText(key: E.TextKey<EpicPageVocabulary>, params?: Record<string, string | number>): string {
     return this.isReady ? this.translationForKey(key, params) : ""
