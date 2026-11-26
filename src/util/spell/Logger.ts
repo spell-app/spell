@@ -1,5 +1,4 @@
-import chalk from "chalk"
-
+import { hexToRgb } from "spell/util/color"
 import { commaList } from "spell/util/string"
 
 ////////////////
@@ -39,7 +38,7 @@ export class Logger {
   level: DebugLevel = "WARN"
   /** Prefix to prepend to all messages, e.g. subsystem name. */
   prefix: string | undefined = undefined
-  /** Color to apply to `prefix` in our output, as any CSS color `chalk.hex()` accepts. */
+  /** Colour of `prefix` in our output, a hex colour (`#999`):  `inColor()` says how it's shown. */
   color: string = "#999"
 
   /** All of `level`/`prefix`/`color` are optional and fall back to class field defaults above. */
@@ -77,7 +76,7 @@ export class Logger {
    * - A subclass changes how its lines look here (the page server's `SRV.ServerLog`).
    */
   protected write(_level: DebugLevel, consoleMethod: ConsoleMethod, args: any[]) {
-    if (this.prefix) args.unshift(chalk.hex(this.color)(this.prefix))
+    if (this.prefix) args.unshift(...inColor(this.prefix, this.color))
     console[consoleMethod](...args)
   }
 
@@ -113,4 +112,37 @@ export class Logger {
   static readonly INFO = "INFO" as unknown as DebugLevel
   /** Everything, including debug messages. */
   static readonly DEBUG = "DEBUG" as unknown as DebugLevel
+}
+
+////////////////
+// ## Colour
+////////////////
+
+/** The parts of node's `process` `inColor()` reads:  absent in a page. */
+type NodeProcess = {
+  versions?: { node?: string }
+  env: Record<string, string | undefined>
+  stdout?: { isTTY?: boolean }
+}
+
+/**
+ * `text` in `color`, as the leading arguments of a `console` call.
+ * - In a page:  `%c`, with the colour as CSS, which every browser's console shows.
+ * - In node:  a terminal's colour codes, 24-bit where the terminal says it takes them (`COLORTERM`), else its
+ *   256 colours;  plain when `NO_COLOR` is set, or the output is no terminal and `FORCE_COLOR` isn't set
+ * - Hand-written, not `chalk`:  this file is in every page's first files, where a terminal colour package is
+ *   dead weight;  node code that wants more colours imports `chalk` itself (the page server's `ServerLog`).
+ */
+function inColor(text: string, color: string): string[] {
+  const node = (globalThis as { process?: NodeProcess }).process
+  if (!node?.versions?.node) return [`%c${text}`, `color: ${color}`]
+  const { env } = node
+  const forced = env.FORCE_COLOR !== undefined && env.FORCE_COLOR !== "0" && env.FORCE_COLOR !== "false"
+  if (env.NO_COLOR || !(forced || (node.stdout?.isTTY && env.TERM !== "dumb"))) return [text]
+  const { r, g, b } = hexToRgb(color)
+  const byte = (channel: number) => Math.round(channel * 255)
+  const code = /truecolor|24bit/i.test(env.COLORTERM ?? "")
+    ? `38;2;${byte(r)};${byte(g)};${byte(b)}`
+    : `38;5;${16 + 36 * Math.round(r * 5) + 6 * Math.round(g * 5) + Math.round(b * 5)}`
+  return [`\x1b[${code}m${text}\x1b[39m`]
 }

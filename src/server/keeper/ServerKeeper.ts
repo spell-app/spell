@@ -494,7 +494,10 @@ export class ServerKeeper {
     return { ...row, state: "starting", why: "started:  it was down" }
   }
 
-  /** each worktree's page server and editor:  shown while it has one, stopped after `IDLE_MINUTES` unused */
+  /**
+   * each worktree's page server and editor:  shown while it has one, stopped after `IDLE_MINUTES` unused
+   * - never while a program marks its worktree in use (`SRV.CheckoutUse`:  `epic turns` waiting or running there)
+   */
   private async lookAtWorktrees(repo: KeeperRepo): Promise<KeptServer[]> {
     const rows: KeptServer[] = []
     const book = new SRV.PortBook()
@@ -515,7 +518,8 @@ export class ServerKeeper {
       }
       // a server on code from before P82 says neither:  never stopped, as nothing says it's unused
       const idle = running.lastRequest === undefined ? 0 : this.now() - Date.parse(running.lastRequest)
-      if (running.pages === 0 && idle > IDLE_MINUTES * 60_000) {
+      // a program working in it (`epic turns`' line, its tests) marks it in use:  never stopped meanwhile (I459)
+      if (running.pages === 0 && idle > IDLE_MINUTES * 60_000 && !SRV.CheckoutUse.isInUse(checkout)) {
         await this.control.stop(checkout)
         rows.push({ ...row, state: "stopped", why: `stopped after ${IDLE_MINUTES} minutes unused` })
         continue

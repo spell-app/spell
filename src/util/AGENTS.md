@@ -137,7 +137,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - A sub-folder, not loose files:
     - its `string.ts` and `DOM.ts` would clash with the generic ones a folder up (macOS is case-insensitive)
     - and nothing in `ui` may import it
-  - Its dependencies (lodash, chalk, pluralize ...) are the kit's own, in its root `package.json`.
+  - Its dependencies (lodash, pluralize ...) are the kit's own, in its root `package.json`.
     - Spell UI bundles none of them:  `yarn measure` and `yarn smoke` (declarations) prove it.
 - Files in `spell/` import the generic helpers by deep path (`spell/util/class`).
   - NEVER the `spell/util` barrel:  it re-exports this folder, so that's a cycle.

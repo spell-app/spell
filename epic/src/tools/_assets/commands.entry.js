@@ -36,7 +36,7 @@
  *   `parseJSON5()`, `ServerLink`.
  */
 import { slug } from "spell/util/string"
-import { parseJSON5 } from "spell/util/spell/json"
+import { parseJSON5 } from "spell/util/spell/parseJSON5"
 import { ServerLink } from "spell/epic/review"
 
 import { drawThenBoot, el, sectionNumber, withCode } from "./spell-doc-helpers.js"

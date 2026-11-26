@@ -1,7 +1,7 @@
 import { get as _get, set as _set } from "lodash-es"
-import queryString from "query-string"
 
-import { parseJSON, parseJSON5 } from "./json"
+import { queryText } from "spell/util/fetching"
+import { parseJSON, readJSON5 } from "./json"
 import { abortableFetch, isAbortError } from "./abortableFetch"
 import { KnownFormat, BINARY_FORMATS, type KnownFormatMimeType } from "./constants"
 import {
@@ -48,7 +48,7 @@ export type $FetchRequestParams = {
   headers?: Record<string, any>
   /** Input format, used to set `Content-Type` header.  See `KnownFormat`. */
   requestFormat?: KnownFormatMimeType
-  /** URL query params, as string or object which will be serialized. */
+  /** URL query params, as string or object which will be serialized (`queryText()`, its keys sorted). */
   query?: string | Record<string, any>
 }
 
@@ -117,7 +117,7 @@ export function $fetch<T = any>($params: $FetchParams): Promise<T> {
   let fullURL = url
   if (typeof query === "string") fullURL += `?${query}`
   // the `?` too:  without it the query ran into the path (`/apipage=x`)
-  else if (query) fullURL += `?${queryString.stringify(query)}`
+  else if (query) fullURL += `?${queryText(query, { sort: true })}`
   // console.warn("$fetch:", fullURL, fetchParams)
   const request = abortableFetch(fullURL, fetchParams, fetcher)
 
@@ -149,7 +149,7 @@ export function $fetch<T = any>($params: $FetchParams): Promise<T> {
       // Pull text out to process json/json5 separately below.
       const text = await response.text()
       if (format === KnownFormat.json || format.toLowerCase() === "json") return parseJSON(text)
-      if (format === KnownFormat.json5 || format.toLowerCase() === "json5") return parseJSON5(text)
+      if (format === KnownFormat.json5 || format.toLowerCase() === "json5") return await readJSON5(text)
       return text
     } catch (error) {
       throw new ResponseParseError({ ...errorParams, error })

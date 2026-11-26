@@ -112,6 +112,24 @@ describe("ServerKeeper:  every project's servers kept up (epic `epic-engine` P82
     expect(servers.running.has(worktree)).toBe(true)
   })
 
+  it("a worktree marked in use (`epic turns` waiting or running there) keeps its server up, unused or not (I459)", async () => {
+    vi.stubEnv(SRV.KEEPER_HOME_VARIABLE, join(folder, "home"))
+    const worktree = fakeWorktree(main, join(folder, "worktrees", "seo"))
+    writeFileSync(join(worktree, ".spell-server.json"), "{}\n")
+    servers.running.add(worktree)
+    servers.lastRequest.set(worktree, new Date(now - 3 * 3_600_000).toISOString())
+    const done = SRV.CheckoutUse.hold(join(worktree, "src"), "epic turns:  yarn test")
+    try {
+      await keeper().look()
+      expect(servers.running.has(worktree)).toBe(true)
+    } finally {
+      done()
+      vi.unstubAllEnvs()
+    }
+    await keeper().look()
+    expect(servers.running.has(worktree)).toBe(false)
+  })
+
   it("a project's own servers:  watched by port;  started by its command;  one without, down and shown", async () => {
     const holder: Server = createServer()
     await new Promise<void>((done) => holder.listen(0, "127.0.0.1", done))

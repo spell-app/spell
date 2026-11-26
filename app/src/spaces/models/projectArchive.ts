@@ -1,4 +1,4 @@
-import { parseJSON5 } from "spell/util"
+import { parseJSON5 } from "spell/util/spell/parseJSON5"
 import { SP } from "spell/parser/spell"
 
 import { filesInZip, zipOf } from "./zip"
