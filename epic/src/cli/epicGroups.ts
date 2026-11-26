@@ -1150,34 +1150,42 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
   servers: [
     {
       name: "restart",
-      usage: "<server> [--repo <name>]",
+      usage: "[<server>] [--repo <name>]",
       description:
-        "ask the server keeper to restart a main checkout's server:  page-server, editor (its page server restarts with it), or a repo's own by name",
+        "another name for spell server restart:  Spell's server keeper restarts a main checkout's server (page-server, editor, or a name spell keeper add registered)",
       example: "epic servers restart editor",
-      flags: { "--repo <name>": "the repo (default:  the one this checkout is of, else the hub's default)" }
+      flags: {
+        "--repo <name>": "which repo's main checkout (default:  the one this checkout is of, else the hub's default)"
+      }
     },
     {
       name: "start",
-      usage: "<server> [--repo <name>]",
-      description: "ask the server keeper to start a main checkout's server, one stopped by hand too",
+      usage: "[<server>] [--repo <name>]",
+      description:
+        "another name for spell server start:  in a main checkout, the keeper starts it, one stopped by hand too",
       example: "epic servers start page-server",
-      flags: { "--repo <name>": "the repo (default:  the one this checkout is of, else the hub's default)" }
+      flags: {
+        "--repo <name>": "which repo's main checkout (default:  the one this checkout is of, else the hub's default)"
+      }
     },
     {
       name: "stop",
-      usage: "<server> [--repo <name>]",
-      description: "ask the server keeper to stop a main checkout's server, and leave it stopped until a start",
+      usage: "[<server>] [--repo <name>]",
+      description:
+        "another name for spell server stop:  in a main checkout, the keeper stops it and leaves it stopped until a start",
       example: "epic servers stop page-server",
-      flags: { "--repo <name>": "the repo (default:  the one this checkout is of, else the hub's default)" }
+      flags: {
+        "--repo <name>": "which repo's main checkout (default:  the one this checkout is of, else the hub's default)"
+      }
     },
     {
       name: "status",
-      usage: "[--repo <name>] [--json]",
-      description: "main's servers as the server keeper last saw them:  name, state, address, why",
-      example: "epic servers status",
+      usage: "[<server>] [--repo <name>] [--watch]",
+      description:
+        "another name for spell server status:  the page server's details, a server's line, or (--watch) every server",
+      example: "epic servers status editor",
       flags: {
-        "--repo <name>": "the repo (default:  the one this checkout is of, else the hub's default)",
-        "--json": "print them as JSON"
+        "--repo <name>": "which repo's main checkout (default:  the one this checkout is of, else the hub's default)"
       }
     }
   ],

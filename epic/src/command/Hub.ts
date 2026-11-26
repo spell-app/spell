@@ -23,8 +23,9 @@ import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
  * - `stop`:  stop it
  * - `status`:  JSON, exit 1 when it isn't running
  * - `url <file>`:  ensure it runs, then print the URL that serves `<file>` (a page in a registered repo's content)
- * - `kick`:  ensure it runs, then have its SERVER KEEPER look at every server now (`ServerKeeper`, epic `epic-engine`
- *   P82):  what every session's start runs (`hooks/server-keeper.mjs`);  quiet, and nothing to do with no repos
+ * - `kick`:  ensure it runs, then have SPELL'S SERVER KEEPER look at every server now (`spell/server/keeper`;  the hub
+ *   kept them itself until epic `epic-engine` P85, and as it starts it makes sure that keeper runs);  quiet, and
+ *   nothing to do with no repos
  *
  * - Its repos:  `epic repo` (`Repos`);  `epic server <verb>` in a repo `epic init` set up registers that one first
  *   (`registerHere()`)
@@ -136,16 +137,16 @@ export class Hub {
   }
 
   /**
-   * The hub running, and its server keeper looking at every server now:  `epic hub kick`.
+   * The hub running, and Spell's server keeper looking at every server now:  `epic hub kick`.
    * - `here`:  the checkout the session starts in, registered first when `epic init` set it up (`registerHere()`)
-   * - a hub just started looks as it starts;  one already running is asked (`POST /api/servers/look`)
+   * - the keeper in charge asked (`POST /api/servers/look`, the token from its record);  none yet (a hub just
+   *   started is starting it):  nothing more
    * - no repos:  nothing to keep, nothing done
    */
   async kick(here: string, port = DEFAULT_EPIC_PORT): Promise<void> {
     this.registerHere(here)
     if (!new RepoList({ home: this.home }).repos().length) return
-    const { launched } = await this.ensure(port)
-    if (launched) return
+    await this.ensure(port)
     const { SRV } = await import("spell/server")
     const keeper = new SRV.KeeperLink().running()
     if (!keeper) return

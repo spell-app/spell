@@ -9,6 +9,9 @@
  * - Cards are made once each and brought up to date in place, so an open fold stays open;  which folds are open is
  *   kept in the browser, by server
  * - Plain DOM, no imports:  the keeper serves it as it is.  Built with `document.createElement()`, never markup in strings.
+ * - In a frame (the epic tooling's Servers tab shows it for its cards, epic `epic-engine` P85):  no title of its own,
+ *   light or dark as the page around it says (`?scheme=`), and its height told to that page as it changes
+ *   (`embedInFrame()`), so the frame never scrolls
  */
 
 /** How often the page asks, ms. */
@@ -375,8 +378,26 @@ async function loadUi() {
   return Promise.race([ready.then(() => true), late])
 }
 
+/**
+ * SIDE EFFECT:  in a frame, the page marked `servers-embedded` (its title hidden) and its height posted to the page
+ * around it whenever it changes, `{ spellServersHeight }`:  only a number, so any page may hear it
+ */
+function embedInFrame() {
+  if (window.parent === window) return
+  document.documentElement.classList.add("servers-embedded")
+  // the page around it says its light or dark (`?scheme=`):  a frame of another scheme draws an opaque background
+  const scheme = new URLSearchParams(location.search).get("scheme")
+  if (scheme === "light" || scheme === "dark") document.documentElement.style.colorScheme = scheme
+  // the body's own bottom, not the document's scroll height:  that never drops below the frame's, so it'd only grow
+  const tell = () =>
+    window.parent.postMessage({ spellServersHeight: Math.ceil(document.body.getBoundingClientRect().bottom) }, "*")
+  new ResizeObserver(tell).observe(document.body)
+  tell()
+}
+
 /** the page started:  Spell UI, then an ask every `ASK_MS` while it shows */
 async function start() {
+  embedInFrame()
   await refresh()
   hasUi = await loadUi()
   if (hasUi && lastAnswer) drawCards(lastAnswer)

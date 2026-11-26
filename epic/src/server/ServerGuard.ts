@@ -9,36 +9,36 @@ import { RealPath } from "spell/server/RealPath"
 import { kindOf, serverCheckoutOf, serverProcesses, type ServerProcess } from "spell/server/page/prune"
 import { EpicHome } from "spell/epic/config/EpicHome.ts"
 
-import { HOLD_FILE, REPOS_FILE } from "./server.types.ts"
+import { REPOS_FILE } from "./server.types.ts"
 
 /****************
  * ### `ServerGuard`
- * The COMMAND GUARD (epic `epic-engine` P84):  says whether a shell command an agent is about to run would start,
- * stop, restart or kill one of a MAIN checkout's servers, which only the server keeper may do (`ServerKeeper`).
+ * The COMMAND GUARD (epic `epic-engine` P84, narrowed in P85):  says whether a shell command an agent is about to run
+ * would kill one of a MAIN checkout's servers, or start main's editor by hand, which only Spell's server keeper may
+ * do (`spell/server/keeper`).
  *
  * ```ts
  * const guard = ServerGuard.forMachine()
- * guard.check("cd ~/www/spell && spell server start all", "/Users/owen/www/spell.worktrees/seo")
- * // => { command: "spell server start all", why: "...", instead: "epic servers start page-server" }
- * guard.check("spell server start", "/Users/owen/www/spell.worktrees/seo")   // => undefined:  the worktree's own
+ * guard.check("cd ~/www/spell/app && vp dev", "/Users/owen/www/spell.worktrees/seo")
+ * // => { command: "vp dev", why: "...", instead: "spell server start editor ..." }
+ * guard.check("cd ~/www/spell && spell server restart", "/Users/owen/www/spell.worktrees/seo")   // => undefined
  * ```
  *
  * - Its caller:  the plugin's `PreToolUse` hook on Bash, [server-guard.mjs](../../hooks/server-guard.mjs), which
  *   answers "deny" with `message()`;  Claude Code's and Codex's
- * - The main checkouts:  every repo the epic hub serves (`~/.spell-epic/repos.json5`), never a guess from folder names;
- *   a worktree of one (its `.git` a file) is never main
+ * - The main checkouts:  every one Spell's keeper keeps (`~/.spell/keeper.json5` `checkouts`), and every repo the epic
+ *   hub serves (`~/.spell-epic/repos.json5`), never a guess from folder names;  a worktree of one (its `.git` a file)
+ *   is never main
  * - Each piece of the command is looked at:  split on `&&`, `||`, `;`, `|`, `&` and new lines, with each `cd` before it
  *   followed, and each `$(...)` inside it looked at too
  * - Refused, in a main checkout:
- *   - `spell server` / `epic server` `start`, `stop`, `restart`, `ensure`, `serve`, `local` (`all` too);  `--root` wins
- *     over the folder
- *   - the editor started there:  `vp dev`, `vite`, `yarn start:dev`, `yarn start`, `spell app serve`
- *   - `epic hub stop`, anywhere:  the hub IS the keeper
+ *   - the editor started there by hand:  `vp dev`, `vite`, `yarn start:dev`, `yarn start`, `spell app serve`
  *   - a kill (`kill`, `pkill`, `killall`, `lsof ... | xargs kill`, `kill $(lsof ...)`) that would reach a page server,
  *     editor or hub of a main checkout:  each process looked up by its command line and working folder
  *     (`serverProcesses()`), only when a kill is there to judge
- * - Left alone:  reading (`ps`, `lsof`, `curl`, `spell server status`), `epic servers ...` (the way to ask), and every
- *   command about a worktree's own servers
+ * - Left alone:  `spell server ...` and `epic server ...` (in a main checkout they ask the keeper themselves),
+ *   `spell keeper ...`, `epic servers ...`, `epic hub stop` (the hub keeps no servers since P85, and the keeper brings
+ *   it back), reading (`ps`, `lsof`, `curl`), and every command about a worktree's own servers
  * - Lets everything through while the keeper's HANDS-OFF switch is on (`isHandsOff`):  the person is working on the
  *   servers themselves
  * - What it can't see (a script, a command built in pieces):  main's servers refuse those themselves
@@ -89,22 +89,31 @@ export class ServerGuard {
   }
 
   /**
-   * The guard for this machine:  the hub's repos as the main checkouts, the keeper's hands-off switch as it is now.
-   * - `home`:  default the epic home (`EpicHome.folder()`)
+   * The guard for this machine:  the main checkouts Spell's keeper keeps and the hub serves, and the keeper's hands-off
+   * switch as it is now, read from their files by hand (plain `node`, no import of the keeper).
+   * - `home`:  default the epic home (`EpicHome.folder()`);  `keeperHome`:  default the keeper's, `SPELL_KEEPER_HOME`
+   *   else `~/.spell`
    * - NEVER throws:  files it can't read give no mains, and the switch off
    */
-  static forMachine(home = EpicHome.folder()): ServerGuard {
+  static forMachine(
+    home = EpicHome.folder(),
+    keeperHome = process.env.SPELL_KEEPER_HOME || join(homedir(), ".spell")
+  ): ServerGuard {
     const read = <T>(file: string): T | undefined => {
       try {
-        return DataFile.read<T>(join(home, file))
+        return DataFile.read<T>(file)
       } catch {
         return undefined
       }
     }
-    const repos = read<{ repos?: { checkout?: string }[] }>(REPOS_FILE)?.repos ?? []
+    const kept = read<{ checkouts?: { checkout?: string }[] }>(join(keeperHome, KEEPER_LIST_FILE))?.checkouts ?? []
+    const repos = read<{ repos?: { checkout?: string }[] }>(join(home, REPOS_FILE))?.repos ?? []
+    const mains = [...kept, ...repos]
+      .map((each) => each.checkout)
+      .filter((checkout): checkout is string => Boolean(checkout))
     return new ServerGuard({
-      mains: repos.map((repo) => repo.checkout).filter((checkout): checkout is string => Boolean(checkout)),
-      isHandsOff: read<{ handsOff?: boolean }>(HOLD_FILE)?.handsOff === true
+      mains: [...new Set(mains)],
+      isHandsOff: read<{ handsOff?: boolean }>(join(keeperHome, KEEPER_HOLDS_FILE))?.handsOff === true
     })
   }
 
@@ -129,7 +138,7 @@ export class ServerGuard {
   static message({ command, why, instead }: GuardRefusal): string {
     return (
       `Refused:  ${command}\n` +
-      `Why:  ${why}  Only the server keeper starts, stops or restarts a main checkout's servers.\n` +
+      `Why:  ${why}  Only Spell's server keeper starts, stops or restarts a main checkout's servers.\n` +
       `Run instead:  ${instead}\n` +
       `(Or leave main's servers to the Servers tab;  a worktree's own servers are yours.)`
     )
@@ -289,8 +298,6 @@ export class ServerGuard {
     switch (program) {
       case "spell":
         return this.checkSpell(rest, cwd)
-      case "epic":
-        return this.checkEpic(rest, cwd)
       case "vp":
       case "vite":
         return this.checkVite(program, rest, cwd)
@@ -309,41 +316,12 @@ export class ServerGuard {
     }
   }
 
-  /** `spell server <verb>`, `spell app serve` */
+  /** `spell app serve`;  `spell server ...` asks the keeper itself, in a main checkout */
   private checkSpell(args: string[], cwd: string): Verdict | undefined {
     const [noun, verb] = positional(args)
-    if (noun === "server") return this.checkServerVerb(verb, args, cwd)
     if (noun === "app" && verb === "serve" && this.mainAt(cwd))
-      return {
-        why: "this would start main's editor (and its page server) by hand.",
-        instead: "epic servers start editor"
-      }
+      return { why: "this would start main's editor (and its page server) by hand.", instead: EDITOR_INSTEAD }
     return undefined
-  }
-
-  /** `epic server <verb>`, `epic hub stop`;  `epic servers` is the way to ask */
-  private checkEpic(args: string[], cwd: string): Verdict | undefined {
-    const [noun, verb] = positional(args)
-    if (noun === "server") return this.checkServerVerb(verb, args, cwd)
-    if (noun === "hub" && verb === "stop")
-      return {
-        why: "the epic hub is the server keeper:  stopped, nothing keeps main's servers up.",
-        instead: "epic servers status  (or epic hub kick, to have it look now)"
-      }
-    return undefined
-  }
-
-  /** a page server verb, in the checkout `--root` names, else `cwd` */
-  private checkServerVerb(verb: string | undefined, args: string[], cwd: string): Verdict | undefined {
-    if (!verb || !SERVER_VERBS.has(verb)) return undefined
-    const root = flagValue(args, "--root")
-    const main = this.mainAt(root ? folderFrom(cwd, root) : cwd)
-    if (!main) return undefined
-    const action = verb === "stop" ? "stop" : verb === "restart" ? "restart" : "start"
-    return {
-      why: `this would ${action} ${main}'s page server by hand.`,
-      instead: `epic servers ${action} page-server`
-    }
   }
 
   /** `vp dev`, `vite [dev | serve]` in a main checkout */
@@ -430,8 +408,8 @@ export class ServerGuard {
       why: `this would kill ${name} (process ${main.pid}).`,
       instead:
         server === "hub"
-          ? "epic servers status  (the hub keeps the rest;  epic hub kick makes it look now)"
-          : `epic servers restart ${server}  (or epic servers stop ${server})`
+          ? "epic hub stop  (Spell's server keeper starts it again;  epic hub kick makes the keeper look now)"
+          : `spell server restart ${server}  (or spell server stop ${server})`
     }
   }
 
@@ -554,14 +532,17 @@ function listenersOn(port: number): number[] {
 /** What runs another command:  skipped, so the command after it is judged. */
 const WRAPPERS = new Set(["sudo", "env", "nohup", "exec", "time", "command", "builtin", "nice", "caffeinate"])
 
-/** The page server verbs that start, stop or restart it;  `status` and `url` only read (or ask the keeper). */
-const SERVER_VERBS = new Set(["start", "stop", "restart", "ensure", "serve", "local"])
+/** Spell's keeper's list of main checkouts, in its home (`spell/server/keeper`'s `KEEPER_LIST_FILE`). */
+const KEEPER_LIST_FILE = "keeper.json5"
+
+/** Spell's keeper's holds, in its home:  `{ held, handsOff }` (`spell/server/keeper`'s `KEEPER_HOLDS_FILE`). */
+const KEEPER_HOLDS_FILE = "server-keeper-holds.json"
 
 /** The app folder's workspace name, `yarn workspace spell-app ...`. */
 const APP_WORKSPACE = "spell-app"
 
 /** The way to ask for main's editor. */
-const EDITOR_INSTEAD = "epic servers start editor  (or epic servers restart editor)"
+const EDITOR_INSTEAD = "spell server start editor  (or spell server restart editor)"
 
 /**
  * `words` as the program it runs and its arguments:  `node <kit>/bin/spell.mjs` is `spell`, `npx vite` is `vite`,

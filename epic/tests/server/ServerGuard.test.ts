@@ -63,29 +63,31 @@ const guard = new ServerGuard({
 describe("ServerGuard.check():  a table of real commands", () => {
   // [command, folder it runs in, refused (what to run instead) or let through]
   const CASES: [string, string, string | undefined][] = [
-    // 2026-11-23:  a session started every server in the main checkout, from a worktree
-    [`cd ${MAIN} && spell server start all`, WORKTREE, "epic servers start page-server"],
-    ["spell server start", MAIN, "epic servers start page-server"],
-    ["spell server restart", join(MAIN, "app"), "epic servers restart page-server"],
-    ["yarn server stop", MAIN, "epic servers stop page-server"],
-    [`node ${MAIN}/bin/spell.mjs server start --root ${MAIN}`, WORKTREE, "epic servers start page-server"],
-    [`epic server start --all`, MAIN, "epic servers start page-server"],
-    // ... and killed main's editors by their process numbers
-    ["kill 102", WORKTREE, "epic servers restart editor"],
-    ["kill -9 101 202", WORKTREE, "epic servers restart page-server"],
-    ["lsof -ti:3000 | xargs kill -9", WORKTREE, "epic servers restart editor"],
-    ["kill $(lsof -ti tcp:4747)", WORKTREE, "epic servers restart page-server"],
-    ["kill 1102", WORKTREE, "epic servers restart editor"],
-    ["pkill -f vite", WORKTREE, "epic servers restart editor"],
-    ["(sleep 1; kill 103)", WORKTREE, "epic servers status"],
-    // the editor started from main's app folder
-    [`cd ${MAIN}/app && yarn start:dev`, WORKTREE, "epic servers start editor"],
-    [`cd ${MAIN}/app/app && vp dev`, WORKTREE, "epic servers start editor"],
-    [`cd ${MAIN}/app/app && npx vite`, WORKTREE, "epic servers start editor"],
-    [`yarn --cwd ${MAIN}/app start:dev`, WORKTREE, "epic servers start editor"],
-    ["spell app serve --headless", MAIN, "epic servers start editor"],
-    ["FORCE_COLOR=1 nohup spell server start &", MAIN, "epic servers start page-server"],
-    ["epic hub stop", WORKTREE, "epic servers status"],
+    // main's servers asked for by name go through:  in a main checkout, `spell server` asks Spell's keeper itself
+    // (epic `epic-engine` P85;  P84 refused these, naming `epic servers`)
+    [`cd ${MAIN} && spell server start all`, WORKTREE, undefined],
+    ["spell server start", MAIN, undefined],
+    ["spell server restart", join(MAIN, "app"), undefined],
+    ["yarn server stop", MAIN, undefined],
+    [`node ${MAIN}/bin/spell.mjs server start --root ${MAIN}`, WORKTREE, undefined],
+    [`epic server start --all`, MAIN, undefined],
+    ["FORCE_COLOR=1 nohup spell server start &", MAIN, undefined],
+    ["spell keeper start", MAIN, undefined],
+    ["epic hub stop", WORKTREE, undefined],
+    // 2026-11-23:  sessions killed main's editors by their process numbers
+    ["kill 102", WORKTREE, "spell server restart editor"],
+    ["kill -9 101 202", WORKTREE, "spell server restart page-server"],
+    ["lsof -ti:3000 | xargs kill -9", WORKTREE, "spell server restart editor"],
+    ["kill $(lsof -ti tcp:4747)", WORKTREE, "spell server restart page-server"],
+    ["kill 1102", WORKTREE, "spell server restart editor"],
+    ["pkill -f vite", WORKTREE, "spell server restart editor"],
+    ["(sleep 1; kill 103)", WORKTREE, "epic hub stop"],
+    // the editor started by hand from main's app folder
+    [`cd ${MAIN}/app && yarn start:dev`, WORKTREE, "spell server start editor"],
+    [`cd ${MAIN}/app/app && vp dev`, WORKTREE, "spell server start editor"],
+    [`cd ${MAIN}/app/app && npx vite`, WORKTREE, "spell server start editor"],
+    [`yarn --cwd ${MAIN}/app start:dev`, WORKTREE, "spell server start editor"],
+    ["spell app serve --headless", MAIN, "spell server start editor"],
     // a worktree's own servers are its session's
     ["spell server start", WORKTREE, undefined],
     ["spell server restart all", join(WORKTREE, "app"), undefined],
@@ -98,9 +100,9 @@ describe("ServerGuard.check():  a table of real commands", () => {
     ["curl -s http://127.0.0.1:4747/api/server", MAIN, undefined],
     ["spell server status", MAIN, undefined],
     ["epic servers restart editor", MAIN, undefined],
-    ['echo "spell server start && kill 102"', MAIN, undefined],
-    // a checkout the hub doesn't serve is no main's
-    ["spell server start", OTHER, undefined],
+    ['echo "vp dev && kill 102"', MAIN, undefined],
+    // a checkout nobody keeps is no main's
+    ["vp dev", OTHER, undefined],
     ["kill 4242", MAIN, undefined]
   ]
   test.each(CASES)("%s  (in %s)", (command, cwd, instead) => {
@@ -110,11 +112,11 @@ describe("ServerGuard.check():  a table of real commands", () => {
   })
 
   test("the message says what was refused, why, and what to run instead", () => {
-    const refused = guard.check(`cd ${MAIN} && spell server start all`, WORKTREE)!
-    expect(refused.command).toBe("spell server start all")
+    const refused = guard.check(`cd ${MAIN}/app/app && vp dev`, WORKTREE)!
+    expect(refused.command).toBe("vp dev")
     const message = ServerGuard.message(refused)
-    expect(message).toMatch(/^Refused:  spell server start all\nWhy:  .*page server by hand\./)
-    expect(message).toContain("Run instead:  epic servers start page-server")
+    expect(message).toMatch(/^Refused:  vp dev\nWhy:  .*main's editor by hand/)
+    expect(message).toContain("Run instead:  spell server start editor")
   })
 
   test("hands off:  everything goes through", () => {
@@ -127,6 +129,7 @@ describe("ServerGuard.check():  a table of real commands", () => {
     const counting = new ServerGuard({ mains: [MAIN], servers: () => (asked++, SERVERS) })
     counting.check("spell server start", MAIN)
     counting.check("yarn start:dev", join(MAIN, "app"))
+    counting.check("epic hub stop", MAIN)
     expect(asked).toBe(0)
     counting.check("kill 102; kill 101", WORKTREE)
     expect(asked).toBe(1)
@@ -134,41 +137,46 @@ describe("ServerGuard.check():  a table of real commands", () => {
 })
 
 describe("the hook, server-guard.mjs", () => {
+  // main's checkouts from Spell's keeper's list (`~/.spell/keeper.json5`), the epic hub's list empty
   const home = join(TEMP, "epic-home")
+  const keeperHome = join(TEMP, "keeper-home")
   mkdirSync(home, { recursive: true })
-  writeFileSync(join(home, "repos.json5"), JSON.stringify({ repos: [{ name: "spell", checkout: MAIN }] }))
+  mkdirSync(keeperHome, { recursive: true })
+  writeFileSync(join(home, "repos.json5"), JSON.stringify({ repos: [] }))
+  writeFileSync(join(keeperHome, "keeper.json5"), JSON.stringify({ checkouts: [{ name: "spell", checkout: MAIN }] }))
 
   /** the hook run on a Bash call of `command` in `cwd`:  its exit code and what it printed */
   const runHook = (command: string, cwd: string) => {
     const ran = spawnSync(process.execPath, [HOOK], {
       input: JSON.stringify({ tool_name: "Bash", tool_input: { command }, cwd }),
-      env: { ...process.env, SPELL_EPIC_HOME: home },
+      env: { ...process.env, SPELL_EPIC_HOME: home, SPELL_KEEPER_HOME: keeperHome },
       encoding: "utf8"
     })
     return { status: ran.status, out: ran.stdout.trim() ? JSON.parse(ran.stdout) : undefined }
   }
 
-  test("refuses a start of main's page server, saying what to run instead", () => {
-    const { status, out } = runHook("spell server start", MAIN)
+  test("refuses main's editor started by hand, saying what to run instead", () => {
+    const { status, out } = runHook("vp dev", join(MAIN, "app", "app"))
     expect(status).toBe(0)
     expect(out.hookSpecificOutput).toMatchObject({ hookEventName: "PreToolUse", permissionDecision: "deny" })
-    expect(out.hookSpecificOutput.permissionDecisionReason).toContain("epic servers start page-server")
+    expect(out.hookSpecificOutput.permissionDecisionReason).toContain("spell server start editor")
   })
 
-  test("lets a worktree's own start, and anything without a server word, through:  nothing printed", () => {
-    expect(runHook("spell server start", WORKTREE)).toEqual({ status: 0, out: undefined })
+  test("lets spell server in main, a worktree's own start, and anything without a server word, through", () => {
+    expect(runHook("spell server restart", MAIN)).toEqual({ status: 0, out: undefined })
+    expect(runHook("vp dev", join(WORKTREE, "app"))).toEqual({ status: 0, out: undefined })
     expect(runHook("git status", MAIN)).toEqual({ status: 0, out: undefined })
   })
 
   test("hands off:  let through, with one line saying so", () => {
-    writeFileSync(join(home, "server-keeper.json"), JSON.stringify({ held: [], handsOff: true }))
+    writeFileSync(join(keeperHome, "server-keeper-holds.json"), JSON.stringify({ held: [], handsOff: true }))
     try {
-      const { status, out } = runHook("spell server start", MAIN)
+      const { status, out } = runHook("vp dev", join(MAIN, "app", "app"))
       expect(status).toBe(0)
       expect(out.hookSpecificOutput.permissionDecision).toBeUndefined()
       expect(out.hookSpecificOutput.additionalContext).toMatch(/^Hands off is on/)
     } finally {
-      rmSync(join(home, "server-keeper.json"))
+      rmSync(join(keeperHome, "server-keeper-holds.json"))
     }
   })
 

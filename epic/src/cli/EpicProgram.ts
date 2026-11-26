@@ -682,7 +682,7 @@ export class EpicProgram {
   }
 
   /**
-   * `window`, `server`:  scripts passed through;  `servers`:  main's servers, asked of the keeper (`Servers`);
+   * `window`, `server`:  scripts passed through;  `servers`:  another name for `spell server` (`Servers`);
    * `hub`, `repo`:  the machine's epic server (`Hub`, `Repos`).
    */
   private addWindowVerbs(): void {
@@ -708,8 +708,8 @@ export class EpicProgram {
     )
     this.group(
       epic.command("servers"),
-      "ask the server keeper to start, stop or restart a MAIN checkout's servers (page server, editor, a repo's own):  " +
-        "the one way, never by hand;  a worktree's own servers are its session's",
+      "another name for spell server start | stop | restart | status:  Spell's server keeper does a MAIN checkout's " +
+        "servers (page server, editor, a repo's own);  a worktree's own servers are its session's",
       (args) => new Servers().run(args)
     )
     this.group(

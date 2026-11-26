@@ -30,7 +30,7 @@ import { WakeNotes } from "./WakeNotes.mjs"
  * - So a session never runs a `wait` of its own in the background, and nothing times out:  no turn is ever woken with
  *   nothing to do.
  * - A session that ended:  forgotten, its note gone.
- * - Its position:  node only, in the hub's process (`EpicServer`, beside the `ServerKeeper`);  the pollers and the hook
+ * - Its position:  node only, in the hub's process (`EpicServer`);  the pollers and the hook
  *   read only its notes, in plain node.
  * - NEVER throws.
  ****************/

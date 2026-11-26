@@ -1,126 +1,74 @@
+import { join } from "node:path"
+
 import { CLI } from "spell/cli"
-import { SRV } from "spell/server"
-import { RealPath } from "spell/server/RealPath"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { RepoList } from "spell/epic/server/RepoList"
-import type { KeptServer, Repo, ServersAnswer } from "spell/epic/server/server.types"
+import type { Repo } from "spell/epic/server/server.types"
 
-import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
-import { Hub } from "./Hub"
+import { EpicCommandError, parseVerbArgs } from "./command.types"
 
 /****************
  * ### `Servers`
- * `epic servers <verb>`:  the ONE way an agent asks for a MAIN checkout's servers to start, stop or restart (epic
- * `epic-engine` P84):  it asks the server keeper (`ServerKeeper`, in the epic hub), with the same calls the Servers
- * tab's buttons make (`SRV.KeeperLink.ask()`).
- * - `start | stop | restart <server> [--repo <name>]`:  `page-server` (or `page`), `editor`, or one of the repo's own
- *   servers by its name;  the repo:  `--repo`, else the one this checkout is of, else the hub's default
- * - `status [--repo <name>] [--json]`:  main's servers as the keeper last saw them, one line each
- * - the hub is started first when it isn't running (`Hub.ensure()`):  the keeper lives in it
+ * `epic servers <verb>`:  another name for `spell server start | stop | restart | status` (epic `epic-engine` P85),
+ * which asks Spell's server keeper about a MAIN checkout's servers (`spell/server/keeper`).
+ * - `<verb> [<server>] [...]`:  the same words passed on to `spell server`, run in the repo's main checkout, its exit
+ *   code and output unchanged;  `<server>`:  `page-server`, `editor`, or a name `spell keeper add` registered
+ * - `--repo <name>`:  which repo's main checkout, by its name in the hub's list;  else the one this checkout is of,
+ *   else the hub's default
  * - Plural on purpose:  `epic hub` is the hub itself, `epic server` this checkout's own page server.
- * - Why:  sessions killed main's editors by their process numbers and started every server in the main checkout by
- *   hand, and three editors ended up on 3000, 3001 and 3002;  the command guard (`ServerGuard`) now refuses that,
- *   naming this instead.
+ * - Why it's still here:  agents and the command guard's messages learned it in P84;  the keeper is Spell's now, so
+ *   `spell server ...` is the name to teach.
  ****************/
 export class Servers {
-  /** the epic home:  the repo list, the hub */
+  /** the epic home:  the repo list */
   readonly home?: string
 
-  /** - `home`:  default the epic home */
-  constructor({ home }: { home?: string } = {}) {
+  /** the `spell` bin it runs:  the kit's, beside this code */
+  readonly spellBin: string
+
+  /** - `home`:  default the epic home;  `spellBin`:  default the kit's `bin/spell.mjs` (a test hands its own) */
+  constructor({ home, spellBin = join(CLI.KIT_ROOT, "bin", "spell.mjs") }: { home?: string; spellBin?: string } = {}) {
     this.home = home
+    this.spellBin = spellBin
   }
 
-  /** Run `epic servers <args>`;  resolves to the exit code.  Throws `EpicCommandError` for a bad command line. */
+  /** Run `epic servers <args>`;  resolves to `spell server`'s exit code.  Throws `EpicCommandError` for a bad verb. */
   async run(args: string[], cwd = process.cwd()): Promise<number> {
-    const { positional, flags } = parseVerbArgs(args)
-    const [verb, named] = positional
-    const repo = this.repoFor(typeof flags.repo === "string" ? flags.repo : undefined, cwd)
-    switch (verb) {
-      case "status":
-        return this.status(repo, flags.json === true)
-      case "start":
-      case "stop":
-      case "restart": {
-        if (!named)
-          throw new EpicCommandError(`${verb}:  which server?  epic servers ${verb} page-server | editor | <its name>`)
-        return this.act(verb, repo, serverNamed(named))
-      }
-      default:
-        throw new EpicCommandError(`unknown verb '${verb ?? ""}':  start, stop, restart or status`)
-    }
+    const [verb] = parseVerbArgs(args).positional
+    if (!verb || !VERBS.has(verb))
+      throw new EpicCommandError(`unknown verb '${verb ?? ""}':  start, stop, restart or status (spell server's)`)
+    const { repo, rest } = withoutRepo(args)
+    const checkout = this.checkoutFor(repo, cwd)
+    return CLI.runChild(process.execPath, [this.spellBin, "server", ...rest], { cwd: checkout })
   }
 
-  /** `start`, `stop`, `restart`:  asked of the keeper, its answer in one line */
-  private async act(action: SRV.KeeperAction, repo: Repo, server: string): Promise<number> {
-    if (server === "hub")
-      throw new EpicCommandError(
-        "the hub keeps the other servers, so it isn't started or stopped this way:  epic hub kick makes it look now"
-      )
-    await new Hub(this.hubOptions()).ensure()
-    const answer = await new SRV.KeeperLink().ask(action, { checkout: repo.checkout, server })
-    if (!answer)
-      throw new EpicCommandError("the server keeper isn't answering:  epic hub kick, then try again", EXIT.ERRORS)
-    const where = answer.base ? `, at ${answer.base}/` : ""
-    CLI.out(`${repo.name}'s ${server}:  ${answer.state ?? "asked"}${where}`)
-    if (server === "editor" && action !== "stop")
-      CLI.out("(the editor comes back with its page server, which restarts)")
-    return EXIT.OK
-  }
-
-  /** `status`:  main's servers of `repo`, as the keeper last looked */
-  private async status(repo: Repo, json: boolean): Promise<number> {
-    await new Hub(this.hubOptions()).ensure()
-    const keeper = new SRV.KeeperLink().running()
-    if (!keeper) throw new EpicCommandError("the server keeper isn't running:  epic hub kick", EXIT.ERRORS)
-    const response = await fetch(`${keeper.base}${SRV.KEEPER_API}`, { signal: AbortSignal.timeout(STATUS_WAIT_MS) })
-    const answer = (await response.json()) as ServersAnswer
-    const rows = answer.servers.filter((row) => !row.worktree && (row.id === "hub" || row.repo === repo.name))
-    if (json) CLI.out(JSON.stringify({ handsOff: answer.handsOff === true, servers: rows }, null, 2))
-    else {
-      if (answer.handsOff) CLI.out("Hands off is on (the Servers tab):  the keeper starts and stops nothing by itself.")
-      for (const row of rows) CLI.out(statusLine(row))
-    }
-    return EXIT.OK
-  }
-
-  /** the repo asked for:  `--repo`, else the one `cwd` is a checkout of, else the hub's default */
-  private repoFor(name: string | undefined, cwd: string): Repo {
-    const repos = new RepoList(this.hubOptions()).repos()
-    if (!repos.length) throw new EpicCommandError("the epic hub serves no repos yet:  epic repos add <checkout>")
+  /** the main checkout asked for:  `--repo`, else the one `cwd` is a checkout of, else the hub's default, else `cwd` */
+  checkoutFor(name: string | undefined, cwd: string): string {
+    const repos: Repo[] = new RepoList(this.home ? { home: this.home } : {}).repos()
     if (name) {
       const repo = repos.find((each) => each.name === name)
-      if (!repo) throw new EpicCommandError(`no repo named ${name}:  ${repos.map((each) => each.name).join(", ")}`)
-      return repo
+      if (!repo)
+        throw new EpicCommandError(`no repo named ${name}:  ${repos.map((each) => each.name).join(", ") || "none"}`)
+      return repo.checkout
     }
     const main = EpicConfig.ofSetUp(cwd) ? EpicConfig.mainOf(cwd) : undefined
-    return (
-      repos.find((each) => main && RealPath.same(each.checkout, main)) ??
-      repos.find((each) => each.isDefault) ??
-      repos[0]!
-    )
-  }
-
-  /** the home, for `Hub` and `RepoList` */
-  private hubOptions(): { home?: string } {
-    return this.home ? { home: this.home } : {}
+    if (main) return main
+    return (repos.find((each) => each.isDefault) ?? repos[0])?.checkout ?? cwd
   }
 }
 
-/** a server as typed (`page-server`, `page`, `editor`, an own server's name) as the keeper names it */
-function serverNamed(typed: string): string {
-  return PAGE_SERVER_NAMES.has(typed) ? "page server" : typed
+/** `spell server`'s verbs this passes on. */
+const VERBS = new Set(["start", "stop", "restart", "status"])
+
+/** `args` without `--repo <name>` (or `--repo=<name>`), and the name */
+export function withoutRepo(args: string[]): { repo?: string; rest: string[] } {
+  const rest: string[] = []
+  let repo: string | undefined
+  for (let at = 0; at < args.length; at++) {
+    const arg = args[at]!
+    if (arg === "--repo") repo = args[++at]
+    else if (arg.startsWith("--repo=")) repo = arg.slice("--repo=".length)
+    else rest.push(arg)
+  }
+  return { ...(repo && { repo }), rest }
 }
-
-/** one server's line:  its name, state, address and why */
-function statusLine(row: KeptServer): string {
-  const name = row.name.padEnd(12)
-  const state = row.state.padEnd(9)
-  return `${name} ${state} ${row.address ?? ""}${row.why ? `  (${row.why})` : ""}`.trimEnd()
-}
-
-/** What a page server may be typed as. */
-const PAGE_SERVER_NAMES = new Set(["page-server", "page", "page server", "pageserver"])
-
-/** How long `status` waits for the keeper. */
-const STATUS_WAIT_MS = 15_000

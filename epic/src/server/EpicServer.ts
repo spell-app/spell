@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, statSync } from "node:fs"
 import { join, resolve } from "node:path"
 import { pathToFileURL } from "node:url"
 
+import { every } from "spell/util/timing"
 import { SRV, type Handler, type ServedFile } from "spell/server"
 import {
   componentSets,
@@ -15,12 +16,10 @@ import {
   type PageConfig,
   type RouteModule
 } from "spell/server/page"
-import { ServerKeeper } from "spell/server/keeper"
 import type { SiteTab } from "spell/server/site/site.types"
 import { resolvedFile } from "spell/toolchain/sourceNames"
 
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
-import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
 import type { ContentRouteContext } from "spell/epic/list/runningRoutes"
 
@@ -28,13 +27,12 @@ import { packageDir } from "spell/epic/tools/packageDir"
 
 import { RepoApp } from "./RepoApp"
 import { RepoList } from "./RepoList"
-import { ServerFacts } from "./ServerFacts"
+import { SpellKeeper } from "./SpellKeeper"
 import {
   DEFAULT_EPIC_PORT,
   SERVERS_TAB,
   ENGINE_ROUTES,
   EPIC_UI,
-  HOLD_FILE,
   HOME_ENV,
   legacyEnginePath,
   LOG_FILE,
@@ -123,16 +121,6 @@ export class EpicServer {
 
   /** each repo's app, in `repos`' order (`RepoApp`) */
   readonly apps: RepoApp[]
-
-  /**
-   * the SERVER KEEPER (epic `epic-engine` P82):  every repo's web servers kept up, the Servers tab's data;
-   * keeping once `start()` says so (`keep`)
-   * - Spell's since epic `editor` P48 (`spell/server/keeper`):  the hub hands it what's its own (the repos, their
-   *   `.epic/config.json5` servers and app, what merged into main, a fresh hub when its code changes);  it stands
-   *   aside while Spell's own keeper (`spell keeper start`) is in charge, forwarding to it
-   * - epic `epic-engine` takes it out of the hub at the switch-over (its request r99)
-   */
-  readonly keeper: ServerKeeper
 
   /** more fields for every page's `window.SPELL_SERVER`, from route modules (`addPageConfig()`) */
   private pageConfigs: PageConfig[] = []
@@ -231,17 +219,6 @@ export class EpicServer {
       if (app.repo === this.defaultRepo) app.route(router, "/")
     }
     RepoApp.routeStatus(router, this.apps)
-    this.keeper = new ServerKeeper({
-      name: HUB_KEEPER,
-      repos: this.repos,
-      serversOf: (repo) => EpicConfig.of(repo.checkout).servers,
-      editorKept: (checkout) => Boolean(EpicConfig.of(checkout).app?.start),
-      self: HUB_ROW,
-      moreAnswer: () => ServerFacts.of(this.repos),
-      legacyHolds: join(this.home, HOLD_FILE),
-      onStale: () => this.handOver()
-    })
-    this.keeper.route(router, this.web.guard)
     if (repo) {
       const writable = pageServerSettings(repo.checkout).writable ?? WRITABLE
       new PageEditor({ root: repo.content, writable }).route(router, this.web.guard)
@@ -272,8 +249,10 @@ export class EpicServer {
    * - `watchCode`:  live-reload pages when the engine's code changes (its assets, pack and templates) and the
    *   component sets' bundles (default `true`);  a demo check's server turns it off (`DemoServer`):  a bundle rebuilt
    *   by another server in the checkout must never reload a page under a check (epic `epic-engine` I186)
-   * - `keep`:  keep every repo's servers (`ServerKeeper`;  default:  as `pidFile`, so the machine's hub only), and
-   *   listen to every epic's page for every running Claude session (`InboxHub`)
+   * - `keep`:  the machine's hub (default:  as `pidFile`):  hand every repo and its own servers to Spell's server
+   *   keeper and make sure it runs (`SpellKeeper`, epic `epic-engine` P85), register again when the repos' settings
+   *   change, hand over to a fresh hub when its code changes, and listen to every epic's page for every running
+   *   Claude session (`InboxHub`)
    */
   async start({
     port = DEFAULT_EPIC_PORT,
@@ -309,13 +288,7 @@ export class EpicServer {
       this.pidFile.write(this.info)
     }
     if (keep) {
-      const started = Date.parse(this.info.started)
-      this.keeper.start({
-        base: this.web.url,
-        token: this.web.guard.token,
-        isStale: () => SRV.newestChange(SOURCES) > started
-      })
-      this.stops.push(() => this.keeper.stop())
+      this.keepServers()
       // the ONE listener for every epic's page, for every running session (epic `epic-engine` T163);  loaded here
       // only, so a server that keeps nothing never loads the epic tool's inbox code
       const { InboxHub } = await import("spell/epic/tool/InboxHub")
@@ -327,6 +300,32 @@ export class EpicServer {
         console.error("epic server:  a route module's onListening failed:", error)
       })
     return this
+  }
+
+  /**
+   * Spell's server keeper handed this hub's repos and their own servers, and started;  then every `LOOK_SECONDS`:
+   * the repos' settings changed, registered again;  the hub's code changed, a fresh hub (`handOver()`)
+   * - registered BEFORE the keeper starts:  it keeps only what's on its list, so a repo's own server (a work project's
+   *   proxy) is never dropped as it takes over from an older hub's keeper
+   */
+  private keepServers(): void {
+    const keeper = new SpellKeeper()
+    const started = Date.parse(this.info.started)
+    let settings = SpellKeeper.settingsStamp(this.repos)
+    keeper.register(this.repos, { hub: this.info.port })
+    SpellKeeper.ensure()
+    const stop = every(LOOK_SECONDS, () => {
+      const now = SpellKeeper.settingsStamp(this.repos)
+      if (now !== settings) {
+        settings = now
+        keeper.register(this.repos, { hub: this.info.port })
+      }
+      if (SRV.newestChange(SOURCES) > started) {
+        stop()
+        this.handOver()
+      }
+    })
+    this.stops.push(stop)
   }
 
   /** stop:  route modules' stops, the pid file (if ours), the server */
@@ -670,11 +669,8 @@ async function epicServerOn(port: number): Promise<EpicServerInfo | undefined> {
   }
 }
 
-/** The hub's keeper's name in the keeper's record (`SRV.KeeperRecord.keeper`). */
-const HUB_KEEPER = "epic hub"
-
-/** The hub's own row on the Servers tab. */
-const HUB_ROW = { id: "hub", name: "epic hub", what: "the epic pages of every project, and this tab" }
+/** How often the hub looks at its settings and its code, seconds:  as often as the keeper looks at the servers. */
+const LOOK_SECONDS = 10
 
 /** The engine's folder, in a checkout or an npm install (`EngineFiles`). */
 const ENGINE_ROOT = EngineFiles.root
@@ -741,7 +737,7 @@ const DEFAULT_SITE_TABS: readonly SiteTab[] = [
   { name: "Guides", path: "guides/index.html", areas: ["guides"] },
   // the engine's own READMEs, rendered (`docsRoutes`):  the same in every repo
   { name: "Docs", path: "/_epic/docs/README-epics.md", paths: ["^(?:/worktrees/[^/]+)?/_epic/docs/"] },
-  // every project's servers, kept by the hub (`ServerKeeper`, `serverRoutes`;  epic `epic-engine` P82)
+  // every project's servers, kept by Spell's server keeper (`serverRoutes`;  epic `epic-engine` P82, P85)
   SERVERS_TAB
 ]
 

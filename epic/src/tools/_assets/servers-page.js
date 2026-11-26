@@ -1,6 +1,11 @@
 /**
- * The Servers tab's page script (`servers-page.html`, epic `epic-engine` P82, T162):  draws `/api/servers` (the
- * server keeper's `ServersAnswer`) as Spell UI elements, and asks again every 10 seconds while the page shows.
+ * The Servers tab's page script (`servers-page.html`, epic `epic-engine` P82, T162):  draws `/api/servers` (Spell's
+ * server keeper's answer, and the epic tooling's own facts beside it:  `ServersAnswer`) as Spell UI elements, and asks
+ * again every 10 seconds while the page shows.
+ * - SPELL'S SERVERS PAGE for the cards (epic `epic-engine` P85, epic `editor` P49):  while the answer names it
+ *   (`keeperPage`, on the keeper's own port), the page frames it under main's heading (`keeperFrame()`):  a card per
+ *   server, main's and every worktree's, with their logs and Restart;  the frame made once, and as tall as the page
+ *   inside says (`spellServersHeight`), so it never scrolls;  the tab's own cards below are drawn only without it
  * - The page, top to bottom, nothing folding:
  *   - the HANDS-OFF switch (`handsOffSwitch()`, T164):  on, the keeper leaves main's servers alone, and a notice
  *     under it says so plainly
@@ -62,18 +67,14 @@ const ACTIONS = {
 /**
  * Why a server has no Stop (or no buttons at all), said on the button it lacks, by server name (epic `epic-engine`
  * I451:  "why can I start/stop some and not the others?")
- * - the hub IS the keeper:  stopped, nothing would keep the other servers up, nor this page
  * - an editor comes with its page server:  main's is restarted through it, a worktree's restarts with it
  */
 const NO_STOP = {
-  "epic hub":
-    "This server keeps your other servers running, so you can't stop it here.\nIt restarts by itself when you change its code.",
   editor: "The editor runs inside its page server.\nStop that server to stop the editor."
 }
 
 /** Why a server has no Restart, by server name;  none named:  the general reason */
 const NO_RESTART = {
-  "epic hub": NO_STOP["epic hub"],
   editor: "This editor runs inside its page server.\nRestart that server to restart the editor."
 }
 
@@ -238,25 +239,76 @@ function sayProblem(heading, words, state = "negative") {
   place.replaceChildren(...(heading ? [el("ui-message", { state, heading }, words)] : []))
 }
 
-/** the whole page, from `answer` */
+/**
+ * the whole page, from `answer`:  above Spell's Servers page (`keeperFrame()`) the switches and main's heading,
+ * below it what merged into main and each active worktree's open work;  no `keeperPage`:  the tab's own cards
+ */
 function draw(answer) {
   const named = new Set(answer.servers.map((server) => server.repo).filter(Boolean)).size > 1
+  const framed = keeperFrame(answer.keeperPage)
   const onMain = inCardOrder(answer.servers.filter((server) => !server.worktree))
+  const mainHttps = framed && answer.https ? [httpsButton(answer.https)] : []
   document
     .getElementById("servers-page")
     .replaceChildren(
       handsOffSwitch(Boolean(answer.handsOff)),
       ...(answer.handsOff ? [el("ui-message", { state: "warning", heading: "Hands off" }, HANDS_OFF_NOTICE)] : []),
       heading("main", undefined, undefined, [
+        ...mainHttps,
         ...(editorButtons(answer.editorSpaces, undefined, undefined, named) ?? []),
         restartAllButton()
       ]),
-      cards(onMain, named, answer.https),
+      ...(framed ? [] : [cards(onMain, named, answer.https)])
+    )
+  document
+    .getElementById("servers-after")
+    .replaceChildren(
       el("h3", { className: "servers-sub" }, "Merged into main recently"),
       mergedList(answer.mergedIntoMain ?? [], answer.notOnGitHub ?? [], named),
-      ...worktreeGroups(answer, named)
+      ...worktreeGroups(answer, named, { framed })
     )
 }
+
+/**
+ * Spell's Servers page in its frame, under main's heading (epic `epic-engine` P85):  made once, its address changed
+ * only when the keeper's does, so it never reloads between looks;  whether it's shown
+ * - as tall as the page inside says (`spellServersHeight`, posted as it changes):  a cross-origin frame can't be
+ *   measured from here
+ * - light or dark as this page is (`?scheme=`)
+ */
+function keeperFrame(address) {
+  const place = document.getElementById("servers-keeper")
+  if (!place) return false
+  if (!address) {
+    place.replaceChildren()
+    return false
+  }
+  let frame = place.querySelector("iframe")
+  if (!frame) {
+    frame = el("iframe", { className: "servers-keeper-frame", title: KEEPER_FRAME_TITLE })
+    place.replaceChildren(frame)
+  }
+  // light or dark as this page is drawn (Spell UI's theme, not the system's):  the frame's own background goes
+  const scheme = getComputedStyle(document.documentElement).colorScheme.includes("dark") ? "dark" : "light"
+  const source = `${address}?scheme=${scheme}`
+  if (frame.dataset.source !== source) {
+    frame.dataset.source = source
+    frame.src = source
+  }
+  return true
+}
+
+/** The frame's name, for a screen reader. */
+const KEEPER_FRAME_TITLE = "Spell's servers, a card each"
+
+// the framed page's height, as it tells it
+if (typeof window !== "undefined")
+  window.addEventListener("message", (event) => {
+    const height = Number(event.data?.spellServersHeight)
+    const frame = document.querySelector(".servers-keeper-frame")
+    if (!frame || event.source !== frame.contentWindow || !(height > 0)) return
+    frame.style.height = `${Math.ceil(height)}px`
+  })
 
 /** a group's heading:  `main`, `⎇ atmosphere` (its epic page linked), a muted note after it, and its `tools` at the right */
 function heading(words, url, note, tools) {
@@ -701,17 +753,19 @@ function listRow({ plain, isNew, isQuiet, isLoud, tag, words, tip, count, when, 
 }
 
 /**
- * each ACTIVE worktree:  its heading, its servers' cards, then what it holds that main hasn't got
+ * each ACTIVE worktree:  its heading, its servers' cards (not while Spell's Servers page is framed:  it has them), then
+ * what it holds that main hasn't got
  * - only the active ones (`isActiveWorktree()`);  the rest hidden, and none active, one calm line (epic `epic-engine`
  *   J369:  "inactive ones should be hidden")
  * - in the order the keeper sends them, the one worked on last first (`ServerFacts.newestFirst()`, epic `epic-engine`
  *   I449);  a worktree only a server names, after them, by name
  */
-function worktreeGroups(answer, named) {
+function worktreeGroups(answer, named, { framed = false } = {}) {
   const active = worktreeOrder(answer).filter(isActiveWorktree)
   if (!active.length) return [el("p", { className: "servers-quiet" }, NO_ACTIVE_WORKTREES)]
   return active.flatMap(({ worktree, epic, servers }) => {
-    const shown = worktreeCards(servers)
+    // framed:  Spell's Servers page draws every worktree's cards
+    const shown = framed ? [] : worktreeCards(servers)
     return [
       heading(
         `${WORKTREE} ${named && epic?.repo ? `${epic.repo} ` : ""}${worktree}`,

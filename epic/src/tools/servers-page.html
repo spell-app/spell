@@ -17,12 +17,23 @@
         link's switch (T164, I454, I456).
       - A checkout's heading has Show in the editor at its right, where its repo has projects of its own;  the one the
         editor shows now says "In the editor".
+      - Since epic `epic-engine` P85 the cards are SPELL'S SERVERS PAGE (epic `editor` P49), framed under main's heading
+        from the keeper's own port (`#servers-keeper`);  main's heading has the secure link's lock then;  the tab's own
+        sections stay around it:  hands off above, what merged into main and each active worktree's open work below.
     -->
     <title>Servers</title>
     <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
     <style>
       .spell-doc-main .servers-head {
         margin: 24px 0 8px 0;
+      }
+      /* Spell's Servers page, framed:  as wide as the column, as tall as it says (servers-page.js) */
+      .servers-keeper-frame {
+        display: block;
+        width: 100%;
+        height: 240px;
+        border: 0;
+        color-scheme: normal;
       }
       /* a heading's tools at its right:  main's Restart all, Show in the editor */
       .servers-head-tools {
@@ -232,6 +243,8 @@
         </ui-sticky>
         <div id="servers-problem"></div>
         <div id="servers-page"></div>
+        <div id="servers-keeper"></div>
+        <div id="servers-after"></div>
       </main>
     </div>
     <script type="module" src="/_epic/assets/servers-page.js"></script>

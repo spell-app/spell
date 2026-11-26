@@ -21,14 +21,6 @@ export const HOME_FOLDER = ".spell-epic"
 /** The env var that moves `HOME_FOLDER` (tests). */
 export const HOME_ENV = "SPELL_EPIC_HOME"
 
-/**
- * The server keeper's OLD hold file, in `HOME_FOLDER`:  `{ held, handsOff }`, the servers stopped by hand and the
- * hands-off switch;  the command guard reads the switch here (`ServerGuard`).
- * - since epic `editor` P48 the keeper's own is `~/.spell/server-keeper-holds.json` (`spell/server/keeper`):  the
- *   hub's keeper carried this one over once, and writes it too, until epic `epic-engine` moves the guard over
- */
-export const HOLD_FILE = "server-keeper.json"
-
 /** The registered repos, in `HOME_FOLDER`:  `RepoList`. */
 export const REPOS_FILE = "repos.json5"
 
@@ -338,10 +330,14 @@ export type ServerFactsAnswer = {
 }
 
 /**
- * `GET /api/servers` from the hub's keeper:  the keeper's own answer (`KeptServersAnswer`), and the facts beside the
+ * `GET /api/servers` through `serverRoutes`:  Spell's keeper's own answer (`KeptServersAnswer`), and the facts beside the
  * servers (`ServerFacts`).
  */
-export type ServersAnswer = ServerFactsAnswer & KeptServersAnswer
+export type ServersAnswer = ServerFactsAnswer &
+  KeptServersAnswer & {
+    /** the Spell Servers page on the keeper's own port (`http://127.0.0.1:4949/servers/`), which the tab frames */
+    keeperPage?: string
+  }
 
 /** Where the Servers tab's page is served, under every address (`serverRoutes`). */
 export const SERVERS_PAGE = "/_epic/servers/"

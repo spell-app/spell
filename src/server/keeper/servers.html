@@ -127,6 +127,22 @@
       .servers-problem {
         margin: 0 0 16px 0;
       }
+      /* in a frame (the epic tooling's Servers tab):  its cards only, the page around it has the title */
+      .servers-embedded,
+      .servers-embedded body {
+        background: transparent;
+      }
+      .servers-embedded body {
+        min-height: 0;
+        padding: 0 0 4px 0;
+      }
+      .servers-embedded h1,
+      .servers-embedded .servers-lead {
+        display: none;
+      }
+      .servers-embedded main {
+        max-width: none;
+      }
     </style>
   </head>
   <body>
