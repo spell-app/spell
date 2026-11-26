@@ -3,6 +3,7 @@ import { homedir } from "node:os"
 import { basename, dirname, join, resolve } from "node:path"
 
 import { FileLock } from "./FileLock"
+import { EDITOR_SUFFIX, LOCALHOST, hostNameOf } from "./hostNames"
 import { isFree } from "./ports"
 
 /****************
@@ -102,19 +103,8 @@ export class PortBook {
   }
 }
 
-/** A worktree's name as a host's first part:  lower case, letters, digits and dashes (`My_Work` => `my-work`). */
-export function hostNameOf(worktree: string): string {
-  return worktree
-    .toLowerCase()
-    .replace(/[^a-z0-9-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-}
-
-/** What follows a worktree's name for its editor's host:  `editor--app.localhost`. */
-export const EDITOR_SUFFIX = "--app"
-
-/** What every worktree's host name ends in. */
-const LOCALHOST = ".localhost"
+// the names live beside the one maker of a worktree's address
+export { EDITOR_SUFFIX, hostNameOf, namedAddress, namedAddressOf } from "./hostNames"
 
 /** The variable naming another book (the tests'). */
 export const PORTS_FILE_VARIABLE = "SPELL_PORTS_FILE"

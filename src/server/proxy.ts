@@ -3,6 +3,8 @@
  * - The path is forwarded unchanged:  the server behind must expect it
  *   (e.g. a Vite dev server's `base: "/ui"` for `/ui/...`).
  * - `Host` is rewritten to the target's, so its own host check (Vite's `allowedHosts`) accepts it.
+ *   - the one asked for goes on as `X-Forwarded-Host`, its scheme as `X-Forwarded-Proto`:  a worktree's server reached
+ *     by name (`HostRoutes`) builds an address a browser can open from them (spell-epic's `/api/docs/show`)
  * - A request that came over HTTP/2 goes on as HTTP/1.1:  its `:` headers left behind, and the answer's
  *   connection headers (`HOP_BY_HOP`), which HTTP/2 refuses
  */
@@ -30,7 +32,12 @@ export function proxyTo(target: ProxyTarget): Handler {
           port,
           method: request.method,
           path: request.originalUrl,
-          headers: { ...http1Headers(request.headers), host: `127.0.0.1:${port}` }
+          headers: {
+            ...http1Headers(request.headers),
+            host: `127.0.0.1:${port}`,
+            "x-forwarded-host": request.get("host") ?? "",
+            "x-forwarded-proto": (request.raw.socket as { encrypted?: boolean }).encrypted ? "https" : "http"
+          }
         },
         (incoming) => {
           const isHttp2 = request.raw.httpVersionMajor === 2

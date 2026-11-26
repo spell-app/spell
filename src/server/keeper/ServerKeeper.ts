@@ -437,7 +437,10 @@ export class ServerKeeper {
       "the Spell app;  it comes with the page server",
       worktree
     )
-    const address = SRV.editorAddressOf(checkout)
+    const own = SRV.editorAddressOf(checkout)
+    // a worktree's by its name (epic `epic-engine` T167), while it runs
+    const named = worktree && own && SRV.namedAddressOf(checkout, { editor: true })
+    const address = named ? `${named}/` : own
     const log = SRV.serverLogOf(checkout, "editor")
     if (!address) return { ...row, log, canStart: false, state: "stopped" }
     // its record is written as it first answers:  its time, the editor's start
@@ -511,9 +514,12 @@ export class ServerKeeper {
         log: SRV.serverLogOf(checkout, "page server"),
         ...(booked && { port: booked })
       }
+      // its address by its name, through main's page server, which starts it on the first visit (epic `epic-engine` T167)
+      const named = SRV.namedAddressOf(checkout)
       const running = await this.control.status(checkout)
       if (!running) {
-        rows.push({ ...row, state: "stopped", why: this.rows.get(id)?.why ?? "starts when you open one of its pages" })
+        const why = this.rows.get(id)?.why ?? "starts when you open one of its pages"
+        rows.push({ ...row, state: "stopped", why, ...(named && { address: `${named}/` }) })
         continue
       }
       // a server on code from before P82 says neither:  never stopped, as nothing says it's unused
@@ -528,7 +534,7 @@ export class ServerKeeper {
         ...row,
         ...howItStands(running),
         state: "running",
-        address: `${running.base}/`,
+        address: `${named ?? running.base}/`,
         ...(running.lastRequest && { lastRequest: running.lastRequest })
       })
       rows.push(this.editorRow(repo, checkout, worktree))

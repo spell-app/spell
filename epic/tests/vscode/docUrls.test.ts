@@ -64,6 +64,9 @@ test("stamped() and samePage():  a fresh ?t=, ignored with the hash when compari
 test("isLoopback():  plain http on this machine only", () => {
   equal(isLoopback("http://127.0.0.1:4848/x"), true)
   equal(isLoopback("http://localhost:4848/x"), true)
+  // a worktree's name through main's page server (epic `epic-engine` T167)
+  equal(isLoopback("http://epic-engine.localhost:4747/x"), true)
+  equal(isLoopback("http://seo--app.localhost:4747/"), true)
   equal(isLoopback("https://127.0.0.1/x"), false)
   equal(isLoopback("http://example.com/x"), false)
   equal(isLoopback("not a url"), false)

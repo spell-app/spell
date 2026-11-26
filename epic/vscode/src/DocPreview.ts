@@ -11,14 +11,15 @@
  * - Opened by URI:  `vscode://spell-app.spell-epic/doc-preview?file=<absolute path>[&view=review|details|docs]`;
  *   the page's kind decides over `view`
  *   - what spell-epic's `src/tools/pages.js` `openInVSCode()` opens (`epic open`, `epic phase`)
- * - Or `?url=<http://127.0.0.1:port/...>`:  a page some local server already serves, shown as is.
+ * - Or `?url=<http://127.0.0.1:port/...>`:  a page some local server already serves, shown as is (`<w>.localhost` too).
  *   - loopback URLs only
  *   - with a `file` too, the file is the fallback when the URL isn't loopback
  * - The views load only http(s).  For a `file`, the server that serves it, first found of:
  *   1. the EPIC SERVER, spell-epic's one per machine (`epic hub`),
  *      when it runs and the file is in a registered repo's content (`RepoList.urlPathFor()`):
  *      every repo's pages on one port, from any window
- *   2. the MAIN checkout's page server, for a worktree's file, when it serves worktrees (`SRV.mainServerUrl()`)
+ *   2. the MAIN checkout's page server, for a worktree's file, when it serves worktrees (`SRV.mainServerUrl()`):
+ *      by the worktree's name, `http://<w>.localhost:4747/...` (epic `epic-engine` T167)
  *   3. the file's page server (`spell server`, a `.spell-server.json` at its root):  in a kit, the kit's, for a file of
  *      any repo in it (`pageServerRoot()`, epic `repo-split` P16);  else its checkout's
  *   4. none running:  it starts the file's page server (`ensurePageServer()`), as the scripts that open docs do
@@ -147,7 +148,8 @@ export class DocPreview {
     const hub = await DocPreview.epicServer()
     const path = hub && repoPathOf(file)
     if (hub && path) return `${hub.base}${path}`
-    const main = await mainServerUrl(file)
+    // plain HTTP in the side bar, as main's own pages:  a worktree's at its name, `http://seo.localhost:4747`
+    const main = await mainServerUrl(file, undefined, { secure: false })
     if (main) return main
     const root = pageServerRoot(dirname(file))
     // a component set's page at its address, where it finds its `_assets/` (epic `epic-engine` I136)

@@ -102,6 +102,26 @@ describe("ServerKeeper:  every project's servers kept up (epic `epic-engine` P82
     expect(kept.dot()).toEqual({ dot: false })
   })
 
+  // epic `epic-engine` T167:  the Servers page links a worktree by its name, which starts it when it's stopped
+  it("a worktree's page server is at its name through main's page server, running or not", async () => {
+    const worktree = fakeWorktree(main, join(folder, "worktrees", "seo"))
+    writeFileSync(join(worktree, ".spell-server.json"), "{}\n")
+    writeFileSync(join(main, ".spell-server.json"), JSON.stringify({ pid: process.pid, port: 4747 }))
+    servers.running.add(worktree)
+    const kept = keeper()
+    await kept.look()
+    expect(rowOf(kept, "kit/seo/page server")).toMatchObject({
+      state: "running",
+      address: "http://seo.localhost:4747/"
+    })
+    servers.running.delete(worktree)
+    await kept.look()
+    expect(rowOf(kept, "kit/seo/page server")).toMatchObject({
+      state: "stopped",
+      address: "http://seo.localhost:4747/"
+    })
+  })
+
   it("a page open keeps a worktree's server up, however long since its last request", async () => {
     const worktree = fakeWorktree(main, join(folder, "worktrees", "seo"))
     writeFileSync(join(worktree, ".spell-server.json"), "{}\n")

@@ -65,15 +65,22 @@ export function serverBaseIn(output: string): string | undefined {
   return output.match(/"base":\s*"([^"]+)"/)?.[1]
 }
 
-/** Whether `url` is plain http on this machine (`127.0.0.1` / `localhost`):  never open anything else. */
+/**
+ * Whether `url` is plain http on this machine:  never open anything else.
+ * - `127.0.0.1`, `localhost`, or a worktree's name through main's page server, `seo.localhost` (epic `epic-engine` T167):
+ *   browsers and node resolve every `*.localhost` to this machine
+ */
 export function isLoopback(url: string): boolean {
   try {
     const parsed = new URL(url)
-    return parsed.protocol === "http:" && ["127.0.0.1", "localhost"].includes(parsed.hostname)
+    return parsed.protocol === "http:" && LOOPBACK_HOST.test(parsed.hostname)
   } catch {
     return false
   }
 }
+
+/** A host on this machine:  `127.0.0.1`, `localhost`, `<name>.localhost`. */
+const LOOPBACK_HOST = /^(?:127\.0\.0\.1|(?:[a-z0-9-]+\.)?localhost)$/i
 
 ////////////////
 // ## Which tab

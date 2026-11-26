@@ -1,7 +1,9 @@
 /**
  * A worktree's files, and the epic folder's, on the MAIN checkout's page server, so every link points to
  * one port.
- * - The main page server serves each worktree under `/worktrees/<w>/` (`spell/server/page` `PageServer`).
+ * - A worktree's file BY ITS WORKTREE'S NAME, `http://<w>.localhost:4747/...` (`namedAddress()`;  epic `epic-engine`
+ *   T167):  main's page server passes it on to that worktree's own server (`HostRoutes`, epic `editor` P49), started
+ *   on the first visit;  `/worktrees/<w>/...` before, which main's server still serves
  * - Used by `spell server url` and the VS Code doc preview;  either falls back to the worktree's own server.
  * - The epic repo is served from the main checkout itself:  `/epics/...`, not `/worktrees/<w>/epics/...`.
  *   - the epic repo:  `epics/`, `guides/` ...:  ONE epic repo, the same in every checkout
@@ -18,6 +20,7 @@ import { dirname, join, resolve } from "node:path"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { checkoutOf } from "./checkout"
 import { componentSetAddressOf, kitOf } from "./page/settings"
+import { namedAddress } from "./hostNames"
 import { PidFile } from "./PidFile"
 import { RealPath, pathInside } from "./RealPath"
 import { type ServerInfo } from "./server.types"
@@ -33,11 +36,18 @@ import { SERVER_API } from "./liveClient"
  *     read `.epic/config.json5`)
  *     - which main checkout:  `file`'s;  else that of checkout `from`;  else the one beside the epic repo whose
  *       page server serves it (`contentServerOf()`), so a caller that knows no checkout (the doc preview) finds it
+ * - a worktree's file by its worktree's name (`namedAddress()`):  `https://seo.localhost:4747/...` while main's server
+ *   speaks HTTPS, unless `secure` is `false` (VS Code's side bar keeps plain HTTP, as for main's own pages)
+ *   - relies on main's server having `HostRoutes` (epic `editor` P49):  the server keeper keeps it on main's code
  * - "serves worktrees":  its running epics answer (`RUNNING_EPICS_API`, epics' route module)
  *   - so a main server started before it learned to (an older checkout, not yet restarted)
  *     is never handed a URL it would 404
  */
-export async function mainServerUrl(file: string, from?: string): Promise<string | undefined> {
+export async function mainServerUrl(
+  file: string,
+  from?: string,
+  { secure }: { secure?: boolean } = {}
+): Promise<string | undefined> {
   const at = worktreePath(file)
   const main = at?.main ?? (from && checkoutOf(from)?.main) ?? contentServerOf(file)
   if (!main) return undefined
@@ -49,16 +59,16 @@ export async function mainServerUrl(file: string, from?: string): Promise<string
   } catch {
     return undefined
   }
-  const content = contentPathOf(file, (await liveInfo(running.base)) ?? running)
+  const info = (await liveInfo(running.base)) ?? running
+  const content = contentPathOf(file, info)
   if (content) return `${running.base}${content}`
   if (!at) return undefined
-  const worktree = `${running.base}/worktrees/${encodeURIComponent(at.worktree)}`
+  if (isShared(at)) return `${running.base}/${at.path.map(encodeURIComponent).join("/")}`
+  const worktree = namedAddress(at.worktree, { port: running.port, secure: secure ?? !!info.https })
   // a component set's page at its address, where it finds its `_assets/` (I136)
   const address = componentSetAddressOf(at.root, file)
   if (address) return `${worktree}${address}`
-  const path = at.path.map(encodeURIComponent).join("/")
-  if (isShared(at)) return `${running.base}/${path}`
-  return `${worktree}/${path}`
+  return `${worktree}/${at.path.map(encodeURIComponent).join("/")}`
 }
 
 /**

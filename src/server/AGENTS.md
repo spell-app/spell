@@ -211,6 +211,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     every start, so a link to them stays good;  forgotten when the worktree is removed (`forget()`)
     - `hostNames()`:  each checkout's two host names, `editor.localhost` and `editor--app.localhost`, which the page
       server's certificate lists (`hostNameOf()` makes a name one)
+  - [hostNames.ts](hostNames.ts) -- a WORKTREE'S ADDRESS BY NAME, the ONE maker of it (epic `epic-engine` T167):
+    `namedAddress(worktree, { port, secure, editor })`, `http://seo.localhost:4747` (`https://` while main speaks HTTPS,
+    `seo--app.localhost` its editor);  `namedAddressOf(path)` reads it off the path's main checkout's page server record
+    (`undefined` in main, or with main's server down);  `hostNameOf()` beside them
+    - who:  `HostRoutes`' names page, `mainServerUrl()`, the Servers page's worktree rows, spell-epic's openers
+      (`epic open`, `epic pages open`, `epic pages link`, the side bar's doc preview)
+    - node's modules, `checkout.ts` and `Heartbeat.ts` only:  plain `node` loads it as `spell/server/hostNames.ts`
   - `HostRoutes` -- ONE ADDRESS PER WORKTREE through main's page server (epic `editor` P49):  each request's name
     first, `<worktree>.localhost:4747` passed on to that worktree's page server, `<worktree>--app.localhost:4747` to its
     editor, websockets too (`WebServer.firstRoutes`, `upgrade(..., { first })`, before live reload)
@@ -281,7 +288,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - who:  live reload's watching half, the bundles' rebuild, the running epics, a command run's answers, the app's
       disk storage, `spell app watch`
   - [mainServer.ts](mainServer.ts) -- `mainServerUrl()`:  a worktree's file on the MAIN checkout's page server.
-    - A component set's page at its ADDRESS, `/worktrees/<w>/components/<set>/...` (`componentSetAddressOf()`, in
+    - BY THE WORKTREE'S NAME (`namedAddress()`, epic `epic-engine` T167):  `https://seo.localhost:4747/...` while main
+      speaks HTTPS, `{ secure: false }` for plain HTTP (VS Code's side bar);  `/worktrees/<w>/...` before
+    - A component set's page at its ADDRESS, `<w>.localhost:4747/components/<set>/...` (`componentSetAddressOf()`, in
       `page/settings.ts`;  epic `epic-engine` I136):  by its folder's path it loads none of its `_assets/`.
     - It asks that server for `/api/epics/running` (`RUNNING_EPICS_API`).
     - A file of the epic folder, by its own path (`.../spell.epics/epics/...`, as spell-epic hands them out):
@@ -345,6 +354,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Plain `node` loads it by path (epics' `EpicConfig`, for the hooks), so node built-ins only.
     - [Test helpers](test/checkouts.ts) that fake one:  `fakeMainCheckout()`, `fakeWorktree()`.
   - [proxy.ts](proxy.ts) -- `proxyTo()` / `proxyUpgrade()`:  HTTP and websockets to another local server
+    - the host asked for goes on as `X-Forwarded-Host`, its scheme as `X-Forwarded-Proto`:  a worktree reached by name
+      opens its pages in the browser by that name (spell-epic's `/api/docs/show`, `originOf()`;  epic `epic-engine` T167)
   - `WebServer` -- all of the above on node's HTTP server
     - with a `certificate`, HTTPS and HTTP/2 too, on the SAME port (epic `solid-2-final` P14):  each connection
       handed on by its first byte, a TLS hello to node's HTTP/2 server (`allowHTTP1`, so websockets still upgrade),

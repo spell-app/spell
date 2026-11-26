@@ -283,7 +283,8 @@ While you're in it:
 - `epic worktree repos` shows the branch, what's uncommitted, and how far it is ahead of or behind `main`.
 - The worktree has its own page server.
   The first to start gets port 4747, the main checkout's usually;  a worktree's gets another free one,
-  and the main page server shows the worktree at `/worktrees/<name>/` too.
+  and the main page server shows the worktree by its name, `http://<name>.localhost:4747/`, too:
+  `epic open`, `epic pages link` and `spell server url` give its pages that address.
 - The `spell` on your `PATH` still runs your main checkout's code, on the worktree's files.
   So to try your change to a command, or to the compiler under one, run `yarn spell <command>`:  the worktree's own.
 - It opens in its own VS Code window, `⎇ <name>`, where `git.detectWorktrees` shows the worktree in Source Control.

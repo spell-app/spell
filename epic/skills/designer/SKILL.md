@@ -48,7 +48,7 @@ A design review of one page (epic `epic-engine` P24, request r19), against the d
      what shows through them, are only in these
    - a focus naming a control, a menu, a fold:  a `--hover` or `--click` on it
    - which server:  a docs page comes from this checkout's page server, a component set's page at its address (the tool
-     finds both);  a worktree's page as the person sees it:  `--base http://127.0.0.1:4747/worktrees/<w>`
+     finds both);  a worktree's page as the person sees it:  `--base http://<w>.localhost:4747`
    - its JSON's `problems` (console errors, a selector that matched nothing) are findings too
    - among them, `misaligned in <shots>:  ...`:  a row with one item drawn more than half a pixel above or below the
      rest, or a centred column with one left or right of its middle, measured by what's drawn (`Alignment`, epic `epic-engine` P83);  each is HIGH, T18's, fixed in the

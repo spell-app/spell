@@ -761,7 +761,7 @@ export class DocView implements vscode.WebviewViewProvider {
    */
   html(url: string | undefined): string {
     const nonce = randomBytes(16).toString("base64")
-    const csp = `default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}'; frame-src http://127.0.0.1:* http://localhost:*`
+    const csp = `default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}'; frame-src http://127.0.0.1:* http://localhost:* http://*.localhost:*`
     const body = url
       ? `<iframe src="${escapeHTML(url)}" sandbox="${SANDBOX}" allow="${ALLOW}"></iframe>`
       : this.name === "details"
@@ -793,7 +793,7 @@ export class DocView implements vscode.WebviewViewProvider {
     <script nonce="${nonce}">
       const vscode = acquireVsCodeApi()
       // the page server's origins, as the CSP's frame-src:  keys and clicks from anywhere else aren't passed on
-      const LOOPBACK = /^http:\\/\\/(127\\.0\\.0\\.1|localhost)(:\\d+)?$/
+      const LOOPBACK = /^http:\\/\\/(127\\.0\\.0\\.1|([a-z0-9-]+\\.)?localhost)(:\\d+)?$/
       let frame = document.querySelector("iframe")
       // a frame whose page never says where it is (its place message), SILENT_FRAME_MS after it loads:  the browser's
       // error page, or a page stuck loading;  the extension loads it again (recover())

@@ -115,7 +115,7 @@ the site header's pencil opens an element's HTML, and the server splices the edi
 ### One server, every checkout
 
 Vite runs a dev server per project, each on a port of its own.
-Here the MAIN checkout's server serves every epic's worktree too, at `/worktrees/<epic>/...`:
+Here the MAIN checkout's server serves every epic's worktree too, by its name, `http://<epic>.localhost:4747/...`:
 one port, one tab, one live reload, however many epics are open.
 
 - It serves the whole repo, every folder of it, from the root:
@@ -448,7 +448,13 @@ _Only the element's own bytes change, so a diff shows only the edit;  a stale ET
 ### 5. Every epic on the main checkout's port
 
 An epic is worked in its own worktree, but its pages are read on the main checkout's server.
-This page, in an epic's worktree, is at `http://127.0.0.1:4747/worktrees/<epic>/README/server.md`.
+This page, in an epic's worktree, is at `http://<epic>.localhost:4747/README/server.md`.
+
+- The name is the worktree's (`<epic>--app.localhost:4747` is its editor):
+  main's server passes the request on to the worktree's own page server, starting it on the first visit.
+- `https://` while main's server speaks HTTPS:  its certificate lists every worktree's names.
+- `epic open`, `epic pages link`, `spell server url` and the Servers page give a worktree's pages this address.
+- The older address, `/worktrees/<epic>/...` on main's own, still works.
 
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
@@ -471,8 +477,8 @@ _The server knows nothing of epics:  a route module tells it where the worktrees
 - The epic folder is served after each worktree's own files, at its address:
   `/worktrees/<w>/epics/...` works, from one shared copy.
 - A folder's file in an epic's worktree is the worktree's, since that's whose server it is:
-  `spell server url app/README.md`, in an epic's worktree named `readme`, printed
-  `http://127.0.0.1:4747/worktrees/readme/app/README.md`.
+  `spell server url app/README.md`, in an epic's worktree named `readme`, prints
+  `https://readme.localhost:4747/app/README.md`.
 
 ## Writing a page:  one set of steps for every tool
 
