@@ -1,3 +1,4 @@
+import { P } from "spell/parser/parser"
 import { MD } from "spell/parser/markdown"
 import type { MarkdownOptions, MarkdownRendering, MarkdownResult } from "spell/ui/components/ui-markdown"
 
@@ -14,6 +15,12 @@ import type { MarkdownOptions, MarkdownRendering, MarkdownResult } from "spell/u
 export class MDEngine implements MarkdownRendering {
   /** The one engine:  static, as it keeps no state and every element shares it. */
   static readonly instance = new MDEngine()
+
+  /** The engine, once HTML's entity table is in (`P.HTMLEntities.load()`):  every `&name;` decodes from the first render. */
+  static async load(): Promise<MDEngine> {
+    await P.HTMLEntities.load()
+    return MDEngine.instance
+  }
 
   /** Its markup holds `ui-*` elements:  `sanitized` keeps them. */
   readonly drawsUITags = true

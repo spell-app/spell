@@ -20,7 +20,12 @@
  * - Adding one:  "Old forms" in `PARSING.md`.
  * - Plain matches, text and edits:  static and instance-free on purpose.
  */
-import semver from "semver"
+// semver's functions one by one:  its whole barrel is 6.7 KB brotli in the language worker (epic `solid-2-final` I64)
+import gte from "semver/functions/gte"
+import lt from "semver/functions/lt"
+import major from "semver/functions/major"
+import parse from "semver/functions/parse"
+import valid from "semver/functions/valid"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
@@ -125,12 +130,12 @@ export class OldForms {
 
   /** The Spell that drops `form`:  its own `droppedIn`, else the next major after it was deprecated (J287). */
   static droppedIn(form: OldForm): string {
-    return form.droppedIn ?? `${semver.major(form.deprecatedIn) + 1}.0.0`
+    return form.droppedIn ?? `${major(form.deprecatedIn) + 1}.0.0`
   }
 
   /** Is `form` past its drop version in Spell `version` (default this one's)?  Then it's an error, not a warning. */
   static isDropped(form: OldForm, version = OldForms.spellVersion): boolean {
-    return semver.gte(version, OldForms.droppedIn(form))
+    return gte(version, OldForms.droppedIn(form))
   }
 
   /**
@@ -201,12 +206,12 @@ export class OldForms {
    * - No version:  yes, it was written before projects said.
    */
   static isOlderSpell(version: string | undefined): boolean {
-    return !version || !semver.valid(version) || semver.lt(version, OldForms.spellVersion)
+    return !version || !valid(version) || lt(version, OldForms.spellVersion)
   }
 
   /** `version` said short, for people:  `0.9.0` => `0.9`, `1.0.0` => `1.0`;  a patch only when it has one. */
   static shortVersion(version: string): string {
-    const parsed = semver.parse(version)
+    const parsed = parse(version)
     if (!parsed) return version
     return parsed.patch ? `${parsed.major}.${parsed.minor}.${parsed.patch}` : `${parsed.major}.${parsed.minor}`
   }
