@@ -5159,15 +5159,29 @@
           "aliases": ["statement"]
         },
         {
-          "className": "ListCheckedHere",
-          "ruleNames": ["list_checked_here"],
+          "className": "ListFilteredHere",
+          "ruleNames": ["list_filtered_here"],
           "internal": false,
-          "file": "src/spell/rules/lists/ListCheckedHere.ts",
+          "file": "src/spell/rules/lists/ListFilteredHere.ts",
           "line": 27,
-          "purpose": "A read of a place whose `where` is checked here, in the page, all of it: nothing of it is asked of the place.",
+          "purpose": "A read of a place whose `where` is checked on the Spell server, all of it: nothing of it is asked of the place.",
           "syntaxes": [
             {
-              "syntax": ",? checked here"
+              "syntax": ",? filtered here"
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "ListSortedHere",
+          "ruleNames": ["list_sorted_here"],
+          "internal": false,
+          "file": "src/spell/rules/lists/ListSortedHere.ts",
+          "line": 19,
+          "purpose": "A read of a place sorted on the Spell server, when its server can't sort it that way.",
+          "syntaxes": [
+            {
+              "syntax": ",? sorted here"
             }
           ],
           "aliases": ["expression_suffix"]

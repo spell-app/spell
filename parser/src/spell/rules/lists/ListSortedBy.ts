@@ -28,7 +28,7 @@ const ITEM_VARIABLE = "item"
 export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
   @proto static precedence = Precedence.ternary
   @proto static datatype: P.Datatype | undefined = undefined
-  /** The same list, in another order:  `, checked here` after it is about the read it sorts. */
+  /** The same list, in another order:  `, filtered here` after it is about the read it sorts. */
   @proto static handsOnItsLeft = true
 
   /**

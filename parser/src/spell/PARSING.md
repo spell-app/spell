@@ -2434,7 +2434,8 @@ What a program's lines about where data lives compile to, and what reads the res
     on a web server, a warning naming each clause its list can't be asked (`EveryThing.clausesStayingIn()`).
     - `the first N Xs where ...` with a part staying:  a fourth argument, `{ first: N, where }`, so the read goes page
       by page and stops at N that pass;  `the first N Xs` alone, one page of N.
-    - `, checked here` after it (`ListCheckedHere`):  the read made again with nothing handed over, and no warning.
+    - `, filtered here` after it (`ListFilteredHere`):  the read made again with nothing handed over, and no warning.
+    - `, sorted here` after a sort (`ListSortedHere`):  the read as it is, a sort the place can't do opted into.
   - `sorted by`, with a plain field for a key, on a read of a place:  the query's `sort`;  `newest first` says `descending`.
   - `add`, `remove`:  `core.saveThing()`, `core.removeSaved()`, with no list.
   - By its plural alone (`recipes`, `all recipes`, `recipes where ...`;  epic `data` P15):  the same read, the plural looked up first as what the program has by that name (`ownListOf()`):

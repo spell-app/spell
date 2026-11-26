@@ -14,8 +14,8 @@ import {
 } from "spell/parser/spell/rules/places/places.shared"
 import { canNeverBeTrue, EveryThing, handedPartsOf } from "./EveryThing"
 
-/** What `, checked here` notes on the read it follows (`ListCheckedHere`):  nothing's asked of the place. */
-export type CheckedHereData = { checkedHere?: boolean }
+/** What `, filtered here` notes on the read it follows (`ListFilteredHere`):  nothing's asked of the place. */
+export type FilteredHereData = { filteredHere?: boolean }
 
 /** The fields a list of `saved` filters by, by its lines:  none for none said, or for every field. */
 function filterFieldsOf(saved: P.SavedPlace | undefined): readonly string[] {
@@ -89,22 +89,22 @@ export class EveryThingWhere extends SpellExpression<"type|where|body?", { own?:
    * SIDE EFFECT:  a warning, for a `where` on a saved type that can't all go to its place:  it's done here, up to a ceiling.
    * - A web server's list (epic `data`, the filters phase):  naming each clause its list can't be asked
    *   (`EveryThing.clausesStayingIn()`), and how to ask it instead, `its job id is ...` on a field its list filters by,
-   *   or that `, checked here` says it's meant.
+   *   or that `, filtered here` says it's meant.
    * - Any other place:  when none of it can go.
    * - None when a search can go instead (`it searches names with "search"`):  the server narrows what's read.
-   * - None after `, checked here` (`ListCheckedHere`):  it's what's wanted.
+   * - None after `, filtered here` (`ListFilteredHere`):  it's what's wanted.
    * - `predicate`:  the test, made when the warnings are gathered.
    */
   static warnAboutWhere(match: P.Match, type: P.Match, predicate: () => P.ASTMethodDefinition): void {
     const { scope } = match
     const language = SP.Language.of(scope)
     const words = `${type.raw}`.trim()
-    const isCheckedHere = () => !!(match.data as CheckedHereData).checkedHere
+    const isFilteredHere = () => !!(match.data as FilteredHereData).filteredHere
     const isWebServer = () => savedPlaceOfMatch(type)?.placeType.placeKind === "web server"
     const message = language.parserMessage("where-looks-through", { type: SP.singularIn(scope, words) })
     SP.SpellWarnings.noteIf(match, message, () => {
       const saved = savedPlaceOfMatch(type)
-      if (!saved || isWebServer() || isCheckedHere()) return false
+      if (!saved || isWebServer() || isFilteredHere()) return false
       const parts = handedPartsOf(predicate(), searchesOf(saved)?.fields ?? [])
       return !parts?.filter.length && !parts?.search.length
     })
@@ -121,7 +121,7 @@ export class EveryThingWhere extends SpellExpression<"type|where|body?", { own?:
         ? language.parserMessage("where-stays-here-no-filter", params)
         : language.parserMessage("where-stays-here", { ...params, field: wordsOfName(field) })
     }
-    SP.SpellWarnings.noteIf(match, stays, () => !isCheckedHere() && !!staying(), match, "where-stays-here")
+    SP.SpellWarnings.noteIf(match, stays, () => !isFilteredHere() && !!staying(), match, "where-stays-here")
     // given only to a search:  this `where` has to be one
     if (savedPlaceOfMatch(type)) EveryThing.refusedUnlessSearched(match, type, predicate)
     const never = SP.Language.of(scope).parserMessage("never-both")
@@ -137,9 +137,9 @@ export class EveryThingWhere extends SpellExpression<"type|where|body?", { own?:
         args: [ownListAST(match, own), this.predicateOf(match)]
       })
     }
-    // `, checked here` may come after a sort:  the read is made checked here itself, so the sort is done here too
-    const checkedHere = !!(match.data as CheckedHereData).checkedHere
-    const handed = EveryThing.savedAST(match, type, { predicate: this.predicateOf(match), checkedHere })
+    // `, filtered here` may come after a sort:  the read is made checked here itself, so the sort is done here too
+    const filteredHere = !!(match.data as FilteredHereData).filteredHere
+    const handed = EveryThing.savedAST(match, type, { predicate: this.predicateOf(match), filteredHere })
     if (handed) return handed
     return new P.ASTCoreMethodInvocation(match, {
       methodName: "filter",

@@ -248,7 +248,7 @@ export class CompoundExpression extends SpellExpression<"lhs|rhsChain"> {
    * - The first suffix:  our operand, `lhs`.
    * - After `and` / `or`:  the operand after it, e.g. `the game` in `the card is face up and the game is red`.
    *   Every suffix which asks (a person's phrase) binds tighter than those, so that operand is its whole left side.
-   * - After a postfix that hands on what it follows (`handsOnItsLeft`, `, checked here`):  what that one followed.
+   * - After a postfix that hands on what it follows (`handsOnItsLeft`, `, filtered here`):  what that one followed.
    * - After anything else:  unknown, e.g. after `+` the left side is the sum so far.
    */
   private static suffixLeft(lhs: P.Match, suffixes: readonly P.Match[]): P.Match | undefined {

@@ -181,10 +181,10 @@ export const PARSER_MESSAGES = {
    * `{type}`, one of them;  `{field}`, a field its list filters by.
    */
   "where-stays-here":
-    'The server can\'t be asked {clauses}, so this reads every {type} and checks them here, which can be slow.  Ask the server with "its {field} is ...", or end the line with ", checked here" if checking here is what you want',
+    'The server can\'t be asked {clauses}, so this reads every {type} and checks them here, which can be slow.  Ask the server with "its {field} is ...", or end the line with ", filtered here" if checking here is what you want',
   /** The same, on a list that filters by no field:  `{clauses}`, `{type}`. */
   "where-stays-here-no-filter":
-    'The server can\'t be asked {clauses}, so this reads every {type} and checks them here, which can be slow.  Say "the first 20 {types} where ..." to stop once there are enough, or end the line with ", checked here" if checking here is what you want',
+    'The server can\'t be asked {clauses}, so this reads every {type} and checks them here, which can be slow.  Say "the first 20 {types} where ..." to stop once there are enough, or end the line with ", filtered here" if checking here is what you want',
   /** A sort key that waits:  won't compile. */
   "sort-key-waits":
     "A sort can't wait for its key:  it would sort in no order.  Sort by a field of its own, or work the key out first",

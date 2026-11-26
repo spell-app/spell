@@ -23,7 +23,8 @@ import { ListEmpty } from "./ListEmpty"
 import { ListFilter } from "./ListFilter"
 import { ListItemsIn } from "./ListItemsIn"
 import { ListSortedBy } from "./ListSortedBy"
-import { ListCheckedHere } from "./ListCheckedHere"
+import { ListFilteredHere } from "./ListFilteredHere"
+import { ListSortedHere } from "./ListSortedHere"
 import { SortKeyField } from "./SortKeyField"
 import { SortKeyOrder } from "./SortKeyOrder"
 import { AddNewThing } from "./AddNewThing"
@@ -865,7 +866,9 @@ lists.addRule(ListSortedBy, {
   ]
 })
 
-lists.addRule(ListCheckedHere, { roles: { match: "value" }, syntax: ",? checked here" })
+lists.addRule(ListFilteredHere, { roles: { match: "value" }, syntax: ",? filtered here" })
+
+lists.addRule(ListSortedHere, { roles: { match: "value" }, syntax: ",? sorted here" })
 
 lists.addRule(ListMembershipTest, {
   syntax: "{operator:has_or_has_no} {arg:plural_identifier} (where:where|which|that|who) {inline_expression}?",

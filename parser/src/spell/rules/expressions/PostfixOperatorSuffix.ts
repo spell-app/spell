@@ -12,8 +12,8 @@ export class PostfixOperatorSuffix<
   MatchData extends P.AnyMatchData = P.AnyMatchData
 > extends InfixOperatorSuffix<Groups, MatchData> {
   /**
-   * Is what we make what we follow, only done another way, e.g. `, checked here`?  Then a suffix after us follows
-   * what we followed, its items known:  `every job where ..., checked here, sorted by its created at`
+   * Is what we make what we follow, only done another way, e.g. `, filtered here`?  Then a suffix after us follows
+   * what we followed, its items known:  `every job where ..., filtered here, sorted by its created at`
    * (`CompoundExpression.suffixLeft()`).
    */
   declare handsOnItsLeft: boolean

@@ -8,23 +8,23 @@ import {
   type OperatorOperands
 } from "spell/parser/spell/rules/expressions"
 import { EveryThing } from "spell/parser/spell/rules/classes/EveryThing"
-import type { CheckedHereData } from "spell/parser/spell/rules/classes/EveryThingWhere"
+import type { FilteredHereData } from "spell/parser/spell/rules/classes/EveryThingWhere"
 import { isItemScope } from "./lists.shared"
 
 /**
- * `list_checked_here` rule:  a read of a place whose `where` is checked here, in the page, all of it:
+ * `list_filtered_here` rule:  a read of a place whose `where` is checked on the Spell server, all of it:
  * nothing of it is asked of the place.
- * - e.g. `every job where its session id is the session's id, checked here`;  Spanish `, filtrando aquí`
+ * - e.g. `every job where its session id is the session's id, filtered here`;  Spanish `, filtrado aquí`
  * - For when the place's own filter isn't what's meant:  it matches ids exactly, or capitals its own way;
  *   or the list is small, and one read beats many.
  * - So it reads every page, and its `where` warns of nothing (`EveryThingWhere.warnAboutWhere()`);  after a sort
- *   too, `, sorted by its title, checked here`, and after `there are ... where`.
- * - Compiles to the read made again with nothing handed over (`EveryThing.checkedHereAST()`):
+ *   too, `, sorted by its title, filtered here`, and after `there are ... where`.
+ * - Compiles to the read made again with nothing handed over (`EveryThing.filteredHereAST()`):
  *   `core.filter(await core.savedThings(Job, {}, "looks through"), (job) => ...)`.
  * - After anything else, the list as it is:  a list in memory is always checked here.
  * - A postfix suffix, as `, sorted by ...` is:  not inside a `where`, whose comma it would take.
  */
-export class ListCheckedHere extends PostfixOperatorSuffix {
+export class ListFilteredHere extends PostfixOperatorSuffix {
   @proto static precedence = Precedence.ternary
   @proto static datatype: P.Datatype | undefined = undefined
   /** The same list:  `, sorted by its created at` after it knows its items. */
@@ -36,7 +36,7 @@ export class ListCheckedHere extends PostfixOperatorSuffix {
     const match = super.parse(scope, tokens)
     if (!match) return undefined
     const left = SuffixLeft.current
-    if (left) for (const read of readsIn(left)) (read.data as CheckedHereData).checkedHere = true
+    if (left) for (const read of readsIn(left)) (read.data as FilteredHereData).filteredHere = true
     return match
   }
 
@@ -46,7 +46,7 @@ export class ListCheckedHere extends PostfixOperatorSuffix {
   }
 
   compileASTExpression(match: P.MatchFor<this>, { lhs }: OperatorOperands): P.ASTExpression {
-    return EveryThing.checkedHereAST(match as P.Match, lhs!) ?? lhs!
+    return EveryThing.filteredHereAST(match as P.Match, lhs!) ?? lhs!
   }
 }
 

@@ -152,7 +152,7 @@ export class EveryThing extends SpellExpression<"type"> {
    *     here, so the read stops at that many (epic `data` I55).  Without, it goes, and the place checks it.
    * - Some of it staying here, with `first`:  the read goes page by page, and stops once that many pass
    *   (`core.savedThings()`'s `until`);  without, it reads every page, up to the engine's ceiling.
-   * - `checkedHere`:  nothing goes to the place, and every page is read (`ListCheckedHere`, `, checked here`).
+   * - `filteredHere`:  nothing goes to the place, and every page is read (`ListFilteredHere`, `, filtered here`).
    */
   /**
    * How many there are of saved `type` that pass `predicate`, asked of its place, for `match`:
@@ -187,11 +187,11 @@ export class EveryThing extends SpellExpression<"type"> {
   static savedAST(
     match: P.Match,
     type: P.Match,
-    { predicate, first, checkedHere }: { predicate?: P.ASTMethodDefinition; first?: number; checkedHere?: boolean } = {}
+    { predicate, first, filteredHere }: { predicate?: P.ASTMethodDefinition; first?: number; filteredHere?: boolean } = {}
   ): P.ASTExpression | undefined {
     const saved = savedPlaceOfMatch(type)
     if (!saved) return undefined
-    const parts = predicate && !checkedHere ? handedPartsOf(predicate, searchesOf(saved)?.fields ?? []) : undefined
+    const parts = predicate && !filteredHere ? handedPartsOf(predicate, searchesOf(saved)?.fields ?? []) : undefined
     // a web server's list sends only the fields it filters by:  with `first`, one it doesn't stays here, so the read
     // goes page by page and stops at that many, rather than reading every page to filter by it (epic `data` I55)
     const isPaged = first !== undefined && saved.placeType.placeKind === "web server"
@@ -260,13 +260,13 @@ export class EveryThing extends SpellExpression<"type"> {
   }
 
   /**
-   * The read `savedAST()` made, made again with nothing handed to the place:  `, checked here` after it
-   * (`ListCheckedHere`).  `undefined` for anything else.
+   * The read `savedAST()` made, made again with nothing handed to the place:  `, filtered here` after it
+   * (`ListFilteredHere`).  `undefined` for anything else.
    */
-  static checkedHereAST(match: P.Match, read: P.ASTExpression): P.ASTExpression | undefined {
+  static filteredHereAST(match: P.Match, read: P.ASTExpression): P.ASTExpression | undefined {
     const made = HANDED_READS.get(read)
     if (!made?.predicate) return undefined
-    return EveryThing.savedAST(match, made.type, { ...made, checkedHere: true })
+    return EveryThing.savedAST(match, made.type, { ...made, filteredHere: true })
   }
 
   /**
@@ -350,14 +350,14 @@ function queryProperty(match: P.Match, name: string, value: P.ASTExpression): P.
   return new P.ASTObjectLiteralProperty(match, { property: name as never, value })
 }
 
-/** What `savedAST()` made each read from, so `, checked here` can make it again:  see `checkedHereAST()`. */
+/** What `savedAST()` made each read from, so `, filtered here` can make it again:  see `filteredHereAST()`. */
 const HANDED_READS = new WeakMap<P.ASTNode, { type: P.Match; predicate?: P.ASTMethodDefinition; first?: number }>()
 
 /** A `where`'s parts, as a place can be handed them:  see `handedPartsOf()`. */
 export type HandedParts = {
   /** Each `its X is <a value>`:  the place's filter, `ListQuery.filter`. */
   filter: P.ASTObjectLiteralProperty[]
-  /** Each `its X includes <a value>` on a field it searches:  `ListQuery.search`, checked here too. */
+  /** Each `its X includes <a value>` on a field it searches:  `ListQuery.search`, filtered here too. */
   search: P.ASTObjectLiteralProperty[]
   /** Every other clause:  checked here, over what came back. */
   staying: P.ASTNode[]

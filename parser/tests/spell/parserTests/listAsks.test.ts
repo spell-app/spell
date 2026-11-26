@@ -1,6 +1,6 @@
 /**
  * What a read asks of a web server's list, and what it checks in the page:  a list's own `it filters by`, `it sorts by`
- * and search, under its `live at` line;  a `where` sent in parts;  `the first N`;  `, checked here`.
+ * and search, under its `live at` line;  a `where` sent in parts;  `the first N`;  `, filtered here`.
  */
 import { describe, expect, test } from "vite-plus/test"
 
@@ -93,7 +93,7 @@ describe("a `where`, sent in parts", () => {
   test("a clause the list can't be asked warns, naming it, and a field it filters by", () => {
     const { warnings } = compiled(PLACE(`every job where its status is "open" and its kind is not "small"`))
     expect(warnings.join("\n")).toContain(
-      `The server can't be asked "its kind is not "small"", so this reads every job and checks them here, which can be slow.  Ask the server with "its status is ...", or end the line with ", checked here" if checking here is what you want`
+      `The server can't be asked "its kind is not "small"", so this reads every job and checks them here, which can be slow.  Ask the server with "its status is ...", or end the line with ", filtered here" if checking here is what you want`
     )
   })
 
@@ -104,12 +104,12 @@ describe("a `where`, sent in parts", () => {
   })
 })
 
-describe("`, checked here` beside a sort, after `there are`, and `the first X where`'s fields", () => {
+describe("`, filtered here` beside a sort, after `there are`, and `the first X where`'s fields", () => {
   test("before a sort or after it:  the sort's key knows the items, both sort here, and nothing's warned of", () => {
     const sorted = `core.sortedBy(core.filter(await core.savedThings(Job, {}, "looks through"), (job) => job.kind !== "small"), (item) => item.sessionId)`
     for (const read of [
-      `every job where its kind is not "small", checked here, sorted by its session id`,
-      `every job where its kind is not "small", sorted by its session id, checked here`
+      `every job where its kind is not "small", filtered here, sorted by its session id`,
+      `every job where its kind is not "small", sorted by its session id, filtered here`
     ]) {
       const { errors, warnings, compiled: code } = compiled(PLACE(read))
       expect(errors).toEqual([])
@@ -121,7 +121,7 @@ describe("`, checked here` beside a sort, after `there are`, and `the first X wh
   test("after `there are ... where`:  nothing's warned of", () => {
     const where = `there are no jobs where its kind is not "small"`
     expect(compiled(PLACE(where)).warnings.join("\n")).toContain(`can't be asked "its kind is not "small""`)
-    expect(compiled(PLACE(`${where}, checked here`)).warnings.join("\n")).not.toContain("can't be asked")
+    expect(compiled(PLACE(`${where}, filtered here`)).warnings.join("\n")).not.toContain("can't be asked")
   })
 
   test("`the first X where`:  its `where` knows the thing's fields, a name of several words too", () => {
@@ -270,13 +270,13 @@ describe("the first few", () => {
   })
 })
 
-describe("`, checked here`", () => {
+describe("`, filtered here`", () => {
   test("nothing goes to the place, every page is read, and nothing's warned of", () => {
     const {
       errors,
       warnings,
       compiled: code
-    } = compiled(PLACE(`every job where its status is "open" and its kind is not "small", checked here`))
+    } = compiled(PLACE(`every job where its status is "open" and its kind is not "small", filtered here`))
     expect(errors).toEqual([])
     expect(code).toContain(
       `core.filter(await core.savedThings(Job, {}, "looks through"), (job) => job.status === "open" && job.kind !== "small")`
@@ -284,7 +284,7 @@ describe("`, checked here`", () => {
     expect(warnings.join("\n")).not.toContain("can't be asked")
   })
 
-  test("in Spanish, `, filtrando aquí`", () => {
+  test("in Spanish, `, filtrado aquí`", () => {
     const { errors, compiled: code } = compiled(
       [
         `acme es un servidor web en "https://acme.test"`,
@@ -292,7 +292,7 @@ describe("`, checked here`", () => {
         `un "trabajo" es una cosa:`,
         `\t- se guarda en acme`,
         `\t- su "estado" es texto`,
-        `poner x a cada trabajo donde su estado es "abierto", filtrando aquí`
+        `poner x a cada trabajo donde su estado es "abierto", filtrado aquí`
       ],
       "/A.es.spell"
     )
@@ -300,5 +300,39 @@ describe("`, checked here`", () => {
     expect(code).toContain(
       `core.filter(await core.savedThings(Trabajo, {}, "looks through"), (trabajo) => trabajo.estado === "abierto")`
     )
+  })
+})
+
+describe("`, sorted here`", () => {
+  test("after a sort:  the read as it is, its sort still in its question", () => {
+    const plain = compiled(PLACE(`every job, sorted by its name`)).compiled
+    const { errors, compiled: code } = compiled(PLACE(`every job, sorted by its name, sorted here`))
+    expect(errors).toEqual([])
+    const read = `core.savedThings(Job, { sort: [{ field: "name" }] }`
+    expect(plain).toContain(read)
+    expect(code).toContain(read)
+  })
+
+  test("after `, filtered here`, after a sort", () => {
+    const { errors, compiled: code } = compiled(
+      PLACE(`every job where its kind is not "small", sorted by its name, filtered here, sorted here`)
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain(`(job) => job.kind !== "small"`)
+  })
+
+  test("in Spanish, `, ordenado aquí`", () => {
+    const { errors, compiled: code } = compiled(
+      [
+        `acme es un servidor web en "https://acme.test"`,
+        `un "trabajo" es una cosa:`,
+        `\t- se guarda en acme`,
+        `\t- su "nombre" es texto`,
+        `poner x a cada trabajo, ordenado por su nombre, ordenado aquí`
+      ],
+      "/A.es.spell"
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain(`core.savedThings(Trabajo, { sort: [{ field: "nombre" }] }`)
   })
 })
