@@ -454,6 +454,14 @@
     -webkit-text-fill-color: currentcolor;
   }
 
+  /* a line's own indent, its tabs (`BubblyHtml.INDENT`):  no room, nothing drawn, there to be copied (T106) */
+  .bubbly-indent-text {
+    /* out of the line's flow:  a band lays its words out with gaps, which would count it */
+    position: absolute;
+    font-size: 0;
+    white-space: pre;
+  }
+
   /* a note at the end of a head, on its band:  darker than a mark there, so it reads on the band's colour */
   :is(.bubbly-head-pill, .bubbly-pill) .bubbly-comment,
   .bubbly-comment.bubbly-band-comment {
@@ -1817,6 +1825,17 @@
       border-left: 1px solid var(--bubbly-bold-ink);
       margin-left: -0.5px;
     }
+    /*
+     * the caret is drawn as the opposite of what's under it, so it shows on the paper, a band and a pill alike:
+     * in dark, a light code pill's caret was light too, and hard to see (epic `language` I130)
+     * - white, blended by difference:  black on white paper, white on dark, dark on a light pill
+     */
+    .cm-cursorLayer {
+      mix-blend-mode: difference;
+    }
+    .cm-cursorLayer .cm-cursor {
+      border-left-color: white;
+    }
 
     /*
      * the selection over the text, see-through:  under it, the bands' and pills' own colours would hide it
@@ -2324,6 +2343,22 @@
       height: var(--cmb-foot-tiny-height);
       vertical-align: top;
     }
+    /*
+     * ... code after its end tags (`</toolbar> <divider />`, I185):  at the code's size, on the line as any line's,
+     * the row's room above its end tags taken back
+     */
+    .cm-line.cmb-feet-row.cmb-feet-then-code > :not(.cmb-tag-foot, .cm-widgetBuffer, .cmb-feet-join) {
+      font-size: calc(16px * var(--bubbly-editor-scale));
+      line-height: var(--cmb-line-height);
+      tab-size: var(--cmb-indent);
+      vertical-align: top;
+      position: relative;
+      top: calc(-1 * var(--cmb-feet-top));
+    }
+    /* ... a space's room after the last end tag, as between tags on a line (the space itself is drawn at no size) */
+    .cm-line.cmb-feet-row.cmb-feet-then-code > .cmb-tag-foot + .bubbly-spacer {
+      margin-left: var(--cmb-space);
+    }
     .cm-line.cmb-feet-row .cmb-tag-foot {
       /* its tip at its slant, as an inline tag's:  as slanted as a tag's, for its height */
       --cmb-feet-point: calc(var(--cmb-foot-tiny-height) / 2 * var(--bubbly-tag-slope));
@@ -2404,7 +2439,8 @@
       background: none;
       border-radius: 0;
     }
-    .cmb-tag-link > :is(.cmb-tag-pill, .cmb-tag-band) {
+    /* ... a link inside it too, `<text><b>Score</b>: ...</>`:  its own margin sat its words 1.72px low (I186) */
+    .cmb-tag-link > :is(.cmb-tag-pill, .cmb-tag-band, .cmb-tag-link) {
       margin-top: 0;
     }
     /*

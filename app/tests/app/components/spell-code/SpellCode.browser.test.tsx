@@ -106,11 +106,33 @@ describe("<spell-code>", () => {
       "queen",
       "king"
     ])
-    expect(drawing.querySelector(".bubbly-block.bubbly-control > .bubbly-body")!.textContent).toBe('return "Q"')
+    // its line's own tabs before it, drawn at no size, for copying (T106)
+    expect(drawing.querySelector(".bubbly-block.bubbly-control > .bubbly-body")!.textContent).toBe('\t\t\treturn "Q"')
     expect(host.shadowRoot!.querySelector("style")!.textContent).toContain(".bubbly")
     expect(host.shadowRoot!.querySelector<HTMLElement>("[part~=pre]")!.hidden).toBe(true)
     // the copy button still copies the code as written
     expect(host.content.trim()).toBe(CARD.replace(/<\/?script[^>]*>/g, "").trim())
+  })
+
+  test("copies a stretch of the drawing as the file has it, each line's indent kept (T106)", async () => {
+    const host = await code(`<spell-code>${CARD}</spell-code>`)
+    const drawing = drawingOf(host)!
+    const [rank, , queen] = [...drawing.querySelectorAll<HTMLElement>(".bubbly-pill, .bubbly-head-pill")].slice(1)
+    const selected = document.createRange()
+    selected.setStartBefore(rank!)
+    selected.setEndAfter(drawing.querySelector(".bubbly-block.bubbly-control > .bubbly-body")!)
+    const selection = getSelection()!
+    selection.removeAllRanges()
+    selection.addRange(selected)
+    const lines = selection
+      .toString()
+      .split("\n")
+      .filter((line) => line.trim())
+    expect(queen!.textContent).toBe("\t\tif it is a queen")
+    expect(lines.map((line) => /^\t*/.exec(line)![0].length)).toEqual([1, 1, 2, 3])
+    // each indent out of its line's flow, so it moves nothing
+    for (const indent of drawing.querySelectorAll<HTMLElement>(".bubbly-indent-text"))
+      expect(getComputedStyle(indent).position).toBe("absolute")
   })
 
   test("starts every band's words as far into it as the editor does:  a head with a body as one without (I150)", async () => {

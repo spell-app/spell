@@ -46,7 +46,7 @@ describe("BubblyHtml.write()", () => {
     ].join("\n")
     const drawn = BubblyHtml.write(SP.BubblyLayout.of(text))
     expect(drawn).toContain(
-      '<p class="bubbly-head-pill bubbly-ends-input">to <span class="bubbly-input bubbly-with-blanks">play <span class="bubbly-underline">a <span class="bubbly-reference">card</span></span></span></p>'
+      '<p class="bubbly-head-pill bubbly-ends-input"><span class="bubbly-indent-text">\t</span>to <span class="bubbly-input bubbly-with-blanks">play <span class="bubbly-underline">a <span class="bubbly-reference">card</span></span></span></p>'
     )
     expect(drawn).toContain(
       '<span class="bubbly-quoted"><span class="bubbly-input bubbly-with-blanks"><span class="bubbly-quote-mark bubbly-quote-open">"</span>' +
@@ -55,7 +55,7 @@ describe("BubblyHtml.write()", () => {
     )
   })
 
-  test("keeps every word of the code, quote marks too, for copying;  escapes the markup", () => {
+  test("keeps every word of the code, quote marks and each line's indent too, for copying;  escapes the markup (T106)", () => {
     const drawn = html()
     expect(drawn).toContain(
       '<span class="bubbly-quoted"><span class="bubbly-input"><span class="bubbly-quote-mark bubbly-quote-open">"</span>card<span class="bubbly-quote-mark bubbly-quote-close">"</span></span></span>'
@@ -66,11 +66,8 @@ describe("BubblyHtml.write()", () => {
       .replace(/&lt;/g, "<")
       .replace(/&gt;/g, ">")
       .replace(/&amp;/g, "&")
-    expect(words).toBe(
-      CARD.split("\n")
-        .map((line) => line.trim())
-        .join("")
-    )
+    // each line as the file has it, its tabs too:  only the line breaks are the drawing's own
+    expect(words).toBe(CARD.split("\n").join(""))
   })
 
   test("wraps each declaration in a section a page's comments anchor to, each id once", () => {
