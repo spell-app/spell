@@ -4,6 +4,7 @@
 export { AgentsMarked } from "./AgentsMarked"
 export { ChangesAfterGoal } from "./ChangesAfterGoal"
 export { ClarifiedBodies } from "./ClarifiedBodies"
+export { CommitsLast } from "./CommitsLast"
 export { DoneCardsClose } from "./DoneCardsClose"
 export { ContentRelink, type RelinkCount } from "./ContentRelink"
 export { HandedOnFixes } from "./HandedOnFixes"

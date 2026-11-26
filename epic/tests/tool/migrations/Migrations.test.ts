@@ -44,7 +44,8 @@ describe("Migrations", () => {
       "handed-on-fixes",
       "picture-labels",
       "self-fixed-issues",
-      "items-in-order"
+      "items-in-order",
+      "commits-last"
     ])
     expect(Migrations.named("links-agree")?.kind).toBe("epic")
     expect(Migrations.named("nope")).toBeUndefined()
@@ -67,7 +68,8 @@ describe("Migrations", () => {
       "clarified-bodies",
       "reopened-fixes",
       "handed-on-fixes",
-      "picture-labels"
+      "picture-labels",
+      "commits-last"
     ])
   })
 

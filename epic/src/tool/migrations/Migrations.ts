@@ -1,6 +1,7 @@
 import { AgentsMarked } from "./AgentsMarked"
 import { ChangesAfterGoal } from "./ChangesAfterGoal"
 import { ClarifiedBodies } from "./ClarifiedBodies"
+import { CommitsLast } from "./CommitsLast"
 import { DoneCardsClose } from "./DoneCardsClose"
 import { HandedOnFixes } from "./HandedOnFixes"
 import { ItemBodies } from "./ItemBodies"
@@ -68,7 +69,8 @@ export class Migrations {
     new HandedOnFixes(),
     new PictureLabels(),
     new SelfFixedIssues(),
-    new ItemsInOrder()
+    new ItemsInOrder(),
+    new CommitsLast()
   ]
 
   /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */
