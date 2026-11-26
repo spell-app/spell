@@ -1626,12 +1626,14 @@ In `tools/`:
             run epic tidy"):  asks the epic's session to run `/epic tidy <epic>`, as the pill asks for a review
             (`ReviewClient.startReview("tidy")`), the notice saying what came of it;  its tooltip on its words, not the
             row (the menu focuses its first row as it opens);  not on a saga page
-          - last, BELLS & WHISTLES (epic `epic-engine` P86):  `<epic-bells>`, a `<ui-modal size="small">` drawn in the
-            page's shadow root, as Focus mode is:  the Token burn slider, one compact row (its name, then a `<ui-slider>`,
-            Low / Medium / High;  a "Custom" chip by the name only once a switch is flipped below High), then a section
+          - second, after Tidy, BELLS & WHISTLES (epic `epic-engine` P86;  T173:  Tidy, Bells & Whistles, Focus mode, a
+            `<ui-divider>`, Auto Send, Theme):  `<epic-bells>`, a `<ui-modal>` drawn in the page's shadow
+            root, as Focus mode is, filling the window less 20px a side (T173):  a section
             per group, its steps by cost (`BellSteps.COST_ORDER`:  high, medium, low, none, timesaver;  T171), each step's
             row a `<ui-checkbox appearance="toggle">` with its cost (`<ui-label>`) under it, in one column, then its bold
-            title and one sentence;  its gear row has a bell, beside Tidy's broom (both in the docs bundle's icons);  a DRAFT until
+            title and one short line;  in its footer, the Token burn slider at the left (its name, then a `<ui-slider>`, Low /
+            Medium / High, no ticks;  a "Custom" chip by the name only once a switch is flipped below High), Cancel / Save
+            at the right (T173);  its gear row has a bell, beside Tidy's broom (both in the docs bundle's icons);  a DRAFT until
             Save (`POST /api/epics/settings`, `ServerLink`), its ×, Escape and Cancel drop it;  Auto Send's row is the
             page's own choice (`SendCountdown`);  [check-bells.mjs](demo/check-bells.mjs) checks it headless
           - then FOCUS MODE (epic `epic-engine` P57;  2026-10-30:  "a mode where I can quickly

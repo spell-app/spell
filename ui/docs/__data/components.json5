@@ -63722,7 +63722,8 @@
         },
         {
           "name": "--ui-checkbox-toggle-width",
-          "default": "3.5em",
+          "default": "2.75em",
+          "description": "The toggle's lane: about twice its handle, as the platforms' own switches (Fomantic's is 3.5em).",
           "type": "length"
         },
         {

@@ -1234,8 +1234,9 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
 
   /**
    * The header's GEAR, where the git toggle was (Owen, 2026-10-29:  "Turning it off could be from a gear menu in the
-   * epic page header which replaces this"):  a round icon button opening a small menu of SETTINGS, two rows, each
-   * opening a sub-menu beside it
+   * epic page header which replaces this"):  a round icon button opening a small menu of SETTINGS
+   * - in Owen's order (T173):  Tidy, Bells & Whistles, Focus mode (each a dialog), a divider, then Auto Send and Theme,
+   *   each opening a sub-menu beside it
    * - Auto Send · 2 minutes (Owen's comment C8, J160):  Immediately, 2 minutes, 5 minutes, then Off under a divider;
    *   the chosen one ticked (`SendCountdown.choose()`, remembered in this browser for every page)
    * - Theme · Paper (Owen's comment C9, J162):  Spell UI's own theme menu in its menu mode (`<ui-theme-menu
@@ -1290,6 +1291,18 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                   </span>
                 </button>
               </Show>
+              <button
+                type="button"
+                class={[GEAR_ROW, "bells-row"]}
+                part={this.partForName("gear-row")}
+                role="menuitem"
+                value={BELLS_ROW}
+                tabindex="-1"
+                onClick={() => this.openBells()}
+              >
+                <ui-icon name="bell" class="lead" aria-hidden="true" padding="none" />
+                <span class="name">{this.translationForKey("bells")}</span>
+              </button>
               <Show when={this.review.reviewing()}>
                 <button
                   type="button"
@@ -1304,20 +1317,10 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                   <span class="name">{this.translationForKey("focusMode")}</span>
                 </button>
               </Show>
+              {/* the dialogs above, the sub-menus below (Owen, 2026-11-26, T173) */}
+              <ui-divider class="gear-divider" padding="none" />
               {this.gearRow("autoSend", this.translationForKey("autoSend"), this.autoSendWords(this.autoSend))}
               {this.gearRow("theme", this.translationForKey("theme"), this.themeTitle)}
-              <button
-                type="button"
-                class={[GEAR_ROW, "bells-row"]}
-                part={this.partForName("gear-row")}
-                role="menuitem"
-                value={BELLS_ROW}
-                tabindex="-1"
-                onClick={() => this.openBells()}
-              >
-                <ui-icon name="bell" class="lead" aria-hidden="true" padding="none" />
-                <span class="name">{this.translationForKey("bells")}</span>
-              </button>
             </div>
             <div
               class={[GEAR_SUB, "auto-send"]}

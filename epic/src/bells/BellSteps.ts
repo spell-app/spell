@@ -133,14 +133,16 @@ export class BellSteps {
    * Does the slider at `level` let step `step` run, your own switch aside?
    * - High lets everything run
    * - a step that costs no Claude tokens (`none`) or saves more than it costs (`timesaver`) runs at every level
+   * - Medium, a real middle (T173;  Owen:  "Not much difference between 'high' and 'medium'"):  holds off every
+   *   nice-to-have, and every high-cost step that isn't a must-have;  9 of the 28 steps that use tokens
+   * - Low:  only the must-haves that aren't high-cost;  21 of the 28 off
+   *   - so Send still reaches a chat (`openChat`, `wakeQuietChat`), and work still joins your project checked
    */
   static burnAllows(step: BellStep, level: BurnLevel): boolean {
     if (level === "high" || step.cost === "none" || step.cost === "timesaver") return true
-    if (level === "low") return step.cost === "low" && step.importance === "mustHave"
-    // medium
-    if (step.cost === "low") return true
-    if (step.cost === "medium") return step.importance !== "niceToHave"
-    return step.importance === "mustHave"
+    if (step.importance === "mustHave") return level === "medium" || step.cost !== "high"
+    // useful or nice to have:  only a useful one at Medium that isn't high-cost
+    return level === "medium" && step.importance === "useful" && step.cost !== "high"
   }
 
   /**
