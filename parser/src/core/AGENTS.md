@@ -586,6 +586,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     `around` (a second `to complete a job`, given what it wraps)
   - by the file each is in, its `level`:  before, while and around from a page's file in to the `.api.spell` file's,
     after and failure steps the other way;  a page's before and while steps only while one of it is made
+  - a page's hook is the page's method, given the thing first, `jobsPage.whileComplete(job)`, so its steps read the
+    page's own fields (epic `data` I112);  its after and failure steps run on the last one made, once it's left
   - a failure step gives back `core.passTheError()` to send it on;  anything else caught it
   - a server's action (`callsServer`) then runs `core.addServerFailureStep()`'s, last;  a refusal's notice, held till
     then (`holdNotice()`), shows only for what nobody caught, and the error goes on to the caller

@@ -1,4 +1,4 @@
-import { proto } from "spell/util"
+import { kebabCase, proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { Priority } from "spell/parser/spell/rules/rules.types"
@@ -22,6 +22,8 @@ import { ToDoSomething } from "./ToDoSomething"
  *   - Skipped when the action is called off (`cancel`);  a hook may `cancel` it too.
  * - Compiles to a method of the action's type, then a line adding it to the action's hooks:
  *   `core.addAfterHook(Card, "putOnPile", { hook: "afterPutOnPile" })` (`runActing()`, the core's).
+ *   - In a page's file, a method of the PAGE, given the thing first, `afterComplete(job)`:  so its steps read the page's
+ *     own fields, `set the busy note to ...`, and `the job` is what it's given (epic `data` I112).
  *   - A second hook of the same action is `afterPutOnPile2`, and so on.
  * - Naming no action that's above it, it's refused, saying so.  A type's action only, for now.
  * - Registers no call rule:  nothing calls a hook by its words.
@@ -50,12 +52,35 @@ export class AfterHook extends ToDoSomething {
     data.action = action.name
     Object.assign(data, AfterHook.levelOf(scope))
     // its own name:  `after_put_on_$pile`, or the next free one, `after_put_on_$pile_2` ...
-    const type = scope.getType(P.typeCase(signature.instanceType!))
+    // - a page's, on the page:  see `processSignature()`
+    const type = scope.getType(signature.instanceTypeName ?? P.typeCase(signature.instanceType!))
     const base = `${this.moment}_${action.name}`
     let hookName = base
     for (let number = 2; AfterHook.isTaken(type, hookName, match); number++) hookName = `${base}_${number}`
     signature.methodName = hookName
     return match
+  }
+
+  /**
+   * As a method's;  in a page's file, the page's method, given the action's thing first (epic `data` I112):
+   * `while completing a job` in the jobs page's file is `JobsPage.whileComplete(job)`.
+   * - `actionType` keeps the action's type, `job`, for finding the action and adding the hook to its class.
+   * - SIDE EFFECT:  mutates `signature` in place, as `MethodDefinition.processSignature()` does.
+   */
+  processSignature(groups: P.MatchGroups, signature: MethodSignatureData, scope: P.Scope): MethodSignatureData {
+    const { page } = AfterHook.levelOf(scope)
+    const pageType = page ? scope.getType(page) : undefined
+    const initialType = signature.types.find((type) => !type.isSimple)
+    const thing = initialType && signature.args[initialType.argIndex]
+    const processed = super.processSignature(groups, signature, scope)
+    if (!pageType || !thing || !processed.instanceType || processed.testOf) return processed
+    processed.actionType = processed.instanceType
+    processed.instanceType = kebabCase(pageType.name).replace(/^-/, "")
+    processed.instanceTypeName = pageType.name
+    // the thing is an argument, first:  `the job`;  an alias of it for `this` would be the page
+    processed.args.unshift(thing)
+    processed.extraVars = processed.extraVars.filter((each) => typeof each === "string" || each.output !== "this")
+    return processed
   }
 
   /**
@@ -67,7 +92,8 @@ export class AfterHook extends ToDoSomething {
     scope: P.Scope,
     verbsFor: ((word: string) => string[]) | undefined
   ): P.ScopeMethod | undefined {
-    const { instanceType, methodBits } = signature
+    const { methodBits } = signature
+    const instanceType = signature.actionType ?? signature.instanceType
     const [doing, ...rest] = methodBits
     if (!instanceType || !doing) return undefined
     const verbs = verbsFor ? verbsFor(doing) : [doing]
@@ -142,7 +168,10 @@ export class AfterHook extends ToDoSomething {
   getAST(match: P.MatchFor<this>): P.ASTStatementGroup {
     const group = super.getAST(match)
     const signature = this.getSignature(match)!
-    const typeName = signature.instanceTypeName ?? P.typeCase(signature.instanceType!)
+    // the action's type, a page's hook's too:  its method is the page's
+    const typeName = signature.actionType
+      ? P.typeCase(signature.actionType)
+      : (signature.instanceTypeName ?? P.typeCase(signature.instanceType!))
     const { action, level = "app", page } = match.data as AfterHookData
     const hook = { member: signature.methodName! }
     const isPlainAfter = this.moment === "after" && level === "app"

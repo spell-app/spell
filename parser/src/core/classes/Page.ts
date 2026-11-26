@@ -1,5 +1,6 @@
 import { prop } from "spell/util"
 import { core } from "spell/parser/core/core"
+import { notePageMade } from "spell/parser/core/undoing"
 // Import directly to avoid circular import
 import { View } from "./View"
 
@@ -29,10 +30,12 @@ export class Page extends View {
   /**
    * SIDE EFFECT:  the running program's pages are listed as they're made, `core.RUNTIME.pages`:
    * each hears what `trigger()` sends by its own handler, `on fizz` (epic `language` T78).
+   * - And noted as its class's last, for its action steps once it's left (`notePageMade()`, epic `data` I112).
    */
   constructor(props?: Record<string, unknown>) {
     super(props)
     core.RUNTIME?.pages.push(this)
+    notePageMade(this)
   }
 
   /** What its `lock` may be:  `unlocked` or `locked`. */

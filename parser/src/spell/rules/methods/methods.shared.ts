@@ -61,6 +61,13 @@ export type MethodSignatureData = {
    */
   valueKindOf?: string
   /**
+   * The action's type, for a hook in a page's file:  `job` for `while completing a job` (epic `data` I112).
+   * - Its method is the PAGE's (`instanceType`), given the job first, so its steps read the page's own fields:
+   *   `set the busy note to ...` is the page's, `the job` its argument.
+   * - Set by `AfterHook.processSignature()`.
+   */
+  actionType?: string
+  /**
    * A test in a template's outline, e.g. `card` for `- to test card setup:` in a card's (epic `elemental-spell` P5):
    * the template it tests.
    * - Set by `MethodDefinition.processSignature()`.

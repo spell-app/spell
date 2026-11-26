@@ -115,14 +115,19 @@ function jobsProject(): (names: string) => Record<string, unknown> {
     "when any server call fails",
     '\tif the error is "not authorized"',
     '\t\tprint "sign in"',
+    '\totherwise if the error is "offline"',
+    '\t\tprint "You\'re offline:  try again soon"',
     "\totherwise",
-    "\t\tpass the error"
+    "\t\tdo nothing"
   ]
   const page = [
     'a "jobs page" is a page',
     '\tits "busy note" is text',
     "while completing a job",
     '\tset the job\'s note to "busy"',
+    '\tset the busy note to "Completing ..."',
+    "after completing a job",
+    '\tprint "page after"',
     "if completing a job fails",
     '\tif the error is "not permitted"',
     '\t\tprint "You can\'t complete jobs"',
@@ -152,12 +157,14 @@ describe("the steps around a server's action (epic `data` P50)", () => {
       [`POST ${HOST}/api/jobs/7/complete`]: {}
     })
     const { Job, JobsPage } = jobsProject()("Job, JobsPage")
-    new (JobsPage as new () => object)()
+    const page = new (JobsPage as new () => { busyNote?: string })()
     const job = (await read(Job))[0] as Job
     const notes: unknown[] = []
+    const busyNotes: unknown[] = []
     const sent = asked.length
     vi.stubGlobal("fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
       notes.push(job.note)
+      busyNotes.push(page.busyNote)
       asked.push(
         `${init?.method ?? "GET"} ${input instanceof Request ? input.url : `${input instanceof URL ? input.href : input}`}`
       )
@@ -167,6 +174,9 @@ describe("the steps around a server's action (epic `data` P50)", () => {
     const posts = asked.slice(sent).filter((each) => each.startsWith("POST"))
     expect(posts).toEqual([`POST ${HOST}/api/jobs/7/complete`])
     expect(notes[0]).toBe("busy")
+    // the page's own field, from its file's while step (epic `data` I112), put back too
+    expect(busyNotes[0]).toBe("Completing ...")
+    expect(page.busyNote).toBe("")
     expect(job.status).toBe("done")
     // the app's after step ran, then the busy note went back
     expect(job.note).toBe("")
@@ -193,8 +203,34 @@ describe("the steps around a server's action (epic `data` P50)", () => {
     serve({ [`POST ${HOST}/api/jobs/7/complete`]: 401 })
     await expect(job.complete()).resolves.toBeUndefined()
     expect(log).toHaveBeenLastCalledWith("sign in")
+    // anything else:  the app's `otherwise do nothing` catches it, so Spell's notice stays away
     serve({ [`POST ${HOST}/api/jobs/7/complete`]: 500 })
-    await expect(job.complete()).rejects.toThrow()
+    await expect(job.complete()).resolves.toBeUndefined()
+    vi.stubGlobal("fetch", async () => {
+      throw new TypeError("fetch failed")
+    })
+    await expect(job.complete()).resolves.toBeUndefined()
+    expect(log).toHaveBeenLastCalledWith("You're offline:  try again soon")
+    log.mockRestore()
+  })
+
+  test("a page's after step runs once the page is left;  its while step doesn't (epic `data` I116)", async () => {
+    const log = vi.spyOn(core.console, "log").mockImplementation(() => {})
+    serve({ [`GET ${HOST}/api/jobs`]: [{ id: 7, status: "open", note: "" }], [`POST ${HOST}/api/jobs/7/complete`]: {} })
+    const { Job, JobsPage } = jobsProject()("Job, JobsPage")
+    const page = new (JobsPage as new () => object)()
+    const job = (await read(Job))[0] as Job
+    // left:  moving from page to page isn't built, so the page is taken out of the pages made
+    core.RUNTIME!.pages.splice(core.RUNTIME!.pages.indexOf(page as never), 1)
+    const notes: unknown[] = []
+    vi.stubGlobal("fetch", async () => {
+      notes.push(job.note)
+      return Response.json({})
+    })
+    await job.complete()
+    // the while step didn't run:  the note was as it was when the call went out
+    expect(notes[0]).toBe("")
+    expect(log).toHaveBeenCalledWith("page after")
     log.mockRestore()
   })
 

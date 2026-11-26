@@ -9089,7 +9089,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 156,
+          "line": 158,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -10084,6 +10084,32 @@
                 },
                 "py": {
                   "code": "class Country(Place):\n    pass\n\ncountries = core.place(\n    Country(),\n    {\n        \"name\": \"countries\",\n        \"kind\": \"web server\",\n        \"at\": \"https://countries.test\",\n        \"fields_named_in\": \"response_fields\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "GivesManyAtOnce",
+          "ruleNames": ["gives_many_at_once"],
+          "internal": false,
+          "file": "src/spell/rules/places/GivesManyAtOnce.ts",
+          "line": 10,
+          "purpose": "A web server's list takes many ids in one question, joined by commas (epic `data` P57).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} gives many at once by {param:text}",
+              "example": "shop is a web server at \"https://example.com/api\"\n\t- it gives many at once by \"ids\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Shop extends Place {}\nexport const shop = core.place(new Shop(), {\n  name: \"shop\",\n  kind: \"web server\",\n  at: \"https://example.com/api\",\n  manyAtOnceBy: \"ids\"\n})"
+                },
+                "ts": {
+                  "code": "export class Shop extends Place {}\nexport const shop = core.place(new Shop(), {\n  name: \"shop\",\n  kind: \"web server\",\n  at: \"https://example.com/api\",\n  manyAtOnceBy: \"ids\"\n})"
+                },
+                "py": {
+                  "code": "class Shop(Place):\n    pass\n\nshop = core.place(\n    Shop(),\n    {\n        \"name\": \"shop\",\n        \"kind\": \"web server\",\n        \"at\": \"https://example.com/api\",\n        \"many_at_once_by\": \"ids\",\n    },\n)"
                 }
               }
             }
@@ -12661,7 +12687,7 @@
           "ruleNames": ["after_hook"],
           "internal": false,
           "file": "src/spell/rules/methods/AfterHook.ts",
-          "line": 29,
+          "line": 31,
           "purpose": "Steps that run at the end of an action, from any file (epic `language` P56, Owen 2026-11-15).",
           "syntaxes": [
             {
