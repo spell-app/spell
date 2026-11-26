@@ -1143,11 +1143,12 @@ export class SiteBase extends App {
         closable: "",
         heading: overlay.view ? undefined : overlay.entry.name,
         ...(overlay.kind === "sidebar" && { position: "right" }),
-        // a getter handing over the handler:  `h()` reads any function on a dashed tag as a live value
+        // a listener, not an `on-ui-closed` attribute:  Solid warns about a function on an attribute
         // closed by its x, Escape or a button:  its hash goes;  closed by Back, it's gone already, and nothing more
-        "on-ui-closed": () => (_event: Event) => {
-          if (this.getState<OpenOverlay>("overlay") === overlay) this.closedByPerson()
-        }
+        ref: (element: Element) =>
+          element.addEventListener(CLOSED, () => {
+            if (this.getState<OpenOverlay>("overlay") === overlay) this.closedByPerson()
+          })
       },
       // in the box's content part, which pads it as a dialog's or a sidebar's body
       overlay.view ? h("ui-content", {}, core.drawThing(overlay.view)) : null
@@ -1257,6 +1258,9 @@ const OLD_COMPACT_KEY = "compact"
 
 /** What `<ui-page-layout>` sends when its drawer switches between its icons only and all of it. */
 const TOGGLE = "ui-toggle"
+
+/** What a dialog (`<ui-modal>`) or sidebar (`<ui-flyout>`) sends once it has closed:  by its x, Escape or a button. */
+const CLOSED = "ui-closed"
 
 /** What `<ui-site-nav>` sends when a page is picked:  cancelled, the site shows it itself. */
 const NAVIGATING = "ui-navigating"

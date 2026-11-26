@@ -562,6 +562,18 @@ describe("a running site", () => {
     expect(element.querySelector("ui-modal")).toBeNull()
   })
 
+  test("a dialog closed by its x or Escape (`ui-closed`):  forgotten, by a listener, never a function set as text", async () => {
+    drawSite()
+    await site.showAddress("/films")
+    core.showSitePart("settings dialog")
+    await shown()
+    const modal = element.querySelector("ui-modal")!
+    expect(modal.hasAttribute("on-ui-closed")).toBe(false)
+    modal.dispatchEvent(new page.window.Event("ui-closed"))
+    await shown()
+    expect(element.querySelector("ui-modal")).toBeNull()
+  })
+
   test("`close the settings dialog`:  closes it;  naming no dialog or sidebar throws (P8)", async () => {
     drawSite()
     await site.showAddress("/films")
