@@ -13,6 +13,8 @@
  * - A file is a page's chunk only when nothing else could need it before it's shown:
  *   - it declares exactly ONE page (`export class Home extends Page`), and no other file names anything it exports
  *     (a page shown by its class's name, the site's `page: "Home"`, is fine:  the site asks before it shows one)
+ *   - and no dialog or sidebar of the site draws a view it exports, named in the site's `view: "AddAssetDialog"`:
+ *     the site makes that view as it opens, from any page, asking nobody first
  *   - it starts nothing (`if (!core.isCarryingOver) ...`) and imports nothing
  *   - so the first cut is by file:  a page sharing its file with another page stays in the main chunk
  * - The editor's live run stays ONE module:  carrying things over and the Thing Explorer want every class.
@@ -29,13 +31,16 @@ export class PageChunks {
     const sections = code.split(FILE_SEPARATOR)
     const imports = code.match(IMPORT_LINES)?.join("\n") ?? ""
     const names = sections.map((section) => wordsIn(section))
+    const overlayViews = new Set([...code.matchAll(OVERLAY_VIEW)].map(([, name]) => name!))
     const pages = new Map<string, string>()
     const cut = new Set<number>()
     sections.forEach((section, at) => {
       const page = PageChunks.pageIn(section)
       if (!page) return
       const exported = [...section.matchAll(EXPORTED_NAME)].map(([, , name]) => name!)
-      const namedElsewhere = exported.some((name) => names.some((words, other) => other !== at && words.has(name)))
+      const namedElsewhere = exported.some(
+        (name) => overlayViews.has(name) || names.some((words, other) => other !== at && words.has(name))
+      )
       if (namedElsewhere) return
       pages.set(page, `${imports}\n${section}`)
       cut.add(at)
@@ -86,6 +91,9 @@ const IMPORT_LINES = /^import\s*\{[^}]*\}\s*from\s*"[^"]+";?[ \t]*$/gm
 
 /** A page's class:  `export class Home extends Page`. */
 const PAGE_CLASS = /^export class ([\p{L}_$][\p{L}\p{N}_$]*) extends Page\b/gmu
+
+/** A site's dialog or sidebar, naming the view it draws:  `{ name: "add asset dialog", view: "AddAssetDialog" }`. */
+const OVERLAY_VIEW = /\bview: "([\p{L}_$][\p{L}\p{N}_$]*)"/gu
 
 /** A declaration exported on its own line:  its kind, then its name. */
 const EXPORTED_NAME = /^export\s+((?:async\s+)?function\*?|class|const|let|var)\s+([\p{L}_$][\p{L}\p{N}_$]*)/gmu
