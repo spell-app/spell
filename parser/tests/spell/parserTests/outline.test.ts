@@ -211,6 +211,31 @@ describe("outline style", () => {
     expect(quoted).toBe(compile(["the card is a new card", "a card is a thing"]))
   })
 
+  test.each([
+    ["after a comma", ['a "playing card" is a thing, aka "card"']],
+    ["before its `is`", ["a playing card aka card is a thing"]]
+  ])("a type's short name, said %s, is known on the lines above it (epic `language` T104)", (_where, typeLine) => {
+    const above = ["set the card to a new card", "a hand is a list of cards"]
+    const compiled = compile([...above, ...typeLine])
+    expect(compiled).toContain("card = new PlayingCard()")
+    expect(compiled).toMatch(/itemType: "PlayingCard"|return PlayingCard/)
+  })
+
+  test("a type's short name, by a scan:  English's `aka`, Spanish's `alias`, a comment after it left out", () => {
+    const lines = [
+      'a "playing card" is a thing, aka "card"  -- A playing card',
+      "a bank account aka account is a thing"
+    ]
+    expect(Object.fromEntries(SP.spellParser.declaredShortNames(lines.join("\n")))).toEqual({
+      "playing-card": "card",
+      "bank-account": "account"
+    })
+    const spanish = SP.Language.for("es").parser
+    expect(Object.fromEntries(spanish.declaredShortNames('una "carta de juego" es una cosa, alias "carta"'))).toEqual({
+      "carta-de-juego": "carta"
+    })
+  })
+
   describe("a heading without a colon (P10):  the indented lines under it are its body", () => {
     const withColon = ["a card is a thing where:", "\t- its rank is a number", "\t- suit is one of clubs or spades"]
 

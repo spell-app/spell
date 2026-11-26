@@ -197,6 +197,16 @@ export class Parser extends Derivative {
   }
 
   /**
+   * The short name each type `text` declares goes by, found WITHOUT parsing it, by its name as `declaredTypes()` gives
+   * it:  e.g. spell's `card` for `playing-card`, in `a "playing card" is a thing, aka "card"`.
+   * - Why:  so a line above the declaration knows the type by its short name too -- see `stubDeclaredTypes()`.
+   * - Default:  none.  Languages override, e.g. `SpellParser`.
+   */
+  declaredShortNames(_text: string): Map<string, string> {
+    return new Map()
+  }
+
+  /**
    * Stub each type `texts` declare (`declaredTypes()`) which `scope` doesn't know yet.
    * - Run BEFORE a project's files parse, so a line above a type's declaration knows the type too,
    *   e.g. `if the pile is a foundation`.
@@ -213,14 +223,19 @@ export class Parser extends Derivative {
     return this.inPlay(() => {
       const names = texts.flatMap((text) => this.declaredTypes(text, scope))
       const superTypes = new Map(texts.flatMap((text) => [...this.declaredSuperTypes(text)]))
+      const shortNames = new Map(texts.flatMap((text) => [...this.declaredShortNames(text)]))
       const lang = this.inflector?.lang
       for (const name of names) {
         if (scope.types?.get(name)) continue
         const superType = superTypes.get(name)
+        // its short name, unless that already names something:  its declaration refuses it then
+        const shortName = shortNames.get(name)
+        const aka = shortName && !scope.types?.get(shortName) ? P.classCase(shortName) : undefined
         const key = scope.types?.getKeyFor({ name } as P.TypeScope)
         const reused = reuse?.find((type) => scope.types?.getKeyFor(type) === key)
-        if (reused?.stub && reused.lang === lang && reused.superType === superType) scope.types?.add(reused)
-        else scope.types?.add({ name, stub: true, lang, ...(superType && { superType }) })
+        if (reused?.stub && reused.lang === lang && reused.superType === superType && reused.aka === aka)
+          scope.types?.add(reused)
+        else scope.types?.add({ name, stub: true, lang, ...(superType && { superType }), ...(aka && { aka }) })
       }
       return names
     })
