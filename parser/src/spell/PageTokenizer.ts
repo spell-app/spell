@@ -207,6 +207,9 @@ export class PageTokenizer extends P.Tokenizer {
       this.openComment = { indent }
       return this.comment(text, start, start + P.HTML_COMMENT_START.length, end)
     }
+    // a comment line ends nothing, whatever its indent (epic `language` Q84, I188):  it belongs to what's around it,
+    // so the page's lines under it go on being its body
+    if (this.frames.length && isCommentLine(text, start, indent)) return undefined
     // a line at the file's left edge ends the page above it:  it's plain Spell, or the next page's head
     if (indent === 0) this.closeSiblings(0)
     if (text.startsWith("</", start) && this.frames.length) {
@@ -842,6 +845,16 @@ function withErrors<T extends P.Token>(token: T, errors: string[]): T {
 function lineEndOf(text: string, start: number, end: number) {
   const at = text.indexOf("\n", start)
   return at < 0 || at > end ? end : at
+}
+
+/**
+ * Is the line at `start` a comment of spell's, which ends no page or tag above it (epic `language` I188)?
+ * - `// ...` at any indent:  a page's body reads it as a comment too
+ * - `-- ...` at the file's left edge only:  indented in a page's body, it's prose (and `---` a markdown rule)
+ */
+function isCommentLine(text: string, start: number, indent: number) {
+  if (text.startsWith("//", start)) return true
+  return indent === 0 && /^--(?!-)/.test(text.slice(start, start + 3))
 }
 
 /** A comment line's `record`:  the indent its comment's first line has. */
