@@ -26,6 +26,7 @@ import { wordsOfLanguages } from "spell/app/app/runner/words"
 // By file:  the runner barrel brings the runners themselves
 import { loadRuntime } from "spell/app/app/runner/loadRuntime"
 import { EditorHistory } from "spell/app/app/EditorHistory"
+import { ServerRestarts } from "spell/app/app/ServerRestarts"
 import { debugging } from "spell/app/app/Debugging"
 import { StartingPoints } from "spell/app/app/StartingPoints"
 // By file:  the folder's barrel loads the language service
@@ -718,7 +719,10 @@ export class EditorStore extends Observable {
     waitingKeeps.delete(file)
   }
 
-  /** Keep `file` now, if it still has changes.  NEVER throws:  a failure is logged. */
+  /**
+   * Keep `file` now, if it still has changes.  NEVER throws:  a failure is logged.
+   * - Failed as Spell restarts (`ServerRestarts.wentDown()`):  kept again once it's back (T177).
+   */
   private keepNow(file: SP.AnySpellFile): void {
     waitingKeeps.delete(file)
     if (!file.isDirty) return
@@ -727,7 +731,13 @@ export class EditorStore extends Observable {
     void file
       .save(undefined)
       ?.then(() => editor.refreshDrafts())
-      .catch((error) => console.error(`couldn't keep the edit to ${file.path}:`, error))
+      .catch((error) => {
+        // Spell restarting (every merge into main):  kept once it's back, never lost quietly (epic `editor` T177)
+        void ServerRestarts.wentDown().then((isDown) => {
+          if (isDown) return ServerRestarts.whenBack().then(() => editor.keepNow(file))
+          console.error(`couldn't keep the edit to ${file.path}:`, error)
+        })
+      })
   }
 
   /**
@@ -1889,6 +1899,14 @@ export class EditorStore extends Observable {
   @prop({ type: "choice", default: true })
   accessor mayPublish!: boolean
 
+  /**
+   * The step Publish is on while it runs, for its button to say (`<PublishDraft>`;  epic `editor` T179):
+   * `saving` your latest edits into your draft, then `publishing` it;  `undefined` while it doesn't run.
+   * - A second Publish while one runs does nothing.
+   */
+  @prop()
+  accessor publishing: "saving" | "publishing" | undefined
+
   /** Do you have a draft of `file`? */
   hasDraft(file: SP.AnySpellFile): boolean {
     return !!editor.draftedFiles?.includes(file.path)
@@ -1920,12 +1938,14 @@ export class EditorStore extends Observable {
    * - Your latest edits are saved first, so they're in your draft:  never a locked page's (`saveAll()`, `isLocked()`).
    * - A published file changed since your draft began (Q25):  both side by side first, `<PublishClash>`,
    *   to publish yours, with what you took from theirs block by block (T75), or start again from theirs.
+   * - Its button says each step as it goes (`publishing`, T179):  "Saving your changes…", then "Publishing…".
    * - NEVER throws:  a failure is shown.
    */
   async publish(): Promise<void> {
     const { project } = editor
-    if (!project || isStaticBuild) return
+    if (!project || isStaticBuild || editor.publishing) return
     try {
+      editor.publishing = "saving"
       await editor.saveAll()
       const files = new SPACES.ProjectFiles(project)
       const { drafts } = await files.drafts()
@@ -1933,6 +1953,8 @@ export class EditorStore extends Observable {
       const clashes = drafts.filter((draft) => draft.clashes)
       let taken: string[] = []
       if (clashes.length) {
+        // the clash box asks:  the button isn't busy meanwhile
+        editor.publishing = undefined
         const { openPublishClash } = await dialogs()
         const answer = await openPublishClash(clashes)
         if (!answer) return
@@ -1940,8 +1962,10 @@ export class EditorStore extends Observable {
           for (const { filePath } of clashes) await files.discard(filePath)
           return await editor.reloadFiles(clashes.map(({ filePath }) => filePath))
         }
+        editor.publishing = "saving"
         taken = await editor.saveMerged(project, answer.merged)
       }
+      editor.publishing = "publishing"
       const { published, version } = await files.publish({ anyway: clashes.length > 0 })
       if (taken.length) await editor.reloadFiles(taken)
       editor.showNotice(
@@ -1954,6 +1978,7 @@ export class EditorStore extends Observable {
       editor.showError(error)
     } finally {
       await editor.refreshDrafts()
+      editor.publishing = undefined
     }
   }
 
@@ -2133,6 +2158,8 @@ export class EditorStore extends Observable {
   watchOpenFile(): () => void {
     if (isStaticBuild) return () => undefined
     joinLiveChannel()
+    // Spell restarting:  what AutoSave couldn't keep waits for it (`keepNow()`, epic `editor` T177)
+    ServerRestarts.follow()
     const isOpenProjects = (path: string) =>
       !!editor.project && path.startsWith(`${SP.SpellUrls.SPACES}${editor.project.path}/`)
     return watchServerFiles(window, isOpenProjects, () => void editor.readOpenFile(), {

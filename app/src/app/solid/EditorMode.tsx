@@ -258,10 +258,13 @@ const MODE_TIPS: Record<Mode, { chosen: AppTextKey; other: AppTextKey }> = {
  *   I192:  "Text + icon should be purple to distinguish it from the label").
  *   - After Publish, not between it and "Draft" (I203, Owen:  "looks like discard trash can is annotating 'Draft'";
  *     "Swap Publish and Discard buttons").
+ * - While Publish runs (`editor.publishing`), it says each step, a spinner beside it, greyed so a second press can't
+ *   happen (epic `editor` T179):  "Saving your changes…", then "Publishing…"
  * - Gone once you have no drafts (after Publish, Delete Draft), and never in the public preview (`editor.canPublish`).
  ****************/
 export function PublishDraft(): JSX.Element {
-  const hasDrafts = tracked(() => editor.canPublish)
+  const hasDrafts = tracked(() => editor.canPublish || !!editor.publishing)
+  const publishing = tracked(() => editor.publishing)
   return (
     <Show when={hasDrafts()}>
       <span class="PublishDraft">
@@ -272,11 +275,15 @@ export function PublishDraft(): JSX.Element {
         <ui-button
           class="Publish"
           color="primary"
-          icon={PUBLISH_ICON}
+          icon={publishing() ? undefined : PUBLISH_ICON}
+          disabled={!!publishing()}
           {...barTooltip(appTexts.text("publishDraftTip"))}
           onClick={() => void editor.publish()}
         >
-          {appTexts.text("publishDraft")}
+          <Show when={publishing()}>
+            <ui-icon slot="icon" name="spinner" loading="" />
+          </Show>
+          {publishing() ? appTexts.text(PUBLISH_STEPS[publishing()!]) : appTexts.text("publishDraft")}
         </ui-button>
         <ui-button
           class="DiscardDraft"
@@ -294,6 +301,12 @@ export function PublishDraft(): JSX.Element {
 
 /** A draft's mark:  on "Draft", and on a draft file's tab (`SpellEditor.spell`'s `Drafted`). */
 const DRAFT_ICON = "fa7-free:pen-to-square"
+
+/** What Publish's button says at each of its steps (`editor.publishing`). */
+const PUBLISH_STEPS = { saving: "waitPublishSaving", publishing: "waitPublishing" } as const satisfies Record<
+  NonNullable<typeof editor.publishing>,
+  AppTextKey
+>
 
 /** Publish's icon, as File's Publish has it:  a paper plane (Owen, 2026-11-14). */
 const PUBLISH_ICON = "paper plane outline"

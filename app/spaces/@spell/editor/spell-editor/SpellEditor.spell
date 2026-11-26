@@ -368,6 +368,7 @@ spell editor is an app
 			it "is (listing)"
 		its "keeping" is one of offered or busy or kept or hidden
 			// Save Current Changes:  shown while you have a draft or changes not saved;  greyed once they're kept
+			// While busy it's greyed too, its keep words saying what it's doing, "Keeping this version…":  no spinner hiding them
 			it "is (keeping)"
 		to restore it
 			// Restore:  the version chosen becomes your draft
@@ -382,7 +383,7 @@ spell editor is an app
 				</content>
 				<actions>
 					<if it is not hidden>
-						<button class="KeepChanges" style="float: inline-start; margin-inline-start: 0" loading={it is busy} disabled={it is kept} onClick={keep the changes}>{its keep words}</button>
+						<button class="KeepChanges" style="float: inline-start; margin-inline-start: 0" disabled={it is not offered} onClick={keep the changes}>{its keep words}</button>
 					</if>
 					<button class="cancel">{its cancel words}</button>
 					<button class="approve" color="primary" disabled={it is empty} onClick={restore it}>{its restore words}</button>

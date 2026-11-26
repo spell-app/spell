@@ -1198,7 +1198,35 @@ export const APP_TEXTS = {
   guidesMissing:
     "The guides couldn't be opened.\nThey come with Spell, so try closing and opening the app again.\nIf that doesn't help, install Spell again.",
   guidesInTheEditor: "Guides you open in the editor",
-  guidesHomeLink: "All guides"
+  guidesHomeLink: "All guides",
+  ////////////////
+  // ## Waits:  what each wait says while it lasts (epic `editor` T177-T180, from Q92;  Change This is the model)
+  ////////////////
+
+  // Spell restarting after an update (`<ServerRestarting>`, T177)
+  serverRestarting: "Spell is restarting…",
+  serverRestartingKept: "Your changes are kept, and saved as soon as it's back.",
+  serverBack: "Spell is back.",
+  // Publish's button, at each step (`<PublishDraft>`, T179), and the Versions box's Save Current Changes, while busy
+  waitPublishSaving: "Saving your changes…",
+  waitPublishing: "Publishing…",
+  waitKeeping: "Keeping this version…",
+  // under the spinner while a piece of the editor or the Guides page loads the first time (`LazyPiece.Loading`, T180)
+  waitPiece: "Loading…",
+  waitInspector: "Loading the Inspector…",
+  waitPalette: "Loading the views you can add…",
+  waitDesign: "Loading Design…",
+  waitChangeThis: "Loading Change This…",
+  waitTours: "Loading the tours…",
+  waitAnatomy: "Loading Anatomy…",
+  waitHome: "Loading your projects…",
+  waitTheme: "Loading the theme editor…",
+  waitSite: "Loading the site editor…",
+  waitPlace: "Loading the reference page…",
+  waitGroup: "Loading this group of projects…",
+  waitPaletteGroups: "Loading the lists of views you can add…",
+  waitGuides: "Finding the guides…",
+  waitGuide: "Opening the guide…"
 } as const
 
 /** Key of one of the editor's texts, e.g. `"save"`. */

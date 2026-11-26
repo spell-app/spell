@@ -44,7 +44,7 @@ import "./Palette.css"
  */
 export class Palette {
   /** The palette's menu and strip, loaded the first time it opens:  see `LazyPiece`. */
-  static views = new LazyPiece(() => import("./PaletteView"))
+  static views = new LazyPiece(() => import("./PaletteView"), "waitPalette")
 
   /**
    * Open the add panel by itself, the next time the add bar is drawn:

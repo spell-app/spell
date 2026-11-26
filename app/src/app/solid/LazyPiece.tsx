@@ -2,6 +2,7 @@ import { Loading, lazy, untrack, type Component } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { LoadOnce } from "spell/util/LoadOnce"
+import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 
 /****************
  * ### `LazyPiece`
@@ -13,11 +14,12 @@ import { LoadOnce } from "spell/util/LoadOnce"
  *
  *   ```tsx
  *   // Inspector.tsx, the state
- *   static views = new LazyPiece(() => import("./InspectorView"))
+ *   static views = new LazyPiece(() => import("./InspectorView"), "waitInspector")
  *   export const InspectorPane = Inspector.views.view("InspectorPane")
  *   ```
  *
- * - `view(name)`:  a component drawn as that view, inside its own `<Loading>` whose fallback is a `<ui-loader>`;
+ * - `view(name)`:  a component drawn as that view, inside its own `<Loading>` whose fallback is a `<ui-loader>`
+ *   saying what it waits for, the piece's `words` ("Loading the Inspector…";  epic `editor` T180);
  *   once the module is in, at once, with no loader.
  * - `load()`:  the module, once;  the state's `open()` starts it, and what must wait for it (a tour, a test) awaits it.
  * - `ahead`:  a `ref` that loads it ahead, while the pointer rests on what opens it (its tab, its button),
@@ -33,7 +35,15 @@ export class LazyPiece<M extends Record<string, unknown>> {
    */
   private readonly loads = new LoadOnce<"module", M>({ failures: "forgotten" })
 
-  constructor(private readonly importer: () => Promise<M>) {}
+  /**
+   * - `importer`:  loads the piece's view module, `() => import("./InspectorView")`
+   * - `words`:  what its loader says while it loads, an `AppTexts` key ("Loading the Inspector…");
+   *   none:  "Loading…"
+   */
+  constructor(
+    private readonly importer: () => Promise<M>,
+    private readonly words: AppTextKey = "waitPiece"
+  ) {}
 
   /** The module, loaded once;  rejects if it can't load (a new build, offline). */
   load(): Promise<M> {
@@ -70,13 +80,21 @@ export class LazyPiece<M extends Record<string, unknown>> {
     const drawn = (props: object): JSX.Element => {
       const loaded = this.module?.[name] as Component<object> | undefined
       if (loaded) return untrack(() => loaded(props))
-      return <Loading fallback={<LazyPiece.Loading />}>{lazyView(props)}</Loading>
+      return <Loading fallback={<LazyPiece.Loading words={this.words} />}>{lazyView(props)}</Loading>
     }
     return drawn as unknown as M[K]
   }
 
-  /** What shows while a piece loads:  a small spinner, centred in its place. */
-  static Loading(): JSX.Element {
-    return <ui-loader class="LazyPieceLoading" visible="" inline="" size="small" />
+  /**
+   * What shows while a piece loads:  a small spinner, centred in its place, its words under it.
+   * - Every spinner says what it's waiting for (epic `editor` T180):  `words`, an `AppTexts` key.
+   * - The Guides page's waits too.
+   */
+  static Loading(props: { words: AppTextKey }): JSX.Element {
+    return (
+      <ui-loader class="LazyPieceLoading" visible="" inline="" align="center" size="small" text="">
+        {appTexts.text(props.words)}
+      </ui-loader>
+    )
   }
 }

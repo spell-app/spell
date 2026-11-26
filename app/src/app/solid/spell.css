@@ -90,3 +90,9 @@ ui-property-editor[compact] {
   --ui-property-editor-band-size: 11px;
   --ui-property-editor-band-spacing: 0.06em;
 }
+
+/* What shows while a piece of the editor, or one of its pages, loads the first time (`LazyPiece.Loading`):
+   its spinner and words a little below the top of its place, never against its edge (epic `editor` T180). */
+.LazyPieceLoading {
+  margin-block: 24px;
+}

@@ -4,6 +4,7 @@ import { useNavigate, type RouteSectionProps } from "@solidjs/router"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { SPACES } from "spell/app/spaces"
 import { Actions, on, SpellPage } from "spell/app/app/solid"
+import { LazyPiece } from "spell/app/app/solid/LazyPiece"
 import { GUIDES_PAGE, guideUrlFor } from "./pages.types"
 import {
   readGuideBody,
@@ -70,7 +71,7 @@ function GuideIndex() {
     )
   onTitle(appTexts.text("guidesTitle"))
   return (
-    <Loading fallback={<ui-loader />}>
+    <Loading fallback={<LazyPiece.Loading words="waitGuides" />}>
       <h1>{appTexts.text("guidesTitle")}</h1>
       <p class="GuidesLede">{appTexts.text("guidesLede")}</p>
       <ui-input
@@ -192,7 +193,7 @@ function GuideBody(props: { path: string; hash: string }) {
     }
   )
   return (
-    <Loading fallback={<ui-loader />}>
+    <Loading fallback={<LazyPiece.Loading words="waitGuide" />}>
       <ui-button
         class="GuidesBack"
         appearance="basic"

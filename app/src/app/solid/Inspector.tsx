@@ -90,7 +90,7 @@ import "./Inspector.css"
  ****************/
 export class Inspector {
   /** The Inspector's views, loaded the first time it opens:  see `LazyPiece`. */
-  static views = new LazyPiece(() => import("./InspectorView"))
+  static views = new LazyPiece(() => import("./InspectorView"), "waitInspector")
 
   /** Is the column showing (reactive)? */
   static get isOpen(): boolean {

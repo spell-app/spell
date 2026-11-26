@@ -1144,7 +1144,29 @@ const APP_TEXTS_ES: AppTextPack = {
   guidesMissing:
     "No se pudieron abrir las guías.\nVienen con Encanto:  cierra la app y ábrela otra vez.\nSi no funciona, vuelve a instalar Encanto.",
   guidesInTheEditor: "Guías que se abren en el editor",
-  guidesHomeLink: "Todas las guías"
+  guidesHomeLink: "Todas las guías",
+  // lo que dice cada espera mientras dura (epic `editor` T177-T180)
+  serverRestarting: "Encanto se está reiniciando…",
+  serverRestartingKept: "Tus cambios están a salvo, y se guardan en cuanto vuelva.",
+  serverBack: "Encanto ha vuelto.",
+  waitPublishSaving: "Guardando tus cambios…",
+  waitPublishing: "Publicando…",
+  waitKeeping: "Guardando esta versión…",
+  waitPiece: "Cargando…",
+  waitInspector: "Cargando el Inspector…",
+  waitPalette: "Cargando las vistas que puedes añadir…",
+  waitDesign: "Cargando Diseñar…",
+  waitChangeThis: "Cargando Cambiar esto…",
+  waitTours: "Cargando los recorridos…",
+  waitAnatomy: "Cargando Anatomía…",
+  waitHome: "Cargando tus proyectos…",
+  waitTheme: "Cargando el editor de temas…",
+  waitSite: "Cargando el editor del sitio…",
+  waitPlace: "Cargando la página de referencia…",
+  waitGroup: "Cargando este grupo de proyectos…",
+  waitPaletteGroups: "Cargando las listas de vistas que puedes añadir…",
+  waitGuides: "Buscando las guías…",
+  waitGuide: "Abriendo la guía…"
 }
 
 /** Everything Spanish the app shows:  its own texts, then each web component's. */

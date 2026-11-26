@@ -13,7 +13,7 @@
  *   - `EditorTheme.tsx`, `EditorMode.tsx`:  the editor's look, and its Run / Edit / Design modes (and the Program panel shown)
  *   - `MenuBar.tsx`:  the top bar's menus, Spell's, the project's and File · Edit · View · Run · Help
  *   - `ErrorBoundary.tsx`:  `ErrorBoundary`
- *   - `ErrorNotice.tsx`:  `ErrorDisplay`, `ErrorNotice`;  `Notice.tsx`;  `Markdown.tsx`
+ *   - `ErrorNotice.tsx`:  `ErrorDisplay`, `ErrorNotice`;  `Notice.tsx`;  `ServerRestarting.tsx`;  `Markdown.tsx`
  * - The pages' shell (P8):
  *   - `SpellPage`
  *   - `rememberedSizes()`:  what a `<ui-split-panel>` was dragged to
@@ -65,6 +65,7 @@ export * from "./ErrorNotice"
 export * from "./ErrorBoundary"
 export * from "./EditorZones"
 export * from "./Notice"
+export * from "./ServerRestarting"
 export * from "./Markdown"
 
 export * from "./ConsoleLines"

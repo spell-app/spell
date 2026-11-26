@@ -33,7 +33,7 @@ import "./Design.css"
  ****************/
 export class Design {
   /** What draws Design, loaded the first time it shows:  see `LazyPiece`. */
-  static views = new LazyPiece(() => import("./DesignView"))
+  static views = new LazyPiece(() => import("./DesignView"), "waitDesign")
 
   /** Is the editor page in Design (reactive)? */
   static get isShowing(): boolean {

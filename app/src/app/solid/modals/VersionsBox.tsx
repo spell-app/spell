@@ -15,8 +15,8 @@ import type { VersionRow, VersionsBoxProps } from "spell/app/app/solid/modals"
  * - What it says, and what its buttons do, is the editor's:
  *   - its words in the page's language (`appTexts`), handed to the box as it opens
  *   - a version clicked is the one chosen (`choose`);  Restore hands it to `props.restore`
- *   - Save Current Changes runs `props.keep`, shows the list it gives back, the choice where it was,
- *     and goes grey;  the box stays open.  A failure leaves it ready to try again:  `keep` shows what went wrong.
+ *   - Save Current Changes runs `props.keep`, saying "Keeping this version…" while it does (T179), shows the list it
+ *     gives back, the choice where it was, and goes grey;  the box stays open.  A failure leaves it ready to try again:  `keep` shows what went wrong.
  * - Reached by `editor.showVersions()` through the dialogs' dynamic `import()`:  `editor.ts` stays free of Solid.
  ****************/
 export async function openVersions(props: VersionsBoxProps): Promise<void> {
@@ -56,12 +56,16 @@ export async function openVersions(props: VersionsBoxProps): Promise<void> {
   box.keepTheChanges = async () => {
     const chosen = chosenName()
     box.keeping = "busy"
+    // the busy button says what it's doing (epic `editor` T179)
+    box.keepWords = appTexts.text("waitKeeping")
     try {
       list(await props.keep(), chosen)
       box.keeping = "kept"
     } catch {
       // `keep` showed what went wrong:  the button stays, to try again
       box.keeping = "offered"
+    } finally {
+      box.keepWords = appTexts.text("saveCurrentChanges")
     }
   }
 

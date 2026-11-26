@@ -31,7 +31,7 @@ import { LazyPiece } from "./LazyPiece"
  ****************/
 export class EditorTours {
   /** The tours' elements, loaded the first time one starts or is offered:  see `LazyPiece`. */
-  static views = new LazyPiece(() => import("./EditorToursView"))
+  static views = new LazyPiece(() => import("./EditorToursView"), "waitTours")
 
   /** The editor's tours, in the Help menu's order. */
   static get all(): readonly EditorTour[] {

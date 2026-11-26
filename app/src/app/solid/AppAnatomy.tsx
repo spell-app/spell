@@ -34,7 +34,7 @@ import "./AppAnatomy.css"
  ****************/
 export class AppAnatomy {
   /** What draws Anatomy, loaded the first time it shows:  see `LazyPiece`. */
-  static views = new LazyPiece(() => import("./AppAnatomyStack"))
+  static views = new LazyPiece(() => import("./AppAnatomyStack"), "waitAnatomy")
 
   /** Is the app pulled apart (reactive)? */
   static get isShowing(): boolean {

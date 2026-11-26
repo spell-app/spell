@@ -31,7 +31,7 @@ import "./ChangeThis.css"
  ****************/
 export class ChangeThis {
   /** The box, loaded the first time it opens:  see `LazyPiece`. */
-  static views = new LazyPiece(() => import("./ChangeThisView"))
+  static views = new LazyPiece(() => import("./ChangeThisView"), "waitChangeThis")
 
   /**
    * Its icon, the magic wand, wherever Change This is drawn:  the part menu's row, its box's header
