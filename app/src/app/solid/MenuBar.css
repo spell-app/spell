@@ -72,14 +72,17 @@ ui-popup.BarMenuPopup ui-submenu::part(flyout) {
 }
 /*
  * The top bar's own menus (`<BarMenu>`;  epic `editor` T187, Owen:  "Instead of these being pointing menus, I'd like them
- * to look like they come from under the bar with a slide down animation"):
+ * to look like they come from under the bar with a slide down animation";  then "top should stay fixed, should
+ * open/shrink from bottom only"):
  * - each hangs from the bar's bottom edge, its left its name's:  no arrow, no gap, its top corners square
- * - it slides down from behind the bar:  it moves down as far as it's cut at the bar's edge, so its top edge never
- *   moves (`translate` and `clip-path` together, in one ease);  back up the same way as it goes
- * - one opening while another is out (the mouse onto another menu's name) glides there from it, sideways, growing or
- *   shrinking to its own size, as the add bar's do (`.gliding`, `TOP_BAR_PANELS`, `BarPanels.ts`);  the one it
- *   replaces goes at once (`.switching`)
- * - its fill, edge, shadow and blur are the menus' own (above), as the add bar's sub-panels wear them (I367)
+ * - its top edge never moves:  opening uncovers it from the top down, its foot coming down to its full height
+ *   (`clip-path` alone);  closing covers it back up from the foot.  Nothing of it is ever over the bar.
+ *   - It slid down from behind the bar at first (`translate` with the clip), which could show over the bar for a frame
+ *     (Owen:  "flicker in spell menu dropdown animation -- sometimes overlaps the bar").
+ * - one opening while another is out (the mouse onto another menu's name) glides there from it, sideways, its height
+ *   and width growing or shrinking to its own from its foot and side, its top still where it was (`.gliding`,
+ *   `TOP_BAR_PANELS`, `BarPanels.ts`);  the one it replaces goes at once (`.switching`)
+ * - its fill, edge, shadow and blur are the menus' own (below), as the add bar's sub-panels wear them (I367)
  * - reduced motion:  none of that moves
  * - its shadow is kept on three sides by its cut, never above the bar;  `::part()` rules here beat the popup's own sheet
  * - only a popup right after its name in the bar (`ui-item.BarMenu + ...`):  never a right click's menu, nor the add
@@ -88,6 +91,12 @@ ui-popup.BarMenuPopup ui-submenu::part(flyout) {
 :root {
   /* how far a menu's shadow reaches past its sides and foot, kept by its cut */
   --BarMenu-shadow-room: 48px;
+  /* its cut while it's out:  its top at the bar's edge, its shadow kept on the other three sides */
+  --BarMenu-out: inset(
+    0 calc(var(--BarMenu-shadow-room) * -1) calc(var(--BarMenu-shadow-room) * -1) calc(var(--BarMenu-shadow-room) * -1)
+  );
+  /* ... and while it's in:  its foot up at its top, nothing showing */
+  --BarMenu-in: inset(0 calc(var(--BarMenu-shadow-room) * -1) 100% calc(var(--BarMenu-shadow-room) * -1));
 }
 ui-item.BarMenu + ui-popup.BarMenuPopup::part(popup) {
   margin: 0;
@@ -96,9 +105,7 @@ ui-item.BarMenu + ui-popup.BarMenuPopup::part(popup) {
   opacity: 1;
   transform: none;
   translate: 0 0;
-  clip-path: inset(
-    0 calc(var(--BarMenu-shadow-room) * -1) calc(var(--BarMenu-shadow-room) * -1) calc(var(--BarMenu-shadow-room) * -1)
-  );
+  clip-path: var(--BarMenu-out);
   transition:
     translate var(--ui-duration-normal, 200ms) var(--ui-ease-out, ease-out),
     clip-path var(--ui-duration-normal, 200ms) var(--ui-ease-out, ease-out);
@@ -107,25 +114,20 @@ ui-item.BarMenu + ui-popup.BarMenuPopup::part(popup) {
 ui-item.BarMenu + ui-popup.BarMenuPopup::part(popup)::before {
   content: none;
 }
-/* ... behind the bar while it's in */
+/* ... its foot up at its top while it's in */
 ui-item.BarMenu + ui-popup.BarMenuPopup:not(:popover-open)::part(popup) {
-  translate: 0 -100%;
-  clip-path: inset(100% 0 0 0);
+  clip-path: var(--BarMenu-in);
 }
 @starting-style {
   ui-item.BarMenu + ui-popup.BarMenuPopup:popover-open::part(popup) {
-    translate: 0 -100%;
-    clip-path: inset(100% 0 0 0);
+    clip-path: var(--BarMenu-in);
   }
 }
-/* ... opening where another was:  from there, left or right */
+/* ... opening where another was:  from there, left or right, already out */
 @starting-style {
   ui-item.BarMenu + ui-popup.BarMenuPopup.gliding:popover-open::part(popup) {
     translate: var(--BarMenu-glide, 0px) 0;
-    clip-path: inset(
-      0 calc(var(--BarMenu-shadow-room) * -1) calc(var(--BarMenu-shadow-room) * -1)
-        calc(var(--BarMenu-shadow-room) * -1)
-    );
+    clip-path: var(--BarMenu-out);
   }
 }
 /* ... going as another opens:  at once */

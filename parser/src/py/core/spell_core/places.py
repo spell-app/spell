@@ -25,8 +25,10 @@ core.remove_saved(notes[0])                # remove it from the notes
     - so a place's no is a line on the console;  an `in one go:` waits for its answer, and raises it
     - with no loop running (a plain script's top level) it's sent there and then, and raises
   - a read of a place waits until that place's queue is empty, so it sees what was just saved
-  - In a drawing, where nothing can wait (`core.answer_now()`), a read waits right there:
-    a page is sent with its values.
+  - In a drawing, where nothing can wait (`core.run_at_once()`), a read doesn't wait for a save (I158):
+    it's what the place has, with every save still on its way laid over it (`laid_over()`), as a browser's are.
+    - so a drawing shows a save before the place keeps it;  a refused one shows until the next read
+    - the read itself still waits right there:  a page is sent with its values
 - A row is plain JSON, by the JavaScript names of its fields (`deviceCount`):
   so a page and a Python program read and write the same rows.  Its id is the thing's `id`.
 - Who's here (`current_person()`):  who's signed in to an atmosphere account the program names, by their DID;
@@ -211,10 +213,9 @@ class ProgramPlaces:
             behind = self.behind_of_class(cls)
             home = self.home_of_class(cls)
             queue = self.queue(home.place_name)
-            # where nothing can wait, a drawing:  read right here (`core.run_at_once()`)
+            # where nothing can wait, a drawing:  read right here (`core.run_at_once()`), and never wait for a save
             if self.waits_here():
-                self.send_waiting(queue)
-                rows = behind.rows_now(home.collection)
+                rows = laid_over(behind.rows_now(home.collection), queue.on_its_way(), home.collection)
             else:
                 await queue.wait_until_sent()
                 rows = await self.listed(behind, cls)
@@ -562,6 +563,26 @@ def row_for(thing: SpellObject) -> Row:
             continue
         row[declared.stored_as or javascript_name(name)] = _row_value(value)
     return row
+
+
+def laid_over(rows: list[Row], changes: list[Change], collection: str) -> list[Row]:
+    """`rows` of `collection`, as they'll be once `changes`, still on their way, are kept:  a new list.
+
+    - An insert replaces the row with its id, else goes last;  an update merges over it;  a delete leaves it out.
+    - An update to a row it doesn't have is left out:  the place hasn't it, and may never have.
+    """
+    by_id = {str(row.get(ID_FIELD, "")): row for row in rows}
+    for change in changes:
+        if change.get("collection") != collection:
+            continue
+        the_id = str(change.get("id", ""))
+        if change["kind"] == "delete":
+            by_id.pop(the_id, None)
+        elif change["kind"] == "insert":
+            by_id[the_id] = {ID_FIELD: the_id, **change.get("fields", {})}
+        elif the_id in by_id:
+            by_id[the_id] = {**by_id[the_id], **change.get("fields", {})}
+    return list(by_id.values())
 
 
 def _number_fields_of(cls: type) -> list[str]:
