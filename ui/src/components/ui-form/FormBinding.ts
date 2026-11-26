@@ -406,9 +406,29 @@ export class FormBinding {
     let value = target
     for (const key of name.split(".")) {
       if (!FormBinding.isObject(value)) return undefined
-      value = value[key]
+      value = value[FormBinding.keyIn(value, key)]
     }
     return value
+  }
+
+  /**
+   * The key `object` holds `key` under:  `key` itself, else the property its words name, however that's spelled --
+   * `inventory shows` is `inventoryShows`, as a Spell program's compiled code names its properties.
+   * - A key of one word, or one `object` has, is itself.
+   * - None by those words:  `key` itself.
+   */
+  private static keyIn(object: Record<PropertyKey, unknown>, key: string): string {
+    if (key in object || !/[\s_-]/.test(key)) return key
+    const words = FormBinding.wordsOf(key)
+    for (let at: object | null = object; at && at !== Object.prototype; at = Object.getPrototypeOf(at)) {
+      for (const name of Object.getOwnPropertyNames(at)) if (FormBinding.wordsOf(name) === words) return name
+    }
+    return key
+  }
+
+  /** A name as its letters and digits alone, lower case:  `inventory shows`, `inventoryShows` => `inventoryshows`. */
+  private static wordsOf(name: string): string {
+    return name.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "")
   }
 
   /**
@@ -422,7 +442,8 @@ export class FormBinding {
     const keys = name.split(".")
     const key = keys.pop()!
     const owner = keys.length ? FormBinding.read(target, keys.join(".")) : target
-    return { owner: FormBinding.isObject(owner) ? owner : undefined, key }
+    if (!FormBinding.isObject(owner)) return { key }
+    return { owner, key: FormBinding.keyIn(owner, key) }
   }
 
   /**
