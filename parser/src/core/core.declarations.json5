@@ -4324,6 +4324,9 @@
         },
         {
           "name": "query"
+        },
+        {
+          "name": "options"
         }
       ],
       "description": "How many things of `Class` match `query`:  what `the number of jobs where its status is \"open\"` compiles to, when all of its `where` goes to the place (`NumberOfThingsWhere`)."

@@ -7,6 +7,7 @@ import { getWhereMethod, getWhereScope } from "spell/parser/spell/rules/lists/li
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
 import { EveryThing } from "spell/parser/spell/rules/classes/EveryThing"
 import { loopItemsInDrawing, readableInDrawing } from "./places.shared"
+import type { RoughlyData } from "spell/parser/spell/rules/lists/CountRoughly"
 
 /**
  * `number_of_things_where` rule:  how many of a type fit (epic `data` P11).
@@ -35,7 +36,7 @@ export class NumberOfThingsWhere extends SpellExpression<"type|where|body?", { l
     const { type } = match.groups
     const predicate = getWhereMethod(match, type, this.getBody(match))
     // a web server that does all of the `where` counts them itself:  one row asked for, its count read
-    const counted = EveryThing.countAST(match, type, predicate)
+    const counted = EveryThing.countAST(match, type, predicate, !!(match.data as RoughlyData).roughly)
     if (counted) return readableInDrawing(match, counted, match.data.loopItems)
     const list =
       EveryThing.savedAST(match, type, { predicate }) ??

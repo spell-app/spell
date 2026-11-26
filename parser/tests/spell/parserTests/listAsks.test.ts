@@ -443,3 +443,33 @@ describe("a list filtered by any field, with a field and a value", () => {
     expect(errors).toHaveLength(1)
   })
 })
+
+describe("`the number of jobs, roughly`", () => {
+  test("the place's estimate will do:  `core.savedCount(..., { roughly: true })`", () => {
+    const { errors, compiled: code } = compiled(PLACE(`the number of jobs, roughly`, `the number of jobs`))
+    expect(errors).toEqual([])
+    expect(code).toContain(`core.savedCount(Job, {}, { roughly: true })`)
+    expect(code).toContain(`core.savedCount(Job)`)
+  })
+
+  test("with a where the list does whole", () => {
+    const { errors, compiled: code } = compiled(PLACE(`the number of jobs where its status is "open", roughly`))
+    expect(errors).toEqual([])
+    expect(code).toContain(`core.savedCount(Job, { filter: { status: "open" } }, { roughly: true })`)
+  })
+
+  test("in Spanish, `, más o menos`", () => {
+    const { errors, compiled: code } = compiled(
+      [
+        `acme es un servidor web en "https://acme.test"`,
+        `un "trabajo" es una cosa:`,
+        `\t- se guarda en acme`,
+        `\t- su "estado" es texto`,
+        `poner x a el número de trabajos, más o menos`
+      ],
+      "/A.es.spell"
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain(`core.savedCount(Trabajo, {}, { roughly: true })`)
+  })
+})

@@ -32,6 +32,7 @@ import { ListItemsIn } from "./ListItemsIn"
 import { ListSortedBy } from "./ListSortedBy"
 import { ListFilteredHere } from "./ListFilteredHere"
 import { ListSortedHere } from "./ListSortedHere"
+import { CountRoughly } from "./CountRoughly"
 import { SortKeyField } from "./SortKeyField"
 import { SortKeyOrder } from "./SortKeyOrder"
 import { AddNewThing } from "./AddNewThing"
@@ -814,6 +815,8 @@ listsEs.addRule(ListSortedBy, {
 listsEs.addRule(ListFilteredHere, { roles: { match: "value" }, syntax: ",? filtrado aquí" })
 
 listsEs.addRule(ListSortedHere, { roles: { match: "value" }, syntax: ",? ordenado aquí" })
+
+listsEs.addRule(CountRoughly, { roles: { match: "value" }, syntax: ",? más o menos" })
 
 listsEs.addRule(ListMembershipTest, {
   syntax: "{operator:has_or_has_no} {arg:plural_identifier} (where:donde|que) {inline_expression}?",

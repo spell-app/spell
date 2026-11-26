@@ -3770,7 +3770,7 @@
           "ruleNames": ["list_count"],
           "internal": false,
           "file": "src/spell/rules/lists/ListCount.ts",
-          "line": 18,
+          "line": 19,
           "purpose": "Length of something KNOWN to be a list, without naming its items, e.g. `the number of card suits` => `core.itemCountOf(Card.Suits)`.",
           "syntaxes": [
             {
@@ -5182,6 +5182,20 @@
           "syntaxes": [
             {
               "syntax": ",? sorted here"
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "CountRoughly",
+          "ruleNames": ["count_roughly"],
+          "internal": false,
+          "file": "src/spell/rules/lists/CountRoughly.ts",
+          "line": 21,
+          "purpose": "An ending on `the number of`, saying the place's estimate will do.",
+          "syntaxes": [
+            {
+              "syntax": ",? roughly"
             }
           ],
           "aliases": ["expression_suffix"]
@@ -9185,7 +9199,7 @@
           "ruleNames": ["number_of_things_where"],
           "internal": false,
           "file": "src/spell/rules/places/NumberOfThingsWhere.ts",
-          "line": 18,
+          "line": 19,
           "purpose": "How many of a type fit (epic `data` P11).",
           "syntaxes": [
             {

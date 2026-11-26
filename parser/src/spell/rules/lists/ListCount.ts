@@ -5,6 +5,7 @@ import { Priority } from "spell/parser/spell/rules/rules.types"
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
 import { loopItemsInDrawing, readableInDrawing } from "spell/parser/spell/rules/places/places.shared"
 import { EveryThing } from "spell/parser/spell/rules/classes/EveryThing"
+import type { RoughlyData } from "./CountRoughly"
 
 /**
  * `list_count` rule:  length of something KNOWN to be a list, without naming its items,
@@ -30,7 +31,7 @@ export class ListCount extends SpellExpression<"list", { loopItems?: string[] }>
   getAST(match: P.MatchFor<this>): P.ASTExpression {
     const list = P.matchAST(match.groups.list)
     const count =
-      EveryThing.countOfReadAST(match, list) ??
+      EveryThing.countOfReadAST(match, list, !!(match.data as RoughlyData).roughly) ??
       new P.ASTCoreMethodInvocation(match, { methodName: "itemCountOf", args: [list] })
     return readableInDrawing(match, count, match.data.loopItems)
   }

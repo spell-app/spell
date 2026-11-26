@@ -66,6 +66,7 @@ describe("priority and precedence", () => {
         "collection_searched_with:  Priority.declaration",
         "confirmed_join:  Priority.declaration",
         "context_menu_block:  Priority.preferred",
+        "count_roughly:  Precedence.ternary",
         "create_hook:  Priority.specific",
         "create_list_type:  Priority.declaration",
         "create_one_of_a_kind:  Priority.declaration",

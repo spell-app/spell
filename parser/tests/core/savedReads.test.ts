@@ -557,4 +557,16 @@ describe("the number of, counted by the place (`core.savedCount()`)", () => {
     const { Recipe } = program(place)
     expect(await core.savedCount(Recipe)).toBe(1)
   })
+
+  test("`, roughly`:  its estimate taken at its word, one request", async () => {
+    const place = filled(new PagesOnly({ capabilities: WITH_IDS }))
+    for (const id of ["r2", "r3", "r4", "r5"]) {
+      await place.apply([{ kind: "insert", collection: "recipes", id, fields: { id, title: "Stew" } }])
+    }
+    place.requests = []
+    const { Recipe } = program(place)
+    expect(await core.savedCount(Recipe, {}, { roughly: true })).toBe(6)
+    expect(place.requests).toHaveLength(1)
+  })
+
 })

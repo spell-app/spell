@@ -1585,12 +1585,17 @@ export const savedMethods = defineCoreModule({
    * - One row asked for, and the place's own count of them all read off its answer (`ListAnswer.total`).
    * - A place that counts only roughly, by its pages:  its last page read, and its rows added to those before it
    *   (`ListAnswer.lastPage`).
+   * - `roughly`, `the number of jobs, roughly`:  its estimate taken at its word, pages × page size, shown as it is.
    * - A place that doesn't count them, or whose last page can't be asked for straight, or comes back empty:  every one
    *   read, and counted here, as before.
    * - Followed as any read is:  it's asked again as often as the place's line says.
    * - throws what the read threw
    */
-  async savedCount<Class extends new () => unknown>(Class: Class, query: ListQuery = {}): Promise<number> {
+  async savedCount<Class extends new () => unknown>(
+    Class: Class,
+    query: ListQuery = {},
+    { roughly = false }: { roughly?: boolean } = {}
+  ): Promise<number> {
     const program = programPlaces()
     const read = program.readOf(Class as unknown as SavedClass, { ...withoutEmptySearch(query), page: { size: 1 } })
     read.changes.read()
@@ -1598,7 +1603,7 @@ export const savedMethods = defineCoreModule({
     read.hold(answering)
     await answering
     const { total, totalIsEstimate, lastPage } = read
-    if (total !== undefined && !totalIsEstimate) return total
+    if (total !== undefined && (!totalIsEstimate || roughly)) return total
     if (lastPage) {
       const { at, size, rowsBefore } = lastPage
       const last = program.readOf(Class as unknown as SavedClass, { ...withoutEmptySearch(query), page: { at, size } })

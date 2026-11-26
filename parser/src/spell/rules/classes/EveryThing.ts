@@ -161,8 +161,15 @@ export class EveryThing extends SpellExpression<"type"> {
    *   each `its X is` a field its list filters by.  Anything left to the page (a search too, which a server may
    *   match more loosely than `includes`), and its count would be of rows the page then drops.
    * - `undefined` otherwise:  every one is read and counted, as before.
+   * - `roughly`:  the place's estimate will do, `the number of jobs, roughly` (`CountRoughly`):
+   *   `core.savedCount(Job, {}, { roughly: true })`.
    */
-  static countAST(match: P.Match, type: P.Match, predicate?: P.ASTMethodDefinition): P.ASTExpression | undefined {
+  static countAST(
+    match: P.Match,
+    type: P.Match,
+    predicate?: P.ASTMethodDefinition,
+    roughly = false
+  ): P.ASTExpression | undefined {
     const saved = savedPlaceOfMatch(type)
     if (!saved || saved.placeType.placeKind !== "web server") return undefined
     const parts = predicate ? handedPartsOf(predicate, searchesOf(saved)?.fields ?? []) : undefined
@@ -178,9 +185,21 @@ export class EveryThing extends SpellExpression<"type"> {
       properties.push(queryProperty(match, "filter", new P.ASTObjectLiteral(match, { properties: filter })))
     }
     const query = new P.ASTObjectLiteral(match, { properties })
+    const how = new P.ASTObjectLiteral(match, {
+      properties: [
+        new P.ASTObjectLiteralProperty(match, {
+          property: "roughly" as never,
+          value: new P.ASTBooleanLiteral(match, { value: true })
+        })
+      ]
+    })
     return new P.ASTCoreMethodInvocation(match, {
       methodName: "savedCount",
-      args: [P.matchAST<P.ASTTypeExpression>(type), ...(properties.length ? [query] : [])]
+      args: [
+        P.matchAST<P.ASTTypeExpression>(type),
+        ...(properties.length || roughly ? [query] : []),
+        ...(roughly ? [how] : [])
+      ]
     })
   }
 
@@ -253,10 +272,10 @@ export class EveryThing extends SpellExpression<"type"> {
    * its status is "open"`, `ListCount`'s.  `undefined` for anything else:  a read of the first few, or one the place
    * doesn't do whole.
    */
-  static countOfReadAST(match: P.Match, read: P.ASTNode): P.ASTExpression | undefined {
+  static countOfReadAST(match: P.Match, read: P.ASTNode, roughly = false): P.ASTExpression | undefined {
     const made = HANDED_READS.get(read as P.ASTExpression)
     if (!made || made.first !== undefined) return undefined
-    return EveryThing.countAST(match, made.type, made.predicate)
+    return EveryThing.countAST(match, made.type, made.predicate, roughly)
   }
 
   /**
