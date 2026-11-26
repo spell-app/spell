@@ -8,7 +8,8 @@
       at a glance whether main's servers are fine.
       - Served by the keeper itself (`ServerKeeper.route()`, at `/servers/` on its own port), so it still answers
         while every page server is down.
-      - Drawn by `servers.js` from the keeper's `/api/servers`, asked again every 2 seconds.
+      - Drawn by `servers.js` from the keeper's `/api/servers`, asked again every 2 seconds:  compact cards, three a
+        row, in sections (This Mac, each repo, then Epics, the worktree used most recently first).
       - Spell UI from the docs pages' bundle, which the keeper serves too (the settings' `uiScript`);  without it, a
         plain table.
       - The keeper puts its settings where the mark below is (`window.SPELL_KEEPER`:  its write token, Spell UI's
@@ -54,20 +55,32 @@
         margin: 0 0 16px 0;
         color: var(--servers-muted);
       }
-      /* the cards:  three a row at most, never narrower than 280px */
+      h3 {
+        margin: 16px 0 8px 0;
+        font-size: 16px;
+      }
+      h2 + h3 {
+        margin-top: 8px;
+      }
+      /*
+       * the cards, compact (epic `editor` I374, as the epic hub's Servers tab drew them):  three a row, fewer as the
+       * page narrows, never narrower than 200px;  each ONE row:  its name, its button, its state
+       */
       .servers-cards {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(auto-fill, minmax(max(min(100%, 200px), calc((100% - 16px) / 3)), 1fr));
+        gap: 8px;
+        --ui-card-margin-block: 0;
+        --ui-card-content-padding: 8px 12px;
       }
       .servers-card {
-        --ui-card-margin-block: 0;
         min-width: 0;
       }
-      .servers-card-head {
+      .servers-card-row {
         display: flex;
         align-items: center;
         gap: 8px;
+        min-height: 24px;
       }
       .servers-name {
         flex: 1;
@@ -76,6 +89,7 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         font-weight: 600;
+        line-height: 24px;
       }
       .servers-name a {
         color: inherit;
@@ -84,33 +98,17 @@
       .servers-name a:hover {
         text-decoration: underline;
       }
+      .servers-actions {
+        display: flex;
+        --ui-button-basic-border-width: 0px;
+      }
+      .servers-state {
+        flex: none;
+      }
       .servers-facts {
-        margin: 4px 0 0 0;
         color: var(--servers-muted);
         font-variant-numeric: tabular-nums;
         white-space: pre-line;
-      }
-      .servers-actions {
-        display: flex;
-        gap: 4px;
-        margin: 8px 0 0 0;
-      }
-      .servers-actions:empty {
-        display: none;
-      }
-      .servers-log {
-        margin: 8px 0 0 0;
-      }
-      .servers-log pre {
-        margin: 0;
-        max-height: 320px;
-        overflow: auto;
-        font:
-          12px/1.4 ui-monospace,
-          Menlo,
-          monospace;
-        white-space: pre-wrap;
-        overflow-wrap: anywhere;
       }
       /* without Spell UI:  a plain table */
       .servers-table {
@@ -139,6 +137,9 @@
       .servers-embedded h1,
       .servers-embedded .servers-lead {
         display: none;
+      }
+      .servers-embedded #servers-page > :first-child {
+        margin-top: 0;
       }
       .servers-embedded main {
         max-width: none;

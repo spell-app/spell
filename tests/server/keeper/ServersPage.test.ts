@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, utimesSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterEach, beforeEach, describe, expect, it } from "vite-plus/test"
@@ -7,7 +7,14 @@ import { SRV } from "spell/server"
 import { fakeMainCheckout } from "spell/server/test/checkouts"
 import { ask } from "spell/server/test/serve"
 
-import { LOG_LINES, ServerKeeper, lastLines, type PageServerControl } from "spell/server/keeper"
+import {
+  LOG_LINES,
+  ServerKeeper,
+  lastLines,
+  lastWorkedOn,
+  type KeptServer,
+  type PageServerControl
+} from "spell/server/keeper"
 
 describe("the Spell Servers page:  how each server stands, its log, the page itself (epic `editor` P49)", () => {
   let folder: string
@@ -130,5 +137,71 @@ describe("the Spell Servers page:  how each server stands, its log, the page its
     writeFileSync(log, `${"x".repeat(200_000)}\nlast but one\nlast\n`)
     expect(lastLines(log, 2)).toEqual(["last but one", "last"])
     expect(lastLines(join(folder, "none.log"), 2)).toEqual([])
+  })
+})
+
+describe("the Spell Servers page's sections and cards (epic `editor` I374)", () => {
+  /** a server as `/api/servers` lists it:  of `worktree` (none:  a main checkout's), used at `used` */
+  const server = (name: string, worktree?: string, used?: string): KeptServer => ({
+    id: `spell/${worktree ? `${worktree}/` : ""}${name}`,
+    repo: "spell",
+    name,
+    what: "",
+    checkout: "/kit",
+    state: "running" as const,
+    canStart: true,
+    ...(worktree && { worktree }),
+    ...(used && { used })
+  })
+
+  it("sections():  This Mac, Spell (capital S), then Epics, its worktrees the one used most recently first", async () => {
+    const { sections } = await import("spell/server/keeper/servers.js")
+    const keeper = { ...server("server keeper"), repo: "" }
+    const shown = sections([
+      keeper,
+      server("page server"),
+      server("editor"),
+      server("page server", "old", "2026-11-20T10:00:00.000Z"),
+      server("page server", "busy", "2026-11-26T10:00:00.000Z"),
+      server("editor", "busy"),
+      server("page server", "never")
+    ])
+    expect(shown.map(({ heading, level, servers }) => [heading, level, servers.length])).toEqual([
+      ["This Mac", 2, 1],
+      ["Spell", 2, 2],
+      ["Epics", 2, 0],
+      ["⎇ busy", 3, 2],
+      ["⎇ old", 3, 1],
+      ["⎇ never", 3, 1]
+    ])
+    // no worktree:  no Epics heading;  another repo keeps its own name
+    expect(sections([{ ...server("page server"), repo: "acme" }]).map(({ heading }) => heading)).toEqual(["acme"])
+  })
+
+  it("factsOf():  what it's for and how long it's been up, the name's tooltip", async () => {
+    const { factsOf } = await import("spell/server/keeper/servers.js")
+    const up: KeptServer = { ...server("page server"), what: "epic pages", started: "2026-11-26T10:00:00.000Z" }
+    expect(factsOf(up, Date.parse("2026-11-26T10:06:00.000Z"))).toBe("epic pages\nUp for 6\u00a0min")
+    expect(factsOf({ ...up, state: "stopped", why: "stopped by hand" })).toBe(
+      "epic pages\nNot running\nstopped by hand"
+    )
+  })
+
+  it("lastWorkedOn():  a worktree's newest git work, from its git folder's HEAD log and index;  none:  undefined", () => {
+    const folder = realpathSync(mkdtempSync(join(tmpdir(), "worked-on-")))
+    try {
+      const own = join(folder, "main/.git/worktrees/seo")
+      mkdirSync(join(own, "logs"), { recursive: true })
+      mkdirSync(join(folder, "seo"))
+      writeFileSync(join(folder, "seo/.git"), `gitdir: ${own}\n`)
+      writeFileSync(join(own, "logs/HEAD"), "x\n")
+      writeFileSync(join(own, "index"), "x\n")
+      utimesSync(join(own, "logs/HEAD"), new Date("2026-11-20T10:00:00Z"), new Date("2026-11-20T10:00:00Z"))
+      utimesSync(join(own, "index"), new Date("2026-11-25T10:00:00Z"), new Date("2026-11-25T10:00:00Z"))
+      expect(lastWorkedOn(join(folder, "seo"))).toBe("2026-11-25T10:00:00.000Z")
+      expect(lastWorkedOn(join(folder, "nowhere"))).toBeUndefined()
+    } finally {
+      rmSync(folder, { recursive: true, force: true })
+    }
   })
 })

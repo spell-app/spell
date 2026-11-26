@@ -12,6 +12,7 @@ import {
   attributeName,
   isCoreCall,
   isTight,
+  loopBody,
   PRESS_ATTRIBUTES,
   topLevelOf,
   unwrapped,
@@ -855,6 +856,7 @@ export class JSWriter extends ProgramWriter {
    * `for (const card of cards) {...}`, so the waits happen in turn -- `undefined` if it isn't one.
    * - Over a spell `List` (iterable) or a plain array, when the body takes the item only.
    * - A bare `return` in the body ends that turn only:  `continue`.
+   * - A one-line body that's a value, `play each card in the pile`, is that value as a statement (`loopBody()`).
    * - `returns`:  its body returns a value (`returnsFromLoop()`), so it MUST be a plain loop for that to leave the
    *   function it's in;  then spell's list datatype is enough, as a `List` and a plain array both loop.
    */
@@ -874,7 +876,12 @@ export class JSWriter extends ProgramWriter {
     try {
       const body = this.inBlock(() => {
         this.noteParams(method)
-        return this.write(method.body)
+        const each = loopBody(method)
+        return this.write(
+          each === method.body
+            ? each
+            : new P.ASTStatementBlock(method.match, { statements: [each], wrap: method.body.wrap })
+        )
       })
       return `for (const ${this.variableName(item!)} of ${this.tight(collection)}) ${body}`
     } finally {
