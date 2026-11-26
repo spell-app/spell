@@ -1288,10 +1288,15 @@ class SavedRead {
       }))
   }
 
-  /** The next page's things join the list.  - throws what the read threw */
+  /**
+   * The next page's things join the list, each once:  a thing already in it (announced, then on that page) stays where it is
+   * (epic `data` I152).  - throws what the read threw
+   */
   private async readPage(): Promise<void> {
     const things = await this.pagesAfter(this.pagesRead + 1)
-    this.fill(this.inOrder([...(this.list.items as Thing[]), ...things]))
+    const held = this.list.items as Thing[]
+    const known = new Set(held)
+    this.fill(this.inOrder([...held, ...things.filter((thing) => !known.has(thing))]))
   }
 
   /** Is a read of it under way, or has it its answer, with someone holding it? */
@@ -1597,16 +1602,22 @@ class SavedRead {
   }
 
   /**
-   * Does `fields` belong in this read?  Only its filter says:  a filter it can't see goes on the list after it.
+   * Does `fields` belong in this read?  Its filter, its search and its ids say:  a filter it can't see goes on the list after it.
    * - A field a row doesn't name can't say no:  a thing known already stays, until a row says it no longer fits.
    * - A list under one thing (`ListQuery.under`, a post's comments) takes only what it was answered with:
    *   nothing says which thing a new one is under, so it joins none of them (epic `data` P30).
+   * - A list of chosen ids takes only those;  a search, only a row holding its text, as the place's own search finds it
+   *   (`rowsHolding()`), so someone else's change lands only where it belongs (epic `data` I151).
    */
-  private takes(fields: PlaceRow, { isKnown = false }: { isKnown?: boolean } = {}): boolean {
-    if (this.query.under !== undefined && !isKnown) return false
+  private takes(fields: PlaceRow, { id, isKnown = false }: { id?: unknown; isKnown?: boolean } = {}): boolean {
+    const { under, ids, search, filter = {} } = this.query
+    if (under !== undefined && !isKnown) return false
+    if (ids && !ids.includes(String(id as string | number))) return false
+    const folder = this.program.folderNow
+    if (search && !isKnown && folder && !folder.rowsHolding([fields], search).length) return false
     // as the place's own filter does:  a sheet's "true" is yes, its empty cell no (`holdsFilterValue()`)
-    const holds = this.program.folderNow?.holdsFilterValue ?? ((held: unknown, value: unknown) => held === value)
-    return Object.entries(this.query.filter ?? {}).every(
+    const holds = folder?.holdsFilterValue ?? ((held: unknown, value: unknown) => held === value)
+    return Object.entries(filter).every(
       ([field, value]) => holds(fields[field], value) || (isKnown && !(field in fields))
     )
   }
@@ -1620,7 +1631,7 @@ class SavedRead {
     for (const row of rows) {
       if (row[idField] === undefined) continue
       const isKnown = kept.some((thing) => thing.id === row[idField])
-      if (!this.takes(row, { isKnown })) {
+      if (!this.takes(row, { id: row[idField], isKnown })) {
         const thing = kept.find((each) => each.id === row[idField])
         if (thing) left.add(thing)
         continue
@@ -1641,7 +1652,7 @@ class SavedRead {
   thingAdded(thing: Thing): void {
     if (!(thing instanceof this.Class) || this.list.items.includes(thing)) return
     const fields = thing as unknown as PlaceRow
-    if (this.takes(fields)) this.fill(this.inOrder([...(this.list.items as Thing[]), thing]))
+    if (this.takes(fields, { id: thing.id })) this.fill(this.inOrder([...(this.list.items as Thing[]), thing]))
   }
 
   /** `things`, in the order the query asks for. */
