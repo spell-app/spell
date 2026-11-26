@@ -1298,11 +1298,12 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
       saying an old number (an insert moved it down:  `#p-doc-review P10 · Doc Review` -> `P11 · Doc Review`), a comment
       whose block only moved (found by its excerpt, `PlanAnchors`:  BlockAnchors.js's rules, copied), moved in the
       inbox after the page
-    - reports, for Claude or the person:  a link to an id that's gone, a comment or mark on one,
-      a comment whose block's words
-      changed
+    - removes a comment on an id that's gone, when it's the person's own, with a log line (epic `epic-engine` T170);
+      reports, for Claude or the person:  a link to an id that's gone, someone else's comment or a mark on one, a
+      comment whose block's words changed
     - never the log, nor an Original Discussion:  history
-    - also run by `update --title` and `add-phase --before`, right after their change (what it says goes to stderr)
+    - also run by `update --title` and `add-phase --before`, right after their change (what it says goes to stderr),
+      and by `epic inbox apply` after it removed a phase (its gear's "Remove this phase", the mark `remove`, T169)
     - a phase's number in its words is its place (`PhaseIds.labelOf()`);  a phase's `renamed` line names the phase
       titled with its new name, else the one at that number
   - `caveats-and-tests` (2026-10-24, on command;  epic `epic-engine` P32, Q16), RETIRED by `item-renames` (P44):  one
