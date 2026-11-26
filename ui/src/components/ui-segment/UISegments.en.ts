@@ -41,13 +41,17 @@ export const segmentsVocabulary = {
       name: "wrapping",
       group: "layout",
       kind: "keyOnly",
-      description: 'With `direction="horizontal"`:  segments wrap onto more rows.'
+      description: 'With `direction="horizontal"`:  segments wrap onto more rows when they don\'t fit.'
     },
     {
       name: "stackable",
       group: "layout",
-      kind: "keyOnly",
-      description: 'With `direction="horizontal"`:  stacks on mobile.'
+      kind: "keyOrValueAndKey",
+      values: ["tablet"],
+      description:
+        'With `direction="horizontal"`, opts in to stacking:  one segment a row on a screen below 768px ' +
+        '(`stackable`), or below 992px too (`stackable="tablet"`).  Wider, the group stays one row:  ' +
+        "only `wrapping` wraps."
     },
     {
       name: "appearance",

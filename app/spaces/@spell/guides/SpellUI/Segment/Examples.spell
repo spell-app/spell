@@ -253,7 +253,7 @@
 		</>
 
 		<section label="Horizontal wrapping Segments" sticky collapsible dividing>
-			<example "Horizontal wrapping Segments" description="A horizontal segment group can automatically wrap their segments on smaller screens.">
+			<example "Horizontal wrapping Segments" description="A horizontal segment group with `wrapping` wraps its segments onto more rows when they don't fit.">
 				<segments direction="horizontal" wrapping>
 					<segment>Segment One</segment>
 					<segment>Segment Two</segment>
@@ -265,7 +265,7 @@
 					<segment>Segment Eight</segment>
 				</segments>
 			</example>
-			<example "Horizontal wrapping Segments" description="Fomantic's `horizontal stackable segments` (deprecated there since 2.9.3) still works:  the group stacks on phones.">
+			<example "Horizontal stackable Segments" description="A `stackable` group stays one row on a wider screen, and stacks one segment a row only on a phone (below 768px);  `stackable=\"tablet\"` stacks below 992px too.  It never wraps:  only `wrapping` does.">
 				<segments direction="horizontal" stackable>
 					<segment>Segment One</segment>
 					<segment>Segment Two</segment>

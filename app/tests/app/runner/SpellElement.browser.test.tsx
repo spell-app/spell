@@ -260,6 +260,81 @@ describe("SpellElement", () => {
       await expect.poll(() => Math.round(box().height)).toBe(400)
     })
 
+    /**
+     * A share of a row inside a view (epic `editor` P50):  the work project's repro, 800px wide.
+     * - `<space width="50%" />` drawn by a view, then a segment, in a horizontal stack:
+     *   the space is half the row, and the segment starts where it ends.
+     * - Written straight into the stack it always was;  inside a view with a box of its own it was 50% of nothing.
+     */
+    describe("a share of a row it draws (`width=\"50%\"`) is a share of the row around it", () => {
+      /** A view drawing one `<ui-space width="50%">`, as the repro's `gap` does. */
+      class Gap extends View {
+        draw(): ReturnType<View["draw"]> {
+          return (h("ui-space", { width: "50%", height: "2em" }) as unknown as () => ReturnType<View["draw"]>)()
+        }
+      }
+      /** The same, through an if-chain, as `<if its wide is yes> ... <otherwise> ... </>` compiles. */
+      class ChosenGap extends View {
+        get wide() {
+          return this.getProp("wide")
+        }
+        set wide(value) {
+          this.setProp("wide", value)
+        }
+        draw(): ReturnType<View["draw"]> {
+          const space = (width: string) => () => [h("ui-space", { width, height: "2em" })]
+          return [() => core.drawIf(() => this.wide, space("50%"), space("25%"))] as unknown as ReturnType<
+            View["draw"]
+          >
+        }
+      }
+
+      /** The repro's row, 800px wide:  `tag`'s view, then a segment;  its stack and both boxes. */
+      async function row(tag: string, thing: View) {
+        await Promise.all([import("spell/ui/components/ui-space"), import("spell/ui/components/ui-segment")])
+        await import("spell/ui/components/ui-stack")
+        core.defineElement(Gap, "Shares")
+        core.defineElement(ChosenGap, "Shares")
+        await Promise.resolve()
+        const stack = await ElementFixture.render<HTMLElement>(
+          `<ui-stack direction="horizontal" style="width: 800px; gap: 0"><${tag}></${tag}><ui-segment>Right half</ui-segment></ui-stack>`
+        )
+        onTestFinished(() => stack.remove())
+        const view = stack.querySelector(tag) as HTMLElement & { thing?: View }
+        view.thing = thing
+        flush()
+        await ElementFixture.settle(stack)
+        await ElementFixture.settle(stack)
+        const left = stack.getBoundingClientRect().left
+        const space = () => view.shadowRoot!.querySelector("ui-space")!.getBoundingClientRect()
+        const segment = () => {
+          const host = stack.querySelector("ui-segment") as E.DOMElement
+          return (host.shadowRoot!.querySelector(".ui.segment") as HTMLElement).getBoundingClientRect()
+        }
+        return { view, left, space, segment }
+      }
+
+      test("a plain view's:  the space is 400px of 800, the segment starts at 400", async () => {
+        const { view, left, space, segment } = await row("shares-gap", new Gap())
+        await expect.poll(() => view.matches(":state(lays-out-as-drawing)")).toBe(true)
+        await expect.poll(() => Math.round(space().width)).toBe(400)
+        expect(Math.round(segment().left - left)).toBe(400)
+      })
+
+      test("through an <if> / <otherwise>:  the same, and the other branch's share once it flips", async () => {
+        const gap = new ChosenGap()
+        gap.wide = true
+        const { view, left, space, segment } = await row("shares-chosen-gap", gap)
+        await expect.poll(() => view.matches(":state(lays-out-as-drawing)")).toBe(true)
+        await expect.poll(() => Math.round(space().width)).toBe(400)
+        expect(Math.round(segment().left - left)).toBe(400)
+        gap.wide = false
+        core.flush()
+        await expect.poll(() => Math.round(space().width)).toBe(200)
+        expect(Math.round(segment().left - left)).toBe(200)
+      })
+    })
+
     test("a view drawing several elements, or whose tag the page gives a display, keeps its box;  its card is no group's", async () => {
       const cards = await rendered(
         `<ui-cards columns="2" style="display: block; width: 800px"><layout-pair></layout-pair><layout-tile style="display: block"></layout-tile></ui-cards>`

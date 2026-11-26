@@ -41152,7 +41152,7 @@
             },
             {
               "name": "wrapping",
-              "description": "With `direction=\"horizontal\"`:  segments wrap onto more rows.",
+              "description": "With `direction=\"horizontal\"`:  segments wrap onto more rows when they don't fit.",
               "type": {
                 "text": "boolean"
               },
@@ -41160,9 +41160,9 @@
             },
             {
               "name": "stackable",
-              "description": "With `direction=\"horizontal\"`:  stacks on mobile.",
+              "description": "With `direction=\"horizontal\"`, opts in to stacking:  one segment a row on a screen below 768px (`stackable`), or below 992px too (`stackable=\"tablet\"`).  Wider, the group stays one row:  only `wrapping` wraps.",
               "type": {
-                "text": "boolean"
+                "text": "boolean | \"tablet\""
               },
               "fieldName": "stackable"
             },

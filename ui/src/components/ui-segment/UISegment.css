@@ -784,7 +784,9 @@
   .ui.equal-width.horizontal.segments > ::slotted(*) {
     --_ui-segments-width: 100%;
   }
-  .ui:is(.wrapping, .stackable).horizontal.segments {
+  /* Wrapping:  more rows when they don't fit.  Only `wrapping` wraps:  a `stackable` group stays ONE row
+     until it stacks (below). */
+  .ui.wrapping.horizontal.segments {
     flex-wrap: wrap;
   }
   .ui.segments > .horizontal.segments {
@@ -797,13 +799,27 @@
   .ui.segments > .horizontal.segments:not(:first-child) {
     border-top: var(--_ui-segment-border-width) solid var(--_ui-segment-border-color);
   }
-  /* Stackable:  stacks on mobile. */
+  /*
+   * Stackable:  a group stacks ONLY when it asks to, as a table does (epic `epic-engine` T176):
+   * `stackable` below 768px of the screen, `stackable="tablet"` (`tablet stackable`) below 992px,
+   * one segment a row, hairlines between.  Above that it stays one row.
+   */
   @media (--ui-mobile) {
     .ui.stackable.horizontal.segments {
       flex-direction: column;
     }
     .ui.stackable.horizontal.segments > *,
     .ui.stackable.horizontal.segments > ::slotted(*) {
+      --_ui-segments-divider: inset 0 var(--_ui-segment-border-width) 0 0 var(--_ui-segment-border-color);
+      --_ui-segments-radius: 0;
+    }
+  }
+  @media (--ui-tablet) {
+    .ui.tablet-stackable.horizontal.segments {
+      flex-direction: column;
+    }
+    .ui.tablet-stackable.horizontal.segments > *,
+    .ui.tablet-stackable.horizontal.segments > ::slotted(*) {
       --_ui-segments-divider: inset 0 var(--_ui-segment-border-width) 0 0 var(--_ui-segment-border-color);
       --_ui-segments-radius: 0;
     }

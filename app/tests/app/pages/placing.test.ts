@@ -89,11 +89,76 @@ describe.skipIf(!SERVING)("placing in a site with a layout", { timeout: 180_000 
     await page.waitForTimeout(SETTLE_MS)
   }
 
-  /** Click the palette's Button row. */
-  async function clickButton(): Promise<void> {
+  /**
+   * Pick the palette's `label` row up, then click in the app where `where()` says to put it there:
+   * in Edit the add panel picks a part up, as the add bar's menus do (epic `editor` I369, J368).
+   */
+  async function placeAt(label: string, where: () => Promise<{ x: number; y: number }>): Promise<void> {
     await openPalette()
-    await buttonRow().click()
+    await page.locator(`${ADD_PANEL} ui-tree-item[label="${label}"]`).first().click()
+    await page.waitForTimeout(600)
+    expect(
+      await page.evaluate(
+        (name) =>
+          (window as unknown as { PartPlacing: { isPicked(label: string): boolean } }).PartPlacing.isPicked(name),
+        label
+      ),
+      `${label} picked up`
+    ).toBe(true)
+    // measured now, once the panel's gone:  the app may have scrolled meanwhile
+    const { x, y } = await where()
+    // the drop line follows the mouse there first, as a person's does
+    await page.mouse.move(x, y, { steps: 6 })
+    await page.waitForTimeout(300)
+    expect(
+      await page.evaluate(() => !!document.querySelector(".PartDropMarker:not([hidden])")),
+      `a drop line under the mouse, at ${Math.round(x)}, ${Math.round(y)}`
+    ).toBe(true)
+    await page.mouse.click(x, y)
     await page.waitForTimeout(SETTLE_MS)
+  }
+
+  /** The middle of the layout's app menu, as it's drawn:  its box is its shadow root's, the host drawing none of its own. */
+  const menuPoint = () =>
+    page.evaluate(() => {
+      const host = document.querySelector(".AppPaneBody ui-app-menu")!
+      const shown = [...host.shadowRoot!.children]
+        .map((child) => child.getBoundingClientRect())
+        .find((box) => box.width)!
+      return { x: shown.x + shown.width / 2, y: shown.y + shown.height / 2 }
+    })
+
+  /**
+   * Just above the bottom edge of a line of the page in sight (`Line 12`), and its text:  a place in the page, never
+   * the layout's panes;  its lower edge, so the part goes after it, not inside it
+   * - the first line wholly in the app pane:  an earlier step's part, added at the page's end, scrolled the app down
+   */
+  const linePoint = () =>
+    page.evaluate(() => {
+      const pane = document.querySelector(".AppPaneBody")!.getBoundingClientRect()
+      const drawn = (header: Element) =>
+        [header, ...(header.shadowRoot?.children ?? [])]
+          .map((each) => each.getBoundingClientRect())
+          .find((each) => each.width)!
+      const header = [...document.querySelectorAll(".AppPaneBody ui-container ui-header")].find((each) => {
+        const box = drawn(each)
+        return box.top >= pane.top && box.bottom <= pane.bottom
+      })!
+      const box = drawn(header)
+      return { x: box.x + box.width / 2, y: box.bottom - 2, line: header.textContent!.trim() }
+    })
+
+  /** The middle of the footer's text, as it's drawn, scrolled into sight first:  it's below the page's 30 lines. */
+  const footerPoint = async () => {
+    await page.locator('.AppPaneBody div[slot="footer"] ui-text').first().scrollIntoViewIfNeeded()
+    await page.waitForTimeout(300)
+    return page.evaluate(() => {
+      const text = document.querySelector('.AppPaneBody div[slot="footer"] ui-text')!
+      const box = [text, ...(text.shadowRoot?.children ?? [])]
+        .map((each) => each.getBoundingClientRect())
+        .find((each) => each.width)!
+      return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+    })
   }
 
   /** Let go of what's selected. */
@@ -154,14 +219,7 @@ describe.skipIf(!SERVING)("placing in a site with a layout", { timeout: 180_000 
   })
 
   test("a drop over the layout's app menu lands at the end of the page's own drawing", async () => {
-    // its box is its shadow root's:  the host draws none of its own
-    const menu = await page.evaluate(() => {
-      const host = document.querySelector(".AppPaneBody ui-app-menu")!
-      const shown = [...host.shadowRoot!.children]
-        .map((child) => child.getBoundingClientRect())
-        .find((box) => box.width)!
-      return { x: shown.x + shown.width / 2, y: shown.y + shown.height / 2 }
-    })
+    const menu = await menuPoint()
     await dropButton(menu.x, menu.y)
     expect((await linesOf("<container>")).at(-2)).toBe(BUTTON)
     expect(await linesOf("to draw its footer")).toEqual(["<text>The footer</text>"])
@@ -169,13 +227,16 @@ describe.skipIf(!SERVING)("placing in a site with a layout", { timeout: 180_000 
     expect(await linesOf("<container>")).not.toContain(BUTTON)
   })
 
-  // SKIPPED until epic `editor` J368 is decided:  in Edit a click in the add panel picks the part up (I369), so nothing
-  // adds beside what's selected there any more
-  test.skip("a click with nothing selected adds to the page, selected and scrolled into view", async () => {
+  test("picked up, then a click on a line of the page puts it after that line, selected and in view (J368)", async () => {
     await letGo()
-    await clickButton()
+    let line = ""
+    await placeAt("Button", async () => {
+      const point = await linePoint()
+      line = point.line
+      return point
+    })
     const lines = await linesOf("<container>")
-    expect(lines.at(-2)).toBe(BUTTON)
+    expect(lines[lines.indexOf(`<header>${line}</header>`) + 1]).toBe(BUTTON)
     expect(await linesOf("to draw its footer")).toEqual(["<text>The footer</text>"])
     // the button's line, counted from 0 as a drawn part's place is:  the container's head is on line 4
     const { drawn, pane, isSelected, selected } = await boxes(4 + lines.indexOf(BUTTON) + 1)
@@ -185,28 +246,22 @@ describe.skipIf(!SERVING)("placing in a site with a layout", { timeout: 180_000 
     await undo()
   })
 
-  // SKIPPED until epic `editor` J368 is decided:  in Edit a click in the add panel picks the part up (I369), so nothing
-  // adds beside what's selected there any more
-  test.skip("with the footer picked, a click adds to the footer, and it's drawn at once", async () => {
+  test("with the footer picked, a part picked up and clicked onto it goes in the footer, drawn at once (J368)", async () => {
     await page.evaluate(() => {
       const footer = document.querySelector('.AppPaneBody div[slot="footer"] ui-text')
       ;(window as unknown as { Inspector: { select(element: Element | null): void } }).Inspector.select(footer)
     })
     await page.waitForTimeout(800)
-    await clickButton()
+    await placeAt("Button", footerPoint)
     expect(await linesOf("to draw its footer")).toEqual(["<text>The footer</text>", BUTTON])
     expect(await page.locator('.AppPaneBody div[slot="footer"] ui-button').count()).toBe(1)
     await undo()
   })
 
-  // SKIPPED until epic `editor` J368 is decided:  in Edit a click in the add panel picks the part up (I369), so nothing
-  // adds beside what's selected there any more
-  test.skip("what's added but draws nothing to see is still picked, and a notice says so", async () => {
+  test("what's added but draws nothing to see is still picked, and a notice says so", async () => {
     await letGo()
     await page.evaluate(() => ((window as unknown as { editor: { notice?: string } }).editor.notice = undefined))
-    await openPalette()
-    await page.locator(`${ADD_PANEL} ui-tree-item[label="Container"]`).first().click()
-    await page.waitForTimeout(SETTLE_MS)
+    await placeAt("Container", linePoint)
     const { notice, selected } = await page.evaluate(() => {
       const { editor, Inspector } = window as unknown as {
         editor: { notice?: string }
