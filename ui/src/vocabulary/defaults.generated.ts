@@ -271,6 +271,7 @@ export const DEFAULTS_TABLE: Readonly<
   ],
   "ui-cell": [
     { name: "header", kind: "boolean", group: "content" },
+    { name: "sort", kind: "string", group: "behaviour" },
     { name: "span", kind: "number", group: "layout" },
     { name: "align", kind: "textAlign", group: "layout", values: "alignments" },
     { name: "vertical-align", kind: "verticalAlign", group: "layout", values: "verticalAlignments" }
@@ -1522,7 +1523,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "direction", kind: "valueOnly", group: "layout", values: ["horizontal"] },
     { name: "equal-width", kind: "keyOnly", group: "layout" },
     { name: "wrapping", kind: "keyOnly", group: "layout" },
-    { name: "stackable", kind: "keyOnly", group: "layout" },
+    { name: "stackable", kind: "keyOrValueAndKey", group: "layout", values: ["tablet"] },
     {
       name: "appearance",
       kind: "multiple",
@@ -1793,6 +1794,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "vertical-align", kind: "verticalAlign", group: "layout" },
     { name: "sort-column", kind: "number", group: "behaviour" },
     { name: "sort-direction", kind: "enum", group: "behaviour", values: ["ascending", "descending"] },
+    { name: "sort", kind: "json", group: "behaviour" },
     { name: "client-sort", kind: "boolean", group: "advanced" },
     { name: "column-defs", kind: "json", group: "content" },
     { name: "caption", kind: "string", group: "content" },

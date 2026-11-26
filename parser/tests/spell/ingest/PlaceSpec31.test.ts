@@ -139,7 +139,8 @@ describe("PlaceSpec, an OpenAPI 3.1 description as FastAPI writes it", () => {
   })
 
   test("a job's steps are a list under each job, and retrying one a step's action;  a path that only starts like it isn't its", () => {
-    expect(look.notes).toEqual([])
+    // the one note:  an order its description names no field of (below)
+    expect(look.notes.filter((note) => !note.includes("names no field"))).toEqual([])
     expect(look.listsUnder).toEqual([{ owner: "jobs", list: "steps", at: "/api/jobs/{id}/steps" }])
     const steps = named("steps")
     expect(steps).toMatchObject({ at: "/api/jobs/{id}/steps", schemaAt: "#/components/schemas/Step", idAt: "id" })
@@ -431,10 +432,10 @@ describe("spell place verify, of a FastAPI service", () => {
     await ingest.verify("AcmeJobs.api.spell")
     const jobs = () => descriptions.get("AcmeJobs.api.json5")!.collections.jobs!
     expect(jobs().state).toMatchObject({ is: "failed", reason: expect.stringMatching(/too big to read whole/) })
-    jobs().mostBytes = 8_000_000
+    jobs().maxSize = 8_000_000
     await ingest.verify("AcmeJobs.api.spell")
     expect(jobs().state).toMatchObject({ is: "verified", rows: 12_000 })
-    expect(jobs().mostBytes).toBe(8_000_000)
+    expect(jobs().maxSize).toBe(8_000_000)
   })
 
   test("a list giving fewer than the place asks for says so under its own line, though it pages as the place does", async () => {
@@ -460,5 +461,97 @@ describe("spell place verify, of a FastAPI service", () => {
     })
     expect(JSON.stringify(description)).not.toContain("demo_rack_7")
     expect(said.join("\n")).toContain("/api/jobs answered 422:  No rack named demo_rack_7")
+  })
+})
+
+describe("what each list takes, from its description's questions, and tried by verify", () => {
+  const look = new PlaceSpec(DOCUMENT, SPEC_AT).lookAt(ACME)
+  const jobs = look.collections.find((each) => each.name === "jobs")!
+
+  test("a question named as a row's field asking one value is a filter;  its order and its search are its own", () => {
+    expect(jobs.takes).toEqual({
+      filters: ["status", "owner"],
+      search: { param: "search" },
+      sortedWith: "order_by",
+      orders: [{ as: "created_at", field: "created_at" }, { as: "recency" }]
+    })
+    // a list of values (`labels`) and a question no row's field answers (`include_hidden`) aren't filters;
+    // an order naming no field is said, for a person to name
+    expect(look.notes.join("\n")).toContain(`/api/jobs's "order_by" takes "recency", which names no field`)
+    // a list paging only, or asked for by its team, takes nothing more
+    expect(look.collections.find((each) => each.name === "jobs-archive")!.takes).toBeUndefined()
+    expect(look.collections.find((each) => each.name === "runs")!.takes).toBeUndefined()
+  })
+
+  test("the ingest writes them under the list's line;  an order, only once it's known which way round", async () => {
+    const { spell } = await ingestOf("AcmeJobs.api.spell")
+    expect(spell).toMatch(
+      /^\tjobs live at "\/api\/jobs"\n\t\tit filters by status and owner\n\t\tit searches everything with "search"$/m
+    )
+    expect(spell).not.toContain("it sorts")
+    const { files } = parseSpellProject([{ path: "/AcmeJobs.api.spell", contents: spell }])
+    expect(files[0]!.errors).toEqual([])
+  })
+
+  /** Two jobs, newest first, as a server that does what it's asked:  or one that ignores its `status`. */
+  const TWO = [
+    { id: "6f1c", name: "nightly build", status: "queued", owner: "ana", created_at: "2026-11-19T12:00:00Z" },
+    { id: "7a2d", name: "weekly report", status: "done", owner: "bo", created_at: "2026-11-18T12:00:00Z" }
+  ]
+  function jobsServer({ ignoresStatus = false } = {}) {
+    const asked: string[] = []
+    const answer = (url: URL): Response => {
+      asked.push(`${url.pathname}${url.search}`)
+      const byId = TWO.find((row) => url.pathname === `/api/jobs/${row.id}`)
+      if (byId) return Response.json(byId)
+      if (url.pathname !== "/api/jobs") return Response.json({ detail: "Not Found" }, { status: 404 })
+      const { searchParams } = url
+      let rows = TWO
+      const status = searchParams.get("status")
+      if (status && !ignoresStatus) rows = rows.filter((row) => row.status === status)
+      const search = searchParams.get("search")
+      if (search) rows = rows.filter((row) => row.name.includes(search))
+      return Response.json({ items: rows, total: rows.length, limit: 50, offset: 0 })
+    }
+    return { asked, answer }
+  }
+
+  test("verify tries one filter, which way the order goes, and what the search looks in;  the lines follow", async () => {
+    const server = jobsServer()
+    const { ingest, descriptions, texts } = await ingestOf("AcmeJobs.api.spell", server.answer)
+    const result = await ingest.verify("AcmeJobs.api.spell")
+    const { takes } = descriptions.get("AcmeJobs.api.json5")!.collections.jobs!
+    expect(takes).toEqual({
+      filters: ["status", "owner"],
+      search: { param: "search", field: "name" },
+      sortedWith: "order_by",
+      orders: [{ as: "created_at", field: "created_at", descending: true }, { as: "recency" }]
+    })
+    // one filter tried, not every one
+    expect(server.asked.filter((each) => /[?&](status|owner)=/.test(each))).toEqual(["/api/jobs?status=queued"])
+    expect(result.changes).toContain(`jobs:  "order_by=created_at" answered highest "created_at" first.`)
+    const spell = texts.get("AcmeJobs.api.spell")!
+    expect(spell).toMatch(
+      /^\tjobs live at "\/api\/jobs"\n\t\tit filters by status and owner\n\t\tit sorts with "order_by"\n\t\tjobs can be sorted by:\n\t\t\t- "created at" as "created_at"\n\t\tit searches names with "search"$/m
+    )
+    const { files } = parseSpellProject([{ path: "/AcmeJobs.api.spell", contents: spell }])
+    expect(files[0]!.errors).toEqual([])
+    // what it wrote reads as the list's named sort
+    expect(files[0]!.compiled).toMatch(/sortOrders: \[\{\s*name: "createdAt",\s*as: "created_at",\s*field: "createdAt"\s*\}\]/)
+  })
+
+  test("a filter the server ignores is left off, and stays off when it's looked at again", async () => {
+    const { ingest, descriptions, texts } = await ingestOf(
+      "AcmeJobs.api.spell",
+      jobsServer({ ignoresStatus: true }).answer
+    )
+    const result = await ingest.verify("AcmeJobs.api.spell")
+    const jobsNow = () => descriptions.get("AcmeJobs.api.json5")!.collections.jobs!
+    expect(jobsNow().takes).toMatchObject({ filters: ["owner"], ignored: ["status"] })
+    expect(result.changes.join("\n")).toContain(`it answered "status" with rows holding other values`)
+    expect(texts.get("AcmeJobs.api.spell")).toMatch(/^\t\tit filters by owner$/m)
+    await ingest.update("AcmeJobs.api.spell")
+    expect(jobsNow().takes).toMatchObject({ filters: ["owner"], ignored: ["status"] })
+    expect(jobsNow().takes!.orders![0]).toEqual({ as: "created_at", field: "created_at", descending: true })
   })
 })

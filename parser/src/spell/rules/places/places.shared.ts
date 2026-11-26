@@ -182,6 +182,47 @@ export function searchesOf(saved: P.SavedPlace | undefined): { param: string; fi
 }
 
 /**
+ * The fields what's saved in `saved` is filtered by at its place:  `it filters by job-id`.
+ * - Its list's own line first, one step in under its `live at` line;  else its place's.
+ * - `undefined` when no line under its place says so.
+ */
+export function filtersOf(saved: P.SavedPlace | undefined): "every field" | string[] | undefined {
+  const details = placeLinesOf(saved)
+  return details?.collections?.[saved!.collection]?.filters ?? details?.filters
+}
+
+/**
+ * The sorts what's saved in `saved` has names of its own for, at its place:  `measurements can be sorted by:` (`NamedSorts`).
+ * - Its list's own;  empty when no line says any.
+ */
+export function namedSortsOf(saved: P.SavedPlace | undefined): { name: string; as: string; field: string }[] {
+  const details = placeLinesOf(saved)
+  return details?.collections?.[saved!.collection]?.sortOrders ?? details?.sortOrders ?? []
+}
+
+/**
+ * Does the place what's saved in `saved` is in sort a list of it by `field` (as compiled code names it, or a named
+ * sort's name), that way round, itself?
+ * - A named sort (`NamedSorts`) newest first;  the other way round, by its field.
+ * - A field its list sorts by, its own lines' else its place's (`it sorts by`, `can be sorted by any field`):  either
+ *   way round, unless its direction lines name only one (`SortsByAnyField`).
+ */
+export function sortsOnItsServer(saved: P.SavedPlace | undefined, field: string, descending: boolean): boolean {
+  const details = placeLinesOf(saved)
+  const own = details?.collections?.[saved!.collection]
+  const orders = own?.sortOrders ?? details?.sortOrders ?? []
+  const named = orders.find(({ name }) => name === field)
+  if (named && descending) return true
+  // its field, newest first, is the named sort itself
+  if (!named && descending && orders.some((order) => order.field === field)) return true
+  const byField = named?.field ?? field
+  const sorts = own?.sorts ?? details?.sorts
+  if (!sorts || (sorts !== "every field" && !sorts.includes(byField))) return false
+  const directions = own?.sortDirections ?? details?.sortDirections
+  return !directions || (descending ? directions.descending : directions.ascending) !== undefined
+}
+
+/**
  * Is what's saved in `saved` found only by name, with no list of them all?
  * - e.g. `wiki pages are found at "/page/summary/{name}"` (epic `data` P27)
  */

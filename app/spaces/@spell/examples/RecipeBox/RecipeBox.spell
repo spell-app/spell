@@ -91,7 +91,7 @@ recipe box is an app
 
 	its "matches" is
 		// Newest first, by when each was saved
-		return every recipe where its title includes the search, sorted by its created, newest first
+		return every recipe where its title includes the search, filtered here, sorted by its created, newest first
 
 	to add the new recipe
 		add the new recipe to the recipes

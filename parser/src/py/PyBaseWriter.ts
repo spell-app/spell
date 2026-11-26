@@ -244,7 +244,9 @@ export class PyBaseWriter extends P.ProgramWriter {
     }
     const written = this.tight(node.object)
     const name = this.nameOf(node.property.value, "property")
-    if (!node.property.isLegalIdentifier) return `getattr(${written}, ${this.quoted(node.property.value)}, None)`
+    // a key read as written, `the "run_by" of its meta`:  that key, there or not
+    if (!node.property.isLegalIdentifier || node.property.asWritten)
+      return `getattr(${written}, ${this.quoted(node.property.value)}, None)`
     if (this.mayBeNothing(node.object) && !this.isSettingNow(node))
       return `getattr(${written}, ${this.quoted(name)}, None)`
     this.assertThere(node.object, written)
@@ -399,6 +401,8 @@ export class PyBaseWriter extends P.ProgramWriter {
     const [value, boolean] = unwrapped(rhs) instanceof P.ASTBooleanLiteral ? [lhs, rhs] : [rhs, lhs]
     const yesOrNo = unwrapped(boolean)
     if (yesOrNo instanceof P.ASTBooleanLiteral && this.kindOf(value) === "choice") {
+      // one that can be nothing (`yes, no or nothing`):  no is `False`, not `None` too
+      if (!yesOrNo.value && this.canBeNothing(value)) return `${this.tight(value)} ${isNot ? "is not" : "is"} False`
       return yesOrNo.value !== isNot ? this.bare(value) : `not ${this.operand(value, "and", "rhs")}`
     }
     return undefined

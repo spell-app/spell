@@ -137,7 +137,7 @@ describe("DeviceCopy", () => {
 
 describe("DeviceCopy's size limit", () => {
   test("never keeps more than its limit, however much is read", async () => {
-    const { copy, store, time } = deviceCopy({ mostBytes: 1000 })
+    const { copy, store, time } = deviceCopy({ maxSize: 1000 })
     for (let page = 0; page < 40; page++) {
       time.wait(1)
       await copy.keep(`/people/?page=${page}`, answer(ofSize(90 + page)))
@@ -149,7 +149,7 @@ describe("DeviceCopy's size limit", () => {
   })
 
   test("discards what was READ least recently, not what was written least recently", async () => {
-    const { copy, time } = deviceCopy({ mostBytes: 300 })
+    const { copy, time } = deviceCopy({ maxSize: 300 })
     for (const film of ["a", "b", "c"]) {
       time.wait(1)
       await copy.keep(`/films/${film}`, answer(ofSize(100)))
@@ -165,7 +165,7 @@ describe("DeviceCopy's size limit", () => {
   })
 
   test("an answer bigger than the limit isn't kept, and leaves the rest", async () => {
-    const { copy } = deviceCopy({ mostBytes: 100 })
+    const { copy } = deviceCopy({ maxSize: 100 })
     await copy.keep("/small", answer(ofSize(50)))
     await copy.keep("/huge", answer(ofSize(500)))
     expect(copy.addresses).toEqual(["/small"])

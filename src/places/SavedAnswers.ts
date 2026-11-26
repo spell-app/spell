@@ -11,11 +11,16 @@
  * - One file an address, by its path under the place's own:  its question is only how it was asked.
  * - A saved list is paged as the server pages it (`limit` and `offset`), so a read reads each row once and stops,
  *   and picked by a question naming a field its rows hold (`?status=open`).
+ *   - Searched and sorted by the place's own question names (`SavedAsks`), with the page's own matching and order
+ *     (`rowsHolding()`, `rowsInOrder()`):  so a saved answer says what the server would, as near as it can.
  *   - A list inside an object (`{ "items": [...], "total": 3 }`) is paged in place, the rest kept.
  * - Scrubbed before it's written (`answerScrubber()`):  no token, key, password or cookie in a file, nor a person's
  *   email.
  * - Only its words here, no files:  it runs in a page too.  The page server and the ingest read and write the files.
  ****************/
+
+import { rowsHolding, rowsInOrder } from "./PlaceQuery"
+import { ANY_FIELD, type PlaceRow, type SortField } from "./places.types"
 
 /** The header a saved answer carries, so a person can tell:  its value `saved`. */
 export const SAVED_ANSWER_HEADER = "x-spell-saved-answer"
@@ -76,10 +81,26 @@ export function isOffline(path: string, offline: boolean | readonly string[] | u
 }
 
 /**
- * A saved answer's text, as it answers `query`:  a list picked by the fields its rows hold, then paged;  else as saved.
+ * What a place's lines call the questions a saved answer is searched and sorted by (`answerFromSaved()`):
+ * what the page server's served place says (`SP.ServedPlace.asks`).
+ */
+export type SavedAsks = {
+  /** Its search's question names:  `search`.  Left out:  `search` and `q`. */
+  search?: readonly string[]
+  /** Its sort's question names:  `sort`, `order_by`.  Left out:  `sort`. */
+  sort?: readonly string[]
+  /** The sorts it has names of its own for:  `recency`, newest first by end time (`RestSortOrder`). */
+  orders?: readonly { as: string; field: string; descending?: boolean }[]
+}
+
+/**
+ * A saved answer's text, as it answers `query`:  a list picked by the fields its rows hold, searched, sorted, then
+ * paged;  else as saved.
+ * - A search's text in any of a row's fields, capitals aside, as the page checks it (`rowsHolding()`).
+ * - A sort as `title`, `-title` (highest first), or an order's own name (`asks.orders`), in the page's text order.
  * - NEVER throws:  text that isn't JSON is answered as it is.
  */
-export function answerFromSaved(text: string, query: URLSearchParams): string {
+export function answerFromSaved(text: string, query: URLSearchParams, asks: SavedAsks = {}): string {
   let value: unknown
   try {
     value = JSON.parse(text)
@@ -88,16 +109,58 @@ export function answerFromSaved(text: string, query: URLSearchParams): string {
   }
   const [rows, put] = listIn(value)
   if (!rows) return text
-  const asks = [...query.keys()].filter((name) => !PAGING.has(name))
-  const picks = asks.filter((name) => rows.some((row) => isRecord(row) && name in row))
+  const searches = new Set(asks.search ?? DEFAULT_SEARCHES)
+  const sorts = new Set(asks.sort ?? DEFAULT_SORTS)
+  const asked = [...query.keys()].filter((name) => !PAGING.has(name) && !searches.has(name) && !sorts.has(name))
+  const picks = asked.filter((name) => rows.some((row) => isRecord(row) && name in row))
   let answered = picks.length
     ? rows.filter((row) => isRecord(row) && picks.every((name) => asText(row[name]) === query.get(name)))
     : rows
+  const records = () => answered.filter(isRecord)
+  for (const name of searches) {
+    const words = query.get(name)?.trim()
+    if (words) answered = rowsHolding(records(), { [ANY_FIELD]: words })
+  }
+  const sort = [...sorts].map((name) => query.get(name)).find((each) => !!each)
+  const order = !sort ? [] : sortFieldsOf(sort, records(), asks.orders ?? [])
+  if (order.length) answered = rowsInOrder(records(), order)
   if (query.has("limit")) {
     const offset = Number(query.get("offset") ?? 0) || 0
     answered = answered.slice(offset, offset + (Number(query.get("limit")) || answered.length))
   }
   return answered === rows ? text : JSON.stringify(put(answered))
+}
+
+/** A search's question names, when a place's lines don't say. */
+const DEFAULT_SEARCHES = ["search", "q"]
+
+/** A sort's question name, when a place's lines don't say. */
+const DEFAULT_SORTS = ["sort"]
+
+/**
+ * The fields a sort's text names, in order:  `title,-date`, or an order's own name.
+ * - A field no row holds is only how it was asked:  left out.
+ * - An order's field by its words (`createdAt` is a row's `created_at`):  a saved row has the server's names.
+ */
+function sortFieldsOf(sort: string, rows: readonly PlaceRow[], orders: NonNullable<SavedAsks["orders"]>): SortField[] {
+  const named = orders.find((order) => order.as === sort)
+  if (named) {
+    const words = lettersOf(named.field)
+    const field = Object.keys(rows[0] ?? {}).find((key) => lettersOf(key) === words) ?? named.field
+    // a named sort runs newest first, unless it says otherwise
+    return [{ field, descending: named.descending ?? true }]
+  }
+  return sort
+    .split(",")
+    .map((each) => each.trim())
+    .filter((each) => each && each !== "-")
+    .map((each) => (each.startsWith("-") ? { field: each.slice(1), descending: true } : { field: each }))
+    .filter(({ field }) => rows.some((row) => field in row))
+}
+
+/** A name's letters and digits alone, small:  `created_at` and `createdAt` are both `createdat`. */
+function lettersOf(name: string): string {
+  return name.replace(/[^\p{L}\p{N}]/gu, "").toLowerCase()
 }
 
 /** The list a saved answer holds, and how to put another in its place:  the answer, or its one list field. */

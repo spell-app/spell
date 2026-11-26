@@ -52,7 +52,10 @@ const CANONICAL: Record<string, string> = {
   "es-menu": "ui-menu",
   "es-emergente": "ui-popup",
   "es-contenido": "ui-content",
-  "es-acciones": "ui-actions"
+  "es-acciones": "ui-actions",
+  "es-tabla": "ui-table",
+  "es-fila": "ui-row",
+  "es-celda": "ui-cell"
 }
 
 /** `<ui-modal>`'s and `<ui-popup>`'s attributes in the test pack, by language:  its own name => as written (epic `language` P61). */

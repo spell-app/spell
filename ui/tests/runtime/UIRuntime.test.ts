@@ -90,10 +90,51 @@ describe("UIRuntime.toast() / modals", () => {
     }
   })
 
-  it("toasts and modals throw until their component registers a provider", async () => {
+  it("a dialog imports the family itself:  no ready() first", async () => {
+    const ui = new UIRuntime()
+    const load = vi.fn(async () => {
+      Modals.provider = {
+        confirm: async () => true,
+        alert: async () => {},
+        prompt: async ({ value }) => value,
+        choose: async () => [1]
+      }
+    })
+    ui.modals.loadFamilyWith(load)
+    try {
+      await expect(ui.modals.alert("hi")).resolves.toBeUndefined()
+      await expect(ui.modals.confirm("sure?")).resolves.toBe(true)
+      await expect(ui.modals.prompt({ message: "name?", value: "Ann" })).resolves.toBe("Ann")
+      await expect(ui.modals.choose({ message: "which?", rows: [] })).resolves.toEqual([1])
+      expect(load).toHaveBeenCalledTimes(1)
+    } finally {
+      Modals.provider = undefined
+    }
+  })
+
+  it("a toast imports the family itself:  its handle at once, shown with the same id once the family is in", async () => {
+    const ui = new UIRuntime()
+    const shown = vi.fn(({ id = "t1" }: { id?: string }) => ({ id, closed: Promise.resolve() }))
+    const dismissed = vi.fn()
+    ui.toasts.loadFamilyWith(async () => {
+      Toasts.provider = { show: shown, dismiss: dismissed }
+    })
+    try {
+      const handle = ui.toast({ message: "hi" })
+      expect(shown).not.toHaveBeenCalled()
+      await handle.closed
+      expect(shown).toHaveBeenCalledWith(expect.objectContaining({ message: "hi", id: handle.id }))
+      ui.toasts.dismiss(handle.id)
+      expect(dismissed).toHaveBeenCalledWith(handle.id)
+    } finally {
+      Toasts.provider = undefined
+    }
+  })
+
+  it("on a page with no way to import their families, toasts throw and dialogs reject until a provider registers", async () => {
     const runtime = await UI.load()
     expect(() => runtime.toast({ message: "hi" })).toThrow(/ui-toast not registered/)
-    expect(() => runtime.modals.confirm("sure?")).toThrow(/ui-modal not registered/)
+    await expect(runtime.modals.confirm("sure?")).rejects.toThrow(/ui-modal not registered/)
     Modals.provider = {
       confirm: async ({ message }) => message === "sure?",
       alert: async () => {},

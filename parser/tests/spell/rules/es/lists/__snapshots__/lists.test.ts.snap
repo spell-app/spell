@@ -37,7 +37,7 @@ exports[`testing spell module lists, in Spanish > rule group specs > match snaps
   "list_remove_with": "list",
   "list_reverse": "arg?|list",
   "list_shuffle": "arg?|list",
-  "list_sorted_by": "body?",
+  "list_sorted_by": "body?|bySort?",
   "merge_lists": "expression|type?",
   "number_range": "start|end",
   "ordinal_of_expression": "ordinal|expression",

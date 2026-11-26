@@ -269,6 +269,19 @@ describe("saved answers", () => {
     expect((await read("@acme/jobs/jobs/people")).status).toBe(502)
   })
 
+  test("searched and sorted by its place's own question names", async () => {
+    const at = await nobodyThere()
+    const asks = {
+      search: ["text"],
+      sort: ["order_by"],
+      orders: [{ as: "by_title", field: "title", descending: false }]
+    }
+    const { read } = await pageServer([jobs(at, { fixtures: savedAnswers(), asks })], { JOBS_TOKEN: SECRET })
+    const ids = async (path: string) => JSON.parse((await read(path)).text).map(({ id }: { id: string }) => id)
+    expect(await ids("@acme/jobs/jobs/jobs?order_by=by_title")).toEqual(["j-3", "j-1", "j-2"])
+    expect(await ids("@acme/jobs/jobs/jobs?text=weld")).toEqual(["j-2"])
+  })
+
   test("a refusal for its token, a 5xx, or a secret not set:  saved;  a server that answers:  live", async () => {
     const { url, asked } = await standIn()
     const notSet = await pageServer([jobs(url, { fixtures: savedAnswers() })], {})

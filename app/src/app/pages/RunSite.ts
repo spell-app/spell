@@ -1,5 +1,6 @@
 import { SP } from "spell/parser/spell"
-import type { SiteHost } from "spell/parser/core/core.types"
+import type { SiteHost, SiteParts } from "spell/parser/core/core.types"
+import { filledPattern, requiredParamsOf } from "spell/util/addressPattern"
 import { editor, type RunningSitePage } from "spell/app/app/editor"
 import { SiteThemes } from "spell/app/app/runner/SiteThemes"
 import { RunSiteHost } from "spell/app/app/run/RunSiteHost"
@@ -16,6 +17,8 @@ import { SiteWrites } from "./SiteWrites"
  *   - An address whose page has a file of its own still works:  the URL turns to the file's, in place (`followUrl()`).
  * - A page going to another changes the URL (`go()`), so the browser's back and forward work;
  *   the route hears every change of the URL, and tells the site (`heard()`, from `followRoute()`).
+ * - The dialog or sidebar open is in the URL's hash, as on the run page (`RunSiteHost.pushPart()`):  a URL with it,
+ *   and Back and Forward to one, open it (`openHash()`).
  * - While designing, a site's not found page offers to make the page:
  *   `createPage()`, one step of the editor's history.
  * - The core's `SiteHost`, handed to each run (`editor.executeCompiledApp()`):  no Solid, as `editor.ts` uses it.
@@ -36,7 +39,8 @@ export class RunSite implements SiteHost {
    * - A site starting asks it:  a file the URL named is looked up now, and the URL names the page its own way
    *   (`followUrl()`).
    */
-  address(): string {
+  address(site?: SiteParts): string {
+    if (site) this.site = site
     if (this.hereFile && editor.isRunningSite) {
       this.here = this.addressOfFile(this.hereFile) ?? this.here
       this.hereFile = undefined
@@ -85,7 +89,10 @@ export class RunSite implements SiteHost {
   addressOfFile(path: string): string | undefined {
     const file = editor.project?.getFile(path)
     if (!file) return undefined
-    return editor.sitePages().find((page) => !page.params?.length && RunSite.fileHolding(page) === file)?.address
+    const page = editor
+      .sitePages()
+      .find((each) => !requiredParamsOf(each.address).length && RunSite.fileHolding(each) === file)
+    return page && filledPattern(page.address)
   }
 
   /**
@@ -131,9 +138,38 @@ export class RunSite implements SiteHost {
    */
   landOn = (id: string): void => RunSiteHost.landOnSection(document.querySelector(SITE_FRAME) ?? document, id)
 
-  /** Call `showAddress` whenever the URL changes by itself:  each run hands over its site's. */
+  /**
+   * Call `showAddress` whenever the URL changes by itself:  each run hands over its site's.
+   * - And open the dialog or sidebar its hash names, now and on Back and Forward (`openHash()`).
+   */
   listen(showAddress: (address: string) => void): void {
     this.showAddress = showAddress
+    if (!this.hearsHash) globalThis.addEventListener?.("popstate", () => this.openHash())
+    this.hearsHash = true
+    this.openHash()
+  }
+
+  /** The running site, once it asked for its address:  what opens the dialog or sidebar a hash names. */
+  private site?: SiteParts
+
+  /** Whether the window's Back and Forward are listened to, for the hash:  once for the page. */
+  private hearsHash = false
+
+  /** A dialog or sidebar opened:  its hash in the URL, a step in the history (`RunSiteHost.pushPart()`). */
+  partOpened(hash: string): void {
+    RunSiteHost.pushPart(hash)
+  }
+
+  /** The dialog or sidebar open closed:  its hash out of the URL (`RunSiteHost.dropPart()`). */
+  partClosed(): void {
+    RunSiteHost.dropPart()
+  }
+
+  /** Open the dialog or sidebar the URL's hash names, in Run;  with none, the one open closes. */
+  private openHash(): void {
+    const hash = globalThis.location?.hash
+    if (editor.projectPage !== "runner" || hash === undefined) return
+    void this.site?.showPart?.(hash.slice(1))
   }
 
   /**
@@ -176,7 +212,7 @@ export class RunSite implements SiteHost {
   /**
    * Theme `name`'s look for the running site alone (epic `mockup` P8):  its tokens as one block of declarations, worn
    * inline by the site's frame, so the editor around it keeps its own theme (`SiteThemes.tokens()`).
-   * - The project's own, `<name>.theme.json5` in `projectFolder`, else one of Spell UI's.
+   * - The project's own, `<name>.theme.json5` in `projectFolder` or a project it imports, else one of Spell UI's.
    *   - The project's own are then offered in the editor's theme menu, first (I36, `EditorTheme.offerProjectThemes()`).
    * - Rejects on a theme in neither.
    */

@@ -1,4 +1,5 @@
 import type { KeyGoes } from "spell/places/keyGoes"
+import { compareValues } from "spell/util/string"
 import { ANY_FIELD, isPlaceServerAddress } from "spell/places/places.types"
 import { tokenServiceMint } from "spell/places/PlaceToken"
 import {
@@ -22,6 +23,7 @@ import {
   type IngestAsk,
   type IngestResult,
   type IngestSettings,
+  type ListTakes,
   type PlaceDescription,
   type PlaceLook,
   type PlaceState,
@@ -37,7 +39,8 @@ import {
   kindFoundAt,
   kindReadFrom,
   lookAtPlace,
-  messageOf
+  messageOf,
+  searchedFieldOf
 } from "./PlaceLook"
 import {
   checkSecondsWithin,
@@ -246,15 +249,15 @@ export class PlaceIngest {
       (names ?? []).map((sample) => `${at}=${sample}`)
     )
     // a list a person gave more room to read is read with it again
-    const mostBytes = Object.fromEntries(
-      Object.values(old.collections).flatMap(({ at, mostBytes: most }) => (most === undefined ? [] : [[at, most]]))
+    const maxSize = Object.fromEntries(
+      Object.values(old.collections).flatMap(({ at, maxSize: most }) => (most === undefined ? [] : [[at, most]]))
     )
     const look = await lookAtPlace(kind, {
       address,
       reader,
       collections,
       addListed: !collectionsAsked,
-      mostBytes,
+      maxSize,
       ...withDefined({
         spec: specAt,
         docs: docsAt,
@@ -264,8 +267,10 @@ export class PlaceIngest {
     })
     const description = describeLook(look, { kind, name })
     for (const [each, collection] of Object.entries(description.collections)) {
-      const most = old.collections[each]?.mostBytes
-      if (most !== undefined) collection.mostBytes = most
+      const most = old.collections[each]?.maxSize
+      if (most !== undefined) collection.maxSize = most
+      // what a verify found it takes stays found:  a filter it ignores, which way an order goes, what it searches
+      keepTriedTakes(collection, old.collections[each]?.takes)
     }
     leaveOutCopies(description, (await files.otherDescriptionsBeside?.(file)) ?? [])
     if (keySecret) description.about.keySecret = keySecret
@@ -288,7 +293,8 @@ export class PlaceIngest {
     // after the agent's names, as ingest's:  a new type, a list's or one inside a row, named apart from those beside it
     const others = await files.otherSpellBeside(file)
     const listsBefore = new Set(Object.values(old.collections).map(({ at }) => withoutEndSlash(at)))
-    awayFromTypesBeside(description, others, listsBefore)
+    const kept = typesKeptByHand((await files.read(file)) ?? "", old)
+    awayFromTypesBeside(description, [...others, kept], listsBefore)
     const shapeSame = (await fingerprintOf(description)) === old.about.fingerprint
     if (shapeSame) {
       description.canDo = old.canDo
@@ -413,6 +419,12 @@ export class PlaceIngest {
         }
       )
       collection.state = state
+      // what its description says it takes, tried:  one filter, which way round each order is, what it searches
+      const isAskedWithout = !answers && Object.values(collection.askedBy ?? {}).every((value) => value !== "")
+      if (state.is === "verified" && collection.takes && !collection.isOne && isAskedWithout) {
+        const tried = await this.triedTakes(address, collection, rows, reader, description.about.rows)
+        changes.push(...tried.map((each) => `${name}:  ${each}`))
+      }
       // a list no schema typed:  a field any row read holds is kept, though others don't hold it
       const seen = fieldsSeenIn(collection, rows)
       if (seen.length) changes.push(`${name}:  fields its rows hold, new:  ${seen.join(", ")}.`)
@@ -446,10 +458,11 @@ export class PlaceIngest {
       if (seen) description.canDo.write = writeWordsFor(seen)
     }
     await this.keepPrivate(description, { address, collections: read, headers: {}, notes: [] }, file)
-    // the types its reads made, named apart from those beside it, as ingest's are;  its lists are the ones it had
+    // the types its reads made, named apart from those beside it, as ingest's are, and from a person's in the file;
+    // its lists are the ones it had
     const others = await files.otherSpellBeside(file)
     const lists = new Set(Object.values(description.collections).map(({ at }) => withoutEndSlash(at)))
-    awayFromTypesBeside(description, others, lists)
+    awayFromTypesBeside(description, [...others, typesKeptByHand(written, old)], lists)
     // a field its reads made that Spell can't read is left out, as ingest's and update's are:  a server's `load_1min`
     this.compileLeavingOut(description, file)
     description.about.fingerprint = await fingerprintOf(description)
@@ -522,7 +535,7 @@ export class PlaceIngest {
     const url = urlAsking(answers ?? {})
     let answer: Awaited<ReturnType<PoliteReader["read"]>>
     try {
-      answer = await reader.read(url, { mostBytes: collection.mostBytes })
+      answer = await reader.read(url, { maxSize: collection.maxSize })
     } catch (error) {
       if (error instanceof IngestStopped && !reader.hasRoom) throw error
       return failed(`it didn't answer:  ${messageOf(error).replaceAll(url, collection.at)}`)
@@ -610,7 +623,7 @@ export class PlaceIngest {
       const answers = answered([param])
       if (!answers) continue
       try {
-        const answer = await reader.read(urlAsking(answers), { mostBytes: collection.mostBytes })
+        const answer = await reader.read(urlAsking(answers), { maxSize: collection.maxSize })
         if (answer.status >= 400) continue
         collection.askedBy = { [param]: "" }
         return answer
@@ -619,6 +632,94 @@ export class PlaceIngest {
       }
     }
     return undefined
+  }
+
+  /**
+   * What a list's description says it takes (`ListTakes`), tried on it, read only, a request each:  what changed,
+   * in words for the person.
+   * - ONE filter:  its first field the first row holds a plain value in, asked for that value.  An answer holding a
+   *   row with another value, or a refusal, is a server that ignores it:  left off, so no read trusts it.
+   * - Each order naming a field, which way round it is not known yet:  asked for, its rows' order says.
+   * - Its search, no field found yet:  a word from a row's name or title, searched for (`searchedFieldOf()`).
+   * - SIDE EFFECT:  `collection.takes`, as found.
+   * - NEVER throws for an answer, or none:  that's no change;  but `IngestStopped` past the reader's limits
+   */
+  private async triedTakes(
+    address: string,
+    collection: CollectionDescription,
+    rows: ReadonlyArray<Record<string, unknown>>,
+    reader: PoliteReader,
+    pageSize?: number
+  ): Promise<string[]> {
+    const takes = collection.takes!
+    const said: string[] = []
+    const asking = (more: Record<string, string>) => {
+      const asked = { ...collection.askedBy, ...more }
+      const query = [...Object.entries(asked), ...pageAsked(collection, pageSize, asked)]
+        .filter(([, value]) => value !== "")
+        .map(([param, value]) => `${param}=${encodeURIComponent(`${value}`)}`)
+        .join("&")
+      return `${address}${collection.at}${collection.at.includes("?") ? "&" : "?"}${query}`
+    }
+    const rowsAsked = async (more: Record<string, string>) => {
+      try {
+        const answer = await reader.read(asking(more), { maxSize: collection.maxSize })
+        if (answer.status >= 400 || answer.isCut) return undefined
+        return rowsIn(jsonOf(answer.text), collection.rowsAt)?.rows.filter(
+          (row): row is Record<string, unknown> => !!row && typeof row === "object"
+        )
+      } catch (error) {
+        if (error instanceof IngestStopped && !reader.hasRoom) throw error
+        return undefined
+      }
+    }
+    // one filter:  the first it can try with a value a row holds
+    // one whose value not every row shares first:  a server that ignores it then shows it
+    const [first] = rows
+    const triable = (takes.filters ?? []).filter((field) => isPlainValue(first?.[field]))
+    const filter =
+      triable.find((field) => rows.some((row) => `${row[field] as string}` !== `${first![field] as string}`)) ??
+      triable[0]
+    if (first && filter !== undefined) {
+      const value = `${first[filter] as string | number | boolean}`
+      const found = await rowsAsked({ [filter]: value })
+      const isFiltered = !!found?.length && found.every((row) => `${row[filter] as string}` === value)
+      if (!isFiltered) {
+        takes.filters = takes.filters!.filter((field) => field !== filter)
+        if (!takes.filters.length) delete takes.filters
+        takes.ignored = [...new Set([...(takes.ignored ?? []), filter])]
+        said.push(
+          found
+            ? `it answered "${filter}" with rows holding other values, so it doesn't filter by it:  left off.`
+            : `it refused "${filter}", so it doesn't filter by it:  left off.`
+        )
+      }
+    }
+    // each order naming a field:  which way round
+    for (const order of takes.orders ?? []) {
+      if (order.field === undefined || order.descending !== undefined || !takes.sortedWith) continue
+      const found = await rowsAsked({ [takes.sortedWith]: order.as })
+      const values = (found ?? []).map((row) => row[order.field!]).filter((value) => isPlainValue(value))
+      if (values.length < 2) continue
+      const pairs = values.slice(1).map((value, at) => compareOrder(values[at], value))
+      if (pairs.every((each) => each >= 0) && pairs.some((each) => each > 0)) order.descending = true
+      else if (pairs.every((each) => each <= 0) && pairs.some((each) => each < 0)) order.descending = false
+      if (order.descending !== undefined) {
+        said.push(
+          `"${takes.sortedWith}=${order.as}" answered ${order.descending ? "highest" : "lowest"} "${order.field}" first.`
+        )
+      }
+    }
+    // its search's field
+    if (takes.search && takes.search.field === undefined && rows.length >= 2) {
+      const { param } = takes.search
+      const field = await searchedFieldOf(rows, (word) => asking({ [param]: word }), reader)
+      if (field !== undefined) {
+        takes.search.field = field
+        said.push(`its "${param}" searches its "${field}".`)
+      }
+    }
+    return said
   }
 
   /**
@@ -1440,6 +1541,39 @@ function withoutExamples(fields: Record<string, FieldDescription>): void {
 }
 
 /**
+ * SIDE EFFECT:  what a verify found of what `collection` takes (`PlaceIngest.triedTakes()`), from `old`, kept by a
+ * look again:  a filter it ignores stays off, an order keeps which way round it is, a search the field it looks in.
+ */
+function keepTriedTakes(collection: CollectionDescription, old: ListTakes | undefined): void {
+  const takes = collection.takes
+  if (!takes || !old) return
+  if (old.ignored?.length) {
+    takes.ignored = old.ignored
+    takes.filters = takes.filters?.filter((field) => !old.ignored!.includes(field))
+    if (!takes.filters?.length) delete takes.filters
+  }
+  for (const order of takes.orders ?? []) {
+    const was = old.orders?.find(({ as, field }) => as === order.as && field === order.field)
+    if (order.descending === undefined && was?.descending !== undefined) order.descending = was.descending
+  }
+  if (takes.search && old.search?.param === takes.search.param && old.search.field !== undefined) {
+    takes.search.field ??= old.search.field
+  }
+}
+
+/** Is this a value a filter or an order can be tried with:  a text, a number, yes or no? */
+function isPlainValue(value: unknown): value is string | number | boolean {
+  return typeof value === "number" || typeof value === "boolean" || (typeof value === "string" && !!value.trim())
+}
+
+/** Which of two values comes first:  by number, or by words, in the one order text sorts in (`compareValues()`). */
+function compareOrder(one: unknown, other: unknown): number {
+  return typeof one === "number" && typeof other === "number"
+    ? one - other
+    : compareValues(`${one as string}`, `${other as string}`)
+}
+
+/**
  * A token made from `secret` at `tokenFrom`, for a look.
  * - throws `IngestStopped` when the token service says no, or doesn't answer
  */
@@ -1689,6 +1823,25 @@ function awayFromTypesBeside(
       noteApart(words, type)
     }
   }
+}
+
+/**
+ * The types a person keeps by hand in the place's own file, `text`, as a file of their own beside it would declare
+ * them, for `awayFromTypesBeside()`:  `a "state" is a thing`, one line each.
+ * - By hand:  declared in the file, but in none of the lines the description last wrote (`old.spell`), and no list's
+ *   own type (a list a person renamed in the file is still the place's:  `namesFromFile()`).
+ * - So a type a look or a verify's read adds is named apart from it, `lab state`, and the person's is never
+ *   written over:  before, the merge refused the whole run.
+ */
+function typesKeptByHand(text: string, old: PlaceDescription): string {
+  const written = new Set(
+    Object.keys(PlaceWords.of((old.spell ?? []).join("\n")).types).map((type) => type.toLowerCase())
+  )
+  const lists = new Set(Object.values(old.collections).map(({ type }) => type.toLowerCase()))
+  return Object.keys(PlaceWords.of(text).types)
+    .filter((type) => !written.has(type.toLowerCase()) && !lists.has(type.toLowerCase()))
+    .map((type) => `a "${type}" is a thing`)
+    .join("\n")
 }
 
 /**
@@ -1945,7 +2098,8 @@ function whatSpellCantSay({ about, collections, serverTakes }: PlaceDescription)
     if (nextAt && new Set(lists.map(([, collection]) => collection.nextAt)).size > 1)
       said.add(`A next page kept somewhere different in each collection:  "its next page is" is for the whole place.`)
   }
-  if (about.kind === "web server" && !serverTakes?.filters && !serverTakes?.sorts) {
+  const listsTake = Object.values(collections).some(({ takes }) => takes?.filters?.length || takes?.sorts?.length)
+  if (about.kind === "web server" && !serverTakes?.filters && !serverTakes?.sorts && !listsTake) {
     said.add(
       "What it can filter or sort:  it answered as if it hadn't been asked, so `where` and `sorted by` load its rows and work here, up to the usual ceiling.  If it can, add `it filters by cuisine` or `it sorts by title`."
     )
@@ -1962,7 +2116,8 @@ function whatSpellCantSay({ about, collections, serverTakes }: PlaceDescription)
 function writtenOf(parts: SpellParts, written: readonly string[] | undefined): SpellParts {
   if (!written?.length) return parts
   const wrote = new Set(written.map((line) => line.trim()))
-  const kept = (lines: readonly SpellLine[]) => lines.filter(({ text }) => wrote.has(text))
+  // a line one step in under another (`\tit filters by ...`) is kept as it was written, its tab trimmed
+  const kept = (lines: readonly SpellLine[]) => lines.filter(({ text }) => wrote.has(text.trim()))
   return {
     ...parts,
     placeLines: kept(parts.placeLines),

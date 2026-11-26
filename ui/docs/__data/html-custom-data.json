@@ -7533,6 +7533,13 @@
           }
         },
         {
+          "name": "sort",
+          "description": {
+            "kind": "markdown",
+            "value": "A header cell of a table with a `sort`:  the sort name or field its column asks for, `completion`, `name`.  With no `sort`, its column doesn't sort.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "span",
           "description": {
             "kind": "markdown",
@@ -48845,15 +48852,20 @@
           "name": "wrapping",
           "description": {
             "kind": "markdown",
-            "value": "With `direction=\"horizontal\"`:  segments wrap onto more rows.\n\nTakes:  flag (present / absent)"
+            "value": "With `direction=\"horizontal\"`:  segments wrap onto more rows when they don't fit.\n\nTakes:  flag (present / absent)"
           }
         },
         {
           "name": "stackable",
           "description": {
             "kind": "markdown",
-            "value": "With `direction=\"horizontal\"`:  stacks on mobile.\n\nTakes:  flag (present / absent)"
-          }
+            "value": "With `direction=\"horizontal\"`, opts in to stacking:  one segment a row on a screen below 768px (`stackable`), or below 992px too (`stackable=\"tablet\"`).  Wider, the group stays one row:  only `wrapping` wraps.\n\nTakes:  flag, or `tablet`"
+          },
+          "values": [
+            {
+              "name": "tablet"
+            }
+          ]
         },
         {
           "name": "appearance",

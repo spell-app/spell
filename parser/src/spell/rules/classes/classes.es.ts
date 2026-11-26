@@ -31,6 +31,8 @@ import { DimensionUnit } from "./DimensionUnit"
 import { OutlineSpecifierMeasure } from "./OutlineSpecifierMeasure"
 import { OutlineSpecifierPercent } from "./OutlineSpecifierPercent"
 import { OutlineSpecifierMedia } from "./OutlineSpecifierMedia"
+import { OutlineSpecifierSort, PageSortBy } from "./OutlineSpecifierSort"
+import { SORT_ORDER_WORDS } from "spell/parser/spell/rules/lists/sortOrderWords"
 import { CreateThing } from "./CreateThing"
 import { CreateType } from "./CreateType"
 import { CSSBlock } from "./CSSBlock"
@@ -60,6 +62,7 @@ import { OutlineSpecifierEnum } from "./OutlineSpecifierEnum"
 import { OutlineSpecifierInstance } from "./OutlineSpecifierInstance"
 import { OutlineSpecifierList } from "./OutlineSpecifierList"
 import { OutlineSpecifierTextKind } from "./OutlineSpecifierTextKind"
+import { OutlineSpecifierYesNoOrNothing } from "./OutlineSpecifierYesNoOrNothing"
 import { OutlineSpecifierYesOrNo } from "./OutlineSpecifierYesOrNo"
 import { PatternText } from "./PatternText"
 import { PropertyBodyMust } from "./PropertyBodyMust"
@@ -1987,6 +1990,22 @@ classesEs.addRule(OutlineSpecifierMedia, {
   tests: [{ tests: [[`un sonido en "sonidos/deslizar.mp3"`, `core.media("sound", "sonidos/deslizar.mp3")`]] }]
 })
 
+// un orden que guarda una página, y dónde empieza:  `su "orden" es un orden:  finalización, de más reciente a más antiguo`
+// -- before `un {type}`, which would make `orden` a type of its own
+classesEs.addRule(PageSortBy)
+
+classesEs.addRule(OutlineSpecifierSort, {
+  syntax: `un orden :? {by:page_sort_by} (, ${SORT_ORDER_WORDS.es})?`,
+  tests: [
+    {
+      tests: [
+        ["un orden:  finalización, de más reciente a más antiguo", 'core.sort("finalización", true)'],
+        ["un orden: nombre", 'core.sort("nombre")']
+      ]
+    }
+  ]
+})
+
 // un porcentaje, guardado como su fracción:  `su "propina" es un porcentaje` (epic `language` P34)
 // -- before `un {type}`, which would make `porcentaje` a type of its own
 classesEs.addRule(OutlineSpecifierPercent, {
@@ -2042,6 +2061,12 @@ classesEs.addRule(OutlineSpecifierMeasure, { syntax: "(un|una) {datatype:singula
 classesEs.addRule(OutlineSpecifierYesOrNo, {
   syntax: "(o bien)? ((sí|si) o no|verdadero o falso)",
   tests: [{ tests: [["sí o no", "choice"]] }]
+})
+
+// un sí o no que puede ser nada, como el `null` de un servidor:  `su "aprobado" es sí, no o nada`
+classesEs.addRule(OutlineSpecifierYesNoOrNothing, {
+  syntax: "(sí|si) , no o nada",
+  tests: [{ tests: [["sí, no o nada", "choice"]] }]
 })
 
 classesEs.addRule(OutlineSpecifierList, {
@@ -2993,11 +3018,13 @@ classesEs.addRule(FirstThingWhere, {
       tests: [
         [
           "la primera receta donde sus minutos es 5",
-          "core.getItemAt(core.filter(core.everyThing(Receta), (receta) => receta.minutos === 5), 0)"
+          "core.getItemAt(core.filter(core.everyThing(Receta), (receta) => receta.minutos === 5), 0)",
+          "core.getItemAt(core.filter(core.everyThing(Receta), (receta: Receta) => receta.minutos === 5), 0)"
         ],
         [
           "el primer receta que no es 5",
-          "core.getItemAt(core.filter(core.everyThing(Receta), (receta) => receta !== 5), 0)"
+          "core.getItemAt(core.filter(core.everyThing(Receta), (receta) => receta !== 5), 0)",
+          "core.getItemAt(core.filter(core.everyThing(Receta), (receta: Receta) => receta !== 5), 0)"
         ]
       ]
     }

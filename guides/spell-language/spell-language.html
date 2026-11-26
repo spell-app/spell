@@ -209,6 +209,12 @@ solitaire is an app
               <code>2 ... 10</code> is the nine numbers between.
             </li>
             <li>
+              <b>A yes or no</b> is no until it's set: <code>its "done" is yes or no</code>. One that can be nothing
+              says so: <code>its "passed" is yes, no or nothing</code> (Spanish <code>sí, no o nada</code>) is nothing
+              until it's set, so <code>its passed is nothing</code> is true then, and <code>its passed is no</code> only
+              for a no.
+            </li>
+            <li>
               <b>A worked-out one</b> has its values under it, one a line, each with its condition:
               <code>its "value" is</code> above.
             </li>
@@ -355,6 +361,9 @@ a "column" is a pile
               <b><code>where</code></b> filters, and <code>sorted by</code> orders:
               <code>cards in the pile where it is face up</code>,
               <code>every message, sorted by its sent, newest first</code>.
+              A page can hold a sort, <code>its "order" is a sort:  completion, newest first</code>, and a list sorted
+              by it, <code>sorted by the order</code>, follows it; <code>&lt;table sortable sort="the order"&gt;</code>
+              sets it from its headers' <code>sort</code>s (the data guide's "Reading").
             </li>
             <li>
               <b><code>a card belongs to one pile</code></b

@@ -588,7 +588,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/expressions/PostfixOperatorSuffix.ts",
-          "line": 9,
+          "line": 10,
           "purpose": "Base class for expression-suffix rules with no `rhs`, e.g. `is empty`, `is defined`, `exists`.",
           "syntaxes": [],
           "aliases": ["expression_suffix"]
@@ -2687,6 +2687,58 @@
           "aliases": ["expression"]
         },
         {
+          "className": "QuotedKeyRead",
+          "ruleNames": ["quoted_key_read"],
+          "internal": false,
+          "file": "src/spell/rules/properties/QuotedKeyRead.ts",
+          "line": 18,
+          "purpose": "`the \"run_by\" of its meta` ~== `meta.run_by`, a key read off a thing or an object by the key AS WRITTEN, in quotes.",
+          "syntaxes": [
+            {
+              "syntax": "the {key:text} of {expression:operand}",
+              "example": "the \"run_by\" of the gadget",
+              "outputs": {
+                "js": {
+                  "code": "gadget.run_by"
+                },
+                "ts": {
+                  "code": "gadget.run_by"
+                },
+                "py": {
+                  "code": "getattr(gadget, \"run_by\", None)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "PossessiveQuotedKeyRead",
+          "ruleNames": ["possessive_quoted_key_read"],
+          "internal": false,
+          "file": "src/spell/rules/properties/QuotedKeyRead.ts",
+          "line": 67,
+          "purpose": "`its meta's \"run_by\"` ~== `the \"run_by\" of its meta` (`QuotedKeyRead`).",
+          "syntaxes": [
+            {
+              "syntax": "{expression:possessive_owner} {possessive_mark} {key:text}",
+              "example": "the gadget's \"run_by\"",
+              "outputs": {
+                "js": {
+                  "code": "gadget.run_by"
+                },
+                "ts": {
+                  "code": "gadget.run_by"
+                },
+                "py": {
+                  "code": "getattr(gadget, \"run_by\", None)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "PossessiveProperty",
           "ruleNames": ["possessive_property"],
           "internal": false,
@@ -3718,7 +3770,7 @@
           "ruleNames": ["list_count"],
           "internal": false,
           "file": "src/spell/rules/lists/ListCount.ts",
-          "line": 15,
+          "line": 19,
           "purpose": "Length of something KNOWN to be a list, without naming its items, e.g. `the number of card suits` => `core.itemCountOf(Card.Suits)`.",
           "syntaxes": [
             {
@@ -4149,7 +4201,7 @@
           "ruleNames": ["sort_key_field"],
           "internal": false,
           "file": "src/spell/rules/lists/SortKeyField.ts",
-          "line": 14,
+          "line": 23,
           "purpose": "A field of what's being sorted, by its name alone (epic `data` P15).",
           "syntaxes": [
             {
@@ -4521,7 +4573,7 @@
           "ruleNames": ["list_sorted_by"],
           "internal": false,
           "file": "src/spell/rules/lists/ListSortedBy.ts",
-          "line": 27,
+          "line": 34,
           "purpose": "A list in order of something about each item (epic `data` P10).",
           "syntaxes": [
             {
@@ -5105,6 +5157,48 @@
             }
           ],
           "aliases": ["statement"]
+        },
+        {
+          "className": "ListFilteredHere",
+          "ruleNames": ["list_filtered_here"],
+          "internal": false,
+          "file": "src/spell/rules/lists/ListFilteredHere.ts",
+          "line": 27,
+          "purpose": "A read of a place whose `where` is checked on the Spell server, all of it: nothing of it is asked of the place.",
+          "syntaxes": [
+            {
+              "syntax": ",? filtered here"
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "ListSortedHere",
+          "ruleNames": ["list_sorted_here"],
+          "internal": false,
+          "file": "src/spell/rules/lists/ListSortedHere.ts",
+          "line": 22,
+          "purpose": "A read of a place sorted on the Spell server, when its server can't sort it that way.",
+          "syntaxes": [
+            {
+              "syntax": ",? sorted here"
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "CountRoughly",
+          "ruleNames": ["count_roughly"],
+          "internal": false,
+          "file": "src/spell/rules/lists/CountRoughly.ts",
+          "line": 21,
+          "purpose": "An ending on `the number of`, saying the place's estimate will do.",
+          "syntaxes": [
+            {
+              "syntax": ",? roughly"
+            }
+          ],
+          "aliases": ["expression_suffix"]
         },
         {
           "className": "EachItemWhere",
@@ -6380,7 +6474,7 @@
           "ruleNames": ["every_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThing.ts",
-          "line": 26,
+          "line": 28,
           "purpose": "Every thing of a type the program has made, in the order made (epic page `outline-spell`, P16).",
           "syntaxes": [
             {
@@ -6406,7 +6500,7 @@
           "ruleNames": ["every_thing_where"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThingWhere.ts",
-          "line": 27,
+          "line": 36,
           "purpose": "Every thing of a type that fits (epic `data` P10, a short form of `list_filter`).",
           "syntaxes": [
             {
@@ -6435,7 +6529,7 @@
           "ruleNames": ["first_thing_where"],
           "internal": false,
           "file": "src/spell/rules/classes/FirstThingWhere.ts",
-          "line": 14,
+          "line": 16,
           "purpose": "The first thing of a type that fits, or nothing: `every_thing_where`'s first.",
           "syntaxes": [
             {
@@ -6446,7 +6540,7 @@
                   "code": "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord.rank === 1), 0)"
                 },
                 "ts": {
-                  "code": "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord.rank === 1), 0)"
+                  "code": "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord: SuiteRecord) => suiterecord.rank === 1), 0)"
                 },
                 "py": {
                   "code": "core.get_item_at(\n    core.filter(core.every_thing(SuiteRecord), lambda suiterecord: suiterecord.rank == 1),\n    0,\n)"
@@ -7366,7 +7460,7 @@
           "ruleNames": ["define_property_has"],
           "internal": false,
           "file": "src/spell/rules/classes/DefinePropertyHas.ts",
-          "line": 73,
+          "line": 75,
           "purpose": "Declares an instance property on `type`, optionally constrained/initialized by a `type_specifier`.",
           "syntaxes": [
             {
@@ -7493,6 +7587,32 @@
                 },
                 "py": {
                   "code": "core.media(\"sound\", \"sounds/slide.mp3\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["outline_specifier"]
+        },
+        {
+          "className": "OutlineSpecifierSort",
+          "ruleNames": ["outline_specifier_sort"],
+          "internal": false,
+          "file": "src/spell/rules/classes/OutlineSpecifierSort.ts",
+          "line": 20,
+          "purpose": "A property that's a SORT, and where it starts -- `its \"order\" is a sort: completion, newest first`; Spanish `su \"orden\" es un orden: finalización, de más reciente a más antiguo`.",
+          "syntaxes": [
+            {
+              "syntax": "a sort :? {by:page_sort_by} (, ((descending:(newest|latest|highest|largest|biggest|most) first|reversed|in reverse|z-a)|(ascending:(oldest|earliest|lowest|smallest|fewest|least) first|a-z)))?",
+              "example": "a sort:  completion, newest first",
+              "outputs": {
+                "js": {
+                  "code": "core.sort(\"completion\", true)"
+                },
+                "ts": {
+                  "code": "core.sort(\"completion\", true)"
+                },
+                "py": {
+                  "code": "core.sort(\"completion\", True)"
                 }
               }
             }
@@ -7653,6 +7773,32 @@
           "aliases": ["outline_specifier"]
         },
         {
+          "className": "OutlineSpecifierYesNoOrNothing",
+          "ruleNames": ["outline_specifier_yes_no_or_nothing"],
+          "internal": false,
+          "file": "src/spell/rules/classes/OutlineSpecifierYesNoOrNothing.ts",
+          "line": 12,
+          "purpose": "`yes, no or nothing` (Spanish `sí, no o nada`) -- a yes or no that can be nothing: `its \"passed\" is yes, no or nothing`, for a field a server leaves `null` until it's decided.",
+          "syntaxes": [
+            {
+              "syntax": "yes , no or nothing",
+              "example": "yes, no or nothing",
+              "outputs": {
+                "js": {
+                  "code": "choice"
+                },
+                "ts": {
+                  "code": "choice"
+                },
+                "py": {
+                  "code": "choice"
+                }
+              }
+            }
+          ],
+          "aliases": ["outline_specifier"]
+        },
+        {
           "className": "OutlineSpecifierList",
           "ruleNames": ["outline_specifier_list"],
           "internal": false,
@@ -7735,7 +7881,7 @@
           "ruleNames": ["property_value_getter"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyValueGetter.ts",
-          "line": 52,
+          "line": 55,
           "purpose": "`the value of a card is:` -- defines a property getter whose body is an inline EXPRESSION or nested block (`{expression_body}?`), with `its`/`it` mapped to `this` inside.",
           "syntaxes": [
             {
@@ -8542,6 +8688,16 @@
           "aliases": ["outline_specifier"]
         },
         {
+          "className": "PageSortBy",
+          "ruleNames": ["page_sort_by"],
+          "internal": false,
+          "file": "src/spell/rules/classes/OutlineSpecifierSort.ts",
+          "line": 56,
+          "purpose": "The name or field a sort a page holds starts as, every word up to its comma or the line's end: `completion`, `created at`, `hora de fin`.",
+          "syntaxes": [],
+          "aliases": []
+        },
+        {
           "className": "ThePropertyOfAThing",
           "ruleNames": ["the_property_of_a_thing"],
           "internal": false,
@@ -8933,7 +9089,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 129,
+          "line": 156,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -9088,11 +9244,14 @@
           "ruleNames": ["first_few_where"],
           "internal": false,
           "file": "src/spell/rules/places/FirstFewWhere.ts",
-          "line": 14,
+          "line": 17,
           "purpose": "A few of a type, by its plural (epic `data` P11).",
           "syntaxes": [
             {
               "syntax": "the first {number} {type:plural_type} (where:where|which|that|who) {inline_expression}?"
+            },
+            {
+              "syntax": "the first {number} {type:plural_type}"
             }
           ],
           "aliases": ["expression"]
@@ -9102,7 +9261,7 @@
           "ruleNames": ["number_of_things_where"],
           "internal": false,
           "file": "src/spell/rules/places/NumberOfThingsWhere.ts",
-          "line": 17,
+          "line": 19,
           "purpose": "How many of a type fit (epic `data` P11).",
           "syntaxes": [
             {
@@ -9790,6 +9949,35 @@
           "aliases": ["statement"]
         },
         {
+          "className": "FiltersByAnyField",
+          "ruleNames": ["filters_by_any_field"],
+          "internal": false,
+          "file": "src/spell/rules/places/FiltersByAnyField.ts",
+          "line": 17,
+          "purpose": "A web server's list filters by any field, asked the field and the value as two questions.",
+          "syntaxes": [
+            {
+              "syntax": "{collection:plural_type} can be filtered by any field ,? with {field:text} and {value:text}",
+              "example": "cookbook is a web server at \"https://cookbook.test\"\n\t- recipes live at \"/api/recipes\"\n\t\t- recipes can be filtered by any field, with \"field\" and \"value\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://cookbook.test\",\n  collections: { recipes: {\n    at: \"/api/recipes\",\n    filters: \"every field\",\n    filteredWith: { field: \"field\", value: \"value\" }\n  } }\n})"
+                },
+                "ts": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://cookbook.test\",\n  collections: { recipes: {\n    at: \"/api/recipes\",\n    filters: \"every field\",\n    filteredWith: { field: \"field\", value: \"value\" }\n  } }\n})"
+                },
+                "py": {
+                  "code": "class Cookbook(Place):\n    pass\n\ncookbook = core.place(\n    Cookbook(),\n    {\n        \"name\": \"cookbook\",\n        \"kind\": \"web server\",\n        \"at\": \"https://cookbook.test\",\n        \"collections\": {\n            \"recipes\": {\n                \"at\": \"/api/recipes\",\n                \"filters\": \"every field\",\n                \"filtered_with\": {\"field\": \"field\", \"value\": \"value\"},\n            },\n        },\n    },\n)"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_it} can be filtered by any field ,? with {field:text} and {value:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "SortsBy",
           "ruleNames": ["sorts_by"],
           "internal": false,
@@ -9814,6 +10002,64 @@
             },
             {
               "syntax": "{type:subject_it} sorts by every field (with {param:text})?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SortsByAnyField",
+          "ruleNames": ["sorts_by_any_field"],
+          "internal": false,
+          "file": "src/spell/rules/places/SortsByAnyField.ts",
+          "line": 27,
+          "purpose": "A web server's list sorts by any field, named in one question.",
+          "syntaxes": [
+            {
+              "syntax": "{collection:plural_type} can be sorted by any field ,? with {param:text} {nested_statements}?",
+              "example": "cookbook is a web server at \"https://cookbook.test\"\n\t- recipes live at \"/api/recipes\"\n\t\t- recipes can be sorted by any field, with \"sort\"\n\t\t\t- newest first with \"order\" as \"desc\"\n\t\t\t- oldest first with \"order\" as \"asc\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://cookbook.test\",\n  collections: { recipes: {\n    at: \"/api/recipes\",\n    sorts: \"every field\",\n    sortedWith: \"sort\",\n    sortDirections: {\n      param: \"order\",\n      descending: \"desc\",\n      ascending: \"asc\"\n    }\n  } }\n})"
+                },
+                "ts": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://cookbook.test\",\n  collections: { recipes: {\n    at: \"/api/recipes\",\n    sorts: \"every field\",\n    sortedWith: \"sort\",\n    sortDirections: {\n      param: \"order\",\n      descending: \"desc\",\n      ascending: \"asc\"\n    }\n  } }\n})"
+                },
+                "py": {
+                  "code": "class Cookbook(Place):\n    pass\n\ncookbook = core.place(\n    Cookbook(),\n    {\n        \"name\": \"cookbook\",\n        \"kind\": \"web server\",\n        \"at\": \"https://cookbook.test\",\n        \"collections\": {\n            \"recipes\": {\n                \"at\": \"/api/recipes\",\n                \"sorts\": \"every field\",\n                \"sorted_with\": \"sort\",\n                \"sort_directions\": {\"param\": \"order\", \"descending\": \"desc\", \"ascending\": \"asc\"},\n            },\n        },\n    },\n)"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_it} can be sorted by any field ,? with {param:text} {nested_statements}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "NamedSorts",
+          "ruleNames": ["named_sorts"],
+          "internal": false,
+          "file": "src/spell/rules/places/NamedSorts.ts",
+          "line": 27,
+          "purpose": "The sorts a web server's list has names of its own for, each sent as its value.",
+          "syntaxes": [
+            {
+              "syntax": "{collection:plural_type} can be sorted by :? {nested_statements}",
+              "example": "cookbook is a web server at \"https://cookbook.test\"\n\t- recipes live at \"/api/recipes\"\n\t\t- it sorts with \"order_by\"\n\t\t- recipes can be sorted by:\n\t\t\t- \"creation\" as \"created_at\"\n\t\t\t- \"last cooked\" as \"recency\", by cooked-at",
+              "outputs": {
+                "js": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://cookbook.test\",\n  collections: { recipes: {\n    sortedWith: \"order_by\",\n    at: \"/api/recipes\",\n    sortOrders: [{\n      name: \"creation\",\n      as: \"created_at\",\n      field: \"createdAt\"\n    }, {\n      name: \"lastCooked\",\n      as: \"recency\",\n      field: \"cookedAt\"\n    }]\n  } }\n})"
+                },
+                "ts": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://cookbook.test\",\n  collections: { recipes: {\n    sortedWith: \"order_by\",\n    at: \"/api/recipes\",\n    sortOrders: [{\n      name: \"creation\",\n      as: \"created_at\",\n      field: \"createdAt\"\n    }, {\n      name: \"lastCooked\",\n      as: \"recency\",\n      field: \"cookedAt\"\n    }]\n  } }\n})"
+                },
+                "py": {
+                  "code": "class Cookbook(Place):\n    pass\n\ncookbook = core.place(\n    Cookbook(),\n    {\n        \"name\": \"cookbook\",\n        \"kind\": \"web server\",\n        \"at\": \"https://cookbook.test\",\n        \"collections\": {\n            \"recipes\": {\n                \"sorted_with\": \"order_by\",\n                \"at\": \"/api/recipes\",\n                \"sort_orders\": [\n                    {\"name\": \"creation\", \"as_\": \"created_at\", \"field\": \"createdAt\"},\n                    {\"name\": \"lastCooked\", \"as_\": \"recency\", \"field\": \"cookedAt\"},\n                ],\n            },\n        },\n    },\n)"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_it} can be sorted by :? {nested_statements}"
             }
           ],
           "aliases": ["statement"]
@@ -10409,7 +10655,7 @@
           "ruleNames": ["collection_at"],
           "internal": false,
           "file": "src/spell/rules/places/CollectionAt.ts",
-          "line": 30,
+          "line": 44,
           "purpose": "Where a place keeps a type's things, when it's not where anyone would look.",
           "syntaxes": [
             {
@@ -10623,6 +10869,48 @@
           "syntaxes": [
             {
               "syntax": "{type:subject_its} next page is in its {header:text} header"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SortsWith",
+          "ruleNames": ["sorts_with"],
+          "internal": false,
+          "file": "src/spell/rules/places/SortsWith.ts",
+          "line": 10,
+          "purpose": "What a web server calls its sort, said once, for a list's named sorts (`NamedSorts`).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} sorts with {param:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SortDirection",
+          "ruleNames": ["sort_direction"],
+          "internal": false,
+          "file": "src/spell/rules/places/SortsByAnyField.ts",
+          "line": 72,
+          "purpose": "One line under `jobs can be sorted by any field, with \"sort\"`, `- newest first with \"order\" as \"desc\"`.",
+          "syntaxes": [
+            {
+              "syntax": "((descending:newest first)|(ascending:oldest first)) with {param:text} as {value:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "NamedSort",
+          "ruleNames": ["named_sort"],
+          "internal": false,
+          "file": "src/spell/rules/places/NamedSorts.ts",
+          "line": 67,
+          "purpose": "One line of a `named_sorts` block, `- \"completion\" as \"recency\", by end time`.",
+          "syntaxes": [
+            {
+              "syntax": "{name:text} as {value:text} (, by {field:named_sort_field})?"
             }
           ],
           "aliases": ["statement"]
@@ -10982,6 +11270,16 @@
           "aliases": ["expression_suffix"]
         },
         {
+          "className": "NamedSortField",
+          "ruleNames": ["named_sort_field"],
+          "internal": false,
+          "file": "src/spell/rules/places/NamedSorts.ts",
+          "line": 97,
+          "purpose": "The field a `named_sort` line says, after its `, by`: every word to the line's end.",
+          "syntaxes": [],
+          "aliases": []
+        },
+        {
           "className": "SearchedFields",
           "ruleNames": ["searched_fields"],
           "internal": false,
@@ -11329,7 +11627,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 128,
+          "line": 132,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

@@ -31,6 +31,10 @@ export const SpellUrls = {
   INDEX: "/api/projects/index/",
   /** A group's projects:  `GET /api/projects/list/<group's address>`. */
   LIST: "/api/projects/list/",
+  /** How a project's compile is coming along, while a request waits for it:  `GET /api/projects/building/<address>`. */
+  BUILDING: "/api/projects/building/",
+  /** The themes a site of a project may wear, its own and its imports':  `GET /api/projects/themes/<address>`. */
+  THEMES: "/api/projects/themes/",
   /** The org whose own space is the repo's built-ins, spell-app's `spaces/@spell/`. */
   BUILT_IN_ORG: "spell",
 
@@ -71,6 +75,16 @@ export const SpellUrls = {
   /** URL of project `projectId`'s index:  `/api/projects/index/<address>`. */
   indexUrl(projectId: string): string {
     return SpellUrls.INDEX + SpellUrls.encodeAddress(projectId)
+  },
+
+  /** URL of the themes a site of project `projectId` may wear:  `/api/projects/themes/<address>`. */
+  themesUrl(projectId: string): string {
+    return SpellUrls.THEMES + SpellUrls.encodeAddress(projectId)
+  },
+
+  /** URL of how project `projectId`'s compile is coming along:  `/api/projects/building/<address>`. */
+  buildingUrl(projectId: string): string {
+    return SpellUrls.BUILDING + SpellUrls.encodeAddress(projectId)
   },
 
   /** URL of group `rootPath`'s project list:  `/api/projects/list/<group's address>`. */
@@ -120,7 +134,7 @@ export const SpellUrls = {
    */
   projectIdFor(place: string): string {
     if (/%/.test(place)) place = decodeParts(place, place)
-    for (const prefix of [SpellUrls.INDEX, SpellUrls.LIST])
+    for (const prefix of [SpellUrls.INDEX, SpellUrls.LIST, SpellUrls.BUILDING, SpellUrls.THEMES])
       if (place.startsWith(prefix)) place = place.slice(prefix.length)
     const group = SpellSetup.groupFor(place)
     const rest = group ? place.slice(group.path.length + 1) : ""
@@ -193,6 +207,16 @@ export const SpellUrls = {
     return address.split("/").map(SpellUrls.encodePart).join("/")
   }
 }
+/**
+ * How a project's compile is coming along, while a request for a file it builds waits for it:
+ * `GET /api/projects/building/<project>`'s answer (`buildingUrl()`), the page server's `ProjectBuild.progress()`.
+ * - `building`:  is a request waiting for it?  The rest are there only when one is.
+ * - `seconds`:  how long the first one has waited
+ * - `afterStartup`:  it waits for the page server's startup build first, of Spell's own projects
+ * - `compiled`:  the projects compiled so far by the compile it waits for, e.g. one it imports
+ */
+export type BuildProgress = { building: boolean; seconds?: number; afterStartup?: boolean; compiled?: string[] }
+
 /** `typeof SpellUrls`, exported so consumers can type a reference to it. */
 export type SpellUrls = typeof SpellUrls
 

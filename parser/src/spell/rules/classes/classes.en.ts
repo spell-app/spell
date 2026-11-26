@@ -22,6 +22,8 @@ import { DimensionUnit } from "./DimensionUnit"
 import { OutlineSpecifierMeasure } from "./OutlineSpecifierMeasure"
 import { OutlineSpecifierPercent } from "./OutlineSpecifierPercent"
 import { OutlineSpecifierMedia } from "./OutlineSpecifierMedia"
+import { OutlineSpecifierSort, PageSortBy } from "./OutlineSpecifierSort"
+import { SORT_ORDER_WORDS } from "spell/parser/spell/rules/lists/sortOrderWords"
 import { CreateThing } from "./CreateThing"
 import { CreateType } from "./CreateType"
 import { CSSBlock } from "./CSSBlock"
@@ -51,6 +53,7 @@ import { OutlineSpecifierEnum } from "./OutlineSpecifierEnum"
 import { OutlineSpecifierInstance } from "./OutlineSpecifierInstance"
 import { OutlineSpecifierList } from "./OutlineSpecifierList"
 import { OutlineSpecifierTextKind } from "./OutlineSpecifierTextKind"
+import { OutlineSpecifierYesNoOrNothing } from "./OutlineSpecifierYesNoOrNothing"
 import { OutlineSpecifierYesOrNo } from "./OutlineSpecifierYesOrNo"
 import { PatternText } from "./PatternText"
 import { PropertyBodyMust } from "./PropertyBodyMust"
@@ -2036,7 +2039,24 @@ classes.addRule(OutlineSpecifierMedia, {
   tests: [{ tests: [[`a sound at "sounds/slide.mp3"`, `core.media("sound", "sounds/slide.mp3")`]] }]
 })
 
-// a percent, kept as its fraction:  `its "tip" is a percent` (epic `language` P34)
+// a sort a page holds, and where it starts:  `its "order" is a sort:  completion, newest first` -- a read sorted by it
+// follows it, and a table's header click sets it -- before `a {type}`, which would make `sort` a type of its own
+classes.addRule(PageSortBy)
+
+classes.addRule(OutlineSpecifierSort, {
+  syntax: `a sort :? {by:page_sort_by} (, ${SORT_ORDER_WORDS.en})?`,
+  tests: [
+    {
+      tests: [
+        ["a sort:  completion, newest first", 'core.sort("completion", true)'],
+        ["a sort: created at", 'core.sort("created at")'],
+        ["a sort: name, a-z", 'core.sort("name")']
+      ]
+    }
+  ]
+})
+
+// a percent, kept as its fraction:  `its "tip" is a percent`, `<property "tip" type="percent">18%</>` (epic `language` P34)
 // -- before `a {type}`, which would make `percent` a type of its own
 classes.addRule(OutlineSpecifierPercent, {
   syntax: "(a|an) (percent|percentage) (starting at {start:expression})?",
@@ -2091,6 +2111,12 @@ classes.addRule(OutlineSpecifierMeasure, { syntax: "(a|an) {datatype:singular_ty
 classes.addRule(OutlineSpecifierYesOrNo, {
   syntax: "either? (yes or no|true or false)",
   tests: [{ tests: [["yes or no", "choice"]] }]
+})
+
+// a yes or no that can be nothing, as a server's `null`:  `its "passed" is yes, no or nothing`
+classes.addRule(OutlineSpecifierYesNoOrNothing, {
+  syntax: "yes , no or nothing",
+  tests: [{ tests: [["yes, no or nothing", "choice"]] }]
 })
 
 classes.addRule(OutlineSpecifierList, {
@@ -3301,11 +3327,13 @@ classes.addRule(FirstThingWhere, {
       tests: [
         [
           "the first suite record where its rank is 1",
-          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord.rank === 1), 0)"
+          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord.rank === 1), 0)",
+          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord: SuiteRecord) => suiterecord.rank === 1), 0)"
         ],
         [
           "the first suite record which is not 1",
-          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord !== 1), 0)"
+          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord !== 1), 0)",
+          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord: SuiteRecord) => suiterecord !== 1), 0)"
         ]
       ]
     }

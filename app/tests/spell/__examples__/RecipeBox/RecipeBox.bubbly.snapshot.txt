@@ -136,7 +136,7 @@
 |   [property property_value_getter L1]
 |   | its «"matches"» is
 |   |   ⟦// Newest first, by when each was saved⟧
-|   |   return every **recipe** where its **title** includes the **search**, sorted by its **created**, newest first    ‾value(every recipe where its title includes the search, sorted by its created, newest first)
+|   |   return every **recipe** where its **title** includes the **search**, filtered here, sorted by its **created**, newest first    ‾value(every recipe where its title includes the search, filtered here, sorted by its created, newest first)
 
 |   [action to_do_something L1]
 |   | to «add the new recipe»

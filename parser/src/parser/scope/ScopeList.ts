@@ -32,6 +32,14 @@ export class ScopeList<ListType = any, InputType = ListType> {
    */
   #keys = new WeakMap<object, string | undefined>()
 
+  /**
+   * Each key's first item, for the items as they are now:  so `get()` needn't look through them all.
+   * - Made on the first lookup after a change;  an add (to the end) extends it, else it's made again.
+   * - First wins, as `get()`'s `find()` did:  an item later in the list with the same key is never found by it.
+   * - NOT aliases:  a type's can change after it's in the list (`TypeScope.claim()`), so `getByAlias()` looks.
+   */
+  #index: ScopeIndex<ListType> | undefined
+
   /** `props.parentProp` split at its dots, e.g. `["parentScope", "variables"]`, so `parent` needn't parse it. */
   #parentPath: string[] | undefined
 
@@ -81,7 +89,8 @@ export class ScopeList<ListType = any, InputType = ListType> {
       return this.#items
     }
     key = this.normalizeKey(key)
-    const item = this.#items.find((it) => key === this.getKeyFor(it)) ?? this.getByAlias(key)
+    const index = this.indexed()
+    const item = index.keys.get(key) ?? this.getByAlias(key)
     ScopeList.outline?.lookedUp(this, key, item)
     if (!item && !localOnly) return this.parent?.get(key)
     return item
@@ -120,13 +129,30 @@ export class ScopeList<ListType = any, InputType = ListType> {
     })
   }
 
+  /** Our index, for our items as they are now -- see `#index`. */
+  private indexed(): ScopeIndex<ListType> {
+    if (this.#index?.items === this.#items) return this.#index
+    const index: ScopeIndex<ListType> = { items: [], keys: new Map() }
+    this.indexInto(index, this.#items)
+    return (this.#index = index)
+  }
+
+  /** SIDE EFFECT:  `items`, now at the end of `index.items`, go in `index`, each key's first item kept. */
+  private indexInto(index: ScopeIndex<ListType>, items: readonly ListType[]): void {
+    for (const item of items) {
+      const key = this.getKeyFor(item)
+      if (!index.keys.has(key)) index.keys.set(key, item)
+    }
+    index.items = this.#items
+  }
+
   /**
    * Add one or more `items` to end of our list, running each through `transformer` first.
    * - SIDE EFFECT: an item with a `declaredBy` match is noted on it too -- see `noteDeclared()`.
    */
   add(...items: Array<ListType | InputType>) {
     const transformed = items.map(this.transform)
-    this.change(transformed, (current) => [...current, ...transformed])
+    this.change(transformed, (current) => [...current, ...transformed], undefined, true)
     for (const item of transformed) ScopeList.noteDeclared(item)
     return transformed
   }
@@ -172,11 +198,19 @@ export class ScopeList<ListType = any, InputType = ListType> {
    * Swap in the items `apply` makes of ours, recording it in our scope's journal (if any) so it can be undone.
    * - Redone, it's applied to our items as they are then:  see the class.
    */
-  private change(items: ListType[], apply: (current: readonly ListType[]) => readonly ListType[], replace?: true) {
+  private change(
+    items: ListType[],
+    apply: (current: readonly ListType[]) => readonly ListType[],
+    replace?: true,
+    appended?: true
+  ) {
     let previous = this.#items
     const redo = () => {
       previous = this.#items
       this.#items = apply(previous)
+      // added to the end of items the index has:  it takes them too, else it's made again when it's next needed
+      const index = this.#index
+      if (appended && index?.items === previous) this.indexInto(index, items)
     }
     redo()
     const journal = (this.props.target as P.Scope | undefined)?.parser?.journal
@@ -198,6 +232,14 @@ export class ScopeList<ListType = any, InputType = ListType> {
     if (this.props.transformer) return this.props.transformer(item) as ListType
     return item as ListType
   }
+}
+
+/** What `ScopeList` keeps to find an item at once:  see its `#index`. */
+type ScopeIndex<ListType> = {
+  /** The items it's for:  out of date once they're swapped for others. */
+  items: readonly ListType[]
+  /** Each (normalized) key's first item. */
+  keys: Map<string | undefined, ListType>
 }
 
 /** Constructor props for `ScopeList`. */

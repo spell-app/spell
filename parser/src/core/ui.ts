@@ -5,6 +5,7 @@ import type { DrawnWindow } from "spell/element/drawnWindow"
 
 import { core, whileReading } from "./core"
 import { defineCoreModule } from "./core.types"
+import { SORT_HOMES, isPageSort, type PageSort } from "./collection-other"
 import type { MenuItem } from "./acting"
 import { printAlone } from "./printing"
 
@@ -773,6 +774,31 @@ export function listenForTableEdits(element: HTMLElement): () => void {
 }
 
 /**
+ * What a `<ui-table sort="the order">` the program drew asks for, written into the page's sort.  Returns how to stop.
+ * - It hears Spell UI's `ui-sorting` on `element`, its app's, in every language a program draws in (`es-ordenando`),
+ *   from a table showing a sort a page holds (`core.sortShown()`).
+ * - It cancels it, so the table never sorts by itself, and writes the next sort (`core.nextSort()`) where the shown one
+ *   lives:  the table follows it, and so does every read sorted by it, which asks again.
+ * - Any other table's is left to it.
+ * - `core.mountApp()` calls it, and its `unmount()` stops it.
+ */
+export function listenForTableSorts(element: HTMLElement): () => void {
+  const onSorting = (event: Event) => {
+    const { key } = ((event as CustomEvent).detail ?? {}) as { key?: string }
+    // the table itself, though it's drawn inside a view's shadow root:  `target` would be that view
+    const shown = (event.composedPath()[0] as { sort?: unknown } | undefined)?.sort
+    const home = isPageSort(shown) ? SORT_HOMES.get(shown) : undefined
+    if (!home || key === undefined) return
+    event.preventDefault()
+    ;(home.owner as Record<string, unknown>)[home.property] = core.nextSort(shown as PageSort, key)
+  }
+  for (const name of TABLE_SORTING) element.addEventListener(name, onSorting)
+  return () => {
+    for (const name of TABLE_SORTING) element.removeEventListener(name, onSorting)
+  }
+}
+
+/**
  * Name the columns a `<ui-table>` shows for `list`, a list of `Class`'s things (epic `mockup` P9):
  * its `tableColumns`, which Spell UI's table reads when it's handed no `columnDefs`.
  * - So an empty list still has its columns, and a table of it can take its first row.
@@ -906,6 +932,9 @@ type TableEdit = {
  * - Written out, not asked of Spell UI:  the core sits below it.
  */
 const TABLE_EDITING = ["ui-editing", "es-editando"]
+
+/** The event a sortable table sends as a header asks to sort, by each language a program draws in (`UITable.es.ts`). */
+const TABLE_SORTING = ["ui-sorting", "es-ordenando"]
 
 /** The keys that undo and redo, as Spell UI's keyboard names them:  `Mod` is ⌘ on a Mac, Ctrl elsewhere. */
 const UNDO_KEYS = [

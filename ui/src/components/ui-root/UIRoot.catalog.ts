@@ -237,7 +237,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "inverted"
     ]
   },
-  "ui-cell": { folder: "ui-table", attributes: ["header", "span", "align", "vertical-align"] },
+  "ui-cell": { folder: "ui-table", attributes: ["header", "sort", "span", "align", "vertical-align"] },
   "ui-checkbox": {
     folder: "ui-checkbox",
     skeleton: { display: "inline", width: "6em", height: "1.25em" },
@@ -1595,6 +1595,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "vertical-align",
       "sort-column",
       "sort-direction",
+      "sort",
       "client-sort",
       "column-defs",
       "caption",

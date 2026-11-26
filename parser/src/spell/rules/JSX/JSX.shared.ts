@@ -185,6 +185,11 @@ export type JSXMatchData = {
   looking?: { attribute: string; said: string; ownsState: boolean }
   /** (`jsxElement`) A rider written inside an element, `<loading>` or `<failed>` (`SpellJSX.riderOf()`). */
   rider?: "waiting" | "failed"
+  /**
+   * (`jsxElement`) A table's `sort="the order"`:  which of its attributes it is, and the sort a page holds it names
+   * (`SpellJSX.pageSortOf()`).
+   */
+  pageSort?: { index: number; value: P.Match }
   /** (`jsxElement`) Parsed `jsxAttribute` matches for the element. */
   attributes?: Array<P.Match | undefined>
   /** (`jsxAttribute`) Normalized attribute name. */

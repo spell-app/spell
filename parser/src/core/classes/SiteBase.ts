@@ -1,10 +1,27 @@
 import h from "@solidjs/h"
-import { For, createEffect, createMemo, createRoot, getOwner, runWithOwner, untrack, type Owner } from "solid-js"
+import {
+  For,
+  createEffect,
+  createMemo,
+  createRoot,
+  getOwner,
+  onCleanup,
+  runWithOwner,
+  untrack,
+  type Owner
+} from "solid-js"
 
 import { PrefStore, schemaOf } from "spell/util"
 import { MostRecent } from "spell/util/MostRecent"
 import { waitUntil } from "spell/util/timing"
-import { compilePattern, filledPattern, type AddressParams } from "spell/util/addressPattern"
+import {
+  compilePattern,
+  filledPattern,
+  optionalParamsOf,
+  paramsOf,
+  requiredParamsOf,
+  type AddressParams
+} from "spell/util/addressPattern"
 
 import { core } from "spell/parser/core/core"
 import type { SiteHost, SiteLinkEntry, SiteOverlayEntry, SitePageEntry } from "spell/parser/core/core.types"
@@ -25,6 +42,12 @@ import { Thing } from "./Thing"
  * - The site's lines compile to its class's statics (`static pages`, `static dialogs` ...):  this reads them.
  * - An address is matched by the kit's ONE address grammar (`spell/util/addressPattern`), the page server router's:
  *   `/films/:film` shows the film page, its `film` the film the address names.
+ *   - A parameter that may be left out, `/settings/:section?`:  `/settings` shows the page with its `section` at its
+ *     starting value (`startingValues()`), `/settings/billing` with it `"billing"`.
+ * - A TEXT parameter the page changes itself (tabs bound to its `section`) writes the page's address, a step in the
+ *   history, the page not drawn again;  Back and Forward set it back the same way (`followParams()`, `sameDrawing()`).
+ * - The dialog or sidebar open is in the address's hash, `#confirm-order/1042` (`hashOf()`):  opening one writes
+ *   it, closing it takes it out, and an address with it opens it (`showPart()`);  a hash naming none is a section.
  * - `/` with no page of its own shows its first page:  where Run starts.
  * - The page shown, its parameters filled in, then drawn inside the site, with an open dialog or sidebar over it.
  * - An address no page has shows the site's NOT FOUND page;  a page that fails to draw or load, its ERROR page:
@@ -123,9 +146,12 @@ export class SiteBase extends App {
     return all
   }
 
-  /** Its first page with no parameters, to show at `/` when no page is there:  `undefined` for none. */
+  /**
+   * Its first page with no parameters it can't do without, to show at `/` when no page is there:  `undefined` for
+   * none.
+   */
   firstPage(): { entry: SitePageEntry; params: AddressParams } | undefined {
-    const entry = this.allPages().find((page) => !page.params?.length)
+    const entry = this.allPages().find((page) => !needsValues(page))
     return entry && { entry, params: {} }
   }
 
@@ -182,7 +208,8 @@ export class SiteBase extends App {
    * - throws `TypeError` for a page the site doesn't have
    */
   linkTo(name: string, thing?: unknown): string {
-    if (thing == null && this.entryNamed(name)?.params?.length) return ""
+    const entry = this.entryNamed(name)
+    if (thing == null && entry && needsValues(entry)) return ""
     return this.addressWith(name, thing ?? undefined)
   }
 
@@ -202,14 +229,29 @@ export class SiteBase extends App {
    * - Each parameter fills the page's property of its name, looked up by its type:  a thing of the program, or one in
    *   the place its type is saved in (`core.savedThingWithId()`).
    * - A lookup that fails shows the error page.
+   * - A parameter left out (`/settings/:section?` at `/settings`) sets its property back to its starting value.
+   * - The page shown at another address that differs only in its text parameters that may be left out, its tabs'
+   *   (Back from `/settings/team` to `/settings/api-keys`):  its properties set, the page not drawn again
+   *   (`sameDrawing()`).  One that differs in another (`/racks/b16` after `/racks/d16`) is drawn afresh, as before.
    * - The same address again does nothing, unless it showed no page:  a page made for it since shows
    *   (the editor's "Create it", epic `mockup` P4).
    * - NEVER throws:  what goes wrong is shown on the page.
    */
-  async showAddress(address: string, known: Record<string, unknown> = {}): Promise<void> {
+  showAddress(address: string, known: Record<string, unknown> = {}): Promise<void> {
+    const shown = this.showAddressNow(address, known)
+    this.lastShown = shown
+    return shown
+  }
+
+  /** The last address asked for, once it's shown:  a part named in its hash opens after (`showPart()`). */
+  private lastShown: Promise<void> = Promise.resolve()
+
+  /** `showAddress()`'s work. */
+  private async showAddressNow(address: string, known: Record<string, unknown>): Promise<void> {
     const showing = this.getState("showing") as Showing | undefined
     if (address === this.currentAddressHere && showing && showing.kind === "page") return
     this.closeOverlay()
+    const before = this.currentAddressHere
     this.setProp("currentAddress", address)
     // `/` with no page of its own is the site's first page:  where Run starts
     const found = this.pageFor(address) ?? (address === "/" ? this.firstPage() : undefined)
@@ -225,6 +267,15 @@ export class SiteBase extends App {
     if (!page) {
       this.showNow({ kind: "waiting", entry: found.entry })
       return
+    }
+    const starting = this.startingValues(page, found.entry)
+    // the page shown, only its text parameters changed:  set, not drawn again
+    if (showing?.kind === "page" && showing.page === page && before !== undefined) {
+      if (this.sameDrawing(showing, found.params, starting, address)) return
+    }
+    // each parameter left out at its starting value
+    for (const param of optionalParamsOf(found.entry.address)) {
+      if (!(param in found.params)) (page as unknown as Record<string, unknown>)[propertyFor(param)] = starting[param]
     }
     // its parameters' things are read first:  meanwhile its layout, a spinner in the page's room
     if (Object.keys(found.params).some((param) => !(propertyFor(param) in known)))
@@ -242,6 +293,134 @@ export class SiteBase extends App {
       if (this.currentAddressHere === address) this.showFailure(found.entry.name, error)
     }
   }
+
+  /**
+   * The values page `page`'s parameters that may be left out have before any address sets them, by parameter:
+   * what the page gives them as it's made (`when creating it`), else nothing.  What a parameter left out goes back to.
+   * - Read the first time the page is shown, and kept.
+   */
+  private startingValues(page: Page, entry: SitePageEntry): Record<string, unknown> {
+    let values = this.startingByPage.get(page)
+    if (!values) {
+      values = {}
+      for (const param of optionalParamsOf(entry.address))
+        values[param] = (page as unknown as Record<string, unknown>)[propertyFor(param)]
+      this.startingByPage.set(page, values)
+    }
+    return values
+  }
+
+  /** Each page's starting values, `startingValues()`. */
+  private startingByPage = new WeakMap<Page, Record<string, unknown>>()
+
+  /**
+   * Show page `showing` at `address`, whose parameters are `params`, in the same drawing, when only its text
+   * parameters that may be left out differ:  each set (a parameter left out to its starting value), the drawing kept under the new address
+   * (`KeptPages.move()`).  Answers whether it did;  `false`:  `address` is drawn as any other is.
+   */
+  private sameDrawing(
+    showing: Extract<Showing, { kind: "page" }>,
+    params: AddressParams,
+    starting: Record<string, unknown>,
+    address: string
+  ): boolean {
+    const { page, entry } = showing
+    const record = page as unknown as Record<string, unknown>
+    const shownAt = this.pageFor(showing.address)?.params ?? {}
+    const changed = paramsOf(entry.address).filter((param) => shownAt[param] !== params[param])
+    // a tab's:  a text parameter that may be left out;  another (a rack's `:picked`) is drawn afresh, as before
+    const tabs = new Set(optionalParamsOf(entry.address))
+    if (!changed.every((param) => tabs.has(param) && isTextParam(page, param))) return false
+    for (const param of changed) record[propertyFor(param)] = param in params ? params[param] : starting[param]
+    this.moveDrawing(showing.address, address)
+    this.showNow({ ...showing, address })
+    return true
+  }
+
+  /** Keep the drawing at address `from` as the drawing at `to`, in each layout:  shown again, not drawn again. */
+  private moveDrawing(from: string, to: string): void {
+    for (const kept of this.keptPages) kept.move(from, to)
+  }
+
+  /** Each layout's last pages drawn, `KeptPages`:  one per layout drawn. */
+  private keptPages = new Set<KeptPages>()
+
+  /**
+   * Follow the text parameters of page `showing` as the page changes them (tabs bound to its `section`):  each change
+   * writes its address, through the host, a step in the history, the page not drawn again.
+   * - A parameter at its starting value, with none after it filled, is left out:  `/settings` for its first tab.
+   * - What it followed before is let go:  one page followed at a time.
+   */
+  private followParams(showing: Extract<Showing, { kind: "page" }>): void {
+    this.stopFollowing?.()
+    this.stopFollowing = undefined
+    const { page, entry } = showing
+    const params = paramsOf(entry.address).filter((param) => isTextParam(page, param))
+    if (!params.length) return
+    const record = page as unknown as Record<string, unknown>
+    const starting = this.startingValues(page, entry)
+    const optional = new Set(optionalParamsOf(entry.address))
+    let pending: ReturnType<typeof setTimeout> | undefined
+    createRoot((dispose) => {
+      this.stopFollowing = () => {
+        clearTimeout(pending)
+        dispose()
+      }
+      createEffect(
+        () => params.map((param) => record[propertyFor(param)]),
+        () => {
+          // written once the event that changed them is over:  a pick that sets a tab and starts its own tab afresh
+          // (two listeners, with a microtask checkpoint between them) is ONE step in the history
+          clearTimeout(pending)
+          pending = setTimeout(() => this.writeParams(page, entry, params, starting, optional))
+        }
+      )
+    })
+  }
+
+  /**
+   * Write page `page`'s address as its text parameters `params` now are, `followParams()`'s:  through the host, a step
+   * in the history, the drawing kept;  nothing when it's its address already, or another page is shown.
+   */
+  private writeParams(
+    page: Page,
+    entry: SitePageEntry,
+    params: string[],
+    starting: Record<string, unknown>,
+    optional: Set<string>
+  ): void {
+    const record = page as unknown as Record<string, unknown>
+    const values = params.map((param) => record[propertyFor(param)])
+    const current = this.getState<Showing>("showing")
+    // another page shown since, or another site the program's now (a new run)
+    if (current?.kind !== "page" || current.page !== page || core.RUNTIME?.site !== this) return
+    const shownAt = this.pageFor(current.address)?.params ?? {}
+    const differs = params.some((param, at) => (shownAt[param] ?? starting[param] ?? "") !== (values[at] ?? ""))
+    if (!differs) return
+    // left out from the end while at its starting value
+    const filled: Record<string, unknown> = { ...shownAt }
+    params.forEach((param, at) => (filled[param] = values[at]))
+    const names = paramsOf(entry.address)
+    for (let at = names.length - 1; at >= 0; at--) {
+      const param = names[at]!
+      if (!optional.has(param) || (filled[param] !== starting[param] && filled[param] !== "")) break
+      filled[param] = undefined
+    }
+    let address: string
+    try {
+      address = filledPattern(entry.address, filled as Record<string, string | undefined>)
+    } catch {
+      return
+    }
+    if (address === current.address) return
+    this.moveDrawing(current.address, address)
+    this.setProp("currentAddress", address)
+    this.showNow({ ...current, address })
+    core.siteHost?.go(address, { keepScroll: true })
+  }
+
+  /** Lets go of what `followParams()` follows. */
+  private stopFollowing?: () => void
 
   /**
    * Show the error page for page `name`, which failed with `error`:  what a page that throws as it draws comes to
@@ -269,32 +448,106 @@ export class SiteBase extends App {
   // ## Dialogs and sidebars
   ////////////////
 
-  /** Open dialog or sidebar `entry`, its view's first property set to `thing`, if any. */
-  openOverlay(kind: "dialog" | "sidebar", entry: SiteOverlayEntry, thing?: unknown): void {
-    const View = entry.view ? core.things.classNamed(entry.view) : undefined
-    const view = View ? (this.overlayViews.get(entry.name) ?? new (View as new () => object)()) : undefined
+  /**
+   * Open dialog or sidebar `entry`, its view's first property set to `thing`, if any.
+   * - Its name goes in the address's hash, a step in the history (`SiteHost.partOpened()`, `hashOf()`):
+   *   `#confirm-order/1042`.  `fromAddress`:  the address named it already, so it isn't written again.
+   */
+  openOverlay(
+    kind: "dialog" | "sidebar",
+    entry: SiteOverlayEntry,
+    thing?: unknown,
+    { fromAddress = false }: { fromAddress?: boolean } = {}
+  ): void {
+    const view = this.overlayView(entry)
     if (view) {
-      this.overlayViews.set(entry.name, view)
       const property = thing === undefined ? undefined : firstPropertyOf(view.constructor, thing)
       if (property) (view as Record<string, unknown>)[property] = thing
     }
     this.setState("overlay", { kind, entry, view } satisfies OpenOverlay)
+    if (!fromAddress) core.siteHost?.partOpened?.(hashOf(entry.name, idInAddressOf(thing)))
+  }
+
+  /** The view dialog or sidebar `entry` draws, made the first time it opens:  `undefined` for one with none. */
+  private overlayView(entry: SiteOverlayEntry): object | undefined {
+    const View = entry.view ? core.things.classNamed(entry.view) : undefined
+    const view = View ? (this.overlayViews.get(entry.name) ?? new (View as new () => object)()) : undefined
+    if (view) this.overlayViews.set(entry.name, view)
+    return view
   }
 
   /**
    * Close dialog or sidebar `name`, if it's the one open:
    * what `close the review dialog` compiles to (`core.closeSitePart()`).
+   * - Its hash goes from the address (`SiteHost.partClosed()`).
    * - throws `TypeError` for a name that's none of the site's dialogs or sidebars:  a page isn't closed, it's left
    */
   close(name: string): void {
     if (!this.overlayNamed(name))
       throw new TypeError(`SiteBase.close():  ${this.constructor.name} has no dialog or sidebar "${name}";  list it`)
-    if (this.getState<OpenOverlay>("overlay")?.entry.name === name) this.closeOverlay()
+    if (this.getState<OpenOverlay>("overlay")?.entry.name === name) this.closedByPerson()
   }
 
-  /** Close the open dialog or sidebar, if any. */
+  /**
+   * Close the open dialog or sidebar, if any, leaving the address as it is:  the address changed already (another
+   * page, Back).
+   */
   closeOverlay(): void {
     this.setState("overlay", undefined)
+  }
+
+  /** Close the open dialog or sidebar as the program or the person closes it:  its hash taken out of the address. */
+  private closedByPerson(): void {
+    if (!this.getState<OpenOverlay>("overlay")) return
+    this.closeOverlay()
+    core.siteHost?.partClosed?.()
+  }
+
+  /**
+   * Open the dialog or sidebar address hash `hash` names, `confirm-order/1042` (`hashOf()`), once the page its address
+   * names is shown:  the host asks, as a page is opened at an address with a hash, and on Back and Forward.
+   * - Its thing, from the id after its name, looked up as a page's parameter is (`valueFor()`), into its view's first
+   *   property of a thing's type.
+   * - `""`:  none is open;  the one open closes.
+   * - Answers whether `hash` names one;  `false`:  it's a `#section` of the page, for the host to land on.
+   * - NEVER throws:  a thing that can't be read opens nothing, said on the console.
+   */
+  async showPart(hash: string): Promise<boolean> {
+    // the address the host heard with it is shown first:  showing it closes any dialog open
+    await new Promise((resolve) => setTimeout(resolve))
+    await this.lastShown
+    const [name = "", ...rest] = hash.split("/")
+    if (!name) {
+      this.closeOverlay()
+      return true
+    }
+    const part = this.partWithHash(name)
+    if (!part) return false
+    const id = rest.length ? safelyDecoded(rest.join("/")) : undefined
+    const open = this.getState<OpenOverlay>("overlay")
+    let thing: unknown
+    if (id !== undefined) {
+      const view = this.overlayView(part.entry)
+      const property = view && firstThingPropertyOf(view.constructor)
+      try {
+        thing = view && property ? await valueFor(view, property, id) : id
+      } catch (error) {
+        console.warn(`SiteBase:  can't open ${part.entry.name} for "${id}"`, error)
+        return true
+      }
+    }
+    if (open?.entry === part.entry && thing === undefined) return true
+    this.openOverlay(part.kind, part.entry, thing, { fromAddress: true })
+    return true
+  }
+
+  /** The dialog or sidebar whose hash is `name`, `confirm-order`, any case:  `undefined` for none. */
+  private partWithHash(name: string): { kind: "dialog" | "sidebar"; entry: SiteOverlayEntry } | undefined {
+    const wanted = name.toLowerCase()
+    const dialog = this.siteClass.dialogs?.find((entry) => hashOf(entry.name) === wanted)
+    if (dialog) return { kind: "dialog", entry: dialog }
+    const sidebar = this.siteClass.sidebars?.find((entry) => hashOf(entry.name) === wanted)
+    return sidebar && { kind: "sidebar", entry: sidebar }
   }
 
   ////////////////
@@ -440,13 +693,19 @@ export class SiteBase extends App {
   /**
    * Show `showing`:  its page, the not found page or the error page.
    * - SIDE EFFECT:  the layout it's in is shown (`shownLayoutName`), and drawn from now on if it isn't already
-   *   (`layoutsDrawn`).
+   *   (`layoutsDrawn`);  a page's text parameters are followed (`followParams()`).
    */
   private showNow(showing: Showing): void {
     const name = this.layoutNameFor(showing)
     if (!this.layoutsDrawn.includes(name)) this.setState("layoutsDrawn", [...this.layoutsDrawn, name])
     this.setState("shownLayout", name)
+    const was = this.getState<Showing>("showing")
     this.setState("showing", showing)
+    if (showing.kind !== "page") {
+      this.stopFollowing?.()
+      this.stopFollowing = undefined
+    } else if (was?.kind !== "page" || was.page !== showing.page || was.entry !== showing.entry)
+      this.followParams(showing)
   }
 
   /**
@@ -460,6 +719,8 @@ export class SiteBase extends App {
   private drawLayout(name: string): unknown {
     const isShown = () => this.shownLayoutName === name
     const kept = new KeptPages(getOwner())
+    this.keptPages.add(kept)
+    onCleanup(() => this.keptPages.delete(kept))
     const page = () => (isShown() ? this.drawShowingIn(kept) : null)
     if (name === JUST_THE_PAGE)
       return h("div", { class: "spell-site-alone", hidden: () => (isShown() ? undefined : "") }, page)
@@ -630,6 +891,7 @@ export class SiteBase extends App {
   /**
    * Its pages as its navigation lists them:  each one's title (its name without one), address and tags, its pages under it.
    * - A page with a parameter (`/films/:film`) isn't listed:  it's reached from a page, with a film to show.
+   *   One whose parameters may all be left out (`/settings/:section?`) is, at its address without them.
    * - Its links out (`static links`, a page's `links`) among them, each where its line is.
    * - `headings`:  for a navigation whose groups are headings (`<site-nav groups="headings">`, I35), a group of one
    *   page keeps its heading;  else it's that page alone (`underGroups()`).
@@ -714,7 +976,7 @@ export class SiteBase extends App {
    */
   private static navRows(entries: NavEntry[], listed: (entry: SitePageEntry) => SiteNavPage[]): SiteNavPage[] {
     return entries
-      .filter((entry) => "link" in entry || (!entry.params?.length && !entry.unlisted))
+      .filter((entry) => "link" in entry || (!needsValues(entry) && !entry.unlisted))
       .map((entry) => {
         // a link out:  its address, picked as any row is (the drawer opens it in a new tab)
         if ("link" in entry) {
@@ -728,7 +990,7 @@ export class SiteBase extends App {
         const pages = listed(entry)
         const page: SiteNavPage = {
           title: entry.title ?? entry.name,
-          href: entry.address,
+          href: plainAddressOf(entry),
           id: entry.name,
           ...(entry.icon && { icon: entry.icon }),
           ...(entry.tab && { tab: entry.tab }),
@@ -745,8 +1007,9 @@ export class SiteBase extends App {
    * (a film's page marks Films);  `""` for the not found and error pages.
    */
   navCurrent(): string {
-    const listed = this.shownPath().filter((entry) => !entry.params?.length && !entry.unlisted)
-    return listed.at(-1)?.address ?? ""
+    const listed = this.shownPath().filter((entry) => !needsValues(entry) && !entry.unlisted)
+    const entry = listed.at(-1)
+    return entry ? plainAddressOf(entry) : ""
   }
 
   /**
@@ -756,7 +1019,7 @@ export class SiteBase extends App {
   navShownBelow(): string[] {
     const path = this.shownPath()
     let listed = path.length
-    while (listed > 0 && (path[listed - 1]!.params?.length || path[listed - 1]!.unlisted)) listed--
+    while (listed > 0 && (needsValues(path[listed - 1]!) || path[listed - 1]!.unlisted)) listed--
     return path.slice(listed).map((entry) => entry.title ?? entry.name)
   }
 
@@ -803,7 +1066,8 @@ export class SiteBase extends App {
    */
   private drawShowingIn(kept: KeptPages): unknown {
     const showing = this.getState<Showing>("showing")
-    if (showing?.kind === "page" && showing.page.draw !== Thing.prototype.draw) return kept.drawingOf(showing.page, showing.address)
+    if (showing?.kind === "page" && showing.page.draw !== Thing.prototype.draw)
+      return kept.drawingOf(showing.page, showing.address)
     return made(this.drawShowing())
   }
 
@@ -879,8 +1143,12 @@ export class SiteBase extends App {
         closable: "",
         heading: overlay.view ? undefined : overlay.entry.name,
         ...(overlay.kind === "sidebar" && { position: "right" }),
-        // a getter handing over the handler:  `h()` reads any function on a dashed tag as a live value
-        "on-ui-closed": () => (_event: Event) => this.closeOverlay()
+        // a listener, not an `on-ui-closed` attribute:  Solid warns about a function on an attribute
+        // closed by its x, Escape or a button:  its hash goes;  closed by Back, it's gone already, and nothing more
+        ref: (element: Element) =>
+          element.addEventListener(CLOSED, () => {
+            if (this.getState<OpenOverlay>("overlay") === overlay) this.closedByPerson()
+          })
       },
       // in the box's content part, which pads it as a dialog's or a sidebar's body
       overlay.view ? h("ui-content", {}, core.drawThing(overlay.view)) : null
@@ -991,6 +1259,9 @@ const OLD_COMPACT_KEY = "compact"
 /** What `<ui-page-layout>` sends when its drawer switches between its icons only and all of it. */
 const TOGGLE = "ui-toggle"
 
+/** What a dialog (`<ui-modal>`) or sidebar (`<ui-flyout>`) sends once it has closed:  by its x, Escape or a button. */
+const CLOSED = "ui-closed"
+
 /** What `<ui-site-nav>` sends when a page is picked:  cancelled, the site shows it itself. */
 const NAVIGATING = "ui-navigating"
 
@@ -1074,6 +1345,21 @@ class KeptPages {
     return drawn.element
   }
 
+  /**
+   * Keep the drawing at address `from` as the one at `to`:  the same page, its text parameters changed, shown again
+   * as it is (`SiteBase.sameDrawing()`).  One kept at `to` already is let go.
+   */
+  move(from: string, to: string): void {
+    const drawn = this.drawings.get(from)
+    if (!drawn || from === to) return
+    this.letGo(to)
+    this.recent.forget(to)
+    this.recent.forget(from)
+    this.drawings.delete(from)
+    this.drawings.set(to, drawn)
+    this.recent.use(to)
+  }
+
   /** Let the drawing at `address` go:  its root disposed, every read it held left. */
   private letGo(address: string): void {
     this.drawings.get(address)?.dispose()
@@ -1120,6 +1406,21 @@ const THEMED_FRAME =
 
 /** Each site class's matchers, made once. */
 const MATCHERS = new WeakMap<Function, { entry: SitePageEntry; match: ReturnType<typeof compilePattern> }[]>()
+
+/** Is `param` one of `page`'s TEXT parameters:  its property is text, not a thing (`:film`) or a number? */
+function isTextParam(page: object, param: string): boolean {
+  return schemaOf(page.constructor).typeOf(propertyFor(param)) === "text"
+}
+
+/** Does page `entry`'s address need values to fill:  a parameter it can't leave out, `/films/:film`? */
+function needsValues(entry: SitePageEntry): boolean {
+  return requiredParamsOf(entry.address).length > 0
+}
+
+/** Page `entry`'s address with every parameter that may be left out left out:  `/settings/:section?` => `/settings`. */
+function plainAddressOf(entry: SitePageEntry): string {
+  return needsValues(entry) ? entry.address : filledPattern(entry.address)
+}
 
 /** The property a parameter fills:  `film` => `film`, `person id` / `person_id` => `personId`. */
 function propertyFor(param: string): string {
@@ -1187,6 +1488,34 @@ async function valueFor(page: object, property: string, id: string): Promise<unk
 
 /** How long a parameter's lookup waits for its type's class to be known, in seconds:  see `valueFor()`. */
 const CLASS_WAIT = 5
+
+/**
+ * The hash a dialog or sidebar is kept in the address by:  its name without its last word, lower case with dashes,
+ * then the id of its thing, if any (`idInAddressOf()`), encoded:
+ * `confirm order dialog`, `1042` => `confirm-order/1042`;  `settings dialog` => `settings`.
+ */
+export function hashOf(name: string, id?: string | number): string {
+  const words = name.trim().split(/\s+/)
+  const named = (words.length > 1 ? words.slice(0, -1) : words).join("-").toLowerCase()
+  return id === undefined || id === "" ? named : `${named}/${encodeURIComponent(String(id))}`
+}
+
+/** `text` decoded:  as it is when it won't decode. */
+function safelyDecoded(text: string): string {
+  try {
+    return decodeURIComponent(text)
+  } catch {
+    return text
+  }
+}
+
+/** The first property `View` declares whose type is a thing's (a class's, `Film`):  `undefined` for none. */
+function firstThingPropertyOf(View: Function): string | undefined {
+  const schema = schemaOf(View)
+  const declared: string[] = []
+  for (let each: typeof schema | undefined = schema; each; each = each.parent) declared.unshift(...each.declared.keys())
+  return declared.find((name) => /^[A-Z]/.test(schema.typeOf(name)))
+}
 
 /** The first property `View` declares of `thing`'s type, for a dialog or sidebar opened with a thing. */
 function firstPropertyOf(View: Function, thing: unknown): string | undefined {

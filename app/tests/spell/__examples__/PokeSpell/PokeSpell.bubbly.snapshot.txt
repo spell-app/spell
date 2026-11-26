@@ -996,13 +996,13 @@
 |   |   open (a random **pokemon** in (every **pokemon**))    ‾call(open (a random pokemon in (every pokemon)))
 
 |   [property property_value_getter L1]
-|   | its «"kinds to pick"» is every **type** where it is real
+|   | its «"kinds to pick"» is every **type** where it is real, filtered here
 
 |   [property property_value_getter L1]
 |   | its «"found"» is
 |   |   ⟦// Pokémon names are all small letters:  so the search is too⟧
 |   |   set **looking for** to its **search** as lower case    ‾value(looking for) ‾value(its search as lower case)
-|   |   return every **pokemon** where its **name** includes **looking for**    ‾value(every pokemon where its name includes looking for)
+|   |   return every **pokemon** where its **name** includes **looking for**, filtered here    ‾value(every pokemon where its name includes looking for, filtered here)
 
 |   [action to_do_something L1]
 |   | to **draw** it

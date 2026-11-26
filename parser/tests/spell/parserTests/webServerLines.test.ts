@@ -405,12 +405,15 @@ describe("a server that searches (epic `data` P26, T70)", () => {
     expect(warnings.join("\n")).not.toContain("looks through them here")
   })
 
-  test("a where on a field it doesn't search stays here, and says so", () => {
-    const lines = [...SEARCHING.slice(0, -1), `\treturn every move where its power is more than 3`]
-    const { compiled, warnings } = parseSpellProject([{ path: "/T.spell", contents: `${lines.join("\n")}\n` }])
+  test("a where on a field it doesn't search stays here only when it says so, else it's an error naming what stays", () => {
+    const lines = [...SEARCHING.slice(0, -1), `\treturn every move where its power is greater than 3`]
+    const { errors } = parseSpellProject([{ path: "/T.spell", contents: `${lines.join("\n")}\n` }]).files[0]!
+    expect(errors.join("\n")).toContain(`The server doesn't support this filter:  its power is greater than 3.`)
+    lines[lines.length - 1] += ", filtered here"
+    const { compiled, errors: none } = parseSpellProject([{ path: "/T.spell", contents: `${lines.join("\n")}\n` }])
       .files[0]!
+    expect(none).toEqual([])
     expect(compiled).not.toContain("search: {")
-    expect(warnings.join("\n")).toContain("looks through them here")
   })
 
   test("in Spanish too", () => {
@@ -818,11 +821,11 @@ describe("the checks that moved to compile (epic `data` P42)", () => {
           "a review is a thing:",
           "\t- it lives in films",
           '\t- its "title" is text',
-          '\t- its "score" is the number of reviews where its title is "x"',
+          '\t- its "score" is the number of reviews where its title is "x", filtered here',
           '\t- its "other" is its score',
           '\t- its "plain" is its title',
           "a shelf is a thing:",
-          `\t- to f:  return every review, sorted by ${key}`
+          `\t- to f:  return every review, sorted by ${key}, sorted here`
         ].join("\n")
       ).errors
     expect(shelf("its score").join()).toMatch(/can't wait/)

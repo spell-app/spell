@@ -9,6 +9,8 @@ exports[`spell place ingest --spec, of a FastAPI 3.1 description > English:  eve
 	it writes names like "created_at"
 	it searches everything with "q"
 	jobs live at "/api/jobs"
+		it filters by status and owner
+		it searches everything with "search"
 	jobs archives live at "/api/jobs-archive"
 	searches are searched at "/api/search"
 	events live at "/api/events"

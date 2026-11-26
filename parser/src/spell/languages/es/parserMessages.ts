@@ -135,6 +135,10 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     'Nada puede hacerse de sí mismo:  "{name}" ya es una clase de cosa, así que llama a esta de otra forma',
   "where-looks-through":
     "Esto no se puede enviar al lugar, que solo busca valores exactos:  lee cada {type} y las revisa aquí, hasta un límite",
+  "where-stays-here":
+    'El servidor no admite este filtro:  {clauses}.\nSe puede hacer que el servidor de Spell traiga las filas antes y las filtre aquí, pero será lento.\nOpciones:\n- Cambia a otro filtro.\n- Termina la línea con ", filtrado aquí" para traer todas las filas y filtrarlas en el servidor de Spell.\n- Di "los primeros 20 {types} donde ..." para traer solo las 20 primeras filas que coincidan.',
+  "sort-stays-here":
+    'El servidor no admite este orden:  {sort}.\nSe puede hacer que el servidor de Spell traiga las filas antes y las ordene aquí, pero será lento.\nOpciones:\n- Cambia a otro orden.\n- Termina la línea con ", ordenado aquí" para traer todas las filas y ordenarlas en el servidor de Spell.',
   "sort-key-waits":
     "Un orden no puede esperar a su clave:  ordenaría sin ningún orden.  Ordena por un campo propio, o calcula antes la clave",
   "rider-needs-a-line-above": "Esto va debajo de la línea a la que se refiere, como una lectura de un lugar",
@@ -247,6 +251,10 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "outline-line-outside":
     'Una línea sin sujeto, o con "su", habla de un tipo solo en su esquema, con sangría bajo p. ej. "una carta es una cosa donde:"',
   "inline-and-nested-body": "Tiene a la vez una instrucción en la misma línea y un bloque con sangría debajo",
+  "sorted-by-not-a-sort":
+    '"{words}" no es un orden que guarde la página:  "según" va con uno, "ordenadas según el orden";  para un campo, di "ordenadas por su ..."',
+  "table-sort-not-a-sort":
+    'El sort="{words}" de una tabla nombra el orden que muestra y cambia, una propiedad de la página:  decláralo con su "orden" es un orden:  ..., y di sort="el orden"',
   "not-an-element": "<{tag}> no es un elemento:  escribe la etiqueta propia de Spell UI, p. ej. <ui-form>",
   /** A bare tag in a page's drawing that no pack has (epic `elemental-spell` P7). */
   "page-unknown-component":

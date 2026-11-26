@@ -375,3 +375,255 @@ describe("waitAfter():  a read that was only too soon (epic `data` I92)", () => 
     expect(waitAfter("Lost the signal", NOW)).toBeUndefined()
   })
 })
+
+describe("the first few that pass a `where` checked here", () => {
+  /** A place that answers two rows a page, asked or not, as a web server gives its own page size. */
+  class TwoAPage extends CountingPlace {
+    list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
+      return super.list(collection, { ...query, page: { at: query.page?.at ?? "0", size: 2 } }, context)
+    }
+  }
+
+  /** Six recipes, two of every three starting with "S". */
+  async function six() {
+    const place = new TwoAPage({ capabilities: WITH_IDS })
+    const titles = ["Soup", "Stew", "Curry", "Salad", "Sushi", "Tacos"]
+    await place.apply(
+      titles.map((title, at) => ({
+        kind: "insert" as const,
+        collection: "recipes",
+        id: `r${at}`,
+        fields: { id: `r${at}`, title }
+      }))
+    )
+    place.requests = []
+    return place
+  }
+
+  /** Is a recipe's title one starting with "S"? */
+  const startsWithS = (recipe: unknown) => `${(recipe as { title: string }).title}`.startsWith("S")
+
+  test("reads page by page, and stops as soon as there are enough", async () => {
+    const place = await six()
+    const { Recipe } = program(place)
+    const found = await core.savedThings(Recipe, {}, "looks through", { first: 3, where: startsWithS })
+    expect(found.items.map((recipe) => (recipe as InstanceType<typeof Recipe>).title)).toEqual([
+      "Soup",
+      "Stew",
+      "Salad"
+    ])
+    expect(place.requests).toHaveLength(2)
+  })
+
+  test("fewer than that there:  every page, and what passed", async () => {
+    const place = await six()
+    const { Recipe } = program(place)
+    const found = await core.savedThings(Recipe, {}, "looks through", { first: 9, where: startsWithS })
+    expect(found.items).toHaveLength(4)
+    expect(place.requests).toHaveLength(3)
+  })
+
+  test("a search for no text is no search", async () => {
+    const place = await six()
+    const { Recipe } = program(place)
+    await core.savedThings(Recipe, { search: { title: " " } })
+    expect(place.requests[0]![0]!.query).toEqual({ page: { at: "0", size: 2 } })
+  })
+})
+
+describe("the first few, on a list that filters by only some of a `where` (epic `data` I55)", () => {
+  /** A list that filters by its notes only, two rows a page, as a web server's `it filters by notes` does. */
+  class NotesOnly extends CountingPlace {
+    takes(_collection: string, { filter = {} }: ListQuery) {
+      return { filter: Object.keys(filter).every((field) => field === "notes") }
+    }
+
+    async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
+      const { filter = {} } = query
+      const sent = "notes" in filter ? { filter: { notes: filter.notes } } : {}
+      this.requests.push([{ collection, query }])
+      const answer = await MemoryPlace.prototype.list.call(
+        this,
+        collection,
+        {
+          ...query,
+          ...sent,
+          ...(!("notes" in filter) && { filter: undefined }),
+          page: { at: query.page?.at ?? "0", size: 2 }
+        },
+        context
+      )
+      return { ...answer, handled: { filter: Object.keys(filter).every((field) => field === "notes") } }
+    }
+  }
+
+  /** Ten recipes, every one "hot", every other a soup. */
+  async function ten() {
+    const place = new NotesOnly({ capabilities: { idOf: "id" } })
+    await place.apply(
+      Array.from({ length: 10 }, (_, at) => ({
+        kind: "insert" as const,
+        collection: "recipes",
+        id: `r${at}`,
+        fields: { id: `r${at}`, title: at % 2 ? "Stew" : "Soup", notes: "hot" }
+      }))
+    )
+    place.requests = []
+    return place
+  }
+
+  /** Is it a hot soup? */
+  const hotSoup = (recipe: unknown) => {
+    const { title, notes } = recipe as { title: string; notes: string }
+    return notes === "hot" && title === "Soup"
+  }
+
+  test('`the first 2 recipes where its notes is "hot" and its title is "Soup"`, as compiled:  page by page, and stops at 2', async () => {
+    const place = await ten()
+    const { Recipe } = program(place)
+    // the title, which it doesn't filter by, stays in the page (`EveryThing.savedAST()`)
+    const found = await core.savedThings(Recipe, { filter: { notes: "hot" } }, "looks through", {
+      first: 2,
+      where: hotSoup
+    })
+    expect(found.items).toHaveLength(2)
+    expect(place.requests).toHaveLength(2)
+    // what it filters by still goes to it
+    expect(place.requests[0]![0]!.query.filter).toMatchObject({ notes: "hot" })
+  })
+})
+
+describe("`the first X where ...`, its `where` waiting", () => {
+  test("each answer is waited for:  a promise is no yes, and only those that pass come back", async () => {
+    const place = new CountingPlace({ capabilities: { idOf: "id" } })
+    await place.apply(
+      Array.from({ length: 10 }, (_, at) => ({
+        kind: "insert" as const,
+        collection: "recipes",
+        id: `r${at}`,
+        fields: { id: `r${at}`, title: at < 6 ? "Stew" : "Soup", notes: "hot" }
+      }))
+    )
+    const { Recipe } = program(place)
+    // a `where` reading a field that waits compiles to a function that waits
+    const isSoup = async (recipe: unknown) => {
+      await Promise.resolve()
+      return (recipe as { title: string }).title === "Soup"
+    }
+    const found = await core.savedThings(Recipe, {}, "looks through", { first: 2, where: isSoup })
+    expect(found.items.map((recipe) => (recipe as { id: string }).id)).toEqual(["r6", "r7"])
+  })
+})
+
+describe("the number of, counted by the place (`core.savedCount()`)", () => {
+  /** A place that says how many match, all of them, beside one page of rows:  as a web server's `total` does. */
+  class Counting extends CountingPlace {
+    async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
+      const answer = await super.list(collection, query, context)
+      const all = await MemoryPlace.prototype.list.call(this, collection, { ...query, page: undefined }, context)
+      return { ...answer, total: all.rows.length }
+    }
+  }
+
+  test("one row asked for, and its count read", async () => {
+    const place = filled(new Counting({ capabilities: WITH_IDS }))
+    const { Recipe } = program(place)
+    await place.apply([{ kind: "insert", collection: "recipes", id: "r2", fields: { id: "r2", title: "Stew" } }])
+    place.requests = []
+    expect(await core.savedCount(Recipe, { filter: { title: "Stew" } })).toBe(1)
+    expect(await core.savedCount(Recipe)).toBe(2)
+    expect(place.requests.map(([ask]) => ask!.query.page)).toEqual([{ size: 1 }, { size: 1 }])
+  })
+
+  test("a place that doesn't count:  every one read, and counted here", async () => {
+    const place = filled(new CountingPlace({ capabilities: WITH_IDS }))
+    const { Recipe } = program(place)
+    expect(await core.savedCount(Recipe)).toBe(1)
+  })
+
+  /**
+   * A place that says only how many pages of 2 there are, whatever size it's asked for:  an estimate, and where its
+   * last page is (`ListAnswer.lastPage`).  `pagesSaid` more than there are:  its last page is empty.
+   */
+  class PagesOnly extends CountingPlace {
+    pagesSaid: number | undefined
+
+    async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
+      this.requests.push([{ collection, query }])
+      const at = Number(query.page?.at ?? 0)
+      const ask = { ...query, page: { at: `${at}`, size: 2 } }
+      const answer = await MemoryPlace.prototype.list.call(this, collection, ask, context)
+      if (at) return answer
+      const all = await MemoryPlace.prototype.list.call(this, collection, { ...query, page: undefined }, context)
+      const pages = this.pagesSaid ?? Math.ceil(all.rows.length / 2)
+      const lastPage = { at: `${(pages - 1) * 2}`, size: 2, rowsBefore: (pages - 1) * 2 }
+      return { ...answer, total: pages * 2, totalIsEstimate: true, lastPage }
+    }
+  }
+
+  test("a place that counts only its pages:  its last page read, and its rows added to those before", async () => {
+    const place = filled(new PagesOnly({ capabilities: WITH_IDS }))
+    const { Recipe } = program(place)
+    for (const id of ["r2", "r3", "r4", "r5"]) {
+      await place.apply([{ kind: "insert", collection: "recipes", id, fields: { id, title: "Stew" } }])
+    }
+    place.requests = []
+    // 3 pages of 2:  about 6, and exactly 5
+    expect(await core.savedCount(Recipe)).toBe(5)
+    expect(place.requests.map(([ask]) => ask!.query.page)).toEqual([{ size: 1 }, { at: "4", size: 2 }])
+  })
+
+  test("its last page empty, the estimate wrong:  one page at its own size, counted as it's all of them", async () => {
+    const place = filled(new PagesOnly({ capabilities: WITH_IDS }))
+    place.pagesSaid = 3
+    const { Recipe } = program(place)
+    expect(await core.savedCount(Recipe)).toBe(1)
+  })
+
+  test("`, roughly`:  its estimate taken at its word, one request", async () => {
+    const place = filled(new PagesOnly({ capabilities: WITH_IDS }))
+    for (const id of ["r2", "r3", "r4", "r5"]) {
+      await place.apply([{ kind: "insert", collection: "recipes", id, fields: { id, title: "Stew" } }])
+    }
+    place.requests = []
+    const { Recipe } = program(place)
+    expect(await core.savedCount(Recipe, {}, { roughly: true })).toBe(6)
+    expect(place.requests).toHaveLength(1)
+  })
+
+  /** A server that pages by 2 and never says how many:  no total, no page count. */
+  class PagesByTwo extends CountingPlace {
+    async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
+      this.requests.push([{ collection, query }])
+      const at = Number(query.page?.at ?? 0)
+      const size = query.page?.size ?? 2
+      const all = await MemoryPlace.prototype.list.call(this, collection, { ...query, page: undefined }, context)
+      const rows = all.rows.slice(at, at + size)
+      return { ...all, rows, ...(at + size < all.rows.length && { nextPage: `${at + size}` }) }
+    }
+  }
+
+  test("a paged list that gives no total:  not every page read;  no value, unless its first page is all of them", async () => {
+    const place = filled(new PagesByTwo({ capabilities: WITH_IDS }))
+    for (const id of ["r2", "r3", "r4", "r5"]) {
+      await place.apply([{ kind: "insert", collection: "recipes", id, fields: { id, title: "Stew" } }])
+    }
+    const { Recipe } = program(place)
+    place.requests = []
+    expect(await core.savedCount(Recipe)).toBeUndefined()
+    // one row, then one page at its own size:  never the third page
+    expect(place.requests.map(([ask]) => ask!.query.page?.at)).not.toContain("4")
+    expect(place.requests.length).toBeLessThanOrEqual(2)
+    // two of them, one page
+    expect(await core.savedCount(Recipe, { filter: { title: "Soup" } })).toBe(1)
+  })
+
+  test("a list that doesn't page:  every one read, and counted here, as before", async () => {
+    const place = filled(new CountingPlace({ capabilities: { ...WITH_IDS, page: "none" } }))
+    for (const id of ["r2", "r3", "r4"]) {
+      await place.apply([{ kind: "insert", collection: "recipes", id, fields: { id, title: "Stew" } }])
+    }
+    const { Recipe } = program(place)
+    expect(await core.savedCount(Recipe)).toBe(4)
+  })
+})

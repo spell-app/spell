@@ -407,11 +407,22 @@ export class CreatePlace extends TypeDeclaration<
   static importedDetailsOf(type: P.TypeScope): P.ImportedPlaceDetails | undefined {
     const { declaredBy } = type
     if (!declaredBy) return undefined
-    const { checkedEvery, searches, collections } = CreatePlace.detailsOf(declaredBy)
+    const { checkedEvery, searches, collections, filters, sorts, sortOrders, sortDirections } =
+      CreatePlace.detailsOf(declaredBy)
     const collectionsKept = Object.fromEntries(
       Object.entries(collections ?? {})
-        .map(([name, { at, searches: own, searchedOnly, askedBy }]) => {
-          const kept: P.ImportedPlaceCollection = definedProps({ at, searches: own, searchedOnly, askedBy })
+        .map(([name, each]) => {
+          const { at, searches: own, searchedOnly, askedBy, filters: filtersOwn, sortOrders } = each
+          const kept: P.ImportedPlaceCollection = definedProps({
+            at,
+            searches: own,
+            searchedOnly,
+            askedBy,
+            filters: filtersOwn,
+            sortOrders,
+            sorts: each.sorts,
+            sortDirections: each.sortDirections
+          })
           return [name, kept] as const
         })
         .filter(([, kept]) => Object.keys(kept).length)
@@ -419,6 +430,10 @@ export class CreatePlace extends TypeDeclaration<
     const details: P.ImportedPlaceDetails = definedProps({
       checkedEvery,
       searches,
+      filters,
+      sorts,
+      sortOrders,
+      sortDirections,
       readOnly: isPlaceTypeReadOnly(type) || undefined,
       collections: Object.keys(collectionsKept).length ? collectionsKept : undefined
     })
@@ -439,6 +454,7 @@ export class CreatePlace extends TypeDeclaration<
     if (!servedAt) return undefined
     const { keyNamed, keyGoes, tokenFrom, renewsAt, operations } = details
     const writes = [...new Set(Object.values(operations ?? {}))]
+    const asks = savedAsksOf(details)
     return definedProps({
       servedAt,
       at: textIn(match.groups.address),
@@ -448,7 +464,8 @@ export class CreatePlace extends TypeDeclaration<
       tokenFrom,
       renewsAt,
       readOnly: isPlaceTypeReadOnly(type) || undefined,
-      writes: writes.length ? writes : undefined
+      writes: writes.length ? writes : undefined,
+      asks
     })
   }
 
@@ -456,13 +473,14 @@ export class CreatePlace extends TypeDeclaration<
   static detailsOf(match: P.Match): PlaceDetailValue & { operations?: Record<string, string> } {
     const details: PlaceDetailValue & { operations?: Record<string, string> } = {}
     const seen = new Set<P.Match>()
-    // a paging line one step in under a collection's line is that collection's alone (`CollectionAt`, epic `data` P56)
+    // a paging line one step in under a collection's line is that collection's alone (`CollectionAt`, epic `data` P56),
+    // and so is a line saying what it's asked:  `it filters by job id`
     const visit = (each: P.Match, isUnderCollection = false) => {
       if (seen.has(each)) return
       seen.add(each)
       if (each.rule instanceof PlaceDetail) {
         const detail = each.rule.detailOf(each as never)
-        if (!(isUnderCollection && CollectionAt.isPagingOnly(detail))) mergeDetail(details, detail)
+        if (!(isUnderCollection && CollectionAt.isListsOwn(detail))) mergeDetail(details, detail)
       }
       const isCollection = isUnderCollection || each.rule instanceof CollectionAt
       if (each.rule instanceof OperationAt) {
@@ -572,7 +590,7 @@ export function unclearNumbersOf(scope: P.Scope): { unclearNumbers?: string } {
 /** `from` merged into `into`:  a collection's mapping field by field. */
 function mergeDetail(
   into: PlaceDetailValue,
-  { collections, accounts, readOnStartup, ...rest }: PlaceDetailValue
+  { collections, accounts, readOnStartup, sortOrders, ...rest }: PlaceDetailValue
 ): void {
   if (rest.listsUnder) rest.listsUnder = listsUnderMerged(into.listsUnder, rest.listsUnder)
   if (rest.projection) {
@@ -588,12 +606,36 @@ function mergeDetail(
   if (accounts) (into.accounts ??= []).push(...accounts)
   // a line each:  every one named
   if (readOnStartup) (into.readOnStartup ??= []).push(...readOnStartup)
+  // a line each:  every order named
+  if (sortOrders) (into.sortOrders ??= []).push(...sortOrders)
   for (const [
     name,
-    { at, fields, searchedOnly, pictures, askedBy, searches, operations, paging, isOne }
+    {
+      at,
+      fields,
+      searchedOnly,
+      pictures,
+      askedBy,
+      searches,
+      operations,
+      paging,
+      isOne,
+      filters,
+      filteredWith,
+      sorts,
+      sortedWith,
+      sortOrders: orders,
+      sortDirections
+    }
   ] of Object.entries(collections ?? {})) {
     const held = ((into.collections ??= {})[name] ??= {})
     if (searches) held.searches = searches
+    if (filters) held.filters = filters
+    if (filteredWith) held.filteredWith = filteredWith
+    if (sorts) held.sorts = sorts
+    if (sortedWith !== undefined) held.sortedWith = sortedWith
+    if (orders) held.sortOrders = [...(held.sortOrders ?? []), ...orders]
+    if (sortDirections) held.sortDirections = sortDirections
     if (at !== undefined) held.at = at
     if (fields) held.fields = { ...held.fields, ...fields }
     if (searchedOnly) held.searchedOnly = true
@@ -603,6 +645,23 @@ function mergeDetail(
     if (paging) held.paging = { ...held.paging, ...paging }
     if (isOne) held.isOne = true
   }
+}
+
+/**
+ * What a place's lines call its search and sort questions, every list's and each one's own, and the orders they name:
+ * what its saved answers are searched and sorted by (`SP.ServedPlace.asks`).  `undefined` when they say none.
+ */
+function savedAsksOf({ searches, sortedWith, sortOrders, collections = {} }: PlaceDetailValue): SP.ServedPlace["asks"] {
+  const lists = Object.values(collections)
+  const search = [searches, ...lists.map((each) => each.searches)].flatMap((each) => (each ? [each.param] : []))
+  const sort = [sortedWith, ...lists.map((each) => each.sortedWith)].flatMap((each) => (each ? [each] : []))
+  const orders = [sortOrders, ...lists.map((each) => each.sortOrders)].flatMap((each) => each ?? [])
+  const asks = {
+    ...(search.length && { search: [...new Set(search)] }),
+    ...(sort.length && { sort: [...new Set(["sort", ...sort])] }),
+    ...(orders.length && { orders })
+  }
+  return Object.keys(asks).length ? asks : undefined
 }
 
 /**

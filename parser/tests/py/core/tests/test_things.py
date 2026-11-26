@@ -115,6 +115,18 @@ def test_an_unset_property_reads_as_its_first_choice_else_its_types_default() ->
     assert typed.to_json() == {"$type": "TypedThing"}
 
 
+def test_a_yes_or_no_that_can_be_nothing_reads_as_nothing_while_unset() -> None:
+    class Scored(Thing):
+        passed = prop(type="choice", or_nothing=True)
+
+    scored = Scored()
+    assert scored.passed is None
+    scored.passed = False
+    assert scored.passed is False
+    scored.passed = None
+    assert scored.passed is None
+
+
 def test_init_makes_a_value_once_per_thing_and_stores_it() -> None:
     one, other = Player(), Player()
     assert one.hand == []

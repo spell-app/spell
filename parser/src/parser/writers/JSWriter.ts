@@ -57,7 +57,11 @@ const SAVED_IN = "savedIn"
 const ELEMENT_TAG = "elementTag"
 
 /** A `where`'s `core` helper, and its twin that asks each item in turn when its condition waits. */
-const WAITING_TWINS: Record<string, string> = { filter: "filterInTurn", itemWhere: "itemWhereInTurn" }
+const WAITING_TWINS: Record<string, string> = {
+  filter: "filterInTurn",
+  itemWhere: "itemWhereInTurn",
+  sortedBy: "sortedByInTurn"
+}
 
 /** A line's description comment, `-- ...`:  written as a plain `//` (`ASTLineComment()`). */
 const DESCRIPTION_SYMBOL = "--"
@@ -130,10 +134,10 @@ export class JSWriter extends ProgramWriter {
 
   /**
    * Member `property`'s name, by our name (`nameOf()`) -- spell's as is when it isn't a legal identifier,
-   * for whoever writes it to quote:  `["$type"]`.
+   * for whoever writes it to quote:  `["$type"]`;  a key read as written too (`asWritten`):  `meta.run_by`.
    */
   propertyName(property: P.ASTPropertyLiteral): string {
-    return property.isLegalIdentifier ? this.nameOf(property.value) : property.value
+    return property.isLegalIdentifier && !property.asWritten ? this.nameOf(property.value) : property.value
   }
 
   /** Between each source file's code in a project's module:  a comment line -- see `ProgramWriter.fileSeparator`. */
@@ -471,6 +475,7 @@ export class JSWriter extends ProgramWriter {
    * - else `===` / `!==`, by `OPERATORS`:  spell knows what each side is, so `is` means the same thing exactly
    *   (Owen, 2026-10-23, epic `spanish` P28:  "I think we can move to `===` for is now that we have types");
    *   it was a forgiving `==` where the two sides' kinds weren't known alike, `"2"` was `2`
+   *   - one that can be nothing (`yes, no or nothing`) compared to no:  `=== false` / `!== false`, as nothing isn't no
    * - nothing is `undefined`:  `=== undefined` / `!== undefined`
    */
   comparison(node: P.ASTInfixExpression): string | undefined {
@@ -480,6 +485,7 @@ export class JSWriter extends ProgramWriter {
     const [value, boolean] = unwrapped(rhs) instanceof P.ASTBooleanLiteral ? [lhs, rhs] : [rhs, lhs]
     const yesOrNo = unwrapped(boolean)
     if (yesOrNo instanceof P.ASTBooleanLiteral && this.kindOf(value) === "choice") {
+      if (!yesOrNo.value && this.canBeNothing(value)) return `${this.tight(value)} ${isNot ? "!==" : "==="} false`
       return yesOrNo.value !== isNot ? this.bare(value) : `!${this.tight(value)}`
     }
     return undefined

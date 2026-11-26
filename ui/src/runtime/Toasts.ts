@@ -1,3 +1,5 @@
+import { Warnings } from "spell/ui/util"
+
 import type { Disposer, ToastHandle, ToastOptions, ToastProvider } from "./runtime.types"
 
 /****************
@@ -5,7 +7,11 @@ import type { Disposer, ToastHandle, ToastOptions, ToastProvider } from "./runti
  * Programmatic toasts, as `UI.toasts` (and the `UI.toast()` shortcut).
  * - A thin front door:  the `ui-toast` family registers its provider (`register()`) when it's imported, so the
  *   runtime chunk carries no toast markup or CSS.
- * - Until then `show()` throws, rather than silently dropping a message.
+ * - Each toast loads its own code:  `show()` before the family is in hands back its handle at once, and shows the
+ *   toast once `ready()` has imported it (`loadFamilyWith()`), so no caller has to remember.
+ *   - That handle has no `element`;  its `id` and `closed` work as a shown toast's do, and `dismiss(id)` before it
+ *     shows means it never does.
+ * - A page with no way to import it:  `show()` throws, rather than silently dropping a message.
  ****************/
 export class Toasts {
   /**
@@ -44,17 +50,53 @@ export class Toasts {
     if (!Toasts.provider) await this.familyLoader?.()
   }
 
-  /** Show a toast;  see `ToastOptions`. */
+  /** Toasts asked for before the family was in, by id:  `dismiss()` before they show takes them back. */
+  private readonly waiting = new Set<string>()
+
+  /** Ids of `waiting` toasts given none:  `waitingId()`. */
+  private waitingCount = 0
+
+  /**
+   * Show a toast;  see `ToastOptions`.
+   * - Before the `ui-toast` family is in:  imports it (`ready()`), then shows the toast (`showOnceReady()`).
+   */
   show(options: ToastOptions): ToastHandle {
-    return this.registeredProvider.show(options)
+    if (Toasts.provider || !this.familyLoader) return this.registeredProvider.show(options)
+    return this.showOnceReady(options)
   }
 
-  /** Remove toast `id` early. */
+  /** Remove toast `id` early;  a toast still waiting for the family never shows. */
   dismiss(id: string) {
-    this.registeredProvider.dismiss(id)
+    if (this.waiting.delete(id)) return
+    Toasts.provider?.dismiss(id)
   }
 
-  /** `Toasts.provider`;  throws until the `ui-toast` family has registered one. */
+  /**
+   * A handle for `options` now, and the toast once `ready()` has imported the family.
+   * - `closed` follows the toast shown;  it resolves at once when the toast is dismissed first, or can't show
+   *   (a warning on the console says why).
+   */
+  private showOnceReady(options: ToastOptions): ToastHandle {
+    const id = options.id ?? this.waitingId()
+    this.waiting.add(id)
+    const closed = this.ready()
+      .then(() => {
+        if (!this.waiting.delete(id)) return
+        return this.registeredProvider.show({ ...options, id }).closed
+      })
+      .catch((error: unknown) => {
+        this.waiting.delete(id)
+        Warnings.warn("UI.toasts", "can't show a toast", error)
+      })
+    return { id, closed }
+  }
+
+  /** An id for a waiting toast given none:  unique on the page, as the provider's own are. */
+  private waitingId(): string {
+    return `${WAITING_ID_PREFIX}${++this.waitingCount}`
+  }
+
+  /** `Toasts.provider`;  throws when the `ui-toast` family hasn't registered one. */
   private get registeredProvider(): ToastProvider {
     if (!Toasts.provider) {
       throw new Error("UI.toasts:  ui-toast not registered;  import its family (`spell/ui/ui-toast`) first")
@@ -62,3 +104,6 @@ export class Toasts {
     return Toasts.provider
   }
 }
+
+/** Prefix of the ids `Toasts` gives toasts asked for before the family was in. */
+const WAITING_ID_PREFIX = "ui-toast-waiting-"

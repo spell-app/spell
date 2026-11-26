@@ -11,7 +11,7 @@ a "rest countries page" is a thing
 	when creating a rest countries page
 		set its region to "Europe"
 		set its language to "fra"
-	its "countries" is every country where its region is the region, sorted by its name's common
+	its "countries" is every country where its region is the region, sorted by its name's common, filtered here
 		// The region's, looked through here:  REST Countries sends every one at once
 
 	to pick region (region as text)

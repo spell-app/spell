@@ -14,6 +14,9 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { DRAFT_DATATYPE } from "spell/parser/spell/rules/places/DraftOf"
 import { type MethodBody } from "./classes.shared"
 
+/** `core`'s reads of a place that run again whenever its rows change:  what's read off them is followed. */
+const FOLLOWED_READS = new Set(["savedThings", "savedThingsSortedBy", "savedCount", "savedThingWithId"])
+
 /** The type a getter's literal value says, by its rule, as its language's message writes it:  `a number` ... */
 const LITERAL_TYPES: Record<string, SP.ParserMessageKey> = {
   number: "example-number",
@@ -143,7 +146,7 @@ export class PropertyValueGetter extends SpellStatement<
       if (node instanceof P.ASTAwaitExpression) hasWaited = true
       // a read of a place runs again whenever its rows change, so what's read off them is followed
       else if (node instanceof P.ASTScopedMethodInvocation && P.CORE_CALLS_THAT_WAIT.has(node.methodName))
-        hasWaited = (node.methodName !== "savedThings" && node.methodName !== "savedThingWithId") || hasWaited
+        hasWaited = !FOLLOWED_READS.has(node.methodName) || hasWaited
       else if (hasWaited && node instanceof P.ASTPropertyExpression && !(node.object instanceof P.ASTSelfLiteral)) {
         found = true
       }

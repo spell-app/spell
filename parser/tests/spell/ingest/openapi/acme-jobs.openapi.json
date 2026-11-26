@@ -29,6 +29,36 @@
             "in": "query",
             "required": false,
             "schema": { "anyOf": [{ "$ref": "#/components/schemas/JobStatus" }, { "type": "null" }], "title": "Status" }
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "required": false,
+            "schema": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Owner" }
+          },
+          {
+            "name": "labels",
+            "in": "query",
+            "required": false,
+            "schema": { "anyOf": [{ "type": "array", "items": { "type": "string" } }, { "type": "null" }], "title": "Labels" }
+          },
+          {
+            "name": "include_hidden",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "boolean", "default": false, "title": "Include Hidden" }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Search" }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "enum": ["created_at", "recency"], "default": "created_at", "title": "Order By" }
           }
         ],
         "responses": {

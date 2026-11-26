@@ -66,7 +66,7 @@ async function drawn(drawing: string): Promise<{ text: string; isLooping: boolea
     ])
   })
   core.resetRuntime()
-  const contents = `${SERVER}\na "kids screen" is a view\n\tits "big count" is the number of owners where its big is yes\n\tto draw it\n${drawing}\n\nset screen to a new kids screen\n`
+  const contents = `${SERVER}\na "kids screen" is a view\n\tits "big count" is the number of owners where its big is yes, filtered here\n\tto draw it\n${drawing}\n\nset screen to a new kids screen\n`
   const { screen } = runSpellFiles([{ path: "/T.spell", contents }], { registered: true })("screen")
   // the loop asks again and again, never waiting for a timer:  stopped here by an answer that never comes, so the
   // test fails, not hangs (one that fails is asked again too)

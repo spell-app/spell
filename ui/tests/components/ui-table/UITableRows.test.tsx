@@ -8,7 +8,18 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import "spell/ui/components/ui-table"
 
 /** `<ui-table>` DOM element, with the properties these tests set. */
-type TableDOMElement = DOMElement & { sortColumn?: number; sortDirection?: string }
+type TableDOMElement = DOMElement & {
+  sortColumn?: number
+  sortDirection?: string
+  sort?: { by: string; descending?: boolean }
+}
+
+/** A header row whose cells ask for sorts by name, `completion` and `name`, and one that doesn't sort;  two rows. */
+const SORTED_ROWS =
+  `<ui-row header><ui-cell sort="completion">Completed</ui-cell><ui-cell sort="name">Name</ui-cell>` +
+  `<ui-cell>Notes</ui-cell></ui-row>` +
+  `<ui-row><ui-cell>2</ui-cell><ui-cell>Jill</ui-cell><ui-cell>a</ui-cell></ui-row>` +
+  `<ui-row><ui-cell>1</ui-cell><ui-cell>Jamie</ui-cell><ui-cell>b</ui-cell></ui-row>`
 
 /** A header row and three body rows:  names, numbers that sort differently as text, notes. */
 const ROWS =
@@ -90,6 +101,60 @@ describe("<ui-table> rows and cells", () => {
     await ElementFixture.settle()
     expect(names(host)).toEqual(["John", "Jamie", "Jill"])
     expect(host.firstElementChild!.hasAttribute("header")).toBe(true)
+  })
+
+  it("with a `sort`:  `sort-column` and `sort-direction` follow it, by the header whose `sort` is its `by`", async () => {
+    const host = await table("sortable", SORTED_ROWS)
+    host.sort = { by: "completion", descending: true }
+    await ElementFixture.settle()
+    const [completed, name, notes] = host.querySelectorAll<HTMLElement>("ui-row[header] > ui-cell")
+    expect(host.sortColumn).toBe(0)
+    expect(host.sortDirection).toBe("descending")
+    expect(completed!.getAttribute("aria-sort")).toBe("descending")
+    host.sort = { by: "name" }
+    await ElementFixture.settle()
+    expect(host.sortColumn).toBe(1)
+    expect(host.sortDirection).toBe("ascending")
+    expect(name!.getAttribute("aria-sort")).toBe("ascending")
+    expect(completed!.hasAttribute("aria-sort")).toBe(false)
+    // a header with no `sort` doesn't sort
+    expect(notes!.hasAttribute("tabindex")).toBe(false)
+  })
+
+  it("with a `sort`:  a header click asks for its sort in `ui-sorting`;  the sorted one flips, another starts ascending", async () => {
+    const host = await table("sortable", SORTED_ROWS)
+    host.sort = { by: "completion", descending: true }
+    await ElementFixture.settle()
+    const asked: unknown[] = []
+    host.addEventListener("ui-sorting", (event) => asked.push((event as CustomEvent).detail.sort))
+    const [completed, name, notes] = host.querySelectorAll<HTMLElement>("ui-row[header] > ui-cell")
+    await userEvent.click(completed!)
+    await ElementFixture.settle()
+    expect(asked.at(-1)).toEqual({ by: "completion" })
+    expect(host.sort).toEqual({ by: "completion" })
+    expect(host.sortDirection).toBe("ascending")
+    await userEvent.click(name!)
+    await ElementFixture.settle()
+    expect(asked.at(-1)).toEqual({ by: "name" })
+    expect(host.sortColumn).toBe(1)
+    await userEvent.click(notes!)
+    await ElementFixture.settle()
+    expect(asked).toHaveLength(2)
+  })
+
+  it("with a `sort`:  a page that cancels `ui-sorting` keeps its own sort, and the table follows what it sets", async () => {
+    const host = await table("sortable", SORTED_ROWS)
+    host.sort = { by: "name" }
+    await ElementFixture.settle()
+    host.addEventListener("ui-sorting", (event) => {
+      event.preventDefault()
+      host.sort = { by: "completion", descending: true }
+    })
+    await userEvent.click(host.querySelector<HTMLElement>("ui-row[header] > ui-cell:nth-child(1)")!)
+    await ElementFixture.settle()
+    expect(host.sort).toEqual({ by: "completion", descending: true })
+    expect(host.sortColumn).toBe(0)
+    expect(host.sortDirection).toBe("descending")
   })
 
   it('skips an opted-out header (`data-sortable="false"`)', async () => {

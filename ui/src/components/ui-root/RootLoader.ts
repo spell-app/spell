@@ -22,7 +22,8 @@ import type { RootCatalogEntry } from "./UIRoot.types"
 const FAMILIES = import.meta.glob(["../*/index.ts", "!../ui-root/index.ts"])
 
 // A page with a root imports `ui-toast` when it first shows a toast, and `ui-modal` when it's first asked for a dialog
-// (`UI.modals.ready()`);  then its provider registers, after `UI.load()`
+// (each service's `ready()`, which its toasts and dialogs await themselves);  then its provider registers, after
+// `UI.load()`.  `ui-modal` is also imported ahead, once the page has drawn (`RootLoader.warmUp()`)
 if (E.isBrowser()) {
   void UI.load().then((ui) => {
     ui.toasts.loadFamilyWith(() => RootLoader.load("ui-toast").then(() => UI.load()))
@@ -65,6 +66,9 @@ export class RootLoader {
 
   /** Language code => its load, started once (`useLanguage()`).  Page-wide. */
   private static readonly languages = new E.LoadOnce<string, void>()
+
+  /** Has `warmUp()` been asked once on this page?  Page-wide. */
+  private static isWarm = false
 
   ////////////////
   // ## Tags
@@ -180,6 +184,30 @@ export class RootLoader {
     RootLoader.defineEarly()
     // elements made pending before the hook was in (the root's barrel defines its catalog early as it loads)
     for (const tag of RootLoader.undefinedTags(document)) loadFamilyOf(tag)
+  }
+
+  /**
+   * Import the `ui-modal` family AHEAD of the first dialog, so it opens at once:  once a root is ready and the page has
+   * painted it, at idle (`E.LoadOnce.atIdle()`).
+   * - Never delays the first draw:  it starts after a paint of the ready content (two frames), then waits for idle
+   *   (2s at the most), and nothing waits for it.
+   * - Through `UI.modals.ready()`, the ONE loader, which a dialog awaits anyway:  a dialog asked for sooner loads it
+   *   then, and the two share the one import (`load()`).
+   * - Once per page;  nothing on a server (no `requestAnimationFrame()`), nor under Save-Data (loaded on first use).
+   * - Its root calls it as it's ready (`UIRoot.start()`).
+   */
+  static warmUp(): void {
+    if (RootLoader.isWarm || typeof requestAnimationFrame === "undefined") return
+    RootLoader.isWarm = true
+    E.beforeNextPaint(() =>
+      E.beforeNextPaint(() =>
+        E.LoadOnce.atIdle(() => {
+          UI.load()
+            .then((ui) => ui.modals.ready())
+            .catch((error: unknown) => E.Warnings.warn("RootLoader", "couldn't load <ui-modal> ahead", error))
+        })
+      )
+    )
   }
 
   /** Can `load()` import `folder`'s family:  a family of the library's, or one a bundle `add()`ed? */

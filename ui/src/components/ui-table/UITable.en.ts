@@ -217,6 +217,17 @@ export const tableVocabulary = {
       description: "Direction of `sort-column`;  a newly sorted column starts `ascending`."
     },
     {
+      name: "sort",
+      group: "behaviour",
+      kind: "json",
+      reflect: false,
+      description:
+        "The page's sort it shows and sets, `{ by, descending }` (`TableSortValue`):  the header whose `sort` is its " +
+        "`by` is the sorted one, so `sort-column` and `sort-direction` follow it.  A header click asks for the next " +
+        "(`ui-sorting`, with `sort`):  that header's again flips it, another's starts it `ascending`.  With it, a " +
+        "header with no `sort` doesn't sort."
+    },
+    {
       name: "client-sort",
       group: "advanced",
       kind: "boolean",
@@ -263,7 +274,8 @@ export const tableVocabulary = {
     },
     {
       name: "ui-sorting",
-      detail: '{ column: number, key?: string, direction: "ascending" | "descending", originalEvent?: Event }',
+      detail:
+        '{ column: number, key?: string, direction: "ascending" | "descending", sort?: TableSortValue, originalEvent?: Event }',
       cancelable: true,
       description:
         "A header was activated;  `preventDefault()` keeps the current sort (and skips data / `client-sort` " +

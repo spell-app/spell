@@ -559,6 +559,25 @@ export type ListAnswer = {
   rows: PlaceRow[]
   /** What to ask for next, as `PageAsk.at`:  to a reader, it means nothing else.  Left out:  this is the last page. */
   nextPage?: string
+  /**
+   * How many the whole query matches, every page of it, when the place says:  a web server's `total`, or its count
+   * header.  `1234`, beside the 50 rows of this page.
+   * - Only what the place did itself:  a filter or search left to the engine leaves it out, as the place's number
+   *   counts rows the engine would drop.
+   * - Left out:  the place didn't say.
+   */
+  total?: number
+  /**
+   * `total` is an estimate:  a server that says only how many pages there are, its pages times its page size
+   * (`about 1,250`).  The last page alone says exactly.
+   */
+  totalIsEstimate?: true
+  /**
+   * Where the last page is, beside an estimate (`totalIsEstimate`):  the rows before it, and its own, are the exact
+   * number.  Read it with this `at` and `size` (`core.savedCount()`).
+   * - Left out:  there's no estimate, or its last page can't be asked for straight (a cursor's).
+   */
+  lastPage?: { at: string; size: number; rowsBefore: number }
   /** Where the place stood when it answered:  for `changesSince()`, and a change's `version`. */
   version?: string
   /** Which parts of the query it did itself. */
@@ -859,6 +878,19 @@ export type Place = {
    * - throws `PlaceError` for lines it can't honour
    */
   withLines?(lines: PlaceLines): Place
+  /**
+   * Which parts of `query` it would do itself, for `collection`:  for a place whose lists don't all take the same
+   * (a web server's list saying `it filters by job-id` under its own line).
+   * - What `list()` would say it `handled`, asked before it's asked, so `PlaceQuery` knows what's left to it.
+   * - Left out:  `describe()` says, for every list.
+   */
+  takes?(collection: string, query: ListQuery): ListHandled
+  /**
+   * The fields `sort` is in order of, as `collection`'s rows hold them:  a sort its list has a name for
+   * (`measurements can be sorted by:`) is its field, so `PlaceQuery` can sort what it read when the place didn't.
+   * - Left out:  each is a field already.
+   */
+  sortFieldsOf?(collection: string, sort: readonly SortField[]): SortField[]
   /** The rows of `collection` that `query` asks for. */
   list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer>
   /**

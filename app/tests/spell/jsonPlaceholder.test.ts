@@ -29,10 +29,9 @@ const READS: Record<string, unknown> = {
     { postId: 1, id: 2, name: "quo vero reiciendis", email: "Jayne_Kuhic@sydney.com", body: "est natus enim" }
   ],
   [`${SERVER}/users/1`]: { id: 1, name: "Leanne Graham", username: "Bret" },
-  [`${SERVER}/todos`]: [
+  [`${SERVER}/todos?userId=1`]: [
     { userId: 1, id: 1, title: "delectus aut autem", completed: false },
-    { userId: 1, id: 2, title: "quis ut nam facilis", completed: false },
-    { userId: 2, id: 21, title: "suscipit repellat esse", completed: true }
+    { userId: 1, id: 2, title: "quis ut nam facilis", completed: false }
   ],
   [`${SERVER}/users/1/todos`]: [
     { userId: 1, id: 1, title: "delectus aut autem", completed: false },

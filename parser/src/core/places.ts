@@ -399,18 +399,57 @@ function storedAsNamesOf(schema: ReturnType<typeof schemaOf>): Map<string, strin
 const STORED_AS_NAMES = new WeakMap<object, Map<string, string>>()
 
 /**
+ * The key a place sent each field of a type held inside a row under, by our name:  `runBy` => `run_by`, for a thing
+ * made from `{ "run_by": "ada" }` (`PlaceThings.withThingsInside()`).  What it's written back under:  `sourceKeyOf()`.
+ * - By type, as a place's `FieldNames` is by collection:  a thing of that type made here writes the same keys.
+ * - Only keys that aren't ours as they are.
+ */
+const SOURCE_KEYS = new WeakMap<Function, Map<string, string>>()
+
+/** SIDE EFFECT:  a row sent `Class`'s field `ours` under `key` (`SOURCE_KEYS`). */
+function noteSourceKey(Class: Function, ours: string, key: string): void {
+  if (ours === key) return
+  let keys = SOURCE_KEYS.get(Class)
+  if (!keys) SOURCE_KEYS.set(Class, (keys = new Map()))
+  keys.set(ours, key)
+}
+
+/**
+ * The key a row holds `Class`'s field `ours` under, inside the row of what holds it:
+ * - what its line says it's `stored as`, `its "remark" is text, stored as "note"` => `note`
+ * - else the key a row sent it under (`SOURCE_KEYS`), `checked_at` for `checkedAt`
+ * - else ours:  a field no row has sent yet, or a key an object type keeps as it came
+ */
+function sourceKeyOf(Class: Function, ours: string): string {
+  return schemaOf(Class).info(ours)?.storedAs ?? SOURCE_KEYS.get(Class)?.get(ours) ?? ours
+}
+
+/**
  * A value as a row holds it:  a date as text, a list as an array, a thing as a reference to it.
  * - On `Saver`'s writing, which is the same but for a thing it would write whole.
  */
 class RowWriter extends Saver {
-  /** `value` as a row holds it:  a thing inside the row is plain fields again, as the place holds them. */
+  /**
+   * `value` as a row holds it:  a thing inside the row is plain fields again, as the place holds them, each under the
+   * place's key for it (`insideRowFor()`).
+   */
   jsonFor(value: unknown): unknown {
     return this.write(value, (thing) => {
-      if (THINGS_INSIDE_ROWS.has(thing)) return this.rowFor(thing)
+      if (THINGS_INSIDE_ROWS.has(thing)) return this.insideRowFor(thing)
       return isSavedWithOwner(thing)
-        ? { [TYPE_KEY]: thing.constructor.name, id: thing.id, ...this.rowFor(thing) }
+        ? { [TYPE_KEY]: thing.constructor.name, id: thing.id, ...this.insideRowFor(thing) }
         : { [REF_KEY]: `${thing.constructor.name}#${thing.id}` }
     })
+  }
+
+  /**
+   * Every field `thing` holds but its id, as a row holds a thing inside it:  each under the place's own key
+   * (`sourceKeyOf()`), `run_by` for our `runBy`, so what's written back is what was read.
+   * - A row's own fields aren't renamed here:  their place does it (`FieldNames`).
+   */
+  insideRowFor(thing: SpellObject): PlaceRow {
+    const Class = thing.constructor as Function
+    return Object.fromEntries(Object.entries(this.rowFor(thing)).map(([key, json]) => [sourceKeyOf(Class, key), json]))
   }
 
   /** Every field `thing` holds, but its id. */
@@ -669,7 +708,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     const { collection, type, id } = home
     const json = items.map((item) => {
       const row = this.writer.jsonFor(item) as PlaceRow
-      return item === thing ? { ...row, [property]: this.writer.jsonFor(value) } : row
+      return item === thing ? { ...row, [sourceKeyOf(thing.constructor, property)]: this.writer.jsonFor(value) } : row
     })
     const write = { collection, type, id, field, ...(group !== undefined && { group }) }
     this.writing(() => pending.setField({ ...write, value: json, was: undefined }))
@@ -1186,6 +1225,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     const schema = schemaOf(Class)
     const entries = Object.entries(fields).map(([field, sent]) => {
       const name = nameDeclaredIn(schema, field, { isInside })
+      if (isInside) noteSourceKey(Class, name, field)
       const info = schema.info(name)
       const held = info?.itemType ?? info?.type
       const listed = this.listedAs(info, sent)

@@ -287,11 +287,22 @@ export class IfThereAreNone extends ReadRider {
 export class IfThatFails extends ReadRider {
   @proto static kind: RiderKind = "failed"
 
-  /** In an action, its steps see `the error` (epic `data` P50):  `if the error is "offline"`. */
+  /**
+   * Its lines see `the error`:  in an action, its steps (epic `data` P50), `if the error is "offline"`;  in a drawing,
+   * what it draws, `<failed><text>{the error}</text></failed>`, as an element's `<failed>` does (`SpellJSX`).
+   */
   getNestedScopeForMatch(match: P.MatchFor<this>): P.MethodScope {
     const scope = super.getNestedScopeForMatch(match)
-    if (!DrawIt.drawingIn(match.scope)) scope.variables?.add({ name: CAUGHT_ERROR })
+    scope.variables?.add({ name: CAUGHT_ERROR })
     return scope
+  }
+
+  /** In a drawing, `core.readRider("failed", (error) => ...)`:  `core.drawRead()` hands it the failure's words. */
+  getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
+    const ast = super.getAST(match)
+    const draw = ast.args?.args?.[1]
+    if (draw instanceof P.ASTMethodDefinition) draw.args = [new P.ASTVariableExpression(match, { name: CAUGHT_ERROR })]
+    return ast
   }
 
   /** SIDE EFFECT:  notes it's in an action, which needs a line above it. */

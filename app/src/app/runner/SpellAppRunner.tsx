@@ -15,6 +15,8 @@ import { LazyPages } from "./LazyPages"
 import { loadRuntime, type LoadedRuntime } from "./loadRuntime"
 import { ViewerSiteHost } from "./ViewerSiteHost"
 import { fetchJSON, fetchText } from "./fetchFresh"
+import { watchBuild } from "./buildProgress"
+import type { BuildProgress } from "spell/parser/spell/SpellUrls"
 import { languagesOf, mergedWords, wordsAt, wordsOfLanguages } from "./words"
 import {
   loadScopePack,
@@ -87,6 +89,9 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
   let waitTimer: ReturnType<typeof setTimeout> | undefined
   /** the page server said this run's project has mistakes (`BuildStep`):  a run that then fails says so */
   let hasMistakes = false
+  // how the page server's compile is coming along, while the waiting box waits on it (`watchBuild()`):  its time so
+  // far and the projects done, said in the box
+  const [building, setBuilding] = createSignal<BuildProgress | undefined>(undefined, { ownedWrite: true })
   // the explorers' state, kept here so it outlives switching tabs:  each reads it once, as it mounts
   let explorerState: TypeExplorerState = {}
   let thingsState: ThingExplorerState = {}
@@ -203,7 +208,9 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
       <Show when={!props.toolbar && error()}>
         <div class="SpellAppError">{error()}</div>
       </Show>
-      <Show when={waitShown() && waiting()}>{(step) => <WaitingBox step={step()} editUrl={props.editUrl} />}</Show>
+      <Show when={waitShown() && waiting()}>
+        {(step) => <WaitingBox step={step()} editUrl={props.editUrl} name={props.source.name} progress={building()} />}
+      </Show>
       <ui-split-panel
         class={["RunnerSplit", { byPixels: !!props.fluid }]}
         resizable
@@ -264,8 +271,25 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
     if (layout) unslot = slotsFromIn(layout)
     const keepThings = how === "keep things" && isSameProgram(lastSource, source)
     lastSource = source
-    // fetched from the server, which may have to make it first (its words too):  the waiting box, if it takes a while
+    // fetched from the server, which may have to make it first (its words too):  the waiting box, if it takes a while,
+    // saying how the compile is coming along
     if (source.compiled === undefined) startWaiting()
+    const stopWatching =
+      source.compiled === undefined && source.projectId ? watchBuild(source.projectId, setBuilding) : undefined
+    try {
+      await runAfterItsWords(copy, source, layout, keepThings)
+    } finally {
+      stopWatching?.()
+    }
+  }
+
+  /** `run()`'s work, once it's ready:  its own words, then the program -- see `runProgram()`. */
+  async function runAfterItsWords(
+    copy: LoadedRuntime,
+    source: SpellAppSource,
+    layout: Element | undefined,
+    keepThings: boolean
+  ) {
     // its own words first:  their `messages` are what the core says as it runs, e.g. its tests' lines in Spanish
     // - awaited only when there are some to load:  else the last run's app goes at once, in the same tick, as before
     const own = source.words || !source.wordsUrl ? source.words : await ownWords(source)
@@ -513,7 +537,7 @@ function WaitingBox(props: WaitingBoxProps) {
         when={props.step === "mistakes"}
         fallback={
           <ui-loader visible="" text="">
-            {appTexts.text(WAITING_TEXTS[props.step as Exclude<WaitingStep, "mistakes">])}
+            {waitingWords(props)}
           </ui-loader>
         }
       >
@@ -532,12 +556,28 @@ function WaitingBox(props: WaitingBoxProps) {
   )
 }
 
+/**
+ * What the waiting box's spinner says:  its step's words;  or, while the page server says how the compile is coming
+ * along (`SP.BuildProgress`, e.g. a fresh checkout's first run), how long it's taken so far and the projects done.
+ */
+function waitingWords({ step, name, progress }: WaitingBoxProps): string {
+  if (!progress || step === "starting") return appTexts.text(WAITING_TEXTS[step as Exclude<WaitingStep, "mistakes">])
+  const params = { name, seconds: String(progress.seconds ?? 0) }
+  const said = appTexts.text(progress.afterStartup ? "buildingAfterStartup" : "building", params)
+  const done = (progress.compiled ?? []).map((id) => id.slice(id.lastIndexOf("/") + 1))
+  return done.length ? `${said}  ${appTexts.text("buildingDone", { projects: done.join(", ") })}` : said
+}
+
 /** Props for `<WaitingBox>`. */
 type WaitingBoxProps = {
   /** The step it says. */
   step: WaitingStep
   /** Where the project opens in the editor, for its mistakes;  none, no button. */
   editUrl?: string
+  /** The program's name, for the compile's words. */
+  name: string
+  /** How the page server's compile is coming along, once it says (`watchBuild()`);  none, the step's words alone. */
+  progress?: BuildProgress
 }
 
 /**

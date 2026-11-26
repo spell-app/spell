@@ -35,7 +35,7 @@ import { defineCoreModule, type PartEdit } from "./core.types"
 import type { ContextMenuItem, MenuItem } from "./acting"
 import { List } from "./classes/List"
 import { ViewableList } from "./classes/ViewableList"
-import { SPELL_WINDOW, closeDialogOf, listenForTableEdits, listenForUndoKeys, shownIn } from "./ui"
+import { SPELL_WINDOW, closeDialogOf, listenForTableEdits, listenForTableSorts, listenForUndoKeys, shownIn } from "./ui"
 import { pageWaitingLoader, standInFor, waitingLoader } from "./waiting"
 
 /**
@@ -485,6 +485,7 @@ export const drawingMethods = defineCoreModule({
    * - SIDE EFFECT:  `element` gives what's drawn inside it the program's widget defaults (`core.useDefaults()`).
    * - SIDE EFFECT:  ⌘Z and ⇧⌘Z undo and redo while it has the focus, until it's unmounted (`listenForUndoKeys()`).
    * - SIDE EFFECT:  a `<ui-table editable>` of its things writes them (`listenForTableEdits()`).
+   * - SIDE EFFECT:  a `<ui-table sort="the order">`'s header click sets the page's sort (`listenForTableSorts()`).
    */
   mountApp(app: CanDraw, element: HTMLElement): MountedApp {
     ;(element as AppElement).spellRoot?.unmount()
@@ -495,12 +496,14 @@ export const drawingMethods = defineCoreModule({
     const dispose = runWithOwner(null, () => render(() => core.drawThing(app), element))
     const stopUndoKeys = listenForUndoKeys(element)
     const stopTableEdits = listenForTableEdits(element)
+    const stopTableSorts = listenForTableSorts(element)
     const mounted: MountedApp = {
       app,
       unmount() {
         dispose()
         stopUndoKeys()
         stopTableEdits()
+        stopTableSorts()
         if ((element as AppElement).spellRoot === mounted) delete (element as AppElement).spellRoot
       }
     }

@@ -104,6 +104,26 @@ describe("SpellProject's compile cache", () => {
     expect(project.codeWithMapFor("ts/solid").code).toEqual(typescript)
   })
 
+  test("a cache hit doesn't wait on saving its built files:  it saves them behind", async () => {
+    const project = makeProject("save-behind")
+    await project.compile()
+    const compiled = project.compiled
+    reopen(project)
+    // as a page loaded again finds it:  nothing saved from it yet, so its built files are all sent
+    ;(project as unknown as { savedTexts: WeakMap<object, string> }).savedTexts = new WeakMap()
+    // a server that never answers the first built file saved:  the compile still comes back, with its program
+    let sent = false
+    project.declarationsFile.save = (() => {
+      sent = true
+      return new Promise(() => {})
+    }) as typeof project.declarationsFile.save
+    const contents = await project.compile()
+    expect(project.compiledFrom).toBe("cache")
+    expect(project.compiled).toEqual(compiled)
+    expect(contents).toEqual(project.outputFile.contents)
+    expect(sent).toBe(true)
+  })
+
   test("an edit to any of its files compiles the project again:  Card, or Solitaire", async () => {
     const project = makeProject("edits")
     await project.compile()

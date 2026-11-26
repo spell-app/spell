@@ -24,6 +24,19 @@ describe("SP.PageChunks.split():  a built site's pages, each a chunk of its own 
     expect(main).toMatch(/^\/\/ spell-lazy-pages: Grammar,Notes$/m)
   })
 
+  test("a page whose file holds a view one of the site's dialogs draws stays in the main chunk:  any page opens it", () => {
+    const withDialog = COMPILED.replace(
+      "export class Notes extends Page {}",
+      "export class Notes extends Page {}\nexport class AddNoteDialog extends View {}"
+    ).replace(
+      'static pages = [{ page: "Home" }, { page: "Grammar" }, { page: "Notes" }]',
+      'static pages = [{ page: "Home" }, { page: "Grammar" }, { page: "Notes" }]\n  static dialogs = [{ name: "add note dialog", view: "AddNoteDialog" }]'
+    )
+    const { main, pages } = SP.PageChunks.split(withDialog)
+    expect([...pages.keys()]).toEqual(["Grammar"])
+    expect(main).toContain("export class AddNoteDialog extends View")
+  })
+
   test("the main chunk keeps every line where it was, so its source map holds", () => {
     const { main } = SP.PageChunks.split(COMPILED)
     expect(main.split("\n")).toHaveLength(COMPILED.split("\n").length)
