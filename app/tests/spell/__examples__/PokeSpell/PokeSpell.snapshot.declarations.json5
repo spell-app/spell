@@ -1901,7 +1901,7 @@
     {
       "type": "Pokedex",
       "superType": "App",
-      "defined": "/PokeSpell.spell:464-4260"
+      "defined": "/PokeSpell.spell:464-4290"
     },
     {
       "property": "tab",
@@ -2002,13 +2002,13 @@
       "asWritten": "kinds to pick",
       "of": "Pokedex",
       "datatype": "list of types",
-      "defined": "/PokeSpell.spell:1115-1165"
+      "defined": "/PokeSpell.spell:1115-1180"
     },
     {
       "property": "found",
       "of": "Pokedex",
       "datatype": "list of pokemon",
-      "defined": "/PokeSpell.spell:1168-1351"
+      "defined": "/PokeSpell.spell:1183-1381"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -2021,7 +2021,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/PokeSpell.spell:1354-2581"
+      "defined": "/PokeSpell.spell:1384-2611"
     }
   ],
   "codeLines": [

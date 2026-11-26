@@ -1656,7 +1656,7 @@ export class GithubPage extends Thing {
     return (
       <ui-stack spacing="sm" part="issues">
         <ui-header size="medium">Solid's issues</ui-header>
-        {core.drawRead(async () => await core.savedThings(Issue, { filter: { pullRequest: undefined }, page: { size: 6 } }, "as drawn"), (issue: Issue) => core.drawThing(issue), {
+        {core.drawRead(async () => await core.savedThings(Issue, {}, "looks through", { first: 6, where: (issue: Issue) => issue.pullRequest === undefined }), (issue: Issue) => core.drawThing(issue), {
           waitingSay: () => "Asking GitHub",
           none: () => <ui-text part="issues">{"No open issues."}</ui-text>,
           items: () => <ui-cards columns="3" doubling={true} stackable={true} part="issues" />
@@ -2342,19 +2342,19 @@ core.heading("JSONPlaceholder:  posts and their comments, people, and their todo
 
 export class Post extends Thing {
   // - its "user id" is a number
-  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1269, end: 1294 } })
+  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1293, end: 1318 } })
   accessor userId!: number
 
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1296, end: 1315 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1320, end: 1339 } })
   accessor title!: string
 
   // - its "body" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1317, end: 1335 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1341, end: 1359 } })
   accessor body!: string
 
   // - its "comments" is a list of comments
-  static { this.declareProp("comments", { itemType: "Comment", init: () => new List<Comment>({ instanceType: "Comment" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1337, end: 1373 } }) }
+  static { this.declareProp("comments", { itemType: "Comment", init: () => new List<Comment>({ instanceType: "Comment" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1361, end: 1397 } }) }
   get comments(): List<Comment> { return core.linked(this, "comments", Comment) as List<Comment> }
   set comments(value: List<Comment>) { this.setProp("comments", value) }
 
@@ -2372,29 +2372,29 @@ export class Post extends Thing {
     times: ["created", "modified"], select: ["userId", "title", "body", "comments"] }
 
   // - it lives in jsonplaceholder
-  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1240, end: 1267 } })
+  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1264, end: 1291 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in jsonplaceholder
-  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1240, end: 1267 } })
+  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1264, end: 1291 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Comment extends Thing {
   // - its "post id" is a number
-  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1428, end: 1453 } })
+  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1452, end: 1477 } })
   accessor postId!: number
 
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1455, end: 1473 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1479, end: 1497 } })
   accessor name!: string
 
   // - its "email" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1475, end: 1494 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1499, end: 1518 } })
   accessor email!: string
 
   // - its "body" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1496, end: 1514 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1520, end: 1538 } })
   accessor body!: string
 
   @drawn draw() {
@@ -2414,50 +2414,50 @@ export class Comment extends Thing {
     times: ["created", "modified"], select: ["name", "email", "body"] }
 
   // - it lives in jsonplaceholder
-  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1399, end: 1426 } })
+  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1423, end: 1450 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in jsonplaceholder
-  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1399, end: 1426 } })
+  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1423, end: 1450 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class JsonplaceholderUser extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1582, end: 1600 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1606, end: 1624 } })
   accessor name!: string
 
   // - its "username" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1602, end: 1624 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1626, end: 1648 } })
   accessor username!: string
 
   // - its "email" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1626, end: 1645 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1650, end: 1669 } })
   accessor email!: string
 
   // - its "address" is an address
-  @prop({ type: "Address", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1647, end: 1674 } })
+  @prop({ type: "Address", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1671, end: 1698 } })
   accessor address!: Address
 
   // - its "phone" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1676, end: 1695 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1700, end: 1719 } })
   accessor phone!: string
 
   // - its "website" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1697, end: 1718 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1721, end: 1742 } })
   accessor website!: string
 
   // - its "company" is a company
-  @prop({ type: "Company", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1720, end: 1746 } })
+  @prop({ type: "Company", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1744, end: 1770 } })
   accessor company!: Company
 
   // - its "posts" is a list of posts
-  static { this.declareProp("posts", { itemType: "Post", init: () => new List<Post>({ instanceType: "Post" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1748, end: 1778 } }) }
+  static { this.declareProp("posts", { itemType: "Post", init: () => new List<Post>({ instanceType: "Post" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1772, end: 1802 } }) }
   get posts(): List<Post> { return core.linked(this, "posts", Post) as List<Post> }
   set posts(value: List<Post>) { this.setProp("posts", value) }
 
   // - its "todos" is a list of todos
-  static { this.declareProp("todos", { itemType: "Todo", init: () => new List<Todo>({ instanceType: "Todo" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1780, end: 1810 } }) }
+  static { this.declareProp("todos", { itemType: "Todo", init: () => new List<Todo>({ instanceType: "Todo" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1804, end: 1834 } }) }
   get todos(): List<Todo> { return core.linked(this, "todos", Todo) as List<Todo> }
   set todos(value: List<Todo>) { this.setProp("todos", value) }
 
@@ -2467,25 +2467,25 @@ export class JsonplaceholderUser extends Thing {
     times: ["created", "modified"], select: ["name", "email", "posts", "todos"] }
 
   // - it lives in jsonplaceholder
-  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1553, end: 1580 } })
+  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1577, end: 1604 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in jsonplaceholder
-  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1553, end: 1580 } })
+  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1577, end: 1604 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Todo extends Thing {
   // - its "user id" is a number
-  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1862, end: 1887 } })
+  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1886, end: 1911 } })
   accessor userId!: number
 
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1889, end: 1908 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1913, end: 1932 } })
   accessor title!: string
 
   // - its "completed" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1910, end: 1938 } })
+  @prop({ type: "choice", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1934, end: 1962 } })
   accessor completed!: boolean
 
   @drawn draw() {
@@ -2506,11 +2506,11 @@ export class Todo extends Thing {
   }
 
   // - it lives in jsonplaceholder
-  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1833, end: 1860 } })
+  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1857, end: 1884 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in jsonplaceholder
-  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1833, end: 1860 } })
+  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1857, end: 1884 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -2571,7 +2571,7 @@ export const jsonplaceholder = core.place(new Jsonplaceholder(), {
     posts: { at: "/posts" },
     comments: { at: "/comments" },
     jsonplaceholderUsers: { at: "/users" },
-    todos: { at: "/todos" }
+    todos: { filters: ["userId"], at: "/todos" }
   },
   listsUnder: { posts: { comments: "/posts/{id}/comments" }, jsonplaceholderUsers: { posts: "/users/{id}/posts", todos: "/users/{id}/todos" } }
 })
@@ -3691,9 +3691,9 @@ export class RestCountriesPage extends Thing {
   }
 
   /** The region's, looked through here:  REST Countries sends every one at once */
-  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spell", start: 719, end: 811 }, readsFrom: ["rest_countries"] }) }
+  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spell", start: 719, end: 826 }, readsFrom: ["rest_countries"] }) }
   get countries() { return core.waitedValue(this, "countries", async () => {
-    return core.sortedBy(await core.savedThings(Country, { filter: { region: this.region } }), (item: Country) => item.name?.common)
+    return core.sortedBy(core.filter(await core.savedThings(Country, {}, "looks through"), (country: Country) => country.region === this.region), (item: Country) => item.name?.common)
   }, () => [this.region]) }
 
   pickRegionRegion(region: string) {

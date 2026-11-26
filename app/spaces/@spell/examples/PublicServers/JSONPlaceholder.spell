@@ -8,7 +8,7 @@ a "jsonplaceholder page" is a thing
 	"new todo" is a new todo with user id = 1
 	its "person" is the jsonplaceholder user whose id is 1
 		// Whose todos and posts these are:  the first person it has
-	its "todos" is every todo where its user id is 1, filtered here
+	its "todos" is every todo where its user id is 1
 		// Theirs, from every todo
 
 	to add the new todo

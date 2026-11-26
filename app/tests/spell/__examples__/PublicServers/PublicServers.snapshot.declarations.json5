@@ -2898,32 +2898,32 @@
         "placeType": "Jsonplaceholder",
         "collection": "posts"
       },
-      "defined": "/JSONPlaceholder.api.spell:1219-1373"
+      "defined": "/JSONPlaceholder.api.spell:1243-1397"
     },
     {
       "property": "user_id",
       "asWritten": "user id",
       "of": "Post",
       "datatype": "number",
-      "defined": "/JSONPlaceholder.api.spell:1269-1294"
+      "defined": "/JSONPlaceholder.api.spell:1293-1318"
     },
     {
       "property": "title",
       "of": "Post",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1296-1315"
+      "defined": "/JSONPlaceholder.api.spell:1320-1339"
     },
     {
       "property": "body",
       "of": "Post",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1317-1335"
+      "defined": "/JSONPlaceholder.api.spell:1341-1359"
     },
     {
       "property": "comments",
       "of": "Post",
       "datatype": "list of comments",
-      "defined": "/JSONPlaceholder.api.spell:1337-1373"
+      "defined": "/JSONPlaceholder.api.spell:1361-1397"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -2946,32 +2946,32 @@
         "placeType": "Jsonplaceholder",
         "collection": "comments"
       },
-      "defined": "/JSONPlaceholder.api.spell:1375-1514"
+      "defined": "/JSONPlaceholder.api.spell:1399-1538"
     },
     {
       "property": "post_id",
       "asWritten": "post id",
       "of": "Comment",
       "datatype": "number",
-      "defined": "/JSONPlaceholder.api.spell:1428-1453"
+      "defined": "/JSONPlaceholder.api.spell:1452-1477"
     },
     {
       "property": "name",
       "of": "Comment",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1455-1473"
+      "defined": "/JSONPlaceholder.api.spell:1479-1497"
     },
     {
       "property": "email",
       "of": "Comment",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1475-1494"
+      "defined": "/JSONPlaceholder.api.spell:1499-1518"
     },
     {
       "property": "body",
       "of": "Comment",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1496-1514"
+      "defined": "/JSONPlaceholder.api.spell:1520-1538"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -2994,61 +2994,61 @@
         "placeType": "Jsonplaceholder",
         "collection": "jsonplaceholder_users"
       },
-      "defined": "/JSONPlaceholder.api.spell:1516-1810"
+      "defined": "/JSONPlaceholder.api.spell:1540-1834"
     },
     {
       "property": "name",
       "of": "JsonplaceholderUser",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1582-1600"
+      "defined": "/JSONPlaceholder.api.spell:1606-1624"
     },
     {
       "property": "username",
       "of": "JsonplaceholderUser",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1602-1624"
+      "defined": "/JSONPlaceholder.api.spell:1626-1648"
     },
     {
       "property": "email",
       "of": "JsonplaceholderUser",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1626-1645"
+      "defined": "/JSONPlaceholder.api.spell:1650-1669"
     },
     {
       "property": "address",
       "of": "JsonplaceholderUser",
       "datatype": "Address",
-      "defined": "/JSONPlaceholder.api.spell:1647-1674"
+      "defined": "/JSONPlaceholder.api.spell:1671-1698"
     },
     {
       "property": "phone",
       "of": "JsonplaceholderUser",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1676-1695"
+      "defined": "/JSONPlaceholder.api.spell:1700-1719"
     },
     {
       "property": "website",
       "of": "JsonplaceholderUser",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1697-1718"
+      "defined": "/JSONPlaceholder.api.spell:1721-1742"
     },
     {
       "property": "company",
       "of": "JsonplaceholderUser",
       "datatype": "Company",
-      "defined": "/JSONPlaceholder.api.spell:1720-1746"
+      "defined": "/JSONPlaceholder.api.spell:1744-1770"
     },
     {
       "property": "posts",
       "of": "JsonplaceholderUser",
       "datatype": "list of posts",
-      "defined": "/JSONPlaceholder.api.spell:1748-1778"
+      "defined": "/JSONPlaceholder.api.spell:1772-1802"
     },
     {
       "property": "todos",
       "of": "JsonplaceholderUser",
       "datatype": "list of todos",
-      "defined": "/JSONPlaceholder.api.spell:1780-1810"
+      "defined": "/JSONPlaceholder.api.spell:1804-1834"
     },
     {
       "type": "Todo",
@@ -3058,26 +3058,26 @@
         "placeType": "Jsonplaceholder",
         "collection": "todos"
       },
-      "defined": "/JSONPlaceholder.api.spell:1812-1938"
+      "defined": "/JSONPlaceholder.api.spell:1836-1962"
     },
     {
       "property": "user_id",
       "asWritten": "user id",
       "of": "Todo",
       "datatype": "number",
-      "defined": "/JSONPlaceholder.api.spell:1862-1887"
+      "defined": "/JSONPlaceholder.api.spell:1886-1911"
     },
     {
       "property": "title",
       "of": "Todo",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1889-1908"
+      "defined": "/JSONPlaceholder.api.spell:1913-1932"
     },
     {
       "property": "completed",
       "of": "Todo",
       "datatype": "choice",
-      "defined": "/JSONPlaceholder.api.spell:1910-1938"
+      "defined": "/JSONPlaceholder.api.spell:1934-1962"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -3095,78 +3095,78 @@
     {
       "type": "Address",
       "superType": "Thing",
-      "defined": "/JSONPlaceholder.api.spell:1940-2069"
+      "defined": "/JSONPlaceholder.api.spell:1964-2093"
     },
     {
       "property": "street",
       "of": "Address",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1965-1985"
+      "defined": "/JSONPlaceholder.api.spell:1989-2009"
     },
     {
       "property": "suite",
       "of": "Address",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1987-2006"
+      "defined": "/JSONPlaceholder.api.spell:2011-2030"
     },
     {
       "property": "city",
       "of": "Address",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:2008-2026"
+      "defined": "/JSONPlaceholder.api.spell:2032-2050"
     },
     {
       "property": "zipcode",
       "of": "Address",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:2028-2049"
+      "defined": "/JSONPlaceholder.api.spell:2052-2073"
     },
     {
       "property": "geo",
       "of": "Address",
       "datatype": "Geo",
-      "defined": "/JSONPlaceholder.api.spell:2051-2069"
+      "defined": "/JSONPlaceholder.api.spell:2075-2093"
     },
     {
       "type": "Geo",
       "superType": "Thing",
-      "defined": "/JSONPlaceholder.api.spell:2071-2135"
+      "defined": "/JSONPlaceholder.api.spell:2095-2159"
     },
     {
       "property": "lat",
       "of": "Geo",
       "datatype": "number",
-      "defined": "/JSONPlaceholder.api.spell:2091-2112"
+      "defined": "/JSONPlaceholder.api.spell:2115-2136"
     },
     {
       "property": "lng",
       "of": "Geo",
       "datatype": "number",
-      "defined": "/JSONPlaceholder.api.spell:2114-2135"
+      "defined": "/JSONPlaceholder.api.spell:2138-2159"
     },
     {
       "type": "Company",
       "superType": "Thing",
-      "defined": "/JSONPlaceholder.api.spell:2137-2225"
+      "defined": "/JSONPlaceholder.api.spell:2161-2249"
     },
     {
       "property": "name",
       "of": "Company",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:2161-2179"
+      "defined": "/JSONPlaceholder.api.spell:2185-2203"
     },
     {
       "property": "catch_phrase",
       "asWritten": "catch phrase",
       "of": "Company",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:2181-2207"
+      "defined": "/JSONPlaceholder.api.spell:2205-2231"
     },
     {
       "property": "bs",
       "of": "Company",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:2209-2225"
+      "defined": "/JSONPlaceholder.api.spell:2233-2249"
     },
     {
       "type": "Jsonplaceholder",
@@ -3194,12 +3194,15 @@
               "at": "/users"
             },
             "todos": {
-              "at": "/todos"
+              "at": "/todos",
+              "filters": [
+                "userId"
+              ]
             }
           }
         }
       },
-      "defined": "/JSONPlaceholder.api.spell:790-1217"
+      "defined": "/JSONPlaceholder.api.spell:790-1241"
     },
     {
       "type": "JsonplaceholderPage",
@@ -4305,7 +4308,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RestCountries.spell:3441-3529"
+      "defined": "/RestCountries.spell:3456-3544"
     },
     {
       "type": "Idd",
@@ -4352,7 +4355,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RestCountries.spell:3618-3654"
+      "defined": "/RestCountries.spell:3633-3669"
     },
     {
       "type": "Translation",
@@ -4448,7 +4451,7 @@
     {
       "type": "RestCountriesPage",
       "superType": "Thing",
-      "defined": "/RestCountries.spell:455-3355"
+      "defined": "/RestCountries.spell:455-3370"
     },
     {
       "property": "region",
@@ -4472,7 +4475,7 @@
       "property": "countries",
       "of": "RestCountriesPage",
       "datatype": "list of countries",
-      "defined": "/RestCountries.spell:719-811"
+      "defined": "/RestCountries.spell:719-826"
     },
     {
       "syntax": "pick region {callArgs:expression} (of {thisArg:expression})?",
@@ -4492,7 +4495,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/RestCountries.spell:894-952"
+      "defined": "/RestCountries.spell:909-967"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -4505,7 +4508,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RestCountries.spell:955-2304"
+      "defined": "/RestCountries.spell:970-2319"
     },
     {
       "type": "PublicServer",
@@ -4872,13 +4875,12 @@
     1889,
     1893,
     1898,
-    2034,
-    2035,
+    2039,
     2040,
     2045,
     2050,
-    2056,
-    2062,
+    2055,
+    2061,
     2067,
     2072,
     2077,
@@ -4895,12 +4897,12 @@
     2132,
     2137,
     2142,
-    2148,
-    2154,
+    2147,
+    2153,
     2159,
-    2163,
-    2241,
-    2242,
+    2164,
+    2168,
+    2246,
     2247,
     2252,
     2257,
@@ -4915,9 +4917,9 @@
     2302,
     2307,
     2312,
-    2322,
-    2348,
-    2349,
+    2317,
+    2327,
+    2353,
     2354,
     2359,
     2364,
@@ -4933,16 +4935,16 @@
     2414,
     2419,
     2424,
-    2434,
+    2429,
     2439,
-    2459,
-    2460,
-    2466,
-    2472,
-    2478,
-    2479,
-    2485,
-    2486,
+    2444,
+    2464,
+    2465,
+    2471,
+    2477,
+    2483,
+    2484,
+    2490,
     2491,
     2496,
     2501,
@@ -4958,40 +4960,40 @@
     2551,
     2556,
     2561,
-    2567,
-    2568,
+    2566,
+    2572,
     2573,
-    2579,
-    2580,
+    2578,
+    2584,
     2585,
-    2591,
-    2592,
-    2598,
-    2599,
+    2590,
+    2596,
+    2597,
+    2603,
     2604,
-    2610,
-    2611,
-    2617,
-    2649,
-    2650,
+    2609,
+    2615,
+    2616,
+    2622,
+    2654,
     2655,
     2660,
     2665,
     2670,
-    2738,
-    2739,
+    2675,
+    2743,
     2744,
     2749,
     2754,
     2759,
-    2783,
-    2784,
+    2764,
+    2788,
     2789,
     2794,
     2799,
     2804,
-    2829,
-    2830,
+    2809,
+    2834,
     2835,
     2840,
     2845,
@@ -5000,33 +5002,33 @@
     2860,
     2865,
     2870,
-    2891,
-    2892,
+    2875,
+    2896,
     2897,
     2902,
     2907,
-    2941,
-    2942,
+    2912,
+    2946,
     2947,
     2952,
     2957,
     2962,
-    2968,
-    2969,
+    2967,
+    2973,
     2974,
-    2980,
-    2981,
+    2979,
+    2985,
     2986,
     2991,
-    2997,
-    3023,
-    3024,
-    3030,
-    3036,
+    2996,
+    3002,
+    3028,
+    3029,
+    3035,
     3041,
     3046,
-    3135,
-    3136,
+    3051,
+    3140,
     3141,
     3146,
     3151,
@@ -5034,33 +5036,33 @@
     3161,
     3166,
     3171,
-    3216,
-    3217,
+    3176,
+    3221,
     3222,
     3227,
     3232,
-    3238,
-    3258,
-    3259,
+    3237,
+    3243,
+    3263,
     3264,
     3269,
-    3294,
-    3300,
+    3274,
+    3299,
     3305,
-    3346,
-    3347,
+    3310,
+    3351,
     3352,
     3357,
-    3363,
-    3367,
-    3398,
-    3399,
+    3362,
+    3368,
+    3372,
+    3403,
     3404,
     3409,
     3414,
-    3420,
-    3427,
-    3433,
+    3419,
+    3425,
+    3432,
     3438,
     3443,
     3448,
@@ -5080,9 +5082,9 @@
     3518,
     3523,
     3528,
-    3534,
-    3541,
-    3547,
+    3533,
+    3539,
+    3546,
     3552,
     3557,
     3562,
@@ -5105,41 +5107,41 @@
     3647,
     3652,
     3657,
-    3663,
-    3669,
-    3675,
-    3681,
+    3662,
+    3668,
+    3674,
+    3680,
     3686,
     3691,
-    3742,
-    3743,
+    3696,
+    3747,
     3748,
     3753,
-    3759,
-    3766,
-    3772,
-    3778,
-    3779,
+    3758,
+    3764,
+    3771,
+    3777,
+    3783,
     3784,
     3789,
-    3795,
-    3796,
+    3794,
+    3800,
     3801,
     3806,
     3811,
-    3817,
-    3818,
-    3824,
-    3831,
-    3838,
-    3868,
-    3869,
+    3816,
+    3822,
+    3823,
+    3829,
+    3836,
+    3843,
+    3873,
     3874,
     3879,
     3884,
-    3888,
-    3970,
-    3971,
+    3889,
+    3893,
+    3975,
     3976,
     3981,
     3986,
@@ -5163,55 +5165,56 @@
     4076,
     4081,
     4086,
-    4107,
-    4108,
+    4091,
+    4112,
     4113,
     4118,
-    4124,
-    4125,
+    4123,
+    4129,
     4130,
     4135,
-    4141,
-    4142,
+    4140,
+    4146,
     4147,
     4152,
     4157,
-    4168,
-    4169,
+    4162,
+    4173,
     4174,
-    4180,
-    4181,
+    4179,
+    4185,
     4186,
     4191,
     4196,
-    4197,
+    4201,
     4202,
     4207,
-    4213,
-    4214,
+    4212,
+    4218,
     4219,
-    4225,
-    4226,
+    4224,
+    4230,
     4231,
-    4237,
-    4238,
+    4236,
+    4242,
     4243,
-    4249,
-    4268,
-    4269,
-    4275,
-    4281,
-    4287,
+    4248,
+    4254,
+    4273,
+    4274,
+    4280,
+    4286,
     4292,
-    4296,
-    4405,
-    4408,
+    4297,
+    4301,
+    4410,
     4413,
     4418,
     4423,
     4428,
     4433,
     4438,
-    4442
+    4443,
+    4447
   ]
 }

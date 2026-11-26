@@ -140,7 +140,7 @@
     {
       "type": "RecipeBox",
       "superType": "App",
-      "defined": "/RecipeBox.spell:2680-5506"
+      "defined": "/RecipeBox.spell:2680-5521"
     },
     {
       "property": "search",
@@ -172,7 +172,7 @@
       "property": "matches",
       "of": "RecipeBox",
       "datatype": "list of recipes",
-      "defined": "/RecipeBox.spell:3300-3453"
+      "defined": "/RecipeBox.spell:3300-3468"
     },
     {
       "syntax": "add the new recipe (of {thisArg:expression})?",
@@ -186,7 +186,7 @@
       "kind": "method",
       "name": "add the new recipe",
       "returns": "nothing",
-      "defined": "/RecipeBox.spell:3456-3568"
+      "defined": "/RecipeBox.spell:3471-3583"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -199,7 +199,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RecipeBox.spell:3571-4092"
+      "defined": "/RecipeBox.spell:3586-4107"
     }
   ],
   "codeLines": [

@@ -14,6 +14,7 @@ jsonplaceholder is a web server at "https://jsonplaceholder.typicode.com"
 	comments live at "/comments"
 	jsonplaceholder users live at "/users"
 	todos live at "/todos"
+		it filters by user-id
 	a post's comments live at "/posts/{id}/comments"
 	a jsonplaceholder user's posts live at "/users/{id}/posts"
 	a jsonplaceholder user's todos live at "/users/{id}/todos"

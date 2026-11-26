@@ -1403,7 +1403,12 @@ export class GithubPage extends Thing {
   drawIssues() {
     return h("ui-stack", { spacing: "sm", part: "issues" },
       h("ui-header", { size: "medium" }, "Solid's issues"),
-      () => core.drawRead(async () => await core.savedThings(Issue, { filter: { pullRequest: undefined }, page: { size: 6 } }, "as drawn"), (issue) => core.drawThing(issue), {
+      () => core.drawRead(async () => await core.savedThings(
+        Issue,
+        {},
+        "looks through",
+        { first: 6, where: (issue) => issue.pullRequest === undefined }
+      ), (issue) => core.drawThing(issue), {
         waitingSay: () => "Asking GitHub",
         none: () => h("ui-text", { part: "issues" }, "No open issues."),
         items: () => h("ui-cards", { columns: "3", doubling: true, stackable: true, part: "issues" })
@@ -2251,7 +2256,7 @@ export const jsonplaceholder = core.place(new Jsonplaceholder(), {
     posts: { at: "/posts" },
     comments: { at: "/comments" },
     jsonplaceholderUsers: { at: "/users" },
-    todos: { at: "/todos" }
+    todos: { filters: ["userId"], at: "/todos" }
   },
   listsUnder: { posts: { comments: "/posts/{id}/comments" }, jsonplaceholderUsers: { posts: "/users/{id}/posts", todos: "/users/{id}/todos" } }
 })
@@ -3247,7 +3252,7 @@ export class RestCountriesPage extends Thing {
 
   static { this.declareProp("countries", { readsFrom: ["rest_countries"] }) }
   get countries() { return core.waitedValue(this, "countries", async () => {
-    return core.sortedBy(await core.savedThings(Country, { filter: { region: this.region } }), (item) => item.name?.common)
+    return core.sortedBy(core.filter(await core.savedThings(Country, {}, "looks through"), (country) => country.region === this.region), (item) => item.name?.common)
   }, () => [this.region]) }
 
   pickRegionRegion(region) {
