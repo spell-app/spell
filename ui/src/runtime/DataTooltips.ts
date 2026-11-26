@@ -1,6 +1,7 @@
 import { after, cssSecondsFor, flatParentFor, TopLayerTip, type CancelablePromise } from "spell/ui/util"
 
 import type { Browser } from "./Browser"
+import type { Focus } from "./Focus"
 
 /****************
  * ### `DataTooltips`
@@ -20,8 +21,11 @@ import type { Browser } from "./Browser"
  *   - the pointer on a target:  after `--ui-tooltip-delay`, 1.5s, as long as the browser's own `title` tooltip waits
  *     (`styles.en.ts`'s `tooltipDelay`);  a page without the token, `--ui-hover-delay`
  *   - on to another target while one is showing:  at once
- *   - keyboard focus:  at once
+ *   - keyboard focus:  at once (`Focus.isKeyboardFocus()`:  Tab or an arrow key moving it there);
+ *     NOT a click's focus, nor a menu handing focus back to its button as it closes, Escape or not (epic `editor` I368)
  *   - Escape hides it, until the pointer or the focus comes back
+ *   - a press on a target hides it, and it stays hidden until the pointer leaves that target and comes back:
+ *     a click that opens a menu, then closes it, leaves the pointer on the button, and the tip would show again
  * - ONE tooltip at a time:  while the pointer is on a target, no `title` under the pointer shows the browser's own
  *   (`hideTitlesOn()`), whether the page wrote it, a component drew it in its shadow root, or a box around has one.
  *   - The innermost element under the pointer gets an empty `title`, which hides every one around it;
@@ -34,6 +38,8 @@ import type { Browser } from "./Browser"
 export class DataTooltips {
   /** Feature flags:  what says whether it can run at all. */
   private readonly browser: Browser
+  /** Says whether a focus came from the keyboard. */
+  private readonly focus: Focus
 
   /** The shared bubble;  made when one first shows. */
   private bubble: HTMLElement | undefined
@@ -47,6 +53,8 @@ export class DataTooltips {
   private hovered: Element | undefined
   /** The target holding keyboard focus. */
   private focused: Element | undefined
+  /** The target last pressed:  hidden while the pointer stays on it. */
+  private pressed: Element | undefined
   /** A hover waiting out its delay. */
   private pending: CancelablePromise<void> | undefined
   /** The elements given an empty `title` while the pointer's on a target, each with its own (or none), to put back. */
@@ -54,8 +62,9 @@ export class DataTooltips {
   /** Follows the shown target's attributes:  a changed tooltip shows as it changes. */
   private observer: MutationObserver | undefined
 
-  constructor({ browser }: { browser: Browser }) {
+  constructor({ browser, focus }: { browser: Browser; focus: Focus }) {
     this.browser = browser
+    this.focus = focus
   }
 
   /**
@@ -70,6 +79,7 @@ export class DataTooltips {
     document.addEventListener("pointerover", this.onPointerOver, true)
     document.addEventListener("pointermove", this.onPointerMove, { capture: true, passive: true })
     document.addEventListener("pointerout", this.onPointerOut, true)
+    document.addEventListener("pointerdown", this.onPointerDown, { capture: true, passive: true })
     document.addEventListener("focusin", this.onFocusIn, true)
     document.addEventListener("focusout", this.onFocusOut, true)
     document.addEventListener("keydown", this.onKeyDown, true)
@@ -85,6 +95,7 @@ export class DataTooltips {
     this.pointedAt = event.composedPath()[0]
     const hovered = tooltipTargetIn(event)
     if (hovered !== this.hovered) this.putTitlesBack()
+    if (hovered !== this.pressed) this.pressed = undefined
     this.hovered = hovered
     if (hovered) this.hideTitlesOn(event.composedPath())
     this.update()
@@ -135,14 +146,27 @@ export class DataTooltips {
   private readonly onPointerOut = (event: Event) => {
     if ((event as PointerEvent).relatedTarget) return
     this.pointedAt = undefined
-    this.hovered = undefined
+    this.hovered = this.pressed = undefined
     this.putTitlesBack()
     this.update()
   }
 
-  /** Only keyboard focus, so a click on a button doesn't pin its tooltip open. */
+  /**
+   * A press on a target:  hide its tooltip until the pointer leaves it (`onPointerOver()`).
+   * - Its keyboard focus is over too:  a press is the pointer's.
+   */
+  private readonly onPointerDown = (event: Event) => {
+    this.pressed = tooltipTargetIn(event)
+    this.focused = undefined
+    this.update()
+  }
+
+  /**
+   * Only keyboard focus (`Focus.isKeyboardFocus()`):  a click on a button doesn't pin its tooltip open,
+   * and a menu handing focus back to its button as it closes doesn't pop it up.
+   */
   private readonly onFocusIn = (event: Event) => {
-    const isFromKeyboard = (event.composedPath()[0] as Element | undefined)?.matches?.(":focus-visible")
+    const isFromKeyboard = this.focus.isKeyboardFocus(event.composedPath()[0] as Element | undefined)
     this.focused = isFromKeyboard ? tooltipTargetIn(event) : undefined
     this.update()
   }
@@ -160,7 +184,7 @@ export class DataTooltips {
 
   /** Show what should show, or hide:  the one place that decides. */
   private update() {
-    const wanted = this.focused ?? this.hovered
+    const wanted = this.focused ?? (this.hovered === this.pressed ? undefined : this.hovered)
     if (wanted === this.shown) {
       this.cancelPending()
       return

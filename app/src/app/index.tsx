@@ -26,6 +26,7 @@ import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { staticFiles } from "spell/app/app/static/StaticFiles"
 import { ServerCompileStore } from "spell/app/app/ServerCompileStore"
 import { reloadOutOfSight } from "spell/app/app/reloadOutOfSight"
+import { keepEditorOnReload } from "spell/app/app/editorTab"
 import { stepsOnLoadingScreen } from "spell/app/app/solid/loadingSteps"
 
 // Solid follows spell cells:  BEFORE anything renders
@@ -43,6 +44,9 @@ if (!isStaticBuild) ServerCompileStore.install()
 // The editor speaks the page's language:  the browser's, when `index.html` names none.
 // BEFORE anything draws, so `<ui-root>` loads Spell UI's words in it too.
 AppTexts.namePageLanguage()
+
+// This tab loaded again in Run (`/run/...`) stays the editor, never the run page:  BEFORE the router reads the address.
+keepEditorOnReload()
 
 // The dev server gone while the tab's out of sight:  reload once it's back, out of sight, not when the person returns.
 reloadOutOfSight(import.meta.hot)

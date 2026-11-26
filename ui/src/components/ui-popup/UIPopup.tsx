@@ -19,6 +19,9 @@ import anchoredCSS from "./UIPopup.anchored.css?raw"
  *
  * - `open-on`:
  *   - `hover` (with `show-delay` / `hide-delay`, and on keyboard focus too)
+ *     - keyboard focus only (`UI.focus.isKeyboardFocus()`):  not a click's, nor a menu handing focus back to its
+ *       button as it closes (epic `editor` I368)
+ *     - a press on the target hides it, and it stays hidden until the pointer leaves the target and comes back
  *   - `focus`
  *   - `click` (toggles)
  *   - `manual` (only `visible`)
@@ -323,6 +326,7 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
     if (trigger === UIT.PopupTrigger.hover) {
       events.addEventListener("pointerenter", this.onTargetEnter, options)
       events.addEventListener("pointerleave", this.onTargetLeave, options)
+      events.addEventListener("pointerdown", this.onTargetPress, options)
     }
     if (trigger === UIT.PopupTrigger.hover || trigger === UIT.PopupTrigger.focus) {
       events.addEventListener("focusin", this.onTargetFocus, options)
@@ -372,7 +376,22 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
 
   /** Pointer onto the target (`hover`):  show after `show-delay`, else the page's `--ui-hover-delay`. */
   private readonly onTargetEnter = (event: PointerEvent) => {
+    this.isPressed = false
     this.schedule(true, this.hoverDelay, event)
+  }
+
+  /**
+   * The target was pressed since the pointer came onto it (`hover`):  hidden until the pointer leaves.
+   * - A click that opens a menu, then closes it, leaves the pointer on the button:  its tip would show again.
+   */
+  @E.state accessor isPressed = false
+
+  /** A press on the target (`hover`):  hide, and stay hidden while the pointer stays on it. */
+  @E.untracked
+  private readonly onTargetPress = (event: PointerEvent) => {
+    this.isPressed = true
+    if (this.isVisible) this.requestVisible(false, event)
+    else this.delayTimer?.cancel()
   }
 
   /**
@@ -387,11 +406,20 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
 
   /** Pointer off the target (`hover`):  hide after `hide-delay`, unless it reaches the popup first. */
   private readonly onTargetLeave = (event: PointerEvent) => {
+    this.isPressed = false
     this.schedule(false, this.hideDelay ?? 0, event)
   }
 
-  /** Focus onto the target (`hover`, `focus`):  show at once. */
+  /**
+   * Focus onto the target:  show at once.
+   * - `hover`:  only a focus from the keyboard (`UI.focus.isKeyboardFocus()`), as a person moves there;
+   *   never a click's, nor a menu's handing focus back as it closes.
+   * - `focus`:  any focus, as it says.
+   */
+  @E.untracked
   private readonly onTargetFocus = (event: FocusEvent) => {
+    const focused = event.composedPath()[0] as Element | undefined
+    if (this.trigger === UIT.PopupTrigger.hover && !UI.focus.isKeyboardFocus(focused)) return
     this.schedule(true, 0, event)
   }
 

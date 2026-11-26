@@ -3,6 +3,8 @@ import path from "node:path"
 import { chromium, type BrowserContext, type Page } from "playwright"
 import { afterAll, afterEach, beforeEach, describe, expect, test } from "vite-plus/test"
 
+import { Alignment } from "spell/test-helpers/Alignment"
+
 import { builtInProjectsNow, CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
@@ -167,6 +169,70 @@ describe.skipIf(!SERVING)("code follows along", () => {
     await page.waitForTimeout(1000)
     expect((await following(page)).outputShows).toBe(false)
     expect(await button.getAttribute("aria-pressed")).toBe("false")
+  })
+
+  test("the compiled code shows with the code closed, alone in its column (I366)", { timeout: 150_000 }, async () => {
+    const page = await context.newPage()
+    const solidWarnings: string[] = []
+    page.on("console", (message) => {
+      if (/warn|error/.test(message.type()) && /\[[A-Z_]{8,}\]/.test(message.text())) solidWarnings.push(message.text())
+    })
+    await open(page, "Solitaire")
+    /** A picture of the state `name`, with `SHOTS=<folder>`. */
+    const shot = async (name: string) => {
+      if (SHOTS) await page.screenshot({ path: path.join(SHOTS, `js-only-${name}.png`) })
+    }
+    const codeButton = page.locator(".ModeTabs .CodeToggle [part~=item]").first()
+    /** Which of the code's column's panes show, and the column's width. */
+    const panes = () =>
+      page.evaluate(() => {
+        const column = document.querySelector<HTMLElement>(".EditorCode")
+        const visible = (selector: string) => {
+          const element = document.querySelector<HTMLElement>(selector)
+          return !!element && element.getBoundingClientRect().width > 0
+        }
+        return {
+          code: visible(".InputEditor"),
+          compiled: visible(".CodeOutputPane"),
+          column: column && !column.hidden ? Math.round(column.getBoundingClientRect().width) : 0
+        }
+      })
+
+    // the code alone, then both
+    expect(await panes()).toMatchObject({ code: true, compiled: false })
+    await chooseOutput(page, "JavaScript")
+    expect(await panes()).toMatchObject({ code: true, compiled: true })
+    await shot("both")
+
+    // the code closed:  the compiled code alone, the column still there
+    await codeButton.click()
+    await page.waitForTimeout(1500)
+    const alone = await panes()
+    expect(alone).toMatchObject({ code: false, compiled: true })
+    expect(alone.column).toBeGreaterThan(200)
+    expect(await page.locator(".CodeOutputCode .cm-line").first().textContent()).toBeTruthy()
+    // its bar lined up (the kit's alignment check)
+    expect(Alignment.report(await Alignment.scanPage(page, { within: ".CodeOutputPane" }))).toEqual([])
+    await shot("alone")
+
+    // kept for the project across a reload
+    await page.reload()
+    await page.waitForSelector(".CodeOutputCode .cm-line", { timeout: 60_000 })
+    await page.waitForTimeout(1500)
+    expect(await panes()).toMatchObject({ code: false, compiled: true })
+
+    // neither:  no column
+    await compiledCodeButton(page).click()
+    await page.waitForTimeout(1500)
+    expect(await panes()).toEqual({ code: false, compiled: false, column: 0 })
+    await shot("neither")
+
+    // the code back, for the next run
+    await codeButton.click()
+    await page.waitForTimeout(1500)
+    expect(await panes()).toMatchObject({ code: true, compiled: false })
+    await shot("code")
+    expect(solidWarnings).toEqual([])
   })
 
   test("a click on a line of code:  compiled code, the screen and the tree follow", { timeout: 150_000 }, async () => {

@@ -78,12 +78,55 @@ async function start(): Promise<void> {
       ),
       root
     )
-    void wearEditorsTheme()
+    const themed = wearEditorsTheme()
+    void showWhenWhole(root, themed)
   } else {
     // no project group holds it:  the editor's home page says so, and lists what there is
     location.replace(`/edit/${SpellUrls.encodeAddress(address)}`)
   }
 }
+
+/**
+ * Take the loading screen away (`run.html`'s `run-shown`) once the page is whole, so it shows in one step
+ * (epic `editor` I364):
+ * - its theme worn (`themed`), and
+ * - the app drawn, every part of it defined and every Spell UI element drawn with its styles (`:state(ready)`),
+ *   through the parts' shadow roots too;  or the runner's waiting box
+ *   showing, which says each step from there;  or the runner saying the program went wrong
+ * - at most `WHOLE_WAIT_MSEC`:  a program with no app, or one that never draws, still shows its page
+ * - Before, each step flashed by:  a blank page, the bars as plain text, a white page before the theme, the app
+ *   unstyled.
+ * - NEVER throws.
+ */
+async function showWhenWhole(root: HTMLElement, themed: Promise<void>): Promise<void> {
+  const until = performance.now() + WHOLE_WAIT_MSEC
+  await Promise.race([themed, new Promise((resolve) => setTimeout(resolve, WHOLE_WAIT_MSEC))])
+  while (performance.now() < until && !isWhole(root)) await new Promise(requestAnimationFrame)
+  document.documentElement.classList.add("run-shown")
+}
+
+/** Is the run page whole (`showWhenWhole()`)?  Its app drawn and styled, or the runner saying why not. */
+function isWhole(root: HTMLElement): boolean {
+  if (root.querySelector(".SpellAppWaiting, .SpellApp ui-item.error, .SpellAppError")) return true
+  const app = root.querySelector(".SpellAppApp .App")
+  return !!app?.childElementCount && isDrawnThrough(root)
+}
+
+/**
+ * Is every custom element under `root` defined, and every Spell UI one drawn with its styles (`:state(ready)`),
+ * inside their open shadow roots too?
+ */
+function isDrawnThrough(root: Element | ShadowRoot): boolean {
+  if (root.querySelector(":not(:defined)")) return false
+  for (const element of root.querySelectorAll("*")) {
+    if (element.localName.startsWith("ui-") && !element.matches(":state(ready)")) return false
+    if (element.shadowRoot && !isDrawnThrough(element.shadowRoot)) return false
+  }
+  return true
+}
+
+/** The longest the run page's loading screen waits for the page to be whole. */
+const WHOLE_WAIT_MSEC = 8_000
 
 /**
  * Wear the theme and light / dark the person picked in the editor, as the editor's Run wears them:  the editor's own

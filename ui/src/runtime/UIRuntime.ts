@@ -126,13 +126,14 @@ export class UIRuntime {
   readonly propertyControls = new PropertyControls()
 
   /** `data-tooltip`, shown in the top layer so no parent frame cuts it off */
-  readonly dataTooltips = new DataTooltips({ browser: this.browser })
+  readonly dataTooltips = new DataTooltips({ browser: this.browser, focus: this.focus })
 
   /** Resolves once every service is constructed and the runtime is published on `globalThis`. */
   readonly ready: Promise<void>
 
   constructor() {
     this.registerFoundation()
+    this.focus.start()
     this.dataTooltips.start()
     this.ready = Promise.resolve()
   }

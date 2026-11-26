@@ -205,6 +205,35 @@ describe("DataTooltips", () => {
     await expect.poll(isShowing).toBe(false)
   })
 
+  it("a focus handed back by a script or a closing menu doesn't show it, Escape or not (epic `editor` I368)", async () => {
+    const button = framed("")
+    const item = Fixture.render(`<button aria-label="In the menu">In the menu</button>`) as HTMLButtonElement
+    // a menu that hands focus back to its button as Escape closes it
+    item.addEventListener("keydown", (event) => event.key === "Escape" && button.focus())
+    item.focus()
+    await userEvent.keyboard("{Escape}")
+    expect(document.activeElement).toBe(button)
+    expect(button.matches(":focus-visible")).toBe(true)
+    expect(isShowing()).toBe(false)
+    item.focus()
+    button.focus()
+    expect(isShowing()).toBe(false)
+  })
+
+  it("a press hides it, until the pointer leaves the target and comes back (epic `editor` I368)", async () => {
+    const button = framed("")
+    await userEvent.hover(button)
+    await expect.poll(isShowing).toBe(true)
+    await userEvent.click(button)
+    await expect.poll(isShowing).toBe(false)
+    await userEvent.hover(button, { position: { x: 2, y: 2 } })
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    expect(isShowing()).toBe(false)
+    await userEvent.unhover(button)
+    await userEvent.hover(button)
+    await expect.poll(isShowing).toBe(true)
+  })
+
   it("finds a target in a shadow root, and shows a changed text as it changes", async () => {
     const host = Fixture.render(`<div></div>`)
     const inner = host.attachShadow({ mode: "open" })

@@ -3,7 +3,9 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Fixture } from "spell/test-helpers/Fixture"
+import { Keys } from "spell/ui/test-helpers/Keys"
 import { ShadowTree } from "spell/ui/test-helpers/ShadowTree"
+import { UI } from "spell/ui/runtime"
 import { DropZones, UIUploader, type DOMUploaderElement } from "spell/ui/components/ui-uploader"
 
 /** Element-markup rewrites of every example, by path. */
@@ -381,11 +383,14 @@ describe("<ui-uploader>", () => {
     await vi.waitFor(() => expect(popup.hidden).toBe(false))
     expect(popup.getAttribute("open-on")).toBe("hover")
     expect(popup.textContent).toContain("a.json")
-    // its glimpse over:  focus on its button shows it again
+    // its glimpse over:  Tab onto its button shows it again (a focus by script doesn't:  epic `editor` I368)
     popup.hidden = true
     await ShadowTree.settle(uploader)
+    const before = uploader.insertAdjacentElement("beforebegin", document.createElement("button")) as HTMLElement
+    before.focus()
+    await Keys.tab()
     const button = uploader.shadowRoot!.querySelector(".choose")!
-    button.shadowRoot!.querySelector("button")!.focus()
+    expect(UI.focus.activeElementDeep()).toBe(button.shadowRoot!.querySelector("button"))
     await vi.waitFor(() => expect(popup.hidden).toBe(false))
   })
 

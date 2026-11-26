@@ -148,7 +148,7 @@ function runPageInDev(): Plugin {
       server.middlewares.use((request, response, next) => {
         const url = request.url ?? ""
         // a group's own page:  the more spaces file read again, as this server outlives the page server's restarts
-        const page = editorPageFor(url.split("?")[0]!, orgGroupFolders(moreSpacesFrom()))
+        const page = editorPageFor(url, orgGroupFolders(moreSpacesFrom()))
         if (request.method !== "GET" || page === "index.html" || !/text\/html/.test(request.headers.accept ?? "")) {
           return next()
         }
