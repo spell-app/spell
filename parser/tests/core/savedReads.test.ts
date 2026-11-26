@@ -493,6 +493,28 @@ describe("the first few, on a list that filters by only some of a `where` (epic 
   })
 })
 
+describe("`the first X where ...`, its `where` waiting", () => {
+  test("each answer is waited for:  a promise is no yes, and only those that pass come back", async () => {
+    const place = new CountingPlace({ capabilities: { idOf: "id" } })
+    await place.apply(
+      Array.from({ length: 10 }, (_, at) => ({
+        kind: "insert" as const,
+        collection: "recipes",
+        id: `r${at}`,
+        fields: { id: `r${at}`, title: at < 6 ? "Stew" : "Soup", notes: "hot" }
+      }))
+    )
+    const { Recipe } = program(place)
+    // a `where` reading a field that waits compiles to a function that waits
+    const isSoup = async (recipe: unknown) => {
+      await Promise.resolve()
+      return (recipe as { title: string }).title === "Soup"
+    }
+    const found = await core.savedThings(Recipe, {}, "looks through", { first: 2, where: isSoup })
+    expect(found.items.map((recipe) => (recipe as { id: string }).id)).toEqual(["r6", "r7"])
+  })
+})
+
 describe("the number of, counted by the place (`core.savedCount()`)", () => {
   /** A place that says how many match, all of them, beside one page of rows:  as a web server's `total` does. */
   class Counting extends CountingPlace {
