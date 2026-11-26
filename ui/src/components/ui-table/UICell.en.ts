@@ -30,6 +30,14 @@ export const cellVocabulary = {
         "A header cell:  in a `header` row it names its column;  in a body row, its row (the first cell, say)."
     },
     {
+      name: "sort",
+      group: "behaviour",
+      kind: "string",
+      description:
+        "A header cell of a table with a `sort`:  the sort name or field its column asks for, `completion`, " +
+        "`name`.  With no `sort`, its column doesn't sort."
+    },
+    {
       name: "span",
       group: "layout",
       kind: "number",

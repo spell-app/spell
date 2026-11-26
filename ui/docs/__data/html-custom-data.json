@@ -7533,6 +7533,13 @@
           }
         },
         {
+          "name": "sort",
+          "description": {
+            "kind": "markdown",
+            "value": "A header cell of a table with a `sort`:  the sort name or field its column asks for, `completion`, `name`.  With no `sort`, its column doesn't sort.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "span",
           "description": {
             "kind": "markdown",

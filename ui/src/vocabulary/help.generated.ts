@@ -297,6 +297,7 @@ export const HELP_TABLE: Readonly<
     description: "A cell holds one value of a table row; a header cell names its column or row.",
     attributes: {
       header: "A header cell: in a `header` row it names its column; in a body row, its row (the first cell, say).",
+      sort: "A header cell of a table with a `sort`: the sort name or field its column asks for, `completion`, `name`.",
       span: "How many columns it covers; default 1.",
       align: "Aligns its text: `left`, `center`, `right` or `justified`.",
       "vertical-align": "Aligns its content to the `top`, `middle` or `bottom` of the row."
@@ -2189,6 +2190,7 @@ export const HELP_TABLE: Readonly<
       "sort-column":
         "Index of the sorted column (0-based, counting `colspan`s); set by people's clicks unless the app controls it.",
       "sort-direction": "Direction of `sort-column`; a newly sorted column starts `ascending`.",
+      sort: "The page's sort it shows and sets, `{ by, descending }` (`TableSortValue`): the header whose `sort` is its `by` is the sorted one, so `sort-column` and `sort-direction` follow it.",
       "client-sort":
         "Slotted tables: reorder the `tbody` rows by the sorted column's cell text on `ui-sorting` (numeric-aware).",
       "column-defs":

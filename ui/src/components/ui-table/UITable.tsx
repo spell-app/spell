@@ -51,6 +51,12 @@ import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
  *   - `sort-column` and `sort-direction` are auto-controlled.
  *     Each activation first sends the cancelable `ui-sorting` (`TableSortDetail`):
  *     the sorted column flips, another starts `ascending`.
+ *   - `sort`, the page's sort (`TableSortValue`, `{ by, descending }`):  the header whose `sort` is its `by` is the
+ *     sorted one, so `sort-column` and `sort-direction` follow it.
+ *     - A header click asks for the next sort, in `ui-sorting`'s `sort`:  the sorted header's flips it, another's
+ *       starts it `ascending`.  Not cancelled, the table holds it;  a Spell page cancels it and sets its own sort,
+ *       which the table then follows (the read follows it too).
+ *     - With a `sort`, only a header with a `sort` of its own sorts.
  *   - Reordering:  data mode shows its rows sorted.
  *     A slotted table reorders its `tbody` rows by cell text only with `client-sort` (simple static tables);
  *     otherwise the app sorts:  frameworks own their rows.
@@ -537,6 +543,22 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
   /** `sort-direction`:  page-controlled, or set by clicks. */
   @E.controlled("sort-direction") accessor sortDirection: UIT.TableSortDirection | undefined = undefined
 
+  /** `sort`:  the page's sort, which `sort-column` and `sort-direction` follow;  set by clicks unless the page holds it. */
+  @E.controlled("sort") accessor sort: UIT.TableSortValue | undefined = undefined
+
+  /**
+   * `sort` set, or the table changed under it:  `sort-column` and `sort-direction` follow it.
+   * - The column whose header's `sort` is its `by`;  none, when no header asks for it.
+   */
+  @E.onChange("sort", "sortTarget", "tableRevision")
+  protected onPageSortChanged(sort: UIT.TableSortValue | undefined, table: Element | undefined) {
+    if (!sort || !table) return
+    const column = TableSort.columnSortedBy(table, sort.by)
+    const direction: UIT.TableSortDirection = sort.descending ? "descending" : "ascending"
+    if (this.sortColumn !== column) this.sortColumn = column
+    if (this.sortDirection !== direction) this.sortDirection = direction
+  }
+
   /** Direction in effect:  `sortDirection`, `ascending` when only a column is set. */
   get effectiveSortDirection(): UIT.TableSortDirection | undefined {
     return this.sortColumn === undefined ? undefined : (this.sortDirection ?? "ascending")
@@ -568,9 +590,7 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
    */
   private decorateHeaders({ table, isSortable, column, direction }: HeaderSort) {
     const headers = table && isSortable ? TableSort.headers(table) : []
-    const focusable = new Set(
-      headers.filter((header) => TableSort.isSortable(header) && !header.querySelector("button"))
-    )
+    const focusable = new Set(headers.filter((header) => this.canSortBy(header) && !header.querySelector("button")))
     for (const header of this.headersMadeFocusable) {
       if (!focusable.has(header)) {
         header.removeAttribute("tabindex")
@@ -627,7 +647,13 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
     const table = this.sortTarget
     if (!table || !this.sortable) return undefined
     const header = TableSort.header(table, event.target)
-    return header && TableSort.isSortable(header) ? header : undefined
+    return header && this.canSortBy(header) ? header : undefined
+  }
+
+  /** Does `header` sort:  `TableSort.isSortable()`, and, while the table has a `sort`, a `sort` of its own. */
+  @E.untracked
+  private canSortBy(header: Element): boolean {
+    return TableSort.isSortable(header) && (this.sort === undefined || TableRows.sortOf(header) !== undefined)
   }
 
   /**
@@ -639,6 +665,7 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
   private requestSort(header: Element, originalEvent: Event) {
     const table = this.sortTarget
     if (!table) return
+    if (this.sort !== undefined) return this.requestPageSort(table, header, originalEvent)
     const column = TableSort.column(table, header)
     const current = this.sortColumn
     const direction: UIT.TableSortDirection =
@@ -647,6 +674,25 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
     this.requestChange("sortDirection", direction, () =>
       this.requestChange("sortColumn", column, () => this.send("ui-sorting", detail))
     )
+  }
+
+  /**
+   * With a `sort`:  ask for `header`'s sort, `ui-sorting` first (cancelable, with the `sort` it's about to hold), then
+   * `sort`, which `sort-column` and `sort-direction` follow.
+   * - The sorted header's flips it;  another's starts `ascending`.
+   * - Nothing changes when the event is cancelled (a Spell page sets its own sort), or a handler set `sort` itself.
+   */
+  @E.untracked
+  private requestPageSort(table: Element, header: Element, originalEvent: Event) {
+    const by = TableRows.sortOf(header)
+    if (by === undefined) return
+    const current = this.sort
+    const descending = current?.by === by ? !current.descending : false
+    const sort: UIT.TableSortValue = { by, ...(descending && { descending }) }
+    const direction: UIT.TableSortDirection = descending ? "descending" : "ascending"
+    const column = TableSort.column(table, header)
+    const detail: UIT.TableSortDetail = { column, key: by, direction, sort, originalEvent }
+    this.requestChange("sort", sort, () => this.send("ui-sorting", detail))
   }
 
   ////////////////
@@ -1140,7 +1186,7 @@ const CAPTION = "caption"
 const COLUMNS_TOKEN = "--_table-columns"
 
 /** Rows-mode attributes that move columns or headers:  a row's `header` / `footer`, a cell's `span`. */
-const ROW_ATTRIBUTES = ["header", "footer", "span"]
+const ROW_ATTRIBUTES = ["header", "footer", "span", "sort"]
 
 /** A cell of an editable table, by its row (as shown;  `sortedRows.length` is the empty last row) and column. */
 type CellAt = {

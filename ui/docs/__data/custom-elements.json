@@ -49236,6 +49236,14 @@
               "fieldName": "header"
             },
             {
+              "name": "sort",
+              "description": "A header cell of a table with a `sort`:  the sort name or field its column asks for, `completion`, `name`.  With no `sort`, its column doesn't sort.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "sort"
+            },
+            {
               "name": "span",
               "description": "How many columns it covers;  default 1.  Cells never span rows.",
               "type": {
@@ -49853,6 +49861,14 @@
           "members": [
             {
               "kind": "field",
+              "name": "sort",
+              "description": "The page's sort it shows and sets, `{ by, descending }` (`TableSortValue`):  the header whose `sort` is its `by` is the sorted one, so `sort-column` and `sort-direction` follow it.  A header click asks for the next (`ui-sorting`, with `sort`):  that header's again flips it, another's starts it `ascending`.  With it, a header with no `sort` doesn't sort.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            },
+            {
+              "kind": "field",
               "name": "columnDefs",
               "description": "Data mode:  `TableColumn[]` (`key`, `header`, `textAlign`, `sortable`, `width`;  for `editable`, `type`, `choices`, `readOnly`);  default the first row's keys (its `toJSON()`'s, for a row that has one).  A JS property (rich data), not an attribute.",
               "type": {
@@ -49880,7 +49896,7 @@
               "name": "ui-sorting",
               "description": "A header was activated;  `preventDefault()` keeps the current sort (and skips data / `client-sort` reordering).  Cancelable:  `preventDefault()` vetoes it.",
               "type": {
-                "text": "CustomEvent<{ column: number, key?: string, direction: \"ascending\" | \"descending\", originalEvent?: Event }>"
+                "text": "CustomEvent<{ column: number, key?: string, direction: \"ascending\" | \"descending\", sort?: TableSortValue, originalEvent?: Event }>"
               }
             }
           ],
