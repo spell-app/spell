@@ -18,7 +18,7 @@ import { afterAll, beforeAll, describe, test, expect } from "vite-plus/test"
  *   - Solid (`solid-js`, `@solidjs/web`, `@solidjs/signals`, `@solidjs/h`) is in `spell-solid.js` ALONE,
  *     with `spell-ui`'s element core (which `<spell-viewer>` and `<spell-editor>` are defined on).
  *   - The rest of `spell-ui` is in `spell-ui.js` and its lazy chunks (`ui/`) alone.
- *   - `spell-viewer.js`, `spell-editor.js` and `runner.js` import them.  See `sharedSolid()` in `vite.shared.ts`.
+ *   - `spell-viewer.js`, `spell-editor.js` and `runner.js` import them.  See `sharedFiles()` in `vite.shared.ts`.
  *   - Through `spell-solid-shared.js`, which takes them from the PAGE instead when it has them
  *     (a docs page's `SpellUI.packModules`):  `sharedPage()` in `vite.solid.config.ts`.
  * - `<spell-viewer>` is a root:  Spell UI's root family in `spell-solid.js` too.
@@ -37,7 +37,7 @@ import { afterAll, beforeAll, describe, test, expect } from "vite-plus/test"
  *   - it imports Solid and `h` through `spell-solid-shared.js`, bundles none of its own, and never loads `ui`
  *   - it exports that same `h`:  what compiled javascript draws with (P20)
  * - ONE grammar (spell's parser and rules) for a layout's spell and `<spell-code>`'s colours, `spell-grammar.js`
- *   (`sharedGrammar()`, `vite.element.config.ts`);  `<spell-editor>` keeps its own.
+ *   (`sharedFiles({ grammar: true })`, `vite.element.config.ts`);  `<spell-editor>` keeps its own.
  * - CodeMirror only in `<spell-editor>`'s lazy chunk:  the parser compiles, and apps run, before it loads.
  * - Icon packs beside the chunk holding `BuiltInPacks`, where it looks -- complete enough for every Fomantic name.
  * - Every bundle MUST parse:  a build can succeed and still write javascript no browser runs --
@@ -369,7 +369,7 @@ describe("runner builds", () => {
 
   test("the built-in sounds beside each chunk holding `BuiltInSounds` (epic `mockup` P28)", () => {
     // `<spell-editor>`'s language service (`spell-code-lsp.js`, built with the code elements) bundles its own copy
-    // too, for the sounds' NAMES alone (`vite.shared.ts`'s `UI_DATA`):  where their files are is the page's
+    // too, for the sounds' NAMES alone (`vite.shared.ts`'s `WHAT_BUILDS_SHARE`):  where their files are is the page's
     // runtime's to say, the copy in the shared files
     for (const dir of [element, runner]) {
       const soundCode = chunks(dir).filter(
@@ -388,7 +388,7 @@ const NAMES_ONLY = /^spell-(editor|code-lsp)\.js$/
 const PACKAGES = {
   solid: /\/node_modules\/(solid-js|@solidjs\/(web|signals))\//,
   // its generated data and the built-in sounds' names aside, plain tables bundled where they're read
-  // (`vite.shared.ts`'s `UI_DATA`);  and its plain-DOM leaves, bundled the same way (`BUNDLED_UI_LEAVES`:  a desktop
+  // (`vite.shared.ts`'s `WHAT_BUILDS_SHARE`);  and its plain-DOM leaves, bundled the same way (`WHAT_BUILDS_SHARE`:  a desktop
   // drop's reading, epic `language` P67;  the theme tree a site's own theme is built with, I36;  where the Spell UI site
   // is, epic `editor` P43)
   ui: /\/ui\/src\/(?!.*\.generated\.ts$|sounds\/|components\/ui-uploader\/DroppedFiles\.ts$|components\/ui-theme-editor\/ThemeTokens\.ts$|styles\/(ThemeFile|styles\.en)\.ts$|util\/SpellUIGuide\.ts$)/,

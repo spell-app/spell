@@ -590,7 +590,7 @@ type RootLoaderType = (typeof import("spell/ui/components/ui-root"))["RootLoader
  * Register Spell UI's names for a drawing's bare tags, as `"spell-ui"` (`SP.ComponentPacks`), and load those of
  * `project`'s languages:  `<menu>` => `<ui-menu>`, `<menú>` in a Spanish file => `<es-menu>`.
  * - From the PAGE's Spell UI (`spell-solid-shared.js`), its catalog and dictionaries:  this bundle may not carry its
- *   own copy of Spell UI (`sharedSolid()`), so it can't load spaces' `spellUIPack`, which the app and the
+ *   own copy of Spell UI (`sharedFiles()`), so it can't load spaces' `spellUIPack`, which the app and the
  *   command line use.  The same names:  a catalog tag without its `ui-`;  a language's tag, `<lang>-<name>`.
  * - A language other than English:  `RootLoader.useLanguage()`, as a `<spell-viewer>` running a Spanish app does --
  *   SIDE EFFECT:  Spell UI's texts on the page switch to it.

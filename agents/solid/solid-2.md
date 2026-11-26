@@ -195,14 +195,14 @@ count() // 1
   - within a bundle:  Solid + Spell UI live in the shared files, NEVER `spell-runtime.js`.  Each `<spell-viewer>`
     keeps its OWN `core`, all share ONE Solid.  `enableExternalSource` is registered once per Solid, by
     `bridgeSolid()` from the host (`app`'s `cellsBridge.ts`)
-  - `spell-runtime.js` gets Solid, `@solidjs/web` and `@solidjs/h` from `spell-solid.js` (`sharedSolid()`), which
+  - `spell-runtime.js` gets Solid, `@solidjs/web` and `@solidjs/h` from `spell-solid.js` (`sharedFiles()`), which
     also holds Spell UI's element core since `<spell-viewer>` became a Spell UI component;  it never loads
     `spell-ui.js` (`app`'s build tests pin both)
   - `spell run` and the core contract run Solid's BROWSER builds under node, on a linkedom page (`cli`'s
     `hooks.mjs`), with the cells bridged there too
   - across our bundles:  element / runner / editor builds import ONE shared Solid (and `ui`), not a Solid each:  SEE
     `app/AGENTS.md` "Overview".  Any other Solid / `ui` specifier (`solid-js/store`, `spell/ui/runtime`) is a
-    build ERROR:  add it to `sharedSolid()`'s list AND to what `vite.solid.config.ts` exports
+    build ERROR:  add it to `WHAT_BUILDS_SHARE` (`vite.shared.ts`) AND to what `vite.solid.config.ts` exports
   - on host pages with their own Solid / Spell UI:  an import-map variant of `<spell-viewer>` (bare specifiers)
     (planned, epic page T5:  not shipped -- such a page gets a second Solid today)
   - two copies on one page FAIL SILENTLY:  the fork's `register()` swaps `existing.Component` across copies
@@ -450,7 +450,7 @@ const modal = (
 - ARITY TRAP:  on a COMPONENT, a zero-arg function prop becomes a getter.  Handlers MUST take a parameter:
   `onPick: e => go()`, never `onPick: () => go()`.  Element `on*` props and `ref` are exempt.
 - It imports `@solidjs/web` by bare specifier:  keep it inside bundled code, never in blob-loaded compiled spell.
-  `spell-runtime.js` gets it from `spell-solid.js` (`sharedSolid()`), which re-exports `h`.
+  `spell-runtime.js` gets it from `spell-solid.js` (`sharedFiles()`), which re-exports `h`.
 
 ```ts
 h("div", { id: () => props.id, class: "row" }, () => first() + " " + last(), h(Child, { name: () => name() }))

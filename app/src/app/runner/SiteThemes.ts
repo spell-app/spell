@@ -21,7 +21,7 @@ import { fetchText } from "./fetchFresh"
  * - Read afresh each time a site starts, so an edit to the file shows on the next run.
  * - No Solid, no editor:  both hosts use it.
  * - Spell UI's runtime from `spell/ui/core`, never `spell/ui`:  a page's `<spell-viewer>` shares the page's core, and
- *   loads the rest of Spell UI tag by tag, never all of it (the app's `sharedSolid()`).
+ *   loads the rest of Spell UI tag by tag, never all of it (the app's `sharedFiles()`).
  *   - The theme tree (`ThemeTokens`, `ThemeFile`) is bundled into each build:  plain data, nothing a page shares.
  ****************/
 export class SiteThemes {

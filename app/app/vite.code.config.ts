@@ -1,6 +1,6 @@
 import { defineConfig } from "vite"
 
-import { appConfig, sharedSolid } from "./vite.shared.ts"
+import { appConfig, sharedFiles } from "./vite.shared.ts"
 
 /**
  * Build spell's code and markdown elements:  `yarn build:element` => `dist-element/`, after `vite.solid.config.ts`.
@@ -12,7 +12,7 @@ import { appConfig, sharedSolid } from "./vite.shared.ts"
  *     what the page server adds to the docs pages it serves
  *   - `spell-grammar.js`:  spell's parser and rules, `P` and `SP` (`src/app/spellGrammar.ts`), the ONE grammar of the
  *     element builds (epic `solid-2-final` P11):  the colours here, and a `<spell-viewer>` layout's spell, import it
- *     (`sharedGrammar()`, `vite.element.config.ts`)
+ *     (`sharedFiles({ grammar: true })`, `vite.element.config.ts`)
  *   - `spell-editor.js`:  `<spell-editor>` (`src/app/components/spell-editor/`), built HERE so it shares that grammar
  *     with `<spell-code>`:  a page with both loads one (epic `solid-2-final` P19, Q31's A;  its own build before)
  *     - CodeMirror is a chunk of its own, `spell-editor-codemirror.js`, loaded once there's a project to show.
@@ -32,7 +32,7 @@ import { appConfig, sharedSolid } from "./vite.shared.ts"
  *   `spell-code.js`, which would define `<spell-code>` and need Spell UI's families.
  *   - And `spell-language.js` imports it LAZILY:  so does nothing else up front (Vite's preload helper too is a chunk
  *     of its own, `spell-code-preload.js`).
- * - Solid and Spell UI are NOT bundled, as for `<spell-viewer>`:  `sharedSolid()`.
+ * - Solid and Spell UI are NOT bundled, as for `<spell-viewer>`:  `sharedFiles()`.
  *   - Solid and the core through `spell-solid-shared.js`;  the code and markdown families through
  *     `spell-ui-shared.js` (`SHARED_FAMILIES`).
  *   - Both the page's own, on a page with Spell UI of its own (a docs page):  one Solid, one Spell UI.
@@ -43,7 +43,7 @@ import { appConfig, sharedSolid } from "./vite.shared.ts"
 const shared = appConfig()
 export default defineConfig({
   ...shared,
-  plugins: [...shared.plugins, sharedSolid()],
+  plugins: [...shared.plugins, sharedFiles()],
   base: "./",
   publicDir: false,
   build: {
