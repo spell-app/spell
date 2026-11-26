@@ -1008,8 +1008,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
               await SP.loadTargets(this.targets)
               return this.scope!.parser!.inPlay(() => {
                 // each `.spell` file as its AST, so a class gets its members from every file
-                const files = this.filesInPlay
-                const parts = files.map((file, index) =>
+                const allFiles = this.filesInPlay
+                const allParts = allFiles.map((file, index) =>
                   file.AST instanceof P.ASTStatementGroup ? file.AST : (allCompiled as string[])[index]
                 )
                 const { version, exports } = this.contents ?? {}
@@ -1017,13 +1017,11 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                 const languages = [...new Set(this.spellFiles.map((file) => file.language.lang))]
                 // each target's code, through its writer -- `js/solid`'s first:  it's the one that runs
                 for (const target of this.targets) {
-                  if (target.can.draw === false && SpellProject.draws(parts)) {
-                    throw new P.ParserError({
-                      message: `'${this.projectName}' draws a UI, which target '${target.name}' can't.`,
-                      activity: "SpellProject.compile",
-                      params: { target: target.name }
-                    })
-                  }
+                  // a target that can't draw writes only our files that don't:  see `withoutDrawing()`
+                  const { parts, files } =
+                    target.can.draw === false
+                      ? SpellProject.withoutDrawing(allParts, allFiles, this.projectName ?? this.projectId, target.name)
+                      : { parts: allParts, files: allFiles }
                   const refusedKind = SpellProject.placeKindRefusedBy(target, parts)
                   if (refusedKind === "any") {
                     throw new P.ParserError({
@@ -1610,6 +1608,63 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    */
   static draws(parts: Array<P.ASTStatementGroup | string | undefined>): boolean {
     return parts.some((part) => typeof part === "object" && containsJSX(part))
+  }
+
+  /**
+   * `parts` and their `files` for target `targetName`, which can't draw:  each file that draws left out, so it writes
+   * the rest, e.g. a library's classes beside the app that shows them.
+   * - Its stylesheets (`.css` files) too:  there's no page to style.
+   * - Left out quietly:  every target that draws, `js/solid` always, writes them all.
+   * - `files`:  each part's file, in order:  its path says a stylesheet, and names it in what it throws.
+   * - Throws when there's nothing left to write, every `.spell` file drawing, or when a file kept uses a type that only
+   *   a file left out declares:  as its class, a member's, a new one's ...  (the target's code would name a class it
+   *   hasn't).
+   */
+  static withoutDrawing<File extends { path: string }>(
+    parts: Array<P.ASTStatementGroup | string | undefined>,
+    files: readonly File[],
+    projectName: string,
+    targetName: string
+  ): { parts: Array<P.ASTStatementGroup | string | undefined>; files: readonly File[] } {
+    const drawing = parts.map((part) => typeof part === "object" && containsJSX(part))
+    const isStyles = (index: number) => typeof parts[index] === "string" && /\.css$/i.test(files[index]?.path ?? "")
+    const isKept = parts.map((_part, index) => !drawing[index] && !isStyles(index))
+    if (isKept.every(Boolean)) return { parts, files }
+    const kept = parts.filter((_part, index) => isKept[index])
+    if (drawing.some(Boolean) && !kept.some((part) => typeof part === "object")) {
+      throw new P.ParserError({
+        message: `'${projectName}' draws a UI in every file, which target '${targetName}' can't:  it writes only the files that don't draw.`,
+        activity: "SpellProject.compile",
+        params: { target: targetName }
+      })
+    }
+    const declaredIn = (part: unknown) => {
+      const names = new Set<string>()
+      P.forEachNode(part, (node) => {
+        if (node instanceof P.ASTClassDeclaration) names.add(node.type.name)
+      })
+      return names
+    }
+    const keptTypes = declaredIn(kept)
+    // each type only a drawing file declares, by name:  the first file it's in
+    const leftOut = new Map<string, number>()
+    parts.forEach((part, index) => {
+      if (!drawing[index]) return
+      for (const name of declaredIn(part)) if (!keptTypes.has(name) && !leftOut.has(name)) leftOut.set(name, index)
+    })
+    const fileName = (at: number) => files[at]!.path.split("/").at(-1)
+    parts.forEach((part, index) => {
+      if (!isKept[index]) return
+      P.forEachNode(part, (node) => {
+        if (!(node instanceof P.ASTTypeExpression) || !leftOut.has(node.name)) return
+        throw new P.ParserError({
+          message: `'${projectName}', for target '${targetName}':  ${fileName(index)} uses '${node.raw ?? node.name}', from ${fileName(leftOut.get(node.name)!)}, which draws a UI, so '${targetName}' leaves it out.`,
+          activity: "SpellProject.compile",
+          params: { target: targetName, type: node.name }
+        })
+      })
+    })
+    return { parts: kept, files: files.filter((_file, index) => isKept[index]) }
   }
 
   /**
