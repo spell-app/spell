@@ -165,9 +165,14 @@ export class JoinedValues {
         word: ((operator.groups.operator as P.Match | undefined) ?? operator).inputText.trim()
       })
     read.valueJoins.add(operator)
-    read.itemJoins.set(operator, { lhs: saysItems(lhs) ? "items" : "one", rhs: saysItems(rhs) ? "items" : "one" })
+    const datatype = P.listOf(common)
+    read.itemJoins.set(operator, {
+      lhs: saysItems(lhs) ? "items" : "one",
+      rhs: saysItems(rhs) ? "items" : "one",
+      datatype
+    })
     return {
-      datatype: P.listOf(common),
+      datatype,
       match: operator,
       joined: "and",
       items: true,
@@ -219,7 +224,7 @@ export type JoinedValuesRead = {
    * Each `and` among them joining ITEMS into one flat list, and how each side joins:  as its items, or as one
    * (epic `language` T152)
    */
-  itemJoins: Map<P.Match, { lhs: "items" | "one"; rhs: "items" | "one" }>
+  itemJoins: Map<P.Match, ItemJoin>
   /** Why it's refused, in the scope's language -- `undefined` if it isn't */
   problem?: string
   /** It's a condition (`if ...`, a `where`):  a value there is a test of whether it's there */
@@ -231,6 +236,9 @@ export type JoinedValuesRead = {
  * - With a `where`'s, these say a value in an `and` / `or` is a test of whether it's there, as always.
  */
 const CONDITION_GROUPS = new Set(["condition", "operator", "enabled", "disabled", "selected"])
+
+/** How an `and` joins ITEMS:  each side as its items, or as one;  and the flat list it makes, `list of cards`. */
+export type ItemJoin = { lhs: "items" | "one"; rhs: "items" | "one"; datatype: P.Datatype }
 
 /** One side of an operator, as the shunting-yard reduces them. */
 type Side = {

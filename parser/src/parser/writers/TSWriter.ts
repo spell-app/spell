@@ -450,6 +450,12 @@ export class TSWriter extends JSWriter {
       if (!written.startsWith("core.")) return `${declared} = ${written}`
       // what spell read it as, e.g. `Card` for `the last card of discards`:  its match says, while parsing
       const datatype = inner.datatype ?? inner.match?.datatype
+      // a flat list `and` made, `core.mergeLists([...], List) as List<Card>` (epic `language` I164)
+      const itemType =
+        inner instanceof P.ASTCoreMethodInvocation && inner.methodName === "mergeLists"
+          ? this.typeFor(P.itemTypeOf(typeof datatype === "string" ? datatype : undefined))
+          : undefined
+      if (itemType) return `${declared} = ${this.bare(value)} as List<${itemType}>`
       const type = typeof datatype === "string" && !datatype.startsWith("list") ? this.typeFor(datatype) : undefined
       if (!type) return `${declared} = ${written}`
       // an item read says its type as a type argument, still maybe nothing:  `core.getItemAt<Card>(...)`
