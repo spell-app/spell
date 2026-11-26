@@ -1,16 +1,22 @@
 import { E } from "spell/ui/core"
 
+import { PhaseMoves } from "spell/epic/phases"
+
 /****************
  * ### `PhaseDrag`
  * Dragging a TO-DO phase by its title row to another place in the Phases section (epic `epic-engine` P34;  Owen:
  * "Open phases are reordered by dragging one by its title;  done phases never move", no up / down buttons, Q20 B).
  * - pointer events, not the browser's drag and drop:  an element made `draggable` stops text selection in its whole
  *   body, and a phase's body is prose
- * - a press on the title row (the fold button, the title, its badge) that MOVES 6px starts the drag;  a press that
- *   doesn't stays a click and folds as before;  after a drag the click that follows is swallowed, so it doesn't fold
- * - never from the row's buttons (the review pills, the state chips), a link, or anything typed in
- * - while dragging:  a line on the phase it would land before or after (`data-drop`), only where the tool would let it
- *   go (every phase between its place and the new one still to do:  `PlanDoc.movePhase()`);  Escape calls it off
+ * - a press on the title row (the fold button, the title, its status icon, the row's empty space) that MOVES 6px starts
+ *   the drag, its grab cursor over all of them (`EpicPhase.css`, I480);  a press that doesn't stays a click and folds
+ *   as before;  after a drag the click that follows is swallowed, so it doesn't fold
+ * - never from the row's buttons (the review pills, the gear, the state chips), a link, or anything typed in
+ * - only TO-DO phases trade places;  a started or done one keeps its place (`PhaseMoves`, as `PlanDoc.movePhase()`
+ *   does), so a drag past one, shown or hidden by the filter, lands on the nearest to-do place (I480:  refused before,
+ *   with nothing to say why, whenever a done phase the page hid lay between)
+ * - while dragging:  a line where it would land (`data-drop`), on the to-do phase whose place it takes;  Escape calls it
+ *   off
  * - a drop moves the phase AT ONCE, on the page, and hands `move(id, to)` its new place (1-based):  a mark that waits for
  *   Send, which `inbox apply` turns into the file's order;  dragged back, the next drop's mark replaces it
  * - `pending()`:  the moves still waiting (marks not yet applied):  put back after a live patch (the file's order) and
@@ -57,11 +63,17 @@ export class PhaseDrag {
     }
   }
 
-  /** The section's phases, in page order:  its own `<epic-phase>` children, but hidden ones. */
+  /**
+   * The section's phases, in page order:  its own `<epic-phase>` children, hidden ones too (by the filter, or their own
+   * `hidden`):  a place is a place in the file, and the moves (`PhaseMoves`) count every phase.
+   */
   get phases(): Element[] {
-    return Array.from(this.host.children).filter(
-      (child) => child.localName === PHASE_TAG && !child.hasAttribute("hidden")
-    )
+    return Array.from(this.host.children).filter((child) => child.localName === PHASE_TAG)
+  }
+
+  /** The phases showing:  the ones a drop can land by. */
+  get shownPhases(): Element[] {
+    return this.phases.filter((phase) => !PhaseDrag.isHidden(phase))
   }
 
   /**
@@ -101,10 +113,9 @@ export class PhaseDrag {
   reapply() {
     for (const { id, to } of this.pending()) {
       const phases = this.phases
-      const phase = phases.find((each) => each.id === id)
-      const at = phase ? phases.indexOf(phase) + 1 : 0
-      if (!phase || at === to || to < 1 || to > phases.length) continue
-      PhaseDrag.place(phase, phases[to - 1]!, to > at ? "after" : "before")
+      const at = phases.findIndex((each) => each.id === id) + 1
+      if (!at || at === to || PhaseMoves.landing(PhaseDrag.statuses(phases), at, to) !== to) continue
+      PhaseMoves.move(phases, at, to)
     }
   }
 
@@ -134,22 +145,27 @@ export class PhaseDrag {
   }
 
   /**
-   * Where a drop at `y` would put the dragged phase:  before or after the phase under it, and its place then (1-based);
-   * `undefined` where it can't go (its own place, or past a phase that has started).
+   * Where a drop at `y` would put the dragged phase:  its place then (1-based), and the line's phase and side;
+   * `undefined` where it would stay (its own place, or no to-do place between).
+   * - before or after the SHOWN phase under the pointer, then the nearest place a to-do phase holds (`PhaseMoves`)
+   * - the line:  on the phase whose place it takes, on the side it comes in from;  that phase hidden, on the one under
+   *   the pointer
    */
   private placeAt(y: number): { to: number; target: Element; side: DropSide } | undefined {
     const { phase: dragged, from } = this.drag!
     const phases = this.phases
-    const target = phases.find((each) => each.getBoundingClientRect().bottom >= y) ?? phases.at(-1)
-    if (!target || target === dragged) return undefined
-    const box = target.getBoundingClientRect()
+    const shown = this.shownPhases
+    const under = shown.find((each) => each.getBoundingClientRect().bottom >= y) ?? shown.at(-1)
+    if (!under || under === dragged) return undefined
+    const box = under.getBoundingClientRect()
     const side: DropSide = y < box.top + Math.min(box.height, TITLE_PX) / 2 ? "before" : "after"
-    const index = phases.indexOf(target) + 1
-    const to = side === "before" ? (index > from ? index - 1 : index) : index >= from ? index : index + 1
-    if (to === from) return undefined
-    const [low, high] = from < to ? [from, to] : [to, from]
-    if (phases.slice(low - 1, high).some((each) => !PhaseDrag.isToDo(each))) return undefined
-    return { to, target, side }
+    const index = phases.indexOf(under) + 1
+    const asked = side === "before" ? (index > from ? index - 1 : index) : index >= from ? index : index + 1
+    const to = PhaseMoves.landing(PhaseDrag.statuses(phases), from, asked)
+    if (to === undefined || to === from) return undefined
+    const taken = phases[to - 1]!
+    const target = PhaseDrag.isHidden(taken) ? under : taken
+    return { to, target, side: target === under ? side : to > from ? "after" : "before" }
   }
 
   /** Let go:  moved at once, on the page, and handed on (`move()`);  nothing where it can't go. */
@@ -158,7 +174,7 @@ export class PhaseDrag {
     this.end()
     swallowClick()
     if (!place) return
-    PhaseDrag.place(phase, place.target, place.side)
+    PhaseMoves.move(this.phases, this.phases.indexOf(phase) + 1, place.to)
     this.move(phase.id, place.to)
   }
 
@@ -174,15 +190,19 @@ export class PhaseDrag {
   // ## Helpers
   ////////////////
 
-  /** `phase` put `side` of `target`. */
-  static place(phase: Element, target: Element, side: DropSide) {
-    if (side === "before") target.before(phase)
-    else target.after(phase)
-  }
-
   /** Is `phase` still to do (`status`, `todo` when it has none)?  Only those move. */
   static isToDo(phase: Element): boolean {
-    return (phase.getAttribute("status") ?? "todo") === "todo"
+    return PhaseMoves.canMove(phase.getAttribute("status"))
+  }
+
+  /** `phases`' statuses, in order:  what `PhaseMoves` moves by. */
+  private static statuses(phases: readonly Element[]): (string | null)[] {
+    return phases.map((phase) => phase.getAttribute("status"))
+  }
+
+  /** Is `phase` hidden:  by its own `hidden`, or the section's filter (`data-epic-filtered`)? */
+  private static isHidden(phase: Element): boolean {
+    return phase.hasAttribute("hidden") || phase.hasAttribute(FILTERED)
   }
 
   /**
@@ -227,6 +247,9 @@ export type DropSide = "before" | "after"
 
 /** A phase's tag. */
 const PHASE_TAG = "epic-phase"
+
+/** On a phase the section's filter hides (`EpicSection.runs.css`). */
+const FILTERED = "data-epic-filtered"
 
 /** On the phase being dragged. */
 export const DRAGGED = "data-dragged"

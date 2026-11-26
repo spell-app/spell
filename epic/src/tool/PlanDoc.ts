@@ -14,7 +14,7 @@ import {
 } from "spell/epic/definitions"
 import { PlanDates } from "spell/epic/dates"
 import { Markup, type MarkupContent } from "spell/epic/markup"
-import { PageStages, PhaseIds, PhaseStatuses, type PageStage } from "spell/epic/phases"
+import { PageStages, PhaseIds, PhaseMoves, PhaseStatuses, type PageStage } from "spell/epic/phases"
 import { ThreadFacts } from "spell/epic/comments"
 // Import directly:  the page client's pure helpers, never its barrel (the browser's `ReviewClient`)
 import { parseSetLetter, reopensCanceled, setPicksOf } from "spell/epic/review/review.types"
@@ -3058,23 +3058,31 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * The phase at place `n` DEFERRED (its Defer pill while the phases are agreed, epic `epic-engine` P29):
-   * moved after every other phase, still to do;  its number changes, its id never.
-   * - returns its new place
+   * The phase at place `n` DEFERRED (its Defer, epic `epic-engine` P29;  its gear's "Defer this phase" since T169):
+   * moved after every other phase still to do, still to do itself;  its number changes, its id never.
+   * - returns its new place:  `n` when no to-do phase comes after it
    */
   deferPhase(n: number): number {
-    return this.movePhase(n, this.phaseElements.length)
+    const last = this.phaseElements.length
+    const landed = PhaseMoves.landing(
+      this.phases.map((phase) => phase.status),
+      n,
+      last
+    )
+    return landed === n ? n : this.movePhase(n, last)
   }
 
   /**
    * Move the phase at place `from` to place `to` (epic `epic-engine` P34:  Owen drags it there, or `epic move`);
-   * returns `to`.
-   * - only phases still TO DO move, and only among them:  every phase from `from` to `to` must be to do, or dropped
-   *   (epic `epic-engine` I228:  never built);  a done or active one keeps its number:  its commits and log say it
+   * returns the place it landed.
+   * - only a phase still TO DO moves, and only among the to-do (and dropped) phases:  they take each other's places,
+   *   while a started or done phase keeps its place, and so its number, which its commits and log say
+   *   (`PhaseMoves`, epic `epic-engine` I480);  `to` a started phase's place:  the nearest to-do place back
+   *   towards `from`
    * - its id stays;  the NUMBERS follow, all at once (`renumberAll()`):  items' `phase`, Updated lines' `of`, every
    *   bare `P5` in the page's words, and every `P5 · <its name>` (`relabelPhaseNames()`);  the record keeps its own
    * - SIDE EFFECT:  logs it
-   * - throws for a place out of range, or a started phase in the way
+   * - throws for a place out of range, a phase not to do, or no to-do place between
    */
   movePhase(from: number, to: number): number {
     const phases = this.phases
@@ -3082,24 +3090,24 @@ export class PlanDoc extends PlanReader {
       if (!Number.isInteger(n) || n < 1 || n > phases.length)
         throw new PlanDocError(`move ${from} to ${to}:  no place ${n} (1-${phases.length})`)
     if (from === to) return to
-    const [low, high] = from < to ? [from, to] : [to, from]
-    // the one moved is to do;  the ones it passes to do or dropped (a dropped phase may be moved past:  I228)
-    const started = phases.find(
-      (phase) =>
-        phase.n >= low &&
-        phase.n <= high &&
-        (phase.n === from ? phase.status !== "todo" : !PlanDoc.canRenumber(phase.status))
-    )
     const said = `move P${phases[from - 1]!.number} to P${phases[to - 1]!.number}`
-    if (started) throw new PlanDocError(`${said}:  P${started.number} has started;  only to-do phases move`)
+    const landed = PhaseMoves.landing(
+      phases.map((phase) => phase.status),
+      from,
+      to
+    )
+    // the one moved not to do, or every place up to `to` a started one's
+    if (landed === undefined || landed === from) {
+      const started = landed === undefined ? phases[from - 1]! : phases[to - 1]!
+      throw new PlanDocError(`${said}:  P${started.number} has started;  only to-do phases move`)
+    }
     const before = PhaseNumbers.snapshot(this.document)
     const moving = this.phase(from)
     const name = PlanItem.titleOf(moving)
-    if (from < to) this.phase(to).after(moving)
-    else this.phase(to).before(moving)
+    PhaseMoves.move(this.phaseElements, from, landed)
     this.renumberAll(before)
     this.log(`P${phases[from - 1]!.number} ${name}:  moved to ${PhaseIds.labelOf(moving)}`)
-    return to
+    return landed
   }
 
   /**

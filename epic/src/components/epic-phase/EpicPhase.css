@@ -253,11 +253,14 @@
 
   /*
    * ## Dragged to another place (epic `epic-engine` P34;  the Phases section's `PhaseDrag`)
-   * - a to-do phase on a reviewed page:  its title row's EMPTY space the grab cursor;  its chevron, icon, title, time
-   *   pill and buttons keep the pointer (I161, `EpicFold.css`);  while dragging, the grabbing cursor everywhere
+   * - a to-do phase on a reviewed page:  the grab cursor over its whole title row, its chevron, status icon and title
+   *   too, where a press drags it (I480;  Owen, 2026-11-26:  "you don't see the drag cursor when over the phase title,
+   *   only when over the background");  its time pill and buttons keep the pointer (I161, `EpicFold.css`);  while
+   *   dragging, the grabbing cursor everywhere
    * - while dragged:  faded;  the phase it would land beside:  an accent line on that side, over its edge (no room taken)
    */
-  :host(:state(movable)) ui-section::part(title) {
+  :host(:state(movable)) ui-section::part(title),
+  :host(:state(movable)) ui-section::part(toggle) {
     cursor: grab;
   }
   /* while a phase is dragged, `PhaseDrag` marks every phase (`data-dragging`) */

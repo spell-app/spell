@@ -831,6 +831,30 @@ describe("PlanDoc phases", () => {
   })
 })
 
+describe("PlanDoc moving phases (epic `epic-engine` I480)", () => {
+  test("move past done phases:  the to-do ones take each other's places around them, the done ones keep theirs", () => {
+    const plan = freshPlan()
+    for (const name of ["A", "B", "C", "D", "E"]) plan.addPhase(name)
+    plan.setPhase(2, "done")
+    plan.setPhase(4, "done")
+    expect(plan.movePhase(5, 1)).toBe(1)
+    expect(plan.phases.map((phase) => `${phase.name} ${phase.status}`)).toEqual([
+      "E todo",
+      "B done",
+      "A todo",
+      "D done",
+      "C todo"
+    ])
+    // onto a done phase's place:  the nearest to-do place back towards it
+    expect(plan.movePhase(1, 4)).toBe(3)
+    expect(plan.phases.map((phase) => phase.name)).toEqual(["A", "B", "E", "D", "C"])
+    // deferred:  after the other to-do phases;  the last to-do one stays
+    expect(plan.deferPhase(1)).toBe(5)
+    expect(plan.deferPhase(5)).toBe(5)
+    expect(problems(plan)).toEqual([])
+  })
+})
+
 describe("PlanDoc rename (epic-workflow)", () => {
   /** The words of every link to `#id` in `plan`, in page order. */
   function linkWords(plan: PlanDoc, id: string) {

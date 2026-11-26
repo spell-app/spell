@@ -134,8 +134,9 @@
    * differ (epic `epic-engine` I161;  Owen, 2026-10-29:  "pointer when over content in these headers, drag cursor when
    * over whitespace")
    * - over the chevron, icon, title, badge and buttons:  the pointer
-   * - over the empty space:  the pointer too, as a click there still folds (`EpicFold.onTitleRowClick()`);  a to-do
-   *   phase on a reviewed page, the grab cursor, where it drags (`EpicPhase.css`)
+   * - over the empty space:  the pointer too, as a click there still folds (`EpicFold.onTitleRowClick()`)
+   * - a to-do phase on a reviewed page:  the grab cursor over its chevron, icon, title and empty space, where a press
+   *   drags it (`EpicPhase.css`;  epic `epic-engine` I480)
    */
   ui-section::part(toggle) {
     align-items: flex-start;
