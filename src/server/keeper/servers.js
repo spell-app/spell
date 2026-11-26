@@ -32,7 +32,8 @@ const WORDS = {
   start: "Start",
   restartTip: "Restart the {name}, so it runs your latest changes",
   startTip: "Start the {name}",
-  log: "Its recent messages (the last 50 lines of its log)",
+  log: "Recent messages",
+  logTip: "The last 50 lines of its log",
   noLog: "Nothing in its log yet.",
   building: "Building {what}",
   upFor: "Up for {time}",
@@ -216,6 +217,7 @@ function newCard(server) {
     {
       className: "servers-log",
       label: WORDS.log,
+      description: WORDS.logTip,
       level: 4,
       size: "small",
       collapsible: true,

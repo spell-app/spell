@@ -376,6 +376,12 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
     - a worktree's own servers are its session's, as before
   - A worktree's page server and editor keep ONE port each, written down (`SRV.PortBook`), and stop after 30 minutes
     unused.
+  - Reached BY NAME through main's port (epic `editor` P49, `SRV.HostRoutes`):  `<worktree>.localhost:4747` its page
+    server, `<worktree>--app.localhost:4747` its editor, started on the first request;  an org repo's worktrees too;
+    an unknown name lists them.  Over HTTPS, the certificate lists each worktree's two names.
+  - The SERVERS PAGE, on the keeper's own port (`http://localhost:4949/servers/`, `spell keeper status` prints it):
+    each server up or down, how long it's been up, what it's building, its last 50 log lines, Restart;
+    `spell server status --watch` in a terminal.
   - The top bar's Servers tab shows them all, what just reached `main`, and what waits;  a red dot when one is down.
   - A project's own servers (a proxy server, say):  its `.epic/config.json5`'s `servers` (the hub's keeper), or
     `spell keeper add <name> --check <url | port> [--start "<command>"]` (Spell's).

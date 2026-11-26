@@ -339,6 +339,7 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 | `spell server restart` | the page server again, on its code now;  its editor stays up for the next one |
 | `spell server status` | the running page server's details (JSON);  exit 1 when it isn't running |
 | `spell server status <server>` | that server's line, as the server keeper last saw it;  exit 1 when it isn't running |
+| `spell server status --watch` | every server in a table, redrawn every 2 seconds until `Ctrl-C`:  its state, how long it's been up, what it's building, its address;  from the server keeper, else this kit's own files |
 | `spell server url <file>` | starts the page server if needed, then prints the address that serves `<file>`, of this checkout or the epic folder |
 | `spell server certificate [--check] [--undo]` | makes the page server's HTTPS certificate with mkcert, and has this computer trust it (asks for the password once);  the page server then speaks HTTPS and HTTP/2 too, at its next start, on the same port ([README/server.md](server.md#https-and-http2-on-the-same-port)) |
 | `spell server prune [--dry-run]` | stops the page and Vite servers whose checkout is gone, on any checkout;  `--dry-run` only lists them |
@@ -375,6 +376,19 @@ spell keeper add proxy --check 8080 --start "yarn proxy"   # one of your project
   A second one started takes over, and the first steps aside.
   - The epic tooling's hub runs a keeper too, until it hands over to Spell's;  `spell keeper ensure` leaves the hub's
     alone, and `ensure --take-over` takes over from it.
+- THE SERVERS PAGE, `http://localhost:4949/servers/` (`spell keeper status` prints it):  a card per server, up or down, how
+  long it's been up, what it's building, the last 50 lines of its log in a fold, and Restart
+  - served by the keeper itself, on its own port, so it still answers while every page server is down
+  - in a terminal:  `spell server status --watch`
+- ONE ADDRESS PER WORKTREE, through main's port:  `editor.localhost:4747` is worktree `editor`'s page server,
+  `editor--app.localhost:4747` its editor
+  - not running:  the page says it's opening, asks for its servers, and loads once they answer;  the visits count as
+    use, so its 30-minute stop still works
+  - a name no worktree has lists them all, each a link
+  - an org repo's worktrees too, each holding an org's projects, served by a page server of the kit for its spaces
+  - over HTTPS too:  the certificate lists each worktree's two names (browsers refuse a `*.localhost` one), made
+    again by itself when a new worktree first starts, and taken by the page servers with no restart
+  - plain `localhost:4747`, and main's editor on 3000, stay as they are
 - `spell keeper local` runs it in the terminal, until `Ctrl-C`;  `--port <n>` (default 4949) and `--here` (this
   checkout's code, to try a branch) for `start` too.
 - `SPELL_KEEPER_HOME` moves `~/.spell` for the keeper's files:  a scratch one, to try it without touching yours.

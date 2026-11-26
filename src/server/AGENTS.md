@@ -209,6 +209,22 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `PortBook` -- the port each WORKTREE's servers keep, written down once in `~/.spell/server-ports.json`
     (`SPELL_PORTS_FILE`;  epic `epic-engine` P82):  a worktree's page server and its editor are on the same ports at
     every start, so a link to them stays good;  forgotten when the worktree is removed (`forget()`)
+    - `hostNames()`:  each checkout's two host names, `editor.localhost` and `editor--app.localhost`, which the page
+      server's certificate lists (`hostNameOf()` makes a name one)
+  - `HostRoutes` -- ONE ADDRESS PER WORKTREE through main's page server (epic `editor` P49):  each request's name
+    first, `<worktree>.localhost:4747` passed on to that worktree's page server, `<worktree>--app.localhost:4747` to its
+    editor, websockets too (`WebServer.firstRoutes`, `upgrade(..., { first })`, before live reload)
+    - not running:  its start asked for (`PageServer.startByName()`, the keeper's);  a page meanwhile gets the names page
+      ([names.html](names.html), [names.js](names.js)), which loads it once it answers;  a call waits for it
+    - an unknown name:  the names page, listing them;  `/_spell/names` (`NAMES_API`) is its data, on any name
+    - an org repo's worktrees too (`NamedCheckout.spaces`):  a page server of the kit for its spaces, its records the
+      kit's (`PageServer.namedWorktrees()`:  the keeper's list and the more spaces file name the org repos)
+    - the guard lets every `*.localhost` name in (`isNamedHost()`):  browsers resolve them to this machine only;
+      a page's same-origin `Origin` goes on as the worktree server's own, so its writes pass its guard
+    - over HTTPS:  Chrome and Safari refuse a `*.localhost` certificate (J366), so the page server's certificate
+      lists each worktree's names (`LocalCertificate.moreNames`, `addMoreNames()`:  made again with no password when
+      a worktree is first booked, and at the keeper's look);  a page server speaking HTTPS takes new files in place
+      (`WebServer.useCertificate()`), and the keeper restarts it only when HTTPS turns on or off
   - `KeeperLink` -- asking the SERVER KEEPER, the one program that starts, stops and restarts a main checkout's
     servers (`ServerKeeper`, below;  epic `epic-engine` P82):  its record, `~/.spell/server-keeper.json`
     (`SPELL_KEEPER_FILE`), `{ pid, base, token, keeper }`, `keeper` saying which (`spell`, `epic hub`);
@@ -227,7 +243,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - so `KeeperLink.ts` imports its peers WITH `.ts` (`./checkout.ts`, `./Heartbeat.ts`):  Vite loads the config's
         imports in plain `node`
     - this side names nothing of the keeper:  the server package imports no other
-    - `/api/server` answers `lastRequest` and `pages` (open live sockets), for its idle stop of a worktree's server
+    - `/api/server` answers `lastRequest` and `pages` (open live sockets), for its idle stop of a worktree's server;
+      and `building` (the bundles it's building now) and `editor` (its editor's address while it answers), what the
+      Servers page shows (epic `editor` P49)
   - `MoreSpaces` -- the MORE SPACES FOLDERS the kit's page server serves beside spell.spaces, one per org:
     `~/.spell/more-spaces.json5` (`SPELL_MORE_SPACES_FILE`), `{ spaces: ["~/work/acme-app/spaces"] }`, a folder or
     `{ folder, orgs }` each;  any checkout's `spaces/`, a project's main or a worktree's, to see work before it's merged
@@ -383,6 +401,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       merged into main, its hand-over;  epic `epic-engine`'s switch-over (P85) takes it out of the hub
     - not in `SRV`:  it imports the page server, which imports the barrel
     - its holds, `~/.spell/server-keeper-holds.json`:  servers stopped by hand, and hands off
+    - THE SPELL SERVERS PAGE (epic `editor` P49):  `GET /servers/` on the keeper's own port, so it answers while every
+      page server is down ([servers.html](keeper/servers.html), [servers.js](keeper/servers.js));  a card per server
+      (each row's `started`, `building`), its last 50 log lines (`GET /api/servers/log?id=`, `lastLines()`), Restart;
+      Spell UI from the first kit's `"uiScript"` and engine routes, served by the keeper as files (`uiFiles()`), a
+      plain table without;  the epic hub's keeper serves it too, on its own port;  `spell server status --watch` draws
+      the same rows in a terminal (`spell/cli/commands/serverWatch`)
   - `spell/server/page/...` -- the page server, the KIT's (one per kit:  the main one, each worktree's):
     - its CLI, `spell server`
       - started from the kit's root ONLY (epic `repo-split` P16):
@@ -426,6 +450,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         `src/app/components/spell-code/spellDrawingRoutes.server.ts` (`SRV.Drawings`, above)
       - route modules, watched folders, writable folders, bundles, page scripts, component sets, engine routes,
         local copies, what's gone, the site header's tabs, the caches' cap
+    - SPELL UI FOR THE KIT'S OWN PAGES (`"uiScript"`, epic `editor` P49):  the script a page with no component set
+      loads Spell UI from, an address under an engine route (epic's part:  `/_epic/assets/spell-ui.js`, the docs
+      pages' bundle);  the Servers page and the names page;  none, and they draw plain HTML
     - THE CACHES' CAP (`"cacheLimit"`, epic `language` Q41):  the most the server's caches on disk may take, every
       version's entries together, e.g. `"200MB"`, `"1GB"`, `"512KB"` (`SRV.sizeInBytes()`);  200 MB by default
       - the kit's part says `"200MB"`;  a later part's wins, so the epic repo's `page-server.json5` may change it
