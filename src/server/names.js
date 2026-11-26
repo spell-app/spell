@@ -12,7 +12,8 @@ const NAMES = globalThis.SPELL_NAMES ?? {}
 /** The page's words, in the novice voice */
 const WORDS = {
   starting: "Opening {name}…",
-  startingWhy: "Spell is getting this copy of your work ready.\nThe page opens by itself in a moment.\nIf it doesn't, reload this page.",
+  startingWhy:
+    "Spell is getting this copy of your work ready.\nThe page opens by itself in a moment.\nIf it doesn't, reload this page.",
   unknown: "No copy is called {name}",
   unknownWhy: "Each copy of your work has its own name, and {name} isn't one of them.\nChoose a copy to open it:",
   none: "There are no other copies of your work yet.",

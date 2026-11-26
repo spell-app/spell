@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url"
 
 import type { Handler } from "spell/server"
 import { PidFile, editorAddressOf } from "./PidFile"
-import { PortBook } from "./PortBook"
+import { EDITOR_SUFFIX, PortBook, hostNameOf } from "./PortBook"
 import { proxyTo, proxyUpgrade } from "./proxy"
 import { Request } from "./Request"
 
@@ -83,25 +83,9 @@ export class HostRoutes {
   /** whether `host` is a name this answers (the guard's `allowHosts()`):  any `<name>.localhost`, with a port or not */
   static isNamedHost = (host: string): boolean => NAMED_HOST.test(host)
 
-  /** a worktree's name as a host's first part:  lower case, letters, digits and dashes */
-  static hostNameOf(worktree: string): string {
-    return worktree
-      .toLowerCase()
-      .replace(/[^a-z0-9-]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-  }
-
-  /** each worktree's two names, for the page server's certificate:  `editor.localhost`, `editor--app.localhost` */
-  static certificateNames(worktrees: string[]): string[] {
-    return worktrees.flatMap((worktree) => {
-      const name = HostRoutes.hostNameOf(worktree)
-      return name ? [`${name}${LOCALHOST}`, `${name}${EDITOR_SUFFIX}${LOCALHOST}`] : []
-    })
-  }
-
   /** the checkout named `name`, else `undefined` */
   checkoutNamed(name: string): string | undefined {
-    return this.worktrees().find(([worktree]) => HostRoutes.hostNameOf(worktree) === name)?.[1]
+    return this.worktrees().find(([worktree]) => hostNameOf(worktree) === name)?.[1]
   }
 
   /** every worktree, its addresses and whether its page server answers:  `NAMES_API`'s answer.  NEVER throws */
@@ -109,7 +93,7 @@ export class HostRoutes {
     const scheme = secure ? "https" : "http"
     return Promise.all(
       this.worktrees().map(async ([worktree, checkout]) => {
-        const name = HostRoutes.hostNameOf(worktree)
+        const name = hostNameOf(worktree)
         const booked = this.portOf(checkout, false)
         return {
           name,
@@ -226,9 +210,6 @@ export type NamedWorktree = { name: string; worktree: string; address: string; e
 
 /** The names page's call, on any named host:  every worktree and how it stands. */
 export const NAMES_API = "/_spell/names"
-
-/** What follows a worktree's name for its editor:  `editor--app.localhost`. */
-export const EDITOR_SUFFIX = "--app"
 
 /** What every name ends in. */
 const LOCALHOST = ".localhost"

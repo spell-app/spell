@@ -5,6 +5,8 @@ import { isIPv6 } from "node:net"
 import { homedir } from "node:os"
 import { join } from "node:path"
 
+import { PortBook } from "./PortBook"
+
 /****************
  * ### `LocalCertificate`
  * A certificate this machine's browsers trust, for a local server's HTTPS (and so HTTP/2):  made by mkcert.
@@ -28,6 +30,13 @@ export class LocalCertificate {
   /** the names it's made for:  the first is the one checked for trust */
   readonly names: string[]
 
+  /**
+   * more names it's made for when they're there, asked afresh each time:  the page server's, each worktree's two
+   * (`PortBook.hostNames()`, epic `editor` P49);  one missing never makes it less than `"ready"`:  `addMoreNames()`
+   * makes it again
+   */
+  readonly moreNames: () => string[]
+
   /** the certificate's file */
   readonly certificate: string
 
@@ -49,6 +58,7 @@ export class LocalCertificate {
   constructor({
     folder,
     names,
+    moreNames = () => [],
     file = "certificate",
     tools = certificateTools(),
     platform = process.platform,
@@ -57,6 +67,7 @@ export class LocalCertificate {
   }: LocalCertificateProps) {
     this.folder = folder
     this.names = names
+    this.moreNames = moreNames
     this.certificate = join(folder, `${file}.pem`)
     this.key = join(folder, `${file}-key.pem`)
     this.tools = tools
@@ -67,12 +78,15 @@ export class LocalCertificate {
 
   /**
    * The page server's certificate:  for `localhost`, `127.0.0.1` and `::1`, in `~/.spell/localhost/`.
+   * - and each worktree's two host names, `editor.localhost` and `editor--app.localhost`, from the port book
+   *   (`moreNames`):  browsers refuse a `*.localhost` wildcard, so each is listed (epic `editor` P49, J366)
    * - `SPELL_CERTIFICATE_DIR` puts it elsewhere (a test, a measurement)
    */
   static forPageServer(props: Partial<LocalCertificateProps> = {}): LocalCertificate {
     return new LocalCertificate({
       folder: process.env.SPELL_CERTIFICATE_DIR || join(homedir(), ".spell", "localhost"),
       names: PAGE_SERVER_NAMES,
+      moreNames: () => new PortBook().hostNames(),
       file: "localhost",
       ...props
     })
@@ -171,7 +185,34 @@ export class LocalCertificate {
   make(): void {
     this.mkcertOrDie()
     mkdirSync(this.folder, { recursive: true })
-    this.tools.run("mkcert", ["-cert-file", this.certificate, "-key-file", this.key, ...this.names])
+    const names = [...new Set([...this.names, ...this.moreNames()])]
+    this.tools.run("mkcert", ["-cert-file", this.certificate, "-key-file", this.key, ...names])
+  }
+
+  /** `moreNames` the certificate doesn't list yet;  none, or no certificate:  `[]`.  NEVER throws */
+  get missingNames(): string[] {
+    const read = this.read()
+    if (!read) return []
+    const covered = read.names.map(sameName)
+    return this.moreNames().filter((name) => !covered.includes(sameName(name)))
+  }
+
+  /**
+   * SIDE EFFECT:  made again for every name when it's `"ready"` and `moreNames` lists one it doesn't:  a worktree
+   * booked since;  whether it was.
+   * - asks for nothing:  mkcert's authority is trusted already, so no password
+   * - the page servers take the new files in place (`WebServer.useCertificate()`), with no restart
+   * - NEVER throws:  a failure is logged, and it stays as it was
+   */
+  addMoreNames(): boolean {
+    try {
+      if (!this.missingNames.length || this.state !== "ready") return false
+      this.make()
+      return true
+    } catch (error) {
+      console.error("LocalCertificate.addMoreNames():  couldn't make it again for the worktrees' names", error)
+      return false
+    }
   }
 
   /**
@@ -284,6 +325,8 @@ export type LocalCertificateProps = {
   folder: string
   /** the names it's made for:  the first is the one checked for trust */
   names: string[]
+  /** more names it's made for when they're there, asked each time (`LocalCertificate.moreNames`);  default none */
+  moreNames?: () => string[]
   /** its files' name:  `<file>.pem` and `<file>-key.pem`;  default `certificate` */
   file?: string
   /** what runs outside programs;  default the real ones */

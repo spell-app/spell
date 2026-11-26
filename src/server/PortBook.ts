@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { homedir } from "node:os"
-import { dirname, join, resolve } from "node:path"
+import { basename, dirname, join, resolve } from "node:path"
 
 import { FileLock } from "./FileLock"
 import { isFree } from "./ports"
@@ -64,6 +64,19 @@ export class PortBook {
     )
   }
 
+  /**
+   * The HOST NAMES of every checkout in the book, two each:  `editor.localhost` (its page server) and
+   * `editor--app.localhost` (its editor), as main's page server reaches a worktree by name (`HostRoutes`, epic
+   * `editor` P49);  what the page server's certificate lists beside `localhost` (`LocalCertificate.forPageServer()`)
+   */
+  hostNames(): string[] {
+    const checkouts = new Set(Object.keys(this.read()).map((key) => key.slice(0, key.lastIndexOf("#"))))
+    return [...checkouts].flatMap((checkout) => {
+      const name = hostNameOf(basename(checkout))
+      return name ? [`${name}${LOCALHOST}`, `${name}${EDITOR_SUFFIX}${LOCALHOST}`] : []
+    })
+  }
+
   /** Forget every port of `checkout`:  a worktree removed.  SIDE EFFECT:  writes the book. */
   forget(checkout: string): void {
     if (!existsSync(this.file)) return
@@ -88,6 +101,20 @@ export class PortBook {
     writeFileSync(this.file, `${JSON.stringify(ports, null, 2)}\n`)
   }
 }
+
+/** A worktree's name as a host's first part:  lower case, letters, digits and dashes (`My_Work` => `my-work`). */
+export function hostNameOf(worktree: string): string {
+  return worktree
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+}
+
+/** What follows a worktree's name for its editor's host:  `editor--app.localhost`. */
+export const EDITOR_SUFFIX = "--app"
+
+/** What every worktree's host name ends in. */
+const LOCALHOST = ".localhost"
 
 /** The variable naming another book (the tests'). */
 export const PORTS_FILE_VARIABLE = "SPELL_PORTS_FILE"

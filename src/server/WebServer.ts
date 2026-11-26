@@ -229,6 +229,16 @@ export class WebServer {
     return `http://127.0.0.1:${this.port}`
   }
 
+  /**
+   * SIDE EFFECT:  HTTPS answers with `certificate` from now on, with no restart:  each new connection takes it (the
+   * page server's, made again for a new worktree's names, epic `editor` P49);  whether it could:  `false` without HTTPS
+   */
+  useCertificate(certificate: CertificateFiles): boolean {
+    if (!this.secure) return false
+    this.secure.setSecureContext(certificate)
+    return true
+  }
+
   /** the HTTPS base URL once listening, for people's browsers, `https://localhost:4747`;  `undefined` without one */
   get secureUrl(): string | undefined {
     return this.secure ? `https://localhost:${this.port}` : undefined

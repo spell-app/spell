@@ -82,8 +82,19 @@ describe("HostRoutes:  one address per worktree, through main's port (epic `edit
     expect(SRV.HostRoutes.nameOf("SEO.localhost")).toEqual({ name: "SEO", isEditor: false })
     expect(SRV.HostRoutes.nameOf("localhost:4747")).toBeUndefined()
     expect(SRV.HostRoutes.nameOf("seo.example.org")).toBeUndefined()
-    expect(SRV.HostRoutes.hostNameOf("My_Work")).toBe("my-work")
-    expect(SRV.HostRoutes.certificateNames(["seo"])).toEqual(["seo.localhost", "seo--app.localhost"])
+    expect(SRV.hostNameOf("My_Work")).toBe("my-work")
+  })
+
+  it("the book's host names, two a checkout:  what the page server's certificate lists", async () => {
+    await book.portFor(join(folder, "seo"))
+    await book.portFor(join(folder, "seo"), "editor")
+    await book.portFor(join(folder, "My_Work"))
+    expect(book.hostNames()).toEqual([
+      "seo.localhost",
+      "seo--app.localhost",
+      "my-work.localhost",
+      "my-work--app.localhost"
+    ])
   })
 
   it("plain localhost stays main's own", async () => {

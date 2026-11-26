@@ -121,6 +121,9 @@ export class ServerKeeper {
   /** the page server's certificate files as the last look found them (`HttpsSwitch.filesStamp`) */
   private certificateStamp?: string
 
+  /** whether HTTPS was on as the files last changed (or at the first look):  a remake while on restarts nothing */
+  private certificateOn?: boolean
+
   /** a look under way:  the next waits for it */
   private looking?: Promise<void>
 
@@ -568,15 +571,25 @@ export class ServerKeeper {
   /**
    * SIDE EFFECT:  the page server's certificate files compared with the last look's;  changed (made, made again,
    * deleted), every main page server restarted, so it takes HTTPS or drops it.  The first look only notes them.
+   * - made again while on (a new worktree's names):  no restart, each page server takes the new files in place
+   *   (`PageServer.watchCertificate()`, epic `editor` P49)
+   * - and the worktrees' names added first, when one booked since isn't on it (`addMoreNames()`)
    */
   private async watchCertificate(): Promise<void> {
     // hands off:  the change waits, and is taken up once it's turned off
     if (this.isHandsOff) return
+    this.https.certificate.addMoreNames()
     const stamp = this.https.filesStamp
     const hasChanged = this.certificateStamp !== undefined && stamp !== this.certificateStamp
     this.certificateStamp = stamp
+    this.certificateOn ??= this.https.status.state === "on"
     if (!hasChanged) return
     this.https.forget()
+    const isOn = this.https.status.state === "on"
+    const wasOn = this.certificateOn
+    this.certificateOn = isOn
+    // made again while on, and on still:  each page server takes the new files itself
+    if (wasOn && isOn) return
     try {
       await this.restartMainPageServers()
     } catch (error) {

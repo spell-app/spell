@@ -43,6 +43,16 @@ class FakeCertificate {
     return this.state
   }
 
+  /** made again for the worktrees' names, when `missing` lists any (`LocalCertificate.addMoreNames()`) */
+  missing: string[] = []
+  addMoreNames(): boolean {
+    if (!this.missing.length || this.state !== "ready") return false
+    this.steps.push("more names")
+    this.missing = []
+    writeFileSync(this.certificate, `certificate ${Date.now()}`)
+    return true
+  }
+
   async trustInWindow(): Promise<void> {
     this.steps.push("trust")
     if (!this.approves) throw new SRV.CertificateError("security add-trusted-cert didn't work")
@@ -285,6 +295,17 @@ describe("ServerKeeper:  the certificate watched, HTTPS turned, Restart all (epi
     expect(restarts()).toBe(1)
     await keeper.look()
     expect(restarts()).toBe(1)
+  })
+
+  it("made again for a new worktree's names while on:  no restart, the page servers take it in place (epic `editor` P49)", async () => {
+    certificate.makeIfNeeded()
+    await certificate.trustInWindow()
+    await keeper.look()
+    certificate.missing = ["seo.localhost", "seo--app.localhost"]
+    await keeper.look()
+    expect(certificate.steps).toContain("more names")
+    await keeper.look()
+    expect(restarts()).toBe(0)
   })
 
   it("a page server stopped by hand stays stopped when the certificate changes;  Restart all restarts it", async () => {

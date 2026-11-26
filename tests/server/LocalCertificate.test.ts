@@ -69,7 +69,8 @@ describe("LocalCertificate:  mkcert's certificate, every program a stand-in", ()
   }
 
   /** the page server's certificate, in a folder of its own, on `platform` */
-  const certificate = (platform = "darwin") => SRV.LocalCertificate.forPageServer({ folder, tools, platform })
+  const certificate = (platform = "darwin", moreNames = () => [] as string[]) =>
+    SRV.LocalCertificate.forPageServer({ folder, tools, platform, moreNames })
 
   beforeEach(() => {
     folder = mkdtempSync(join(scratch, "folder-"))
@@ -135,6 +136,38 @@ describe("LocalCertificate:  mkcert's certificate, every program a stand-in", ()
     made = covering
     expect(page.makeIfNeeded()).toBe("ready")
   })
+
+  it.skipIf(!covering)(
+    "each worktree's names (`moreNames`):  listed when made;  missing, still ready, and made again with no password",
+    () => {
+      let worktrees = ["seo.localhost", "seo--app.localhost"]
+      trusted = true
+      writeFileSync(join(folder, "localhost.pem"), "")
+      copyFileSync(covering!.cert, join(folder, "localhost.pem"))
+      copyFileSync(covering!.key, join(folder, "localhost-key.pem"))
+      const page = certificate("darwin", () => worktrees)
+      expect(page.state).toBe("ready")
+      expect(page.missingNames).toEqual(["seo.localhost", "seo--app.localhost"])
+      ran = []
+      expect(page.addMoreNames()).toBe(true)
+      expect(ran.find(([command]) => command === "mkcert")?.slice(5)).toEqual([
+        "localhost",
+        "127.0.0.1",
+        "::1",
+        "seo.localhost",
+        "seo--app.localhost"
+      ])
+      // nothing missing:  nothing made
+      worktrees = []
+      ran = []
+      expect(page.addMoreNames()).toBe(false)
+      expect(ran.some(([command]) => command === "mkcert")).toBe(false)
+      // not ready (untrusted):  left for the person
+      worktrees = ["seo.localhost"]
+      trusted = false
+      expect(page.addMoreNames()).toBe(false)
+    }
+  )
 
   it.skipIf(!ending)("makes it again in its last week", () => {
     trusted = true

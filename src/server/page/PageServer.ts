@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, realpathSync, statSync } from "node:fs"
+import { existsSync, readdirSync, realpathSync, statSync, unwatchFile, watchFile, type Stats } from "node:fs"
 import { dirname, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
@@ -26,6 +26,9 @@ import {
   type RouteModule,
   type ServerReport
 } from "spell/server/page"
+
+/** How often a page server speaking HTTPS looks at its certificate's file, ms (`watchCertificate()`). */
+const CERTIFICATE_LOOK_MS = 5_000
 
 /** The mark on every script tag the page server adds to a page (`withPageScripts()`). */
 export const PAGE_SCRIPT_ATTRIBUTE = "data-spell-page-script"
@@ -314,7 +317,10 @@ export class PageServer {
     const { port: actual } = await this.web.listen({ port: wanted, fallback: false })
     this.info.port = actual
     if (routes) this.bundles.start().watch()
-    if (this.web.secureUrl) this.info.https = this.web.secureUrl
+    if (this.web.secureUrl) {
+      this.info.https = this.web.secureUrl
+      this.watchCertificate()
+    }
     if (pidFile) {
       this.pidFile.write(this.info)
       // for a program this machine's person runs against it:  a Python program's places (epic `data` P40)
@@ -423,6 +429,22 @@ export class PageServer {
     return { why: PLAIN_HTTP_WHY[state] }
   }
 
+  /**
+   * SIDE EFFECT:  the certificate's file watched while it speaks HTTPS;  made again (a new worktree's names), the
+   * new one taken in place, with no restart (`SRV.WebServer.useCertificate()`, epic `editor` P49)
+   * - its HTTPS turned off (the files gone) is the server keeper's to restart for
+   */
+  private watchCertificate(): void {
+    const file = SRV.LocalCertificate.forPageServer().certificate
+    const onChange = (now: Stats, before: Stats) => {
+      if (now.mtimeMs === before.mtimeMs) return
+      const { tls } = PageServer.certificateFor()
+      if (tls && this.web.useCertificate(tls)) this.log.info("took the certificate made again, with no restart")
+    }
+    watchFile(file, { interval: CERTIFICATE_LOOK_MS }, onChange)
+    this.stops.push(() => unwatchFile(file, onChange))
+  }
+
   /** stop:  the bundles' build, route modules' stops, the pid file (if ours), the server */
   async stop(): Promise<void> {
     this.bundles.stop()
@@ -513,7 +535,11 @@ export class PageServer {
   ): Promise<{ port: number; editor: number } | undefined> {
     if (port !== DEFAULT_PORT || spaces !== undefined || portFor(root, port, spaces) !== 0) return undefined
     const book = new SRV.PortBook()
-    return { port: await book.portFor(root), editor: await book.portFor(root, "editor") }
+    const isNew = book.portsOf(root)["page server"] === undefined
+    const booked = { port: await book.portFor(root), editor: await book.portFor(root, "editor") }
+    // a worktree new to the book:  the certificate made again for its two names, so it opens by name over HTTPS too
+    if (isNew) SRV.LocalCertificate.forPageServer().addMoreNames()
+    return booked
   }
 
   /**
