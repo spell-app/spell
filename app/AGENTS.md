@@ -73,7 +73,8 @@ working in `app/`, the kit's app folder (its yarn workspace is still named `spel
       ONE FILE AT A TIME, because they share it.
       - The folder's `yarn test` and `yarn review` leave them out (about 15 minutes):  `yarn test:integration` runs them.
       - Start it first:  `spell server start all`.
-      - A file skips itself when no editor is noted, as in CI.
+      - A file skips itself when no editor is noted in CI;  anywhere else it fails, saying to start one (epic
+        `language` I189).
       - One is noted but doesn't answer:  the file fails and says so.
       - A page whose updates stop for good during a test (Solid's `REACTIVITY_HALTED`) fails that test, naming the
         error, in every file:  [runningEditor.ts](tests/app/pages/runningEditor.ts), "A stopped page".
