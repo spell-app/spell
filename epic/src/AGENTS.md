@@ -845,8 +845,8 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       hush only if 80% sure Owen won't look again), the hushed ones approved as his ✓ would (`apply()`), one write
       per page;  the judge a constructor option, so its test never calls a model
     - `CloseAll` (epic `epic-engine` T158):  a section's Close all, the person's own bulk ✓, no judge:  the Judgement
-      calls, Issues and Todos sections' title button closes every DECIDED call, FIXED issue or DONE todo still waiting
-      for their tick (`CloseAllRule`, `components/epic-section/`, the ONE rule the button counts by and the server
+      calls, Issues and Todos sections' title button closes every DECIDED call, FIXED or DONE issue, or DONE or FIXED
+      todo (I487) still waiting for their tick (`CloseAllRule`, `components/epic-section/`, the ONE rule the button counts by and the server
       closes by), in one edit, kept for Undo as one record (`InstantUndo.keepBatch()`), each item's own beside it;
       `POST close-all`, `undo-close-all`;  `epic close-all <epic> <judgements | issues | todos> [--dryrun]`
       - no confirm (epic `epic-engine` I462;  Owen:  "Don't show this"):  the page draws each one closed AT ONCE,

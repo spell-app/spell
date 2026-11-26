@@ -5,19 +5,23 @@
  * Usage (from the `epic/` folder):
  *   node src/demo/check-close-all.mjs [outDir]
  * - the page:  the tool's test fixture as epic `close-all`, in `src/demo/shots/close-all/` (git-ignored), with J1-J3
- *   decided, J4 open, I1 and I2 fixed for review, T1 done;  J3 carries a mark of the person's, so it never counts
+ *   decided, J4 open, I1 and I2 fixed for review, I3 done (not fixed), T1 done;  J3 carries a mark of the person's, so
+ *   it never counts
  * - the server:  a page server of its OWN (`DemoServer`), THIS checkout's pack and routes;  it wakes nobody
  * - checks:
- *   - "Close 2 decided" on Judgement calls (J3's mark leaves it out), "Close 2 fixed" on Issues, "Close 1 done" on Todos
+ *   - "Close 2 decided" on Judgement calls (J3's mark leaves it out), "Close 2 fixed, 1 done" on Issues (epic
+ *     `epic-engine` I487:  DONE issues too), "Close 1 done" on Todos
  *   - a click asks nothing (epic `epic-engine` I462):  both calls drawn ticked at once, before the server answers,
  *     the button gone;  then closed on the page;  the notice says so, with Undo
  *   - Undo puts them back, open to tick again;  the button counts 2 again
  *   - held till Send, as his own ✓ on each (epic `epic-engine` J387), beside I1 ticked by hand:  Close all again, J1
  *     and J2 stay in view, their ✓ pressed and their colour held as I1's, Send counting all three;  a second ✓ on J1
  *     puts J1 alone back;  Send lets J2 go exactly as I1, grey
+ *   - Issues' Close all (I487):  "Close 1 fixed, 1 done" once I1 is ticked by hand;  I2 (fixed) and I3 (done) drawn
+ *     ticked at once, closed on the page, held in view till Send, then grey
  *   - no page errors
  * - screenshots in outDir:  `close-all-light.png`, `close-all-dark.png`, `close-all-phone.png` (the Judgement calls
- *   title), `close-all-at-once.png`, `close-all-notice.png`
+ *   title), `close-all-issues.png` (the Issues title, I487), `close-all-at-once.png`, `close-all-notice.png`
  * - exits 1 on any miss
  * - re-runs itself under `tsx` (the page server is TypeScript)
  */
@@ -84,6 +88,9 @@ for (const title of ["The popup covers its button", "The count is one too many"]
   plan.item(id).setAttribute("urgent", "")
   plan.fixedForReview(id, "the fix")
 }
+// I487:  an issue finished without a fix of its own (DONE), waiting for his tick
+plan.addItem("issue", "The notice hides the Undo")
+plan.setItem("i3", "done")
 plan.addItem("todo", "Add a Close all button")
 plan.setItem("t1", "done")
 const files = new PlanDocFiles({ root: CONTENT })
@@ -217,7 +224,7 @@ async function shootTitle(page, id, name) {
 try {
   const page = await open({ width: 1200, height: 900 })
   check((await words(page, "judgements")) === "Close 2 decided", `Judgement calls:  ${await words(page, "judgements")}`)
-  check((await words(page, "issues")) === "Close 2 fixed", `Issues:  ${await words(page, "issues")}`)
+  check((await words(page, "issues")) === "Close 2 fixed, 1 done", `Issues:  ${await words(page, "issues")}`)
   check((await words(page, "todos")) === "Close 1 done", `Todos:  ${await words(page, "todos")}`)
   check((await words(page, "questions")) === "", "no Close all on Questions")
   await shootTitle(page, "judgements", "close-all-light.png")
@@ -335,6 +342,27 @@ try {
   check(gone.fill !== "dashed" && gone.state === "old", `Send:  J2 no longer pressed, grey (${gone.fill || "no ✓"}, ${gone.state})`)
   check((await drawnItem(page, "j1")).shown, "Send:  J1, open again, stays")
   check((await sendState(page)).state !== "unsent", `Send:  nothing left to send (${(await sendState(page)).state})`)
+
+  // Issues' Close all (I487):  the fixed one and the done one alike, each as his ✓ on it, held till Send
+  check(
+    (await words(page, "issues")) === "Close 1 fixed, 1 done",
+    `Issues, I1 closed by hand:  ${await words(page, "issues")}`
+  )
+  await shootTitle(page, "issues", "close-all-issues.png")
+  await page.evaluate(() => document.querySelector("epic-section#issues").shadowRoot.querySelector(".close-all").click())
+  await waitFor(() => ["i2", "i3"].every((id) => files.read(FILE).item(id).getAttribute("review-as") === "approve"))
+  await page.waitForTimeout(800)
+  for (const id of ["i2", "i3"]) {
+    const drawn = await drawnItem(page, id)
+    check(drawn.shown && drawn.fill && drawn.fill !== "none", `Issues:  ${id.toUpperCase()} in view, ticked (${drawn.fill})`)
+  }
+  check((await words(page, "issues")) === "", "Issues:  the button goes")
+  await page.locator('epic-page epic-send-buttons [part~="send"]').first().click()
+  await page.waitForTimeout(2500)
+  for (const id of ["i2", "i3"]) {
+    const drawn = await drawnItem(page, id)
+    check(drawn.state === "old", `Issues, Send:  ${id.toUpperCase()} let go, grey (${drawn.state})`)
+  }
   await page.close()
 
   const dark = await open({ width: 1200, height: 900 }, "dark")
