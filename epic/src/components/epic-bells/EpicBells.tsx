@@ -209,7 +209,7 @@ export class EpicBells extends E.UIComponent<EpicBellsVocabulary> {
             <h2 class="heading">{this.translationForKey("heading")}</h2>
             <ui-button
               class="close"
-              appearance="circular basic"
+              appearance="basic"
               size="mini"
               icon="xmark"
               aria-label={this.translationForKey("closeTip")}

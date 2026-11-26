@@ -63,7 +63,7 @@ export function ChangeThisBox(): JSX.Element {
               </label>
               <ui-button
                 class="ChangeThisClose"
-                appearance="circular basic"
+                appearance="basic"
                 size="mini"
                 icon="close"
                 aria-label={appTexts.text("changeThisClose")}

@@ -69,11 +69,59 @@ describe("<ui-button> classes", () => {
 
   it("adds `icon` for icon-only and `labeled icon` buttons", async () => {
     const { control: iconOnly } = await button(`<ui-button icon="cloud" aria-label="Cloud"></ui-button>`)
-    expect(iconOnly.className).toBe("ui icon button")
+    // a lone icon-only button draws only its icon (epic `editor` I370)
+    expect(iconOnly.className).toBe("ui bare icon button")
     const { control: labeledIcon } = await button(`<ui-button labeled icon="pause">Pause</ui-button>`)
     expect(labeledIcon.className).toBe("ui labeled icon button")
     const { control: withText } = await button(`<ui-button icon="pause">Pause</ui-button>`)
     expect(withText.className).toBe("ui button")
+  })
+
+  it.each([
+    ['appearance="basic" size="mini"', "ui mini basic bare icon button"],
+    ['appearance="tertiary"', "ui tertiary bare icon button"],
+    ['appearance="circular"', "ui circular icon button"],
+    ['appearance="pill basic"', "ui circular basic icon button"],
+    ['color="primary"', "ui primary icon button"],
+    ["toggle", "ui toggle icon button"],
+    ['attach-to="top"', "ui top attached icon button top-attached"]
+  ])("an icon-only <ui-button %s> keeps its box only when the box is the point", async (attributes, classes) => {
+    const { control } = await button(`<ui-button icon="xmark" aria-label="Close" ${attributes}></ui-button>`)
+    expect(control.className).toBe(classes)
+  })
+
+  it("an icon-only button in a group keeps its box:  the group's track is its look", async () => {
+    const group = await ElementFixture.render<DOMElement>(
+      `<ui-buttons><ui-button icon="bold" aria-label="Bold"></ui-button></ui-buttons>`
+    )
+    const host = group.querySelector<DOMElement>("ui-button")!
+    await host.ready
+    await ElementFixture.settle()
+    expect(host.shadowRoot!.querySelector("[part~=button]")!.className).toBe("ui icon button")
+  })
+
+  it("a bare icon button draws no ring or fill, its icon 1.5em on the grid, its box at least 24px", async () => {
+    const { control } = await button(
+      `<ui-button icon="xmark" aria-label="Close" appearance="basic" style="font-size: 16px"></ui-button>`
+    )
+    const style = getComputedStyle(control)
+    expect(style.backgroundColor).toBe("rgba(0, 0, 0, 0)")
+    expect(style.boxShadow).not.toMatch(/inset/)
+    const icon = control.querySelector(".icon")!.getBoundingClientRect()
+    const box = control.getBoundingClientRect()
+    expect(icon.height).toBe(Math.round((parseFloat(style.fontSize) * 1.5) / 4) * 4)
+    expect(icon.width).toBe(icon.height)
+    expect(box.width).toBe(box.height)
+    expect(box.height).toBeGreaterThanOrEqual(24)
+    expect(Math.abs(icon.x + icon.width / 2 - (box.x + box.width / 2))).toBeLessThan(0.5)
+    expect(Math.abs(icon.y + icon.height / 2 - (box.y + box.height / 2))).toBeLessThan(0.5)
+  })
+
+  it("a mini bare icon button still gives a 24px target", async () => {
+    const { control } = await button(`<ui-button icon="xmark" aria-label="Close" size="mini"></ui-button>`)
+    const box = control.getBoundingClientRect()
+    expect(box.height).toBeGreaterThanOrEqual(24)
+    expect(box.width).toBeGreaterThanOrEqual(24)
   })
 
   it("follows attribute and property changes", async () => {

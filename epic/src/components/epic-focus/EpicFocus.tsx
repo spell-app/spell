@@ -429,7 +429,7 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
             </span>
             <ui-button
               class="close"
-              appearance="circular basic"
+              appearance="basic"
               size="mini"
               icon="xmark"
               aria-label={this.translationForKey("closeTip")}
