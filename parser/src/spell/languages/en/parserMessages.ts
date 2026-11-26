@@ -379,6 +379,11 @@ export const PARSER_MESSAGES = {
     '"it" and "its" mean a type only in its outline, indented under e.g. "a card is a thing where:"',
   /** A statement with a body on its own line AND one indented under it. */
   "inline-and-nested-body": "Got both inline statement and nested block",
+  /** Spanish's `según` before a key that's no sort a page holds:  English never says it. */
+  "sorted-by-not-a-sort": '"{words}" isn\'t a sort the page holds:  say "sorted by its ..." for a field',
+  /** A table's `sort="..."` that names no sort a page holds (`its "order" is a sort:  ...`). */
+  "table-sort-not-a-sort":
+    'A table\'s sort="{words}" names the sort it shows and sets, a property of the page:  declare it with its "order" is a sort:  ..., then say sort="the order"',
   /** A dotted tag, `<UI.Form>`. */
   "not-an-element": "<{tag}> isn't an element:  write Spell UI's own tag, e.g. <ui-form>",
   /** A bare tag in a page's drawing that no pack has (epic `elemental-spell` P7). */

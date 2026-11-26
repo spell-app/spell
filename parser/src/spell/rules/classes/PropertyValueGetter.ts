@@ -15,7 +15,7 @@ import { DRAFT_DATATYPE } from "spell/parser/spell/rules/places/DraftOf"
 import { type MethodBody } from "./classes.shared"
 
 /** `core`'s reads of a place that run again whenever its rows change:  what's read off them is followed. */
-const FOLLOWED_READS = new Set(["savedThings", "savedCount", "savedThingWithId"])
+const FOLLOWED_READS = new Set(["savedThings", "savedThingsSortedBy", "savedCount", "savedThingWithId"])
 
 /** The type a getter's literal value says, by its rule, as its language's message writes it:  `a number` ... */
 const LITERAL_TYPES: Record<string, SP.ParserMessageKey> = {

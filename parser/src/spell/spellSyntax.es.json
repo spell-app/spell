@@ -4560,7 +4560,7 @@
           "ruleNames": ["list_sorted_by"],
           "internal": false,
           "file": "src/spell/rules/lists/ListSortedBy.ts",
-          "line": 31,
+          "line": 34,
           "purpose": "A list in order of something about each item (epic `data` P10).",
           "syntaxes": [
             {
@@ -4577,6 +4577,9 @@
                   "code": "core.sorted_by(mi_lista, lambda item: item.foo)"
                 }
               }
+            },
+            {
+              "syntax": ",? (ordenado|ordenada|ordenados|ordenadas) (bySort:según|segun) {inline_expression}?"
             }
           ],
           "aliases": ["expression_suffix"]
@@ -7472,7 +7475,7 @@
           "ruleNames": ["define_property_has"],
           "internal": false,
           "file": "src/spell/rules/classes/DefinePropertyHas.ts",
-          "line": 73,
+          "line": 74,
           "purpose": "Declares an instance property on `type`, optionally constrained/initialized by a `type_specifier`.",
           "syntaxes": [
             {
@@ -7599,6 +7602,32 @@
                 },
                 "py": {
                   "code": "core.media(\"sound\", \"sonidos/deslizar.mp3\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["outline_specifier"]
+        },
+        {
+          "className": "OutlineSpecifierSort",
+          "ruleNames": ["outline_specifier_sort"],
+          "internal": false,
+          "file": "src/spell/rules/classes/OutlineSpecifierSort.ts",
+          "line": 20,
+          "purpose": "A property that's a SORT, and where it starts -- `its \"order\" is a sort: completion, newest first`; Spanish `su \"orden\" es un orden: finalización, de más reciente a más antiguo`.",
+          "syntaxes": [
+            {
+              "syntax": "un orden :? {by:page_sort_by} (, ((descending:al revés|al reves|de mayor a menor|de más reciente a más antiguo|de mas reciente a mas antiguo|en orden inverso|z-a)|(ascending:a-z|de menor a mayor|de más antiguo a más reciente|de mas antiguo a mas reciente)))?",
+              "example": "un orden:  finalización, de más reciente a más antiguo",
+              "outputs": {
+                "js": {
+                  "code": "core.sort(\"finalización\", true)"
+                },
+                "ts": {
+                  "code": "core.sort(\"finalización\", true)"
+                },
+                "py": {
+                  "code": "core.sort(\"finalización\", True)"
                 }
               }
             }
@@ -8604,6 +8633,16 @@
             }
           ],
           "aliases": ["outline_specifier"]
+        },
+        {
+          "className": "PageSortBy",
+          "ruleNames": ["page_sort_by"],
+          "internal": false,
+          "file": "src/spell/rules/classes/OutlineSpecifierSort.ts",
+          "line": 56,
+          "purpose": "The name or field a sort a page holds starts as, every word up to its comma or the line's end: `completion`, `created at`, `hora de fin`.",
+          "syntaxes": [],
+          "aliases": []
         },
         {
           "className": "ThePropertyOfAThing",
@@ -11506,7 +11545,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 128,
+          "line": 132,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

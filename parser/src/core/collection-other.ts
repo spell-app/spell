@@ -8,6 +8,7 @@
  * - TODO: collections for `words`, `lines`, etc?
  */
 import { textOrder } from "spell/util/string"
+import { schemaOf } from "spell/util/reactive"
 import { core } from "./core"
 // Import directly, never through the barrel:
 // `spell/parser/core/model` loads this file, and must not load drawing (Solid)
@@ -69,6 +70,54 @@ export class Descending {
   static keyOf(key: unknown): unknown {
     return key instanceof Descending ? key.key : key
   }
+}
+
+/**
+ * A sort a page holds:  a sort name or a field, and which way -- `its "order" is a sort:  completion, newest first`.
+ * - Made by `core.sort()`, frozen:  a new sort is a new value, so whatever reads it follows it.
+ * - What `sorted by the order` asks for (`core.sortedByValue()`, `core.savedThingsSortedBy()`), and what a table's
+ *   header click sets (`<ui-table sort="the order">`, `core.nextSort()`);  Spell UI's `TableSortValue` is its shape.
+ */
+export type PageSort = {
+  /** The sort's name, or a field, in its words as written:  `completion`, `created at`. */
+  readonly by: string
+  /** Largest, newest or last first. */
+  readonly descending: boolean
+}
+
+/**
+ * How each sort a read has used finds the way round a NEW sort starts, for the read's things:  `true` newest first,
+ * `false` oldest, `undefined` when nothing says (`core.nextSort()`).
+ * - A read of a place says what its place can do (`core.savedThingsSortedBy()`);  a sort no read has used starts
+ *   oldest first.
+ * - Keyed by the sort value, which a new one hands on.
+ */
+export const SORT_WAYS = new WeakMap<PageSort, (by: string) => boolean | undefined>()
+
+/** Where each sort a table shows lives:  the thing and its property a click writes the next one into (`core.sortShown()`). */
+export const SORT_HOMES = new WeakMap<PageSort, { owner: object; property: string }>()
+
+/** Is `value` a sort a page holds (`core.sort()`'s)? */
+export function isPageSort(value: unknown): value is PageSort {
+  return typeof value === "object" && value !== null && typeof (value as PageSort).by === "string"
+}
+
+/**
+ * The field of `Class`'s things that `words` names, however it's spelled:  `created at` => `createdAt`;
+ * `undefined` when it declares none.
+ */
+export function declaredFieldNamed(Class: Function | undefined, words: string): string | undefined {
+  if (!Class) return undefined
+  const wanted = wordsOf(words)
+  for (let schema = schemaOf(Class) as ReturnType<typeof schemaOf> | undefined; schema; schema = schema.parent) {
+    for (const name of schema.declared.keys()) if (wordsOf(name) === wanted) return name
+  }
+  return undefined
+}
+
+/** A name as its letters and digits alone, lower case:  `created at`, `createdAt`, `created_at` => `createdat`. */
+function wordsOf(name: string): string {
+  return name.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "")
 }
 
 /** The order text sorts in, in the program's own language:  `ñ` after `n` in Spanish, case ignored (`textOrder()`). */
@@ -510,6 +559,70 @@ export const collectionOtherMethods = defineCoreModule({
    */
   descending(key?: unknown): Descending {
     return new Descending(key)
+  },
+
+  /**
+   * A sort a page holds (`PageSort`):  `its "order" is a sort:  completion, newest first` starts as
+   * `core.sort("completion", true)`.
+   * - `by`:  a sort name or a field, its words as written;  `descending`:  largest, newest or last first.
+   */
+  sort(by: string, descending = false): PageSort {
+    return Object.freeze({ by: `${by}`.trim(), descending: !!descending })
+  },
+
+  /**
+   * `collection`, sorted by `sort`, a sort a page holds:  `the scores sorted by the order`, a list kept here.
+   * - Its `by` is a field of the items, however it's spelled (`created at` => `createdAt`);  a read of a place hands
+   *   a sort its place has a name for to the place (`core.savedThingsSortedBy()`).
+   * - `field`:  the field to sort by, when the caller knows it better (a named sort's own field);  else `by`'s.
+   * - No sort, or none of the items has that field:  as it was.
+   */
+  sortedByValue<T = unknown, C extends CollectionOf<T> = CollectionOf<T>>(
+    collection: (C & CollectionOf<T>) | undefined,
+    sort: PageSort | undefined,
+    field?: string
+  ): C {
+    if (!collection || !isPageSort(sort)) return collection as C
+    let key = field
+    if (key === undefined) {
+      core.forEach(collection, (item) => {
+        key ??= declaredFieldNamed((item as object | undefined)?.constructor, sort.by)
+      })
+    }
+    key ??= sort.by
+    const name = key
+    return core.sortedBy(collection, (item) => {
+      const value = (item as Record<string, unknown> | undefined)?.[name]
+      return sort.descending ? new Descending(value) : value
+    })
+  },
+
+  /**
+   * The sort `owner`'s `property` holds, for a table to show:  `<ui-table sort="the order">` is
+   * `"prop:sort": () => core.sortShown(this, "order")`.
+   * - SIDE EFFECT:  remembers where it lives (`SORT_HOMES`), so a header click writes the next one there
+   *   (`listenForTableSorts()`).
+   */
+  sortShown(owner: object, property: string): PageSort | undefined {
+    const sort = (owner as Record<string, unknown>)[property]
+    if (!isPageSort(sort)) return undefined
+    SORT_HOMES.set(sort, { owner, property })
+    return sort
+  },
+
+  /**
+   * The sort after `current` once a table's header asking for `by` is clicked:
+   * - the same `by`:  the other way round
+   * - another:  the way its read's place can sort it, if it can only one way (a sort it names runs newest first);
+   *   else oldest first
+   * - The new sort finds its way round as `current` did (`SORT_WAYS`).
+   */
+  nextSort(current: PageSort | undefined, by: string): PageSort {
+    const ways = current && SORT_WAYS.get(current)
+    const descending = current?.by === by ? !current.descending : (ways?.(by) ?? false)
+    const next = collectionOtherMethods.sort(by, descending)
+    if (ways) SORT_WAYS.set(next, ways)
+    return next
   },
 
   /** The first `count` items of `collection`, as a list that owns none of them:  `the first 20 recipes where ...`. */

@@ -31,6 +31,8 @@ import { DimensionUnit } from "./DimensionUnit"
 import { OutlineSpecifierMeasure } from "./OutlineSpecifierMeasure"
 import { OutlineSpecifierPercent } from "./OutlineSpecifierPercent"
 import { OutlineSpecifierMedia } from "./OutlineSpecifierMedia"
+import { OutlineSpecifierSort, PageSortBy } from "./OutlineSpecifierSort"
+import { SORT_ORDER_WORDS } from "spell/parser/spell/rules/lists/sortOrderWords"
 import { CreateThing } from "./CreateThing"
 import { CreateType } from "./CreateType"
 import { CSSBlock } from "./CSSBlock"
@@ -1985,6 +1987,22 @@ classesEs.addRule(OutlineSpecifierEnum, {
 classesEs.addRule(OutlineSpecifierMedia, {
   syntax: "(un|una) {kind:media_kind} en {path:text}",
   tests: [{ tests: [[`un sonido en "sonidos/deslizar.mp3"`, `core.media("sound", "sonidos/deslizar.mp3")`]] }]
+})
+
+// un orden que guarda una página, y dónde empieza:  `su "orden" es un orden:  finalización, de más reciente a más antiguo`
+// -- before `un {type}`, which would make `orden` a type of its own
+classesEs.addRule(PageSortBy)
+
+classesEs.addRule(OutlineSpecifierSort, {
+  syntax: `un orden :? {by:page_sort_by} (, ${SORT_ORDER_WORDS.es})?`,
+  tests: [
+    {
+      tests: [
+        ["un orden:  finalización, de más reciente a más antiguo", 'core.sort("finalización", true)'],
+        ["un orden: nombre", 'core.sort("nombre")']
+      ]
+    }
+  ]
 })
 
 // un porcentaje, guardado como su fracción:  `su "propina" es un porcentaje` (epic `language` P34)

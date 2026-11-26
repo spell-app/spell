@@ -2425,6 +2425,7 @@ export const CORE_CALLS_THAT_WAIT = new Set([
   "choose",
   "chooseColor",
   "savedThings",
+  "savedThingsSortedBy",
   "savedCount",
   "savedThingAt",
   "savedThingWithId",

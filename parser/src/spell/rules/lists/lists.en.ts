@@ -28,6 +28,7 @@ import { ListSortedHere } from "./ListSortedHere"
 import { CountRoughly } from "./CountRoughly"
 import { SortKeyField } from "./SortKeyField"
 import { SortKeyOrder } from "./SortKeyOrder"
+import { SORT_ORDER_WORDS } from "./sortOrderWords"
 import { AddNewThing } from "./AddNewThing"
 import { EachInStatement } from "./EachInStatement"
 import { PluralCallStatement } from "./PluralCallStatement"
@@ -824,8 +825,7 @@ lists.addRule(SortKeyField, {
 })
 
 lists.addRule(SortKeyOrder, {
-  syntax:
-    ",? ((descending:(newest|latest|highest|largest|biggest|most) first|reversed|in reverse|z-a)|(ascending:(oldest|earliest|lowest|smallest|fewest|least) first|a-z))",
+  syntax: `,? ${SORT_ORDER_WORDS.en}`,
   tests: [
     {
       compileAs: "expression",

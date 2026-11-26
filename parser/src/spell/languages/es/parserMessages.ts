@@ -249,6 +249,10 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "outline-line-outside":
     'Una línea sin sujeto, o con "su", habla de un tipo solo en su esquema, con sangría bajo p. ej. "una carta es una cosa donde:"',
   "inline-and-nested-body": "Tiene a la vez una instrucción en la misma línea y un bloque con sangría debajo",
+  "sorted-by-not-a-sort":
+    '"{words}" no es un orden que guarde la página:  "según" va con uno, "ordenadas según el orden";  para un campo, di "ordenadas por su ..."',
+  "table-sort-not-a-sort":
+    'El sort="{words}" de una tabla nombra el orden que muestra y cambia, una propiedad de la página:  decláralo con su "orden" es un orden:  ..., y di sort="el orden"',
   "not-an-element": "<{tag}> no es un elemento:  escribe la etiqueta propia de Spell UI, p. ej. <ui-form>",
   /** A bare tag in a page's drawing that no pack has (epic `elemental-spell` P7). */
   "page-unknown-component":

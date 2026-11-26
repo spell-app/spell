@@ -4573,7 +4573,7 @@
           "ruleNames": ["list_sorted_by"],
           "internal": false,
           "file": "src/spell/rules/lists/ListSortedBy.ts",
-          "line": 31,
+          "line": 34,
           "purpose": "A list in order of something about each item (epic `data` P10).",
           "syntaxes": [
             {
@@ -7460,7 +7460,7 @@
           "ruleNames": ["define_property_has"],
           "internal": false,
           "file": "src/spell/rules/classes/DefinePropertyHas.ts",
-          "line": 73,
+          "line": 74,
           "purpose": "Declares an instance property on `type`, optionally constrained/initialized by a `type_specifier`.",
           "syntaxes": [
             {
@@ -7587,6 +7587,32 @@
                 },
                 "py": {
                   "code": "core.media(\"sound\", \"sounds/slide.mp3\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["outline_specifier"]
+        },
+        {
+          "className": "OutlineSpecifierSort",
+          "ruleNames": ["outline_specifier_sort"],
+          "internal": false,
+          "file": "src/spell/rules/classes/OutlineSpecifierSort.ts",
+          "line": 20,
+          "purpose": "A property that's a SORT, and where it starts -- `its \"order\" is a sort: completion, newest first`; Spanish `su \"orden\" es un orden: finalización, de más reciente a más antiguo`.",
+          "syntaxes": [
+            {
+              "syntax": "a sort :? {by:page_sort_by} (, ((descending:(newest|latest|highest|largest|biggest|most) first|reversed|in reverse|z-a)|(ascending:(oldest|earliest|lowest|smallest|fewest|least) first|a-z)))?",
+              "example": "a sort:  completion, newest first",
+              "outputs": {
+                "js": {
+                  "code": "core.sort(\"completion\", true)"
+                },
+                "ts": {
+                  "code": "core.sort(\"completion\", true)"
+                },
+                "py": {
+                  "code": "core.sort(\"completion\", True)"
                 }
               }
             }
@@ -8634,6 +8660,16 @@
             }
           ],
           "aliases": ["outline_specifier"]
+        },
+        {
+          "className": "PageSortBy",
+          "ruleNames": ["page_sort_by"],
+          "internal": false,
+          "file": "src/spell/rules/classes/OutlineSpecifierSort.ts",
+          "line": 56,
+          "purpose": "The name or field a sort a page holds starts as, every word up to its comma or the line's end: `completion`, `created at`, `hora de fin`.",
+          "syntaxes": [],
+          "aliases": []
         },
         {
           "className": "ThePropertyOfAThing",
@@ -11556,7 +11592,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 128,
+          "line": 132,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

@@ -684,6 +684,29 @@ a "recipe" is a thing
               </ul>
             </li>
             <li>
+              A sort a page holds, and a table that sets it:
+              <ul>
+                <li>
+                  <code>its "order" is a sort:  completion, newest first</code> (Spanish
+                  <code>su "orden" es un orden:  finalización, de más reciente a más antiguo</code>): a sort name or a
+                  field, and a direction, which leaves out to oldest first.
+                </li>
+                <li>
+                  <code>its "rows" is the first 50 measurements sorted by the order</code> (Spanish
+                  <code>... ordenadas según el orden</code>) follows it: a new sort reads again. A sort the server can do
+                  that way round goes to it, <code>?order_by=recency&amp;limit=50</code>; one it can't is done in the
+                  page, over the 50 it read, with no more read.
+                </li>
+                <li>
+                  <code>&lt;table sortable sort="the order"&gt;</code> shows it, and each header
+                  <code>&lt;cell sort="completion"&gt;</code> names the sort its column asks for; a header with no
+                  <code>sort</code> doesn't sort. Its first click starts the way round the server can do, if it can only
+                  one way (a named sort runs newest first); the next flips it.
+                  <code>sort</code> is the same word in every language, <code>&lt;celda sort="finalización"&gt;</code>.
+                </li>
+              </ul>
+            </li>
+            <li>
               Every saved type has <code>its created</code> and <code>its modified</code> by itself: two dates Spell
               stamps as things are saved.
               <ul>
@@ -798,7 +821,7 @@ a "recipe" is a thing
                   A sort goes to a list that sorts by that field, or has a name for that order. A sort it can't do is
                   an error, <code>The server doesn't support this sort: ...</code>, unless the read ends
                   <code>, sorted here</code> (Spanish <code>, ordenado aquí</code>): then every row is fetched and sorted
-                  on the Spell server. A sort a page sets as it runs isn't checked.
+                  on the Spell server. A sort a page holds (<code>sorted by the order</code>) isn't checked: one the server can't do is done over what was read, <code>the first 50</code> sorting those 50.
                 </li>
                 <li>
                   Text sorts one way everywhere: the page, a place that can't sort, saved answers and the ingest,
@@ -1149,7 +1172,7 @@ a "recipe" is a thing
                 <li>What works now, kind by kind: the table in <a href="#2-where">Saying where</a>.</li>
               </ul>
             </li>
-            <li>Sorting a table by asking the place; a Google Sheet's own locale.</li>
+            <li>A Google Sheet's own locale.</li>
             <li>
               Spell UI's Spanish attribute names are ASCII: <code>tamano</code>, not <code>tamaño</code>, though a tag
               can be typed with its accent (<code>&lt;botón&gt;</code>).
