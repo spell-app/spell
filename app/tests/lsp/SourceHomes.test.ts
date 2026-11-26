@@ -59,6 +59,7 @@ describe("SourceHomes.fieldHomes()", () => {
     const homes = SourceHomes.fieldHomes(parsed(PILES), undefined, ["Foundation", "Pile"], ["layout"])
     const home = homes.start.layout!
     expect(home).toMatchObject({ kind: "default", typeName: "Foundation", place: "literal", style: "text" })
+    if (home.kind !== "default") throw new TypeError("not a default")
     expect(PILES.slice(home.span!.start, home.span!.end)).toBe(`"stacked"`)
   })
 
