@@ -147,6 +147,14 @@ describe("pageServerSettings()", () => {
     rmSync(capped, { recursive: true, force: true })
   })
 
+  test("Spell UI's script for pages with no component set, `uiScript`:  one value, a later part's winning", () => {
+    const named = kit()
+    put(named, "package.json", { name: "kit", workspaces: ["ui"], pageServer: { uiScript: "/_a/spell-ui.js" } })
+    put(named, "ui/package.json", { name: "spell-ui", pageServer: { uiScript: "/_epic/assets/spell-ui.js" } })
+    expect(pageServerSettings(named).uiScript).toBe("/_epic/assets/spell-ui.js")
+    rmSync(named, { recursive: true, force: true })
+  })
+
   test("outside a kit:  the folder's own part alone;  none:  {}", () => {
     const alone = realpathSync(mkdtempSync(join(tmpdir(), "page-settings-alone-")))
     put(alone, "package.json", { pageServer: { routes: ["r.ts"] } })

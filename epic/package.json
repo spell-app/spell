@@ -103,6 +103,7 @@
         "sitePage": "index.html"
       }
     },
+    "uiScript": "/_epic/assets/spell-ui.js",
     "engineRoutes": {
       "/_epic/assets/": "src/tools/_assets",
       "/_epic/pack/": "src/components/__pack",

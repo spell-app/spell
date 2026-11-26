@@ -65,6 +65,9 @@ export type KeptServerState = "running" | "starting" | "stopped" | "down"
  * - `address`:  where it answers, while it does (a worktree's stopped one:  `port`, the one written down for it)
  * - `why`:  a few words on its state:  why it's down, what the keeper just did
  * - `since`:  when the keeper last started it;  `lastRequest`:  a worktree's last use
+ * - `started`:  when the server itself started, as it says (`ServerInfo.started`):  how long it's been up
+ * - `building`:  what it's building now (a page server's bundles, `ServerInfo.building`)
+ * - `log`:  its log file, whose last lines `GET /api/servers/log?id=<id>` answers (the Spell Servers page's fold)
  * - `canStart`:  whether Start and Restart apply;  `own`:  one of the checkout's own servers (`KeeperServer`)
  */
 export type KeptServer = {
@@ -80,6 +83,9 @@ export type KeptServer = {
   why?: string
   since?: string
   lastRequest?: string
+  started?: string
+  building?: string[]
+  log?: string
   canStart: boolean
   /** the buttons it takes, when not every one (main's editor:  Start and Restart, never Stop) */
   actions?: ("start" | "stop" | "restart")[]
@@ -159,6 +165,21 @@ export const HANDS_OFF_API = "/api/servers/hands-off"
 
 /** `POST /api/servers/hands-off`'s body. */
 export type HandsOff = { on: boolean }
+
+/** `GET /api/servers/log?id=<id>`:  the last lines of a server's log (`KeptServerLog`). */
+export const SERVER_LOG_API = "/api/servers/log"
+
+/** `SERVER_LOG_API`'s answer:  the server's log file and its last `LOG_LINES` lines, colours taken out;  none yet:  `[]`. */
+export type KeptServerLog = { id: string; file?: string; lines: string[] }
+
+/** How many of a log's last lines the Spell Servers page shows. */
+export const LOG_LINES = 50
+
+/**
+ * Where the Spell Servers page is, on the keeper's own port (epic `editor` P49):  `/servers/`, its script beside it;
+ * so it answers while every page server is down
+ */
+export const SERVERS_PAGE = "/servers/"
 
 /** Where main's Restart all asks:  every main page server and its editor restarted (epic `epic-engine` T164). */
 export const RESTART_ALL_API = "/api/servers/restart-all"

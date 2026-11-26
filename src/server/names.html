@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--
+      The worktree names page (epic `editor` P49):  what main's page server shows at `<name>.localhost:4747`
+      (`HostRoutes`) while that worktree's server starts, or for a name no worktree has.
+      - starting:  says so, and loads the page once its server answers
+      - unknown:  lists the worktrees, each one's name a link
+      - `names.js` draws it;  the page server puts its settings (`window.SPELL_NAMES`) and that script where the marks are
+    -->
+    <title>Spell</title>
+    <!-- names settings -->
+    <style>
+      :root {
+        color-scheme: light dark;
+        --names-muted: light-dark(#6b6b76, #a3a3ae);
+        --names-bg: light-dark(#ffffff, #1b1b1f);
+        --names-text: light-dark(#1b1b1f, #ececf1);
+      }
+      html {
+        background: var(--names-bg);
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+        padding: 48px 16px;
+        background: var(--names-bg);
+        color: var(--names-text);
+        font:
+          16px/1.5 system-ui,
+          -apple-system,
+          sans-serif;
+      }
+      main {
+        max-width: 560px;
+        margin: 0 auto;
+      }
+      h1 {
+        margin: 0 0 8px 0;
+        font-size: 24px;
+      }
+      p {
+        margin: 0 0 16px 0;
+        white-space: pre-line;
+      }
+      .names-muted {
+        color: var(--names-muted);
+      }
+      .names-list a {
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="names-page"></main>
+    <!-- names script -->
+  </body>
+</html>

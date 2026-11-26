@@ -1,7 +1,14 @@
 import { join, resolve } from "node:path"
 
 import { SRV } from "spell/server"
-import { KeeperList, KeeperProgram, SPELL_KEEPER, type KeptServer, type KeptServersAnswer } from "spell/server/keeper"
+import {
+  KeeperList,
+  KeeperProgram,
+  SERVERS_PAGE,
+  SPELL_KEEPER,
+  type KeptServer,
+  type KeptServersAnswer
+} from "spell/server/keeper"
 import { CLI } from "spell/cli"
 
 /**
@@ -110,6 +117,7 @@ async function keeperStatus(options: KeeperOptions): Promise<number> {
   }
   const who = record.keeper ?? "epic hub"
   CLI.out(`server keeper:  ${who === SPELL_KEEPER ? "Spell's" : `${who}'s`}, at ${record.base} (pid ${record.pid})`)
+  CLI.out(`The Servers page:  ${serversPageOf(record)}`)
   if (answer.handsOff) CLI.out("Hands off is on:  the keeper starts and stops nothing by itself.")
   for (const row of answer.servers) CLI.out(`  ${statusLine(row)}`)
   return CLI.EXIT.OK
@@ -135,6 +143,11 @@ function mainOf(dir: string): string {
 /** the keeper's log */
 function logFile(): string {
   return join(SRV.keeperHome(), "keeper.log")
+}
+
+/** the Spell Servers page's address, on the keeper's own port:  `http://localhost:4949/servers/` */
+export function serversPageOf(record: SRV.KeeperRecord): string {
+  return `${record.base.replace("127.0.0.1", "localhost")}${SERVERS_PAGE}`
 }
 
 /** the keeper's `GET /api/servers` */

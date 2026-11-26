@@ -246,6 +246,8 @@ export class PageServer {
       // last:  a Spell site's address, which has no file of its own
       (path) => componentSetSitePath(path, this.componentSets)
     )
+    // main's:  each worktree by its name, `<worktree>.localhost:4747` (epic `editor` P49)
+    if (!this.info.worktree && !this.pidFile.spaces) this.routeNames(settings)
     const router = this.web.router
     // every request but the keeper's look at `/api/server` counts as use:  a worktree's idle stop (epic `epic-engine` P82)
     router.use(this.noteRequest)
@@ -326,16 +328,69 @@ export class PageServer {
   }
 
   /**
-   * What `/api/server` answers:  `info`, plus how it's used now, for the server keeper's idle stop (epic `epic-engine`
-   * P82):  `lastRequest`, when it last answered a request, and `pages`, how many pages hold its live socket open
+   * SIDE EFFECT:  each worktree reached by name through this server (`SRV.HostRoutes`, epic `editor` P49):
+   * `<worktree>.localhost:<port>` its page server, `<worktree>--app.localhost:<port>` its editor, started on the first
+   * request;  their requests, and their websockets, before anything of this server's own
+   */
+  private routeNames(settings: PageServerSettings): void {
+    const names = new SRV.HostRoutes({
+      worktrees: () => PageServer.namedWorktrees(this.root),
+      start: (checkout) => PageServer.startByName(checkout),
+      ...(settings.uiScript && { uiScript: settings.uiScript }),
+      mainServes: (path) => this.engineRoutes.some(([route]) => path.startsWith(route))
+    })
+    this.web.guard.allowHosts(SRV.HostRoutes.isNamedHost)
+    this.web.firstRoutes.use(names.handle)
+    this.web.upgrade(names.claimsUpgrade, names.upgrade, { first: true })
+  }
+
+  /**
+   * The worktrees reached by name through main checkout `root`'s page server:  its own, from git's records
+   * (`SRV.worktreesOf()`)
+   */
+  static namedWorktrees(root: string): [string, string][] {
+    return SRV.worktreesOf(SRV.checkoutOf(root)?.main ?? root)
+  }
+
+  /** Start worktree `checkout`'s page server, as a request by name asks:  through the server keeper, else here. */
+  static async startByName(checkout: string): Promise<unknown> {
+    const kept = await new SRV.KeeperLink().ask("start", { checkout, server: "page server" })
+    return kept ?? PageServer.ensure(checkout)
+  }
+
+  /**
+   * What `/api/server` answers, its STATUS CALL:  `info` (when it `started` ...), plus how it stands now
+   * - `lastRequest`, when it last answered a request, and `pages`, how many pages hold its live socket open:  the
+   *   server keeper's idle stop (epic `epic-engine` P82)
+   * - `building`, the bundles it's building now, and `editor`, its editor's address while it answers:  what the Spell
+   *   Servers page says of it (epic `editor` P49), from the keeper's look
    */
   liveInfo(): ServerInfo {
+    const building = this.buildingNow()
+    const editor = SRV.editorAddressOf(this.root, this.pidFile.spaces)
     return {
       ...this.info,
       lastRequest: new Date(this.lastRequest).toISOString(),
-      pages: this.web.live?.clientCount ?? 0
+      pages: this.web.live?.clientCount ?? 0,
+      ...(building.length && { building }),
+      ...(editor && { editor })
     }
   }
+
+  /** the bundles being built now, found once a build starts and kept until it ends:  a hash of each one's sources */
+  private buildingNow(): string[] {
+    if (!this.bundles.isBuilding) {
+      this.building = undefined
+      return []
+    }
+    this.building ??= SRV.Bundle.all(this.root)
+      .filter((bundle) => !bundle.spec.committed && (bundle.isIncomplete || bundle.isStale))
+      .map((bundle) => bundle.name)
+    return this.building
+  }
+
+  /** the build's stale bundles, while it runs (`buildingNow()`) */
+  private building?: string[]
 
   /** when the server last answered a request but `/api/server`, ms;  its start, before any */
   private lastRequest = Date.now()

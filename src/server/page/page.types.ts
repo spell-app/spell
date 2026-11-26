@@ -175,6 +175,14 @@ export type PageServerSettings = {
    * - a later part's wins:  the kit's says `"200MB"`, the epic repo's `page-server.json5` may say otherwise
    */
   cacheLimit?: string | number
+  /**
+   * the script that puts Spell UI on a page the kit serves with no component set of its own, as such a page loads it:
+   * an address under one of the `engineRoutes`, `/_epic/assets/spell-ui.js` (the docs pages' bundle, epic's part)
+   * - the Spell Servers page (`ServerKeeper`) and the worktree names page (`HostRoutes`), epic `editor` P49
+   * - the kit names no big folder:  the address comes from here;  none, and those pages draw plain HTML
+   * - one value, a later part's winning
+   */
+  uiScript?: string
 }
 
 /** One of the page server's `pageScripts`:  a module script added to the pages it serves. */

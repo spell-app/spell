@@ -103,10 +103,16 @@ export default function kitCommands(spell: Command): void {
         "<server>:  its line, as the server keeper last saw it"
     )
     .argument("[server]", "page-server (default:  its details), editor, or a name spell keeper add registered")
+    .option(
+      "--watch",
+      "every server in a table, redrawn every 2 seconds until Ctrl-C (from the keeper, else the files)"
+    )
     .action((which: string | undefined) =>
-      which && !which.startsWith("-")
-        ? CLI.runCommand(async () => (await serverCommand()).serverStatus(which))
-        : pageServer("status")
+      process.argv.includes("--watch")
+        ? CLI.runCommand(async () => (await import("spell/cli/commands/serverWatch")).watchStatus())
+        : which && !which.startsWith("-")
+          ? CLI.runCommand(async () => (await serverCommand()).serverStatus(which))
+          : pageServer("status")
     )
 
   passThrough(server.command("url"))

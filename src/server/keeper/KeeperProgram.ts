@@ -8,7 +8,7 @@ import { SRV } from "spell/server"
 
 import { KeeperList } from "./KeeperList"
 import { ServerKeeper } from "./ServerKeeper"
-import { DEFAULT_KEEPER_PORT, KEEPER_LOG_FILE, SPELL_KEEPER } from "./keeper.types"
+import { DEFAULT_KEEPER_PORT, KEEPER_LOG_FILE, SERVERS_PAGE, SPELL_KEEPER } from "./keeper.types"
 
 /****************
  * ### `KeeperProgram`
@@ -57,6 +57,8 @@ export class KeeperProgram {
         void web.close().finally(() => process.exit(0))
       }
     })
+    // its own address shows the Spell Servers page
+    web.router.get("/", (request, reply, next) => (request.path === "/" ? reply.redirect(SERVERS_PAGE) : next()))
     keeper.route(web.router, web.guard)
     const { url } = await web.listen({ port, fallback: true })
     console.log(`server keeper:  listening at ${url}, keeping ${new KeeperList({ home: this.home }).file}`)

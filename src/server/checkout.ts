@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, statSync } from "node:fs"
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { basename, dirname, join, resolve } from "node:path"
 
 /**
@@ -79,3 +79,32 @@ function brokenWorktreeAt(root: string, own: string): Checkout | undefined {
  *   (app's `tsconfig.node.json`, through spaces' `environment.ts`) still compiles it
  */
 export type Checkout = { root: string; main: string; worktree?: string; missingGitDir?: string }
+
+/**
+ * The worktrees of main checkout `main`, each `[name, folder]`, from git's own records:  each
+ * `<main>/.git/worktrees/<id>/gitdir` names its folder's `.git`, as `git worktree list` reads them, with no `git` run.
+ * - a folder that's gone (removed by hand, not pruned yet) is left out;  the name is the folder's
+ * - what the server keeper keeps, and what main's page server reaches by name (`<name>.localhost:4747`, `HostRoutes`)
+ * - NEVER throws
+ */
+export function worktreesOf(main: string): [string, string][] {
+  const found = new Map<string, string>()
+  let entries
+  try {
+    entries = readdirSync(join(main, ".git", "worktrees"), { withFileTypes: true })
+  } catch {
+    return []
+  }
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue
+    let folder: string
+    try {
+      folder = dirname(readFileSync(join(main, ".git", "worktrees", entry.name, "gitdir"), "utf8").trim())
+    } catch {
+      continue
+    }
+    const name = basename(folder)
+    if (existsSync(folder) && !found.has(name)) found.set(name, folder)
+  }
+  return [...found]
+}

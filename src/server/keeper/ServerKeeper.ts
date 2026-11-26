@@ -1,6 +1,18 @@
 import { spawn } from "node:child_process"
-import { copyFileSync, existsSync, mkdirSync, openSync, readFileSync, readdirSync, writeFileSync } from "node:fs"
-import { basename, dirname, join } from "node:path"
+import {
+  closeSync,
+  copyFileSync,
+  existsSync,
+  fstatSync,
+  mkdirSync,
+  openSync,
+  readFileSync,
+  readSync,
+  statSync,
+  writeFileSync
+} from "node:fs"
+import { dirname, join } from "node:path"
+import { fileURLToPath } from "node:url"
 
 import { every } from "spell/util/timing"
 import { slug } from "spell/util/string"
@@ -16,7 +28,12 @@ import {
   RESTART_ALL_API,
   HANDS_OFF_API,
   KEEPER_HOLDS_FILE,
+  KEEPER_LOG_FILE,
   KEEPER_SERVER_LOGS,
+  LOG_LINES,
+  SERVER_LOG_API,
+  SERVERS_PAGE,
+  type KeptServerLog,
   SPELL_KEEPER,
   type EditorSpaces,
   type HandsOff,
@@ -355,6 +372,8 @@ export class ServerKeeper {
       checkout: this.home,
       address: base && `${base}/`,
       state: "running",
+      started: new Date(Date.now() - process.uptime() * 1000).toISOString(),
+      log: join(this.home, KEEPER_LOG_FILE),
       canStart: false
     }
   }
@@ -374,12 +393,15 @@ export class ServerKeeper {
   /** The main checkout's page server, kept up:  started when down, restarted when older than its code;  held:  left. */
   private async keepMainPageServer(repo: KeeperRepo): Promise<KeptServer> {
     const id = idOf(repo, "page server")
-    const row = this.row(id, repo, repo.checkout, "page server", "epic pages, guides, the app's calls")
+    const row = {
+      ...this.row(id, repo, repo.checkout, "page server", "epic pages, guides, the app's calls"),
+      log: SRV.serverLogOf(repo.checkout, "page server")
+    }
     const handsOff = this.isHandsOff
     if (handsOff || this.held().includes(id)) {
       const running = await this.control.status(repo.checkout)
       return running
-        ? { ...row, state: "running", address: `${running.base}/` }
+        ? { ...row, ...howItStands(running), state: "running", address: `${running.base}/` }
         : { ...row, state: "stopped", why: handsOff ? HANDS_OFF_WHY : STOPPED_BY_HAND }
     }
     if (this.isWaitingAfterFailure(id)) return this.rows.get(id) ?? { ...row, state: "down" }
@@ -390,6 +412,7 @@ export class ServerKeeper {
       const since = server.launched ? new Date(this.now()).toISOString() : this.rows.get(id)?.since
       return {
         ...row,
+        ...howItStands(server),
         state: "running",
         address: `${server.base}/`,
         ...(since && { since }),
@@ -411,9 +434,12 @@ export class ServerKeeper {
       "the Spell app;  it comes with the page server",
       worktree
     )
-    const record = readJson<{ url?: string; pid?: number }>(join(checkout, EDITOR_FILE))
-    const isUp = record?.url !== undefined && record.pid !== undefined && SRV.isProcessAlive(record.pid)
-    return { ...row, canStart: false, state: isUp ? "running" : "stopped", ...(isUp && { address: record.url }) }
+    const address = SRV.editorAddressOf(checkout)
+    const log = SRV.serverLogOf(checkout, "editor")
+    if (!address) return { ...row, log, canStart: false, state: "stopped" }
+    // its record is written as it first answers:  its time, the editor's start
+    const started = statSync(join(checkout, SRV.EDITOR_FILE), { throwIfNoEntry: false })?.mtime.toISOString()
+    return { ...row, log, canStart: false, state: "running", address, ...(started && { started }) }
   }
 
   /**
@@ -452,6 +478,7 @@ export class ServerKeeper {
     const row: KeptServer = {
       ...this.row(id, repo, repo.checkout, server.name, server.what ?? "", undefined),
       own: true,
+      log: this.ownLogOf(repo, server),
       canStart: Boolean(server.start),
       address: addressOf(server.check)
     }
@@ -468,13 +495,14 @@ export class ServerKeeper {
   private async lookAtWorktrees(repo: KeeperRepo): Promise<KeptServer[]> {
     const rows: KeptServer[] = []
     const book = new SRV.PortBook()
-    for (const [worktree, checkout] of worktreesOf(repo.checkout)) {
+    for (const [worktree, checkout] of SRV.worktreesOf(repo.checkout)) {
       const booked = book.portsOf(checkout)["page server"]
       const hasRecord = existsSync(join(checkout, PAGE_SERVER_FILE))
       if (!booked && !hasRecord) continue
       const id = idOf(repo, "page server", worktree)
       const row = {
         ...this.row(id, repo, checkout, "page server", "its own pages, on demand", worktree),
+        log: SRV.serverLogOf(checkout, "page server"),
         ...(booked && { port: booked })
       }
       const running = await this.control.status(checkout)
@@ -491,6 +519,7 @@ export class ServerKeeper {
       }
       rows.push({
         ...row,
+        ...howItStands(running),
         state: "running",
         address: `${running.base}/`,
         ...(running.lastRequest && { lastRequest: running.lastRequest })
@@ -588,7 +617,7 @@ export class ServerKeeper {
     const repos = this.repos
     for (const repo of repos) {
       if (SRV.RealPath.same(repo.checkout, checkout)) return { repo }
-      for (const [worktree, folder] of worktreesOf(repo.checkout))
+      for (const [worktree, folder] of SRV.worktreesOf(repo.checkout))
         if (SRV.RealPath.same(folder, checkout)) return { repo, worktree }
     }
     throw new SRV.HttpError(
@@ -614,8 +643,22 @@ export class ServerKeeper {
    *   server (`showInEditor()`), then every main page server restarted, just after the answer
    * - `POST /api/servers/<start|stop|restart>`, `{ checkout, server }`:  `act()`
    * - every POST needs the hub's write token (`guard`)
+   * - `GET /api/servers/log?id=<id>`:  the last `LOG_LINES` lines of that server's log (`KeptServerLog`)
+   * - `GET /servers/`:  the Spell Servers page (`servers.html`, `servers.js`), with Spell UI from the docs pages'
+   *   bundle (`uiFiles()`):  on the keeper's own port, so it answers while every page server is down (epic `editor` P49)
    */
   route(router: SRV.Router, guard: SRV.Guard): void {
+    router.get(SERVERS_PAGE, (request, reply, next) =>
+      request.path.endsWith("/") ? this.sendServersPage(reply, guard.token) : reply.redirect(SERVERS_PAGE)
+    )
+    router.get(`${SERVERS_PAGE}${SERVERS_SCRIPT}`, (_request, reply) =>
+      reply
+        .type("text/javascript; charset=utf-8")
+        .noStore()
+        .send(readFileSync(join(HERE, SERVERS_SCRIPT), "utf8"))
+    )
+    router.use((request, reply, next) => this.uiFiles()?.files.handle(request, reply, next) ?? next())
+    router.get(SERVER_LOG_API, (request, reply) => reply.noStore().json(this.logOf(String(request.query.id ?? ""))))
     router.get(SRV.KEEPER_API, this.onAsked)
     router.get(`${SRV.KEEPER_API}/dot`, (_request, reply) => reply.noStore().json(this.dot()))
     router.post(`${SRV.KEEPER_API}/look`, guard.writeCheck, async (_request, reply) => {
@@ -664,7 +707,7 @@ export class ServerKeeper {
       if (!orgs.length) return []
       const isServed = (folder: string) =>
         served.some(({ dir, orgs: its }) => its.some((org) => orgs.includes(org)) && SRV.RealPath.same(dir, folder))
-      const worktrees = worktreesOf(repo.checkout)
+      const worktrees = SRV.worktreesOf(repo.checkout)
         .filter(([, folder]) => existsSync(join(folder, SPACES)))
         .sort(([one], [other]) => one.localeCompare(other))
       return [
@@ -689,7 +732,9 @@ export class ServerKeeper {
   showInEditor(repo: string, worktree?: string, file: string = SRV.MORE_SPACES_FILE): string[] {
     const known = this.repos.find((each) => each.name === repo && !isKit(each.checkout))
     if (!known) throw new SRV.HttpError(404, `the hub serves no project named ${repo}`)
-    const checkout = worktree ? worktreesOf(known.checkout).find(([name]) => name === worktree)?.[1] : known.checkout
+    const checkout = worktree
+      ? SRV.worktreesOf(known.checkout).find(([name]) => name === worktree)?.[1]
+      : known.checkout
     if (!checkout) throw new SRV.HttpError(404, `${repo} has no worktree named ${worktree}`)
     try {
       return SRV.switchSpaces(join(checkout, SPACES), { file })
@@ -697,6 +742,61 @@ export class ServerKeeper {
       if (error instanceof TypeError) throw new SRV.HttpError(400, error.message)
       throw error
     }
+  }
+
+  /**
+   * The last `LOG_LINES` lines of server `id`'s log, colours taken out;  none yet, or no such server:  `[]`.
+   * - NEVER throws
+   */
+  logOf(id: string): KeptServerLog {
+    const file = this.rows.get(id)?.log
+    return { id, ...(file && { file }), lines: file ? lastLines(file, LOG_LINES) : [] }
+  }
+
+  /**
+   * The Spell UI files the Servers page loads:  the docs pages' bundle of the first kit the keeper keeps, as its
+   * settings name it (`"uiScript"`, under one of its `"engineRoutes"`), with every engine route it loads from;  none:  `undefined`, and the page draws a
+   * plain table.  Found once.  NEVER throws
+   */
+  uiFiles(): { script: string; files: SRV.StaticHandler } | undefined {
+    if (this.foundUi !== undefined) return this.foundUi || undefined
+    this.foundUi = false
+    const kit = this.repos.find((repo) => isKit(repo.checkout))
+    if (!kit) return undefined
+    try {
+      const settings = pageServerSettings(kit.checkout)
+      const script = settings.uiScript
+      const routes = Object.entries(settings.engineRoutes ?? {})
+      if (!script || !routes.some(([prefix]) => script.startsWith(prefix))) return undefined
+      // every engine route:  the bundle loads its packs from them too (`/_epic/pack/`)
+      const mounts = routes.map(([prefix, folder]) => ({ prefix, dir: join(kit.checkout, folder) }))
+      const files = new SRV.StaticHandler({ mounts })
+      this.foundUi = { script, files }
+    } catch (error) {
+      console.error("server keeper:  can't find Spell UI for the Servers page;  it draws a plain table", error)
+    }
+    return this.foundUi || undefined
+  }
+
+  /** `uiFiles()`'s answer, once found;  `false`:  none */
+  private foundUi?: { script: string; files: SRV.StaticHandler } | false
+
+  /** the Servers page, told its write token and where Spell UI is (`window.SPELL_KEEPER`) */
+  private sendServersPage(reply: SRV.Reply, token: string): void {
+    const ui = this.uiFiles()
+    const script = ui && existsSync(this.uiFileOnDisk(ui.script)) ? ui.script : undefined
+    const config = { token, ...(script && { uiScript: script }), lookSeconds: LOOK_SECONDS }
+    const page = readFileSync(join(HERE, SERVERS_HTML), "utf8").replace(
+      CONFIG_MARK,
+      `<script>window.SPELL_KEEPER = ${JSON.stringify(config).replaceAll("<", "\\u003c")}</script>`
+    )
+    reply.type("text/html; charset=utf-8").noStore().send(page)
+  }
+
+  /** the file Spell UI's script `address` is on disk */
+  private uiFileOnDisk(address: string): string {
+    const found = this.uiFiles()?.files.resolve(address)
+    return found && "file" in found ? found.file : ""
   }
 
   /** `POST /api/servers/https` */
@@ -775,9 +875,9 @@ export class ServerKeeper {
   /** start one of the checkout's own servers in the background, its output in `<home>/servers/<repo>-<name>.log` */
   private startOwn(repo: KeeperRepo, server: KeeperServer): void {
     this.lastStart.set(idOf(repo, server.name), this.now())
-    const folder = join(this.home, KEEPER_SERVER_LOGS)
-    mkdirSync(folder, { recursive: true })
-    const out = openSync(join(folder, `${slug(`${repo.name}-${server.name}`, { as: "id" })}.log`), "a")
+    const log = this.ownLogOf(repo, server)
+    mkdirSync(dirname(log), { recursive: true })
+    const out = openSync(log, "a")
     const child = spawn(process.env.SHELL || "/bin/sh", ["-c", server.start!], {
       cwd: server.folder ?? repo.checkout,
       detached: true,
@@ -785,6 +885,11 @@ export class ServerKeeper {
     })
     child.once("error", (error) => console.error(`server keeper:  ${server.name} won't start:`, error))
     child.unref()
+  }
+
+  /** one of the checkout's own servers' log:  `<home>/servers/<repo>-<name>.log` */
+  private ownLogOf(repo: KeeperRepo, server: KeeperServer): string {
+    return join(this.home, KEEPER_SERVER_LOGS, `${slug(`${repo.name}-${server.name}`, { as: "id" })}.log`)
   }
 
   /** the holds file */
@@ -906,9 +1011,6 @@ type HoldFile = { held?: string[]; handsOff?: boolean }
 /** A checkout's page server record. */
 const PAGE_SERVER_FILE = ".spell-server.json"
 
-/** A checkout's editor record (spell-app's `EditorServer`). */
-const EDITOR_FILE = ".spell-server.editor.json"
-
 /** How long an editor may take to answer after its page server starts, seconds:  Vite may be building its cache. */
 const EDITOR_WAIT_SECONDS = 90
 
@@ -940,29 +1042,6 @@ function isKit(checkout: string): boolean {
 }
 
 /**
- * the worktrees of main checkout `main`, each `[name, folder]`, from git's own records:  each
- * `<main>/.git/worktrees/<id>/gitdir` names its folder's `.git`, as `git worktree list` reads them, with no `git` run
- * - a folder that's gone (removed by hand, not pruned yet) is left out;  the name is the folder's
- */
-function worktreesOf(main: string): [string, string][] {
-  const records = join(main, ".git", "worktrees")
-  if (!existsSync(records)) return []
-  const found = new Map<string, string>()
-  for (const entry of readdirSync(records, { withFileTypes: true })) {
-    if (!entry.isDirectory()) continue
-    let folder: string
-    try {
-      folder = dirname(readFileSync(join(records, entry.name, "gitdir"), "utf8").trim())
-    } catch {
-      continue
-    }
-    const name = basename(folder)
-    if (existsSync(folder) && !found.has(name)) found.set(name, folder)
-  }
-  return [...found]
-}
-
-/**
  * whether main checkout `checkout`'s page server serves an editor:  its settings run the app's routes, which start
  * the editor (spell-app's `EditorServer`), as `spell server start all` reads them.  NEVER throws
  */
@@ -972,6 +1051,53 @@ function pageServerServesEditor(checkout: string): boolean {
   } catch {
     return false
   }
+}
+
+/** This folder:  the Servers page's files are beside this one. */
+const HERE = dirname(fileURLToPath(import.meta.url))
+
+/** The Servers page, and its script, beside this file. */
+const SERVERS_HTML = "servers.html"
+const SERVERS_SCRIPT = "servers.js"
+
+/** Where `sendServersPage()` puts the page's settings. */
+const CONFIG_MARK = "<!-- keeper settings -->"
+
+/** How far back from a log's end `lastLines()` reads, bytes:  50 long lines and more. */
+const LOG_TAIL_BYTES = 64 * 1024
+
+/**
+ * The last `count` lines of `file`, its colours (ANSI codes) taken out;  missing:  `[]`.
+ * - only its last `LOG_TAIL_BYTES` read:  a log grows for weeks
+ * - NEVER throws
+ */
+export function lastLines(file: string, count: number): string[] {
+  let handle: number | undefined
+  try {
+    handle = openSync(file, "r")
+    const size = fstatSync(handle).size
+    const length = Math.min(size, LOG_TAIL_BYTES)
+    const buffer = Buffer.alloc(length)
+    readSync(handle, buffer, 0, length, size - length)
+    const lines = buffer.toString("utf8").replace(ANSI_CODES, "").split(/\r?\n/)
+    // a read that began part way into a line:  that line's end is dropped
+    if (length < size) lines.shift()
+    while (lines.length && lines.at(-1) === "") lines.pop()
+    return lines.slice(-count)
+  } catch {
+    return []
+  } finally {
+    if (handle !== undefined) closeSync(handle)
+  }
+}
+
+/** A terminal's colour and style codes, `\x1b[32m`. */
+// oxlint-disable-next-line no-control-regex -- the escape character is what it matches
+const ANSI_CODES = /\x1b\[[0-9;]*[A-Za-z]/g
+
+/** what a page server's status call says of how it stands now:  when it started, what it's building */
+function howItStands(info: SRV.RunningServer): Pick<KeptServer, "started" | "building"> {
+  return { started: info.started, ...(info.building?.length && { building: info.building }) }
 }
 
 /** `check`'s address:  a URL as it is, a port as `http://127.0.0.1:<port>/` */

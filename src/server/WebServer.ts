@@ -90,6 +90,12 @@ export class WebServer {
   /** extra fields for each page's `window.SPELL_SERVER` */
   private configure?: (served: ServedFile) => Record<string, unknown>
 
+  /**
+   * what runs first, before live reload and the routes, once the host check passes:  for requests this server only
+   * passes on (main's page server's worktree names, `HostRoutes`)
+   */
+  readonly firstRoutes = new Router()
+
   /** websocket upgrades by path prefix, e.g. `/ui` -> a dev server's HMR */
   private upgrades: { claims: (request: Request) => boolean; handle: UpgradeHandler }[] = []
 
@@ -116,6 +122,8 @@ export class WebServer {
 
     const top = new Router()
     if (checkHost) top.use(this.guard.hostCheck)
+    // before its own live reload:  a request this server only passes on (a worktree's name, `HostRoutes`)
+    top.use(this.firstRoutes)
     if (this.live) {
       this.upgrade(LIVE_EVENTS, this.live.events)
       top.get(LIVE_SCRIPT, (_request, reply) =>
@@ -163,9 +171,14 @@ export class WebServer {
    * - the host check applies
    * - an upgrade nothing claims is refused
    */
-  upgrade(prefix: string | ((request: Request) => boolean), handle: UpgradeHandler): this {
+  upgrade(
+    prefix: string | ((request: Request) => boolean),
+    handle: UpgradeHandler,
+    { first = false }: { first?: boolean } = {}
+  ): this {
     const claims = typeof prefix === "string" ? (request: Request) => underPrefix(request.path, prefix) : prefix
-    this.upgrades.push({ claims, handle })
+    if (first) this.upgrades.unshift({ claims, handle })
+    else this.upgrades.push({ claims, handle })
     return this
   }
 

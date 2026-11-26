@@ -481,3 +481,32 @@ const CODE = /\.(ts|js|mjs)$/
 
 /** Folders `newestChange()` skips, anywhere in a path. */
 const SKIPPED = /(^|[/\\])(node_modules|_assets|__pack|\.[^/\\]+)[/\\]/
+
+/** The editor's record at the kit's root (the app's `EditorServer`), `{ url, pid }` while it runs;  a project's by `spacesFileName()`. */
+export const EDITOR_FILE = ".spell-server.editor.json"
+
+/**
+ * Each server's log at checkout `root`, for spaces `spaces` (`spacesFileName()`):  the page server's,
+ * `.spell-server.log`, and its editor's (vite's output), `.spell-server.editor.log`
+ * - what the Spell Servers page shows the last lines of (epic `editor` P49)
+ */
+export function serverLogOf(root: string, server: "page server" | "editor", spaces?: string): string {
+  return join(root, spacesFileName(server === "editor" ? ".spell-server.editor.log" : ".spell-server.log", spaces))
+}
+
+/**
+ * The address of checkout `root`'s editor, while its record names a process alive;  else `undefined`.
+ * - its record:  `<root>/.spell-server.editor.json` (`EDITOR_FILE`), or its spaces' (`spacesFileName()`)
+ * - NEVER throws
+ */
+export function editorAddressOf(root: string, spaces?: string): string | undefined {
+  try {
+    const record = JSON.parse(readFileSync(join(root, spacesFileName(EDITOR_FILE, spaces)), "utf8")) as {
+      url?: string
+      pid?: number
+    }
+    return record.url !== undefined && record.pid !== undefined && isProcessAlive(record.pid) ? record.url : undefined
+  } catch {
+    return undefined
+  }
+}

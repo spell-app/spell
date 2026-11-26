@@ -149,6 +149,13 @@ export type ServerInfo = {
   lastRequest?: string
   /** how many pages hold its live socket open now:  a page open is use, so no idle stop */
   pages?: number
+  /**
+   * the bundles it's building now, by name (`ui-site`, `epic-docs` ...), while it builds (`BundleBuild`):  what the
+   * Spell Servers page says it's doing (epic `editor` P49);  none while it builds nothing
+   */
+  building?: string[]
+  /** its editor's address, while its editor answers (the app's `EditorServer`, its record `.spell-server.editor.json`) */
+  editor?: string
 }
 
 ////////////////
