@@ -1586,8 +1586,10 @@ export const savedMethods = defineCoreModule({
    * - A place that counts only roughly, by its pages:  its last page read, and its rows added to those before it
    *   (`ListAnswer.lastPage`).
    * - `roughly`, `the number of jobs, roughly`:  its estimate taken at its word, pages × page size, shown as it is.
-   * - A place that doesn't count them, or whose last page can't be asked for straight, or comes back empty:  every one
-   *   read, and counted here, as before.
+   * - A paged list that doesn't count them, or whose last page can't be asked for straight, or comes back empty:  NOT
+   *   every page read.  One page at its own size is, and counted when it's the whole list;  else `undefined`, no
+   *   value, so a tile shows its "—".  Say `, roughly` for its estimate, where it has one.
+   * - A list that doesn't page (a file, a list kept whole):  every one read, and counted here, as before.
    * - Followed as any read is:  it's asked again as often as the place's line says.
    * - throws what the read threw
    */
@@ -1595,7 +1597,7 @@ export const savedMethods = defineCoreModule({
     Class: Class,
     query: ListQuery = {},
     { roughly = false }: { roughly?: boolean } = {}
-  ): Promise<number> {
+  ): Promise<number | undefined> {
     const program = programPlaces()
     const read = program.readOf(Class as unknown as SavedClass, { ...withoutEmptySearch(query), page: { size: 1 } })
     read.changes.read()
@@ -1613,7 +1615,17 @@ export const savedMethods = defineCoreModule({
       const rows = core.itemCountOf(await reading)
       if (rows > 0) return rowsBefore + rows
     }
-    return core.itemCountOf(await savedMethods.savedThings(Class, query))
+    // a list that doesn't page is one read whole anyway
+    if ((program.placeFor(Class as unknown as SavedClass).behind.describe().page ?? "none") === "none") {
+      return core.itemCountOf(await savedMethods.savedThings(Class, query))
+    }
+    // paged, and not counted:  one page at its own size, counted only if it's all of them
+    const first = program.readOf(Class as unknown as SavedClass, withoutEmptySearch(query))
+    first.changes.read()
+    const page = first.firstPage()
+    first.hold(page)
+    const rows = await page
+    return first.hasMorePages ? undefined : core.itemCountOf(rows)
   },
 
   /** The thing at `place` in `Class`'s place's order, counting from 1, `-1` the last:  what `the first recipe` compiles to, for a saved type. */

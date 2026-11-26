@@ -551,7 +551,7 @@ describe("the number of, counted by the place (`core.savedCount()`)", () => {
     expect(place.requests.map(([ask]) => ask!.query.page)).toEqual([{ size: 1 }, { at: "4", size: 2 }])
   })
 
-  test("its last page empty, the estimate wrong:  every one read, and counted here", async () => {
+  test("its last page empty, the estimate wrong:  one page at its own size, counted as it's all of them", async () => {
     const place = filled(new PagesOnly({ capabilities: WITH_IDS }))
     place.pagesSaid = 3
     const { Recipe } = program(place)
@@ -569,4 +569,39 @@ describe("the number of, counted by the place (`core.savedCount()`)", () => {
     expect(place.requests).toHaveLength(1)
   })
 
+  /** A server that pages by 2 and never says how many:  no total, no page count. */
+  class PagesByTwo extends CountingPlace {
+    async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
+      this.requests.push([{ collection, query }])
+      const at = Number(query.page?.at ?? 0)
+      const size = query.page?.size ?? 2
+      const all = await MemoryPlace.prototype.list.call(this, collection, { ...query, page: undefined }, context)
+      const rows = all.rows.slice(at, at + size)
+      return { ...all, rows, ...(at + size < all.rows.length && { nextPage: `${at + size}` }) }
+    }
+  }
+
+  test("a paged list that gives no total:  not every page read;  no value, unless its first page is all of them", async () => {
+    const place = filled(new PagesByTwo({ capabilities: WITH_IDS }))
+    for (const id of ["r2", "r3", "r4", "r5"]) {
+      await place.apply([{ kind: "insert", collection: "recipes", id, fields: { id, title: "Stew" } }])
+    }
+    const { Recipe } = program(place)
+    place.requests = []
+    expect(await core.savedCount(Recipe)).toBeUndefined()
+    // one row, then one page at its own size:  never the third page
+    expect(place.requests.map(([ask]) => ask!.query.page?.at)).not.toContain("4")
+    expect(place.requests.length).toBeLessThanOrEqual(2)
+    // two of them, one page
+    expect(await core.savedCount(Recipe, { filter: { title: "Soup" } })).toBe(1)
+  })
+
+  test("a list that doesn't page:  every one read, and counted here, as before", async () => {
+    const place = filled(new CountingPlace({ capabilities: { ...WITH_IDS, page: "none" } }))
+    for (const id of ["r2", "r3", "r4"]) {
+      await place.apply([{ kind: "insert", collection: "recipes", id, fields: { id, title: "Stew" } }])
+    }
+    const { Recipe } = program(place)
+    expect(await core.savedCount(Recipe)).toBe(4)
+  })
 })
