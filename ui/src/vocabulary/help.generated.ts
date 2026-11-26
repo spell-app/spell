@@ -1820,8 +1820,9 @@ export const HELP_TABLE: Readonly<
       size: "Text size of every segment in the group.",
       direction: "`horizontal`: side by side instead of stacked.",
       "equal-width": 'With `direction="horizontal"`: every segment the same width.',
-      wrapping: 'With `direction="horizontal"`: segments wrap onto more rows.',
-      stackable: 'With `direction="horizontal"`: stacks on mobile.',
+      wrapping: 'With `direction="horizontal"`: segments wrap onto more rows when they don\'t fit.',
+      stackable:
+        'With `direction="horizontal"`, opts in to stacking: one segment a row on a screen below 768px (`stackable`), or below 992px too (`stackable="tablet"`).',
       appearance:
         "The group's look, several words at once: `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below; `tall-stacked` two), `piled` (a pile of rotated sheets behind the group), `basic` (no box of its own).",
       padding: "`compact`: only as wide as its content.",

@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vite-plus/test"
+import { afterEach, describe, expect, it } from "vite-plus/test"
+import { page } from "vite-plus/test/browser"
 
 import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
@@ -244,6 +245,65 @@ describe("UISegment.css examples", () => {
     )
     expect([...ladder].sort((a, b) => a - b)).toEqual(ladder)
     expect(size(".ui.medium.segment")).toBe(size('.ui.segment[class="ui segment"]'))
+  })
+})
+
+////////////////
+// ## Stacking and wrapping
+////////////////
+
+/** Three equal-width segments side by side, in a group with `words` (`stackable`, `tablet stackable` ...). */
+const ROW = (words: string) =>
+  `<div class="ui ${words} equal width horizontal segments">` +
+  `<div class="ui segment">One</div><div class="ui segment">Two</div><div class="ui segment">Three</div></div>`
+
+/** Each of the group's segments' tops, rounded:  one value for one row, three for a column. */
+function rowTops(group: HTMLElement): number[] {
+  return [...group.querySelectorAll<HTMLElement>(":scope > .segment")].map((segment) =>
+    Math.round(segment.getBoundingClientRect().top)
+  )
+}
+
+describe("UISegment.css stacking (stacks only when asked, as a table does)", () => {
+  afterEach(async () => {
+    await page.viewport(1200, 900)
+  })
+
+  it("keeps a stackable equal-width group ONE row on a desktop", async () => {
+    await page.viewport(1200, 900)
+    Sheets.adopt([...foundationCSS, segmentCSS])
+    for (const words of ["stackable", "tablet stackable"]) {
+      const group = Sheets.render(ROW(words))
+      expect(getComputedStyle(group).flexWrap, words).toBe("nowrap")
+      expect(new Set(rowTops(group)).size, words).toBe(1)
+    }
+  })
+
+  it("stacks a stackable group as a column on a phone;  `tablet stackable` on a tablet too", async () => {
+    Sheets.adopt([...foundationCSS, segmentCSS])
+    await page.viewport(375, 800)
+    for (const words of ["stackable", "tablet stackable"]) {
+      const group = Sheets.render(ROW(words))
+      expect(getComputedStyle(group).flexDirection, words).toBe("column")
+      expect(new Set(rowTops(group)).size, words).toBe(3)
+    }
+    await page.viewport(900, 800)
+    const tablet = Sheets.render(ROW("tablet stackable"))
+    expect(getComputedStyle(tablet).flexDirection).toBe("column")
+    const plain = Sheets.render(ROW("stackable"))
+    expect(getComputedStyle(plain).flexDirection).toBe("row")
+  })
+
+  it("never stacks a group that doesn't ask, and a wrapping group still wraps", async () => {
+    Sheets.adopt([...foundationCSS, segmentCSS])
+    await page.viewport(375, 800)
+    const plain = Sheets.render(ROW(""))
+    expect(getComputedStyle(plain).flexDirection).toBe("row")
+    await page.viewport(1200, 900)
+    const wrapping = Sheets.render(ROW("wrapping"))
+    expect(getComputedStyle(wrapping).flexWrap).toBe("wrap")
+    // equal width:  each segment takes the row, so each wraps onto its own
+    expect(new Set(rowTops(wrapping)).size).toBe(3)
   })
 })
 

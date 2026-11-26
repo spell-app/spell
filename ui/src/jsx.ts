@@ -43637,7 +43637,7 @@ export interface UISegmentsAttributes {
    */
   "prop:equalWidth"?: boolean | ""
   /**
-   * With `direction="horizontal"`:  segments wrap onto more rows.
+   * With `direction="horizontal"`:  segments wrap onto more rows when they don't fit.
    * - takes:  flag (present / absent)
    */
   wrapping?: boolean | ""
@@ -43647,15 +43647,15 @@ export interface UISegmentsAttributes {
    */
   "prop:wrapping"?: boolean | ""
   /**
-   * With `direction="horizontal"`:  stacks on mobile.
-   * - takes:  flag (present / absent)
+   * With `direction="horizontal"`, opts in to stacking:  one segment a row on a screen below 768px (`stackable`), or below 992px too (`stackable="tablet"`).  Wider, the group stays one row:  only `wrapping` wraps.
+   * - takes:  flag, or `tablet`
    */
-  stackable?: boolean | ""
+  stackable?: boolean | "" | "tablet"
   /**
    * `stackable`, as the DOM element's property.
    * @deprecated write `stackable` -- `prop:` stays only for compiled spell
    */
-  "prop:stackable"?: boolean | ""
+  "prop:stackable"?: boolean | "" | "tablet"
   /**
    * The group's look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` two), `piled` (a pile of rotated sheets behind the group), `basic` (no box of its own).  Their old names were `raised`, `stacked`, `piled`, `basic`.
    * - takes:  space-separated:  `raised` · `stacked` · `tall-stacked` · `piled` · `basic`
