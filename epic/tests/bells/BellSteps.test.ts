@@ -25,6 +25,31 @@ describe("BellSteps", () => {
     expect(order).toEqual(BellSteps.GROUPS)
   })
 
+  test("each group lists its steps by cost:  high, medium, low, none, then the timesavers;  the table's order within a cost", () => {
+    for (const group of BellSteps.GROUPS) {
+      const costs = BellSteps.STEPS.filter((step) => step.group === group).map((step) =>
+        BellSteps.COST_ORDER.indexOf(step.cost)
+      )
+      expect(costs, group).toEqual([...costs].sort((a, b) => a - b))
+    }
+    const background = BellSteps.STEPS.filter((step) => step.group === "background").map((step) => step.key)
+    expect(background).toEqual(["watchSends", "refreshPages", "startNotices", "closeLeftovers"])
+    const testing = BellSteps.STEPS.filter((step) => step.group === "testing").map((step) => step.key)
+    expect(testing).toEqual([
+      "fullTestRun",
+      "editorWarnings",
+      "checksBeforeMerge",
+      "speedTest",
+      "editorAddOns",
+      "stopStuckTests"
+    ])
+  })
+
+  test("the costs:  5 high, 14 medium, 10 low, 13 none, 3 timesavers", () => {
+    const count = (cost: string) => BellSteps.STEPS.filter((step) => step.cost === cost).length
+    expect(BellSteps.COST_ORDER.map(count)).toEqual([5, 14, 10, 13, 3])
+  })
+
   test("with nothing changed, every step runs", () => {
     const values = BellSteps.defaults()
     for (const step of BellSteps.STEPS) expect(BellSteps.stateOf(values, step.key)).toEqual({ on: true })
@@ -48,11 +73,24 @@ describe("BellSteps", () => {
     expect(BellSteps.stateOf(values, "designReview")).toEqual({ on: false, why: "burn" })
   })
 
-  test("Low:  timesavers and the cheap must-haves only", () => {
+  test("a step that uses no tokens runs at every level, unless your own switch is off", () => {
+    for (const level of BellSteps.BURN_LEVELS) {
+      const values = BellSteps.withBurn(BellSteps.defaults(), level)
+      expect(BellSteps.stateOf(values, "startNotices").on, level).toBe(true) // none, useful
+      expect(BellSteps.stateOf(values, "watchAgentNotes").on, level).toBe(true) // none, useful
+    }
+    const off = BellSteps.withBurn({ ...BellSteps.defaults(), startNotices: false }, "low")
+    expect(BellSteps.stateOf(off, "startNotices")).toEqual({ on: false, why: "switch" })
+  })
+
+  test("Low:  timesavers, the steps that use no tokens, and the cheap must-haves only", () => {
     const values = BellSteps.withBurn(BellSteps.defaults(), "low")
     const on = BellSteps.STEPS.filter((step) => !step.inBrowser && BellSteps.stateOf(values, step.key).on)
     expect(
-      on.every((step) => step.cost === "timesaver" || (step.cost === "low" && step.importance === "mustHave"))
+      on.every(
+        (step) =>
+          step.cost === "timesaver" || step.cost === "none" || (step.cost === "low" && step.importance === "mustHave")
+      )
     ).toBe(true)
     expect(on.map((step) => step.key)).toContain("stopStuckTests")
     expect(on.map((step) => step.key)).not.toContain("titleCheck")

@@ -684,41 +684,42 @@ epic settings.
 - The code reads its own (`Bells.isOn()`):  the title check and item scoring (`epic add`), the "On it" line and the
   fresh hint (the prompt hook), waking a session and passing it a Send (the hub), opening a chat for a Send nobody hears,
   saving the epic pages at a turn's end, merge-main's rename step, the hourly sweep, the behind-main notice.
-- The skill's own, each with its key:
+- The skill's own, each with its key and cost, in the dialog's order (by group, the costliest first;  `BellSteps.STEPS`);
+  `none` costs no Claude tokens, and runs at every Token burn level unless the person's own switch is off:
 
-| Step | Key |
-| --- | --- |
-| the coherence review at kickoff (step 3) | `bells.reuseCheckPlan` |
-| the coherence review of the build plans (step 4b) | `bells.reuseCheckPhases` |
-| a helper for bigger epic page edits | `bells.pageEditHelper` |
-| building in helpers (above) | `bells.helpersBuild` |
-| resuming cut-off agents ("After a restart") | `bells.restartHelpers` |
-| the finishing pass's sweep for drift bugs | `bells.finalTidy` |
-| the designer review (5, step 4) | `bells.designReview` |
-| the plan check (5, step 4) | `bells.planCheck` |
-| an agent's alignment scan of what it changed | `bells.alignmentCheck` |
-| trying a manual test yourself before asking the person | `bells.handChecksFirst` |
-| `epic voice check` on text people see | `bells.plainWordsCheck` |
-| an agent's unit tests before it merges | `bells.checksBeforeMerge` |
-| the last agent's full suite | `bells.fullTestRun` |
-| the parser's speed test | `bells.speedTest` |
-| rebuilding the VS Code extension | `bells.editorAddOns` |
-| the editor's Solid warnings after a merge | `bells.editorWarnings` |
-| stopping a stalled test run (`--stall`) | `bells.stopStuckTests` |
-| rewriting a phase's notes in plain words (Doc Review) | `bells.plainPhaseNotes` |
-| writing the epic's guide (Doc Review) | `bells.epicGuide` |
-| fixing the READMEs (Doc Review) | `bells.fixReadmes` |
-| `/docs-check` of the guides' links and pictures | `bells.checkGuides` |
-| the changelog entry | `bells.changelog` |
-| merging an agent's work into `main` at once | `bells.mergeEachHelper` |
-| merging `main` into the worktree | `bells.mergeMain` |
-| rebuilding generated files after a merge | `bells.remakeBuiltFiles` |
-| installing packages a merge changed | `bells.installPackages` |
-| carrying the person's uncommitted edits on `main` into the branch first | `bells.keepOwnEdits` |
-| `/epic tidy`'s reset of items marked working that nobody works on | `bells.clearStuckItems` |
-| answering an item's Add Details and Clarify | `bells.itemRequests` |
-| the waiter for the person's notes to agents (`epic agents wait`) | `bells.watchAgentNotes` |
-| rebuilding a page's bundles by hand (`spell bundle`) | `bells.refreshPages` |
+| Step | Key | Cost |
+| --- | --- | --- |
+| the coherence review of the build plans (step 4b) | `bells.reuseCheckPhases` | high |
+| the coherence review at kickoff (step 3) | `bells.reuseCheckPlan` | medium |
+| a helper for bigger epic page edits | `bells.pageEditHelper` | medium |
+| building in helpers (above) | `bells.helpersBuild` | high |
+| resuming cut-off agents ("After a restart") | `bells.restartHelpers` | medium |
+| the finishing pass's sweep for drift bugs | `bells.finalTidy` | medium |
+| the designer review (5, step 4) | `bells.designReview` | high |
+| the plan check (5, step 4) | `bells.planCheck` | medium |
+| an agent's alignment scan of what it changed | `bells.alignmentCheck` | medium |
+| trying a manual test yourself before asking the person | `bells.handChecksFirst` | medium |
+| `epic voice check` on text people see | `bells.plainWordsCheck` | low |
+| the last agent's full suite | `bells.fullTestRun` | medium |
+| the editor's Solid warnings after a merge | `bells.editorWarnings` | medium |
+| an agent's unit tests before it merges | `bells.checksBeforeMerge` | low |
+| the parser's speed test | `bells.speedTest` | low |
+| rebuilding the VS Code extension | `bells.editorAddOns` | none |
+| stopping a stalled test run (`--stall`) | `bells.stopStuckTests` | timesaver |
+| rewriting a phase's notes in plain words (Doc Review) | `bells.plainPhaseNotes` | high |
+| fixing the READMEs (Doc Review) | `bells.fixReadmes` | high |
+| writing the epic's guide (Doc Review) | `bells.epicGuide` | medium |
+| `/docs-check` of the guides' links and pictures | `bells.checkGuides` | low |
+| the changelog entry | `bells.changelog` | low |
+| carrying the person's uncommitted edits on `main` into the branch first | `bells.keepOwnEdits` | low |
+| merging an agent's work into `main` at once | `bells.mergeEachHelper` | none |
+| merging `main` into the worktree | `bells.mergeMain` | none |
+| rebuilding generated files after a merge | `bells.remakeBuiltFiles` | none |
+| installing packages a merge changed | `bells.installPackages` | none |
+| `/epic tidy`'s reset of items marked working that nobody works on | `bells.clearStuckItems` | low |
+| answering an item's Add Details and Clarify | `bells.itemRequests` | medium |
+| the waiter for the person's notes to agents (`epic agents wait`) | `bells.watchAgentNotes` | none |
+| rebuilding a page's bundles by hand (`spell bundle`) | `bells.refreshPages` | none |
 
 In Codex:  the same keys;  a step Codex does itself rather than in an agent is still the step.
 

@@ -130,6 +130,41 @@ describe("the clear moment", () => {
   })
 })
 
+describe("one session's fresh, waiting for its agents (T172)", () => {
+  test("marked alone:  its own round, its own prompt doesn't count;  waits for its agents, then its line says go", () => {
+    const solo = FreshAll.markSolo(ME, "seo", NOW)
+    expect(solo).toMatchObject({ epic: "seo", self: true, solo: true })
+    expect(FreshAll.pending(ME)?.solo).toBe(true)
+    // another round's sessions don't hold it back
+    FreshAll.mark(SEO, "seo", { round: "r1", now: NOW })
+    const asked = transcript("solo", [prompt(NOW - 2000, "/epic fresh")])
+    writeFileSync(agentsFile, '[{ name: "docs-pass", task: "the docs" }]\n')
+    expect(FreshAll.whyNot(ME, solo, { transcript: asked, cwd: root, now: NOW })).toMatch(/docs-pass/)
+    rmSync(agentsFile)
+    expect(FreshAll.whyNot(ME, solo, { transcript: asked, cwd: root, now: NOW + minutes(1) })).toBeNull()
+    expect(FreshAll.wakeLine(solo)).toMatch(/seo's agents are done.*steps 2-4/)
+  })
+
+  test("after an agent is done:  go when clear, wait saying why, nothing when no solo fresh of that epic waits", () => {
+    expect(FreshAll.afterAgent(ME, "seo", { cwd: root, now: NOW })).toBeUndefined()
+    FreshAll.mark(ME, "seo", { round: "r1", now: NOW })
+    expect(FreshAll.afterAgent(ME, "seo", { cwd: root, now: NOW })).toBeUndefined()
+    FreshAll.markSolo(ME, "seo", NOW)
+    expect(FreshAll.afterAgent(ME, "docs", { cwd: root, now: NOW })).toBeUndefined()
+    writeFileSync(agentsFile, '[{ name: "docs-pass", task: "the docs" }]\n')
+    expect(FreshAll.afterAgent(ME, "seo", { cwd: root, now: NOW })).toEqual({
+      wait: expect.stringMatching(/docs-pass/)
+    })
+    rmSync(agentsFile)
+    expect(FreshAll.afterAgent(ME, "seo", { cwd: root, now: NOW })).toEqual({
+      go: expect.stringMatching(/go fresh now/)
+    })
+    const talking = transcript("solo-talking", [prompt(NOW - 2000, "/epic fresh"), prompt(NOW + minutes(2))])
+    const later = FreshAll.afterAgent(ME, "seo", { transcript: talking, cwd: root, now: NOW + minutes(3) })
+    expect(later).toEqual({ wait: expect.stringMatching(/wrote to it/) })
+  })
+})
+
 describe("the end-of-turn hook's wait", () => {
   /** A clock the stubbed sleep moves on;  `onSleep` runs at each look. */
   function clock(onSleep: (looks: number) => void = () => {}) {

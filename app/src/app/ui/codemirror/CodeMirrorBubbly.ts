@@ -90,8 +90,9 @@ export class CodeMirrorBubbly {
           drawnAtOnce: (decorations, transaction) =>
             blankLinesDrawn(decorations, transaction, sliceOf(transaction.state)?.hiddenIndent),
           marksTyped: marksTyped,
-          // laid out on the page:  its grammar loads on first use (epic `solid-2-final` P20)
-          waitFor: () => (elsewhere?.isElsewhere() || SP.hasGrammar() ? undefined : SP.loadGrammar())
+          // laid out on the page:  its grammar loads on first use (epic `solid-2-final` P20), once there's text
+          waitFor: (state) =>
+            elsewhere?.isElsewhere() || !state.doc.length ? undefined : CodeMirrorBubbly.grammarLoading()
         }
       ),
       EditorView.editorAttributes.of({ class: EDITOR_CLASSES }),
@@ -100,6 +101,16 @@ export class CodeMirrorBubbly {
       CodeMirrorSelection.extension,
       DescriptionRoom.extension
     ]
+  }
+
+  /**
+   * Spell's grammar, loading for a layout made on the page (epic `solid-2-final` P20):  `undefined` once it's here.
+   * - An empty editor (the Spell Console's line, before a key) asks nothing:  the page downloads no grammar for it.
+   * - NEVER rejects:  a grammar that won't load leaves the code plain, and says why in devtools.
+   */
+  static grammarLoading(): Promise<void> | undefined {
+    if (SP.hasGrammar()) return undefined
+    return SP.loadGrammar().catch((error: unknown) => console.error("couldn't load spell's grammar", error))
   }
 
   /** How long the typing must pause before the code's laid out again, in msec. */
@@ -112,7 +123,10 @@ export class CodeMirrorBubbly {
    * - NEVER throws:  `Decoration.none` when the layout fails.
    */
   static decorationsOf(state: EditorState, within?: SP.SpellFile, slice?: Slice): DecorationSet {
-    if (!SP.hasGrammar()) return Decoration.none
+    if (!SP.hasGrammar()) {
+      if (state.doc.length) void CodeMirrorBubbly.grammarLoading()
+      return Decoration.none
+    }
     try {
       return new BubblyDecorations(state, drawingOf(state, within), {
         isView: (tag) => isViewTag(within, tag),
@@ -132,8 +146,11 @@ export class CodeMirrorBubbly {
    * - NEVER throws:  no decorations when the layout fails, and no marks when a region's marks fail.
    */
   static laidOutOf(state: EditorState, within?: SP.SpellFile, slice?: Slice): LaidOut {
-    // the grammar, still loading:  plain till it comes (`waitFor`)
-    if (!SP.hasGrammar()) return { decorations: Decoration.none }
+    // the grammar, still loading:  plain till it comes (`waitFor`, or the next pause in the typing)
+    if (!SP.hasGrammar()) {
+      if (state.doc.length) void CodeMirrorBubbly.grammarLoading()
+      return { decorations: Decoration.none }
+    }
     try {
       return CodeMirrorBubbly.laidOutFrom(state, drawingOf(state, within), (tag) => isViewTag(within, tag), slice)
     } catch (error) {

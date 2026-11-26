@@ -233,7 +233,7 @@ export class PlanDocCommands {
       return this.bedtimeAll(name === "status" ? ["status", ...rest] : rest, flags)
     // `focus on | off | status | summary`:  every running epic at once (`FocusCommands`, epic `epic-engine` T93)
     if (command === "focus") return this.focus.run(positional.slice(1), flags)
-    // `fresh all [--pause] | status | drop | quiet | wait | cancel`:  every running epic session to a fresh one
+    // `fresh all [--pause] | later | queued | status | drop | quiet | wait | cancel`:  every running epic session to a fresh one
     // (`FreshCommands`, epic `epic-engine` T113;  its pause round, T139)
     if (command === "fresh") return this.fresh.run(positional.slice(1), flags)
     if (command === "backfill") return this.backfill(name, flags)
@@ -2002,6 +2002,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    a fresh session at its next clear moment;  TELL: lines;
                                                    --pause:  each pauses and saves its agents first, says quiet,
                                                    and all go only once every one is;  cancel calls that off
+  fresh later <epic> | queued <epic> [--json]      /epic fresh while agents run:  this session goes fresh once
+                                                   they're done;  queued:  the post-fresh list
   prompt <name> "text" | --file path               set the prompt that started the plan ("" removes it)
   summary <name> [--json] [--all]                  open questions, issues, todos, limits, manual tests;  the next phase;
                                                    finished phases and grey items only counted, unless --all

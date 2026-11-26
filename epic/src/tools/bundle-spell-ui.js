@@ -239,6 +239,8 @@ const ICONS = {
   "solid/star": ["star"],
   // the epic page gear's Tidy (epic `epic-engine` T168)
   "solid/broom": ["broom"],
+  // the epic page gear's Bells & Whistles (epic `epic-engine` P86, T171)
+  "solid/bell": ["bell"],
   "regular/star": ["star outline"],
   // epic pages' review (epic `review-review`):
   // section icons, the item action menu and filter, the page header's send / files / git buttons

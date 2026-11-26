@@ -92,6 +92,14 @@ Agents paused for a fresh start (`epic fresh all --pause`):
   - leave everyone's uncommitted files where they are
 - `epic fresh cancel` calls a pause off
 
+A fresh start asked for while the epic's agents run (`/epic fresh`):
+- `epic fresh later <epic>`:  this session goes fresh by itself once they're done (`epic fresh status` shows it,
+  `epic fresh drop` calls it off);  say "fresh as soon as <names> finish"
+- meanwhile start no new work:  each new ask is an item queued for the fresh session,
+  `epic queue <epic> <id> "after the fresh"`;  say "queued for the fresh session:  <what>";  quick answers still go
+- picking the epic up:  `epic fresh queued <epic>` lists that post-fresh list;  take those up first,
+  `epic unqueue <epic> <id>` as you start each
+
 1. `epic phase <epic>#P3 active`, and say what you're doing:  `epic inbox status <epic> "Building P3"` (the page's step label turns, the words its tooltip).
 2. Check the accepted plan still fits.
    - A small change:  `epic updated <epic>#P3 "<p>what changed</p>" --summary "Plan adjusted:  ..."`.
@@ -315,6 +323,7 @@ Without them, every step still works:  each skill's "In Codex:" lines say it in 
 | a background command (Bash `run_in_background`, `TaskStop`) | waiting on `epic ask wait` while the chat stays free | run it in the foreground and wait:  it ends when the person sends;  stop it with Ctrl-C |
 | plan mode (`/comment`) | the person comments on a file in the plan tab | none:  take their notes in the chat, or open it as a guide with comments (`epic pages link <page> --show`) |
 | `${CLAUDE_PLUGIN_ROOT}` in a skill | the epic plugin's own folder, which Claude Code fills in | `epic guide --root` prints it:  read `${CLAUDE_PLUGIN_ROOT}` as that folder |
+| the wait for agents before a fresh start (`epic fresh later`, its end-of-turn hook) | the session goes fresh by itself once its agents are done | no hand-off to wait for:  finish the work, then start a new session and `epic fresh queued <epic>` |
 | the pause before a fresh start (`epic fresh all --pause`) | every session saves its agents and reports back | can't start one:  it needs Claude Code's session messages;  `epic fresh status` and `cancel` work anywhere |
 | the epic hub's wake (the inbox poller's `Stop` hook, the `PostToolUse` hook) | wakes the session when the person sends, or hands it the Send at its next tool call | `epic inbox wait <epic>`, run yourself, in the foreground |
 | the end-of-turn hook | commits and syncs the plans | `epic turn end` (Codex's hook runs it too) |
