@@ -185,7 +185,8 @@ export const PERF_STEPS = [
   "listeners",
   "sheets",
   "cpu",
-  "pipeline"
+  "pipeline",
+  "warnings"
 ] as const
 
 /** One of `PERF_STEPS`. */

@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { CliError } from "spell/cli"
-import type { PerfPageName, PerfProfileName, PerfRecord, PerfRunOptions, PerfServers } from "./perf.types"
+import type { PerfPageName, PerfProfileName, PerfRecord, PerfRunOptions, PerfServers, PerfStep } from "./perf.types"
 import { PerfMachine } from "./PerfMachine"
 import { PerfBuilds } from "./PerfBuilds"
 import { PerfResults } from "./PerfResults"
@@ -15,6 +15,7 @@ import { A11yMeasure } from "./A11yMeasure"
 import { ListenersMeasure } from "./ListenersMeasure"
 import { SheetsMeasure } from "./SheetsMeasure"
 import { CpuMeasure } from "./CpuMeasure"
+import { SolidWarningsMeasure } from "./SolidWarningsMeasure"
 
 /****************
  * ### `PerfRun`
@@ -26,6 +27,8 @@ import { CpuMeasure } from "./CpuMeasure"
  *   Nothing in the checkout changes:  the editor's writes are refused while it's measured.
  * - The docs and epic pages:  the page server's, which must be running (`spell server start`).
  * - Each step its own class (`LoadMeasure` ...);  `pipeline` runs `spell speedtest --pipeline`.
+ * - `warnings` walks the checkout's RUNNING editor in dev mode, for Solid's warnings (`SolidWarningsMeasure`):
+ *   a walk step it couldn't run is a failure.
  * - Writes ONE dated file in the kit's `.perf-results/` (`PerfResults`):  the numbers, the machine before and after,
  *   the commit, Chrome's version, what was asked;  `--baseline save` makes it the baseline too.
  * - A step that fails is named in `failures`, and the rest go on.
@@ -173,12 +176,24 @@ export class PerfRun {
       })
     }
     if (steps.includes("pipeline")) await step("pipeline", "Solitaire", async () => this.pipeline())
+    if (steps.includes("warnings") && pages.includes("editor")) {
+      await step("warnings", "editor", async () => {
+        const result = await SolidWarningsMeasure.measure(this.kitRoot, this.say)
+        for (const failed of result.failedSteps) this.failures.push(`warnings editor:  ${failed}`)
+        return result
+      })
+    }
   }
 
-  /** The editor build served, when a page asked for needs it;  else only the page server. */
+  /**
+   * The editor build served, when a page and a step asked for need it;  else only the page server.
+   * - `pipeline` and `warnings` measure no build:  asked alone, nothing is built
+   */
   private async servers(builds: PerfBuilds, pagePort: number): Promise<{ editor: PerfServers }> {
     const pageServer = `http://127.0.0.1:${pagePort}`
-    const needsEditor = this.options.pages.some((page) => page === "editor" || page === "run")
+    const needsEditor =
+      this.options.pages.some((page) => page === "editor" || page === "run") &&
+      this.options.steps.some((step) => !BUILDLESS_STEPS.includes(step))
     if (!needsEditor) return { editor: { editor: "", pageServer } }
     this.say("Building the editor into a temporary folder ...")
     const editor = await builds.serve(builds.build("editor"), pagePort)
@@ -219,3 +234,6 @@ export class PerfRun {
     return execFileSync("git", args, { cwd: this.kitRoot, encoding: "utf8" }).trim()
   }
 }
+
+/** The steps that measure no editor build. */
+const BUILDLESS_STEPS: PerfStep[] = ["pipeline", "warnings"]

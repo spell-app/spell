@@ -11,6 +11,7 @@ import type { A11yResult } from "./A11yMeasure"
 import type { ListenersResult } from "./ListenersMeasure"
 import type { SheetsResult } from "./SheetsMeasure"
 import type { CpuResult } from "./CpuMeasure"
+import type { SolidWarningsResult } from "./SolidWarningsMeasure"
 
 /**
  * Where `spell perf run` keeps what it measured, and how `spell perf report` compares it.
@@ -160,6 +161,9 @@ export class PerfResults {
     }
     const pipeline = (data.pipeline?.Solitaire ?? {}) as { median?: Record<string, unknown> }
     for (const [metric, value] of Object.entries(pipeline.median ?? {})) keep(`pipeline Solitaire ${metric}`, value)
+    const warnings = data.warnings?.editor as SolidWarningsResult | undefined
+    keep("warnings editor solidWarnings", warnings?.solidWarnings)
+    keep("warnings editor otherProblems", warnings?.otherProblems)
     return out
   }
 }

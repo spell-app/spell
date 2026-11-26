@@ -544,12 +544,12 @@ export function drawn<This extends object, Draw extends (this: This) => Drawing>
  * - Through `createComponent()`, as Solid's JSX does:  untracked, so what `draw()` reads is its own, not the caller's.
  * - `draw()` runs in a memo, inside the boundary:
  *   again only for what IT read, never because the boundary re-reads its children
- *   (it does, whenever anything under it changes:  a list grows, a card flips).
+ *   (rc.13's did, whenever anything under it changed:  a list grew, a card flipped).
  * - When `draw()` (or a live value in it) throws:
  *   - one line on the program's console
  *   - a cancelable `ui-error` from the app's element (`{ error, thing }`)
  *   - a small stand-in, unless that event was cancelled:  made once, even as the drawing around it changes
- *     (`<Errored>` builds its fallback once since Solid rc.15;  `drawing.test.ts` pins it)
+ *     (`<Errored>` builds its fallback once;  `drawing.test.ts` pins it)
  *   - The rest of the drawing keeps working;  the boundary heals when the thing draws again.
  * - A thing whose class `drawsWaiting` holds its whole drawing until a value it reads answers:
  *   an `if`, or an attribute of the drawing's outermost element, has no spot of its own for one, and with no
@@ -956,8 +956,9 @@ const DRAWN = Symbol("drawn")
 /**
  * `drawing` MADE, if it's `h()`'s thunk (a function that makes the element) -- else `drawing` as it is.
  * - Compiled JavaScript's `draw()` returns `h("div", ...)`, a thunk.  Made here, inside the boundary's memo:
- *   - ONCE:  left a thunk, Solid would make the element again each time the boundary re-reads its children, which it
- *     does whenever anything under it changes (a card added to a pile)
+ *   - ONCE, in the memo:  a thunk left for Solid to make draws again in a loop beside a saved read
+ *     (a `<for>` over a saved type beside other lines), measured on Solid 2.0.4 (`drawnReads.test.ts`);
+ *     rc.13's boundary also made it again each time it re-read its children (a card added to a pile)
  *   - inside the boundary:  a tag or child that throws while it's made shows the stand-in
  *   - elements INSIDE it need nothing:  `h()` makes them as it makes their parent
  * - A fragment, `<>...</>`, is a list of them (`[h("a"), h("b")]`):  each made once, the same way.

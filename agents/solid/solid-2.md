@@ -26,32 +26,36 @@ or anything touching Spell UI (`spell/ui`).
   - React is GONE from `app`, `core` and `util`:  no React kits, no `view()`, no `@vitejs/plugin-react`.
     Only the `spell` CLI keeps it, for its terminal screens (Ink).
   - Items still marked (planned) below wait on an open todo:  they are NOT in code.
-- Target Solid `2.0.0-rc.21` (2026-11-09, epic `epic-engine` P67;  rc.17 from 2026-10-22, epic `solid-17`), every package
-  pinned EXACTLY:
+- Target Solid 2.0 FINAL, `2.0.4` (2026-11-26, epic `solid-2-final` P21;  rc.21 from 2026-11-09, epic `epic-engine`
+  P67), every package pinned EXACTLY:
 
   ```text
-  solid-js, @solidjs/web, @solidjs/h, @solidjs/signals,
-  @solidjs/compiler, @solidjs/babel-plugin         2.0.0-rc.21
-  @solidjs/vite-plugin                             3.0.0-next.57
-  @solidjs/router                                  2.0.0-next.44
-  seroval, seroval-plugins                         1.7.0   (solid-js pins them)
+  solid-js, @solidjs/web, @solidjs/signals                 2.0.4
+  @solidjs/h, @solidjs/compiler, @solidjs/babel-plugin     2.0.3
+  @solidjs/vite-plugin                                     3.0.1
+  @solidjs/router                                          2.0.1
+  @solidjs/start-devtools  (an optional peer)              1.0.1
+  seroval, seroval-plugins           yarn's pick (solid-js asks ^1.8.0:  1.8.2)
   ```
 
   - every repo is on them:  ONE copy at the kit's root, pinned in the root `resolutions`;
     upgrade them all together (one Solid per page)
-  - what changed since rc.13, and bit us, is in the rules below, marked with the release (rc.14 ... rc.17)
+  - what changed from rc.13 to 2.0, and bit us, is in the rules below, marked with its release where that still helps
+  - 2.0.4 against rc.21, measured:  every experiment the same, every test the same, but for Spell's shadow-root events
+    (`ShadowEvents`, which reads Solid's delegation:  `registerDelegatedContainer()` returns nothing now)
 - Solid's own docs for agents ship IN `solid-js` since rc.16:  trust them first.
   They're in its folder, `node_modules/solid-js/`:
   - the 2.0 primer:  `skills/solid-2.0/`
   - the cheatsheet, as a skill:  `skills/solid-2.0-cheatsheet/`
   - every dev diagnostic code, and how to fix it:  `skills/reactivity-diagnostics/`
   - the same codes as data, each with its fix and docs link:  `diagnostics.json`
-  - v2.solidjs.com is the 2.0 reference;  a dev console message links its code's page there
-- Re-verified on rc.13:  every experiment behaved as on rc.11 (`solid-2.html`, "rc.11 vs rc.13").
+  - docs.solidjs.com is the 2.0 reference;  a dev console message links its code's page there
+- Re-verified on 2.0.4:  every experiment read as on rc.21 (as rc.13 had as on rc.11:  `solid-2.html`, "rc.11 vs rc.13").
   - rc.13 moved `createErrorBoundary`, `createLoadingBoundary`, `createRevealOrder`, `sharedConfig` and `$DEVCOMP`
     out of `solid-js` into `solid-js/internal`.  NEVER import from `solid-js/internal`:  use `<Errored>` /
     `<Loading>` / `<Reveal>` (callable as functions, `children` as a getter -- see `UIComponent.mount()` in Spell UI).
-  - RC bumps:  run `solid/experiments/*` on old and new (`SOLID_NODE_MODULES=<dir>` picks the Solid) and diff.
+  - A Solid upgrade:  run the kit's `guides/solid/experiments/*` on old and new (`SOLID_NODE_MODULES=<dir>` picks the
+    Solid) and diff.
 - NEVER model Solid 2 on React OR on Solid 1:  both priors produce wrong code here.
 
 ## The model in six bullets
@@ -268,6 +272,11 @@ draw() {
 - Reads:
   - read reactive values in JSX, a memo or an effect compute -- a component body or `<For>` / `<Show>` callback body
     is an owner, NOT a tracking scope (`STRICT_READ_UNTRACKED`)
+  - NEVER wrap a read in `untrack()` to quiet `STRICT_READ_UNTRACKED` (Solid's own advice, 2.0.4):
+    the value still never updates, and the warning was the only sign.  Move the read to where it's used:
+    JSX, a memo, an effect's compute, the event handler, or an accessor handed to a hook (`useThing(() => props.id)`)
+    - `untrack()` is for a one-time snapshot someone DECIDED never follows its source, never for a value that may
+      come from async
   - need the value now in imperative code or a test?  `flush()` first (`core.flush()` for spell state).  NEVER
     `flush()` inside an `action`, an effect apply or `onSettled`.
 - Effects:
@@ -309,7 +318,7 @@ draw() {
     console, and the fallback never shows (measured, P6:  `app`'s `ASTViewer` / `MatchViewer`).  Read the value in
     JSX (a render expression) where a throw must show the fallback, or give the effect an `{ effect, error }`
     bundle.
-    - Not re-measured on rc.17:  no release note from rc.14 to rc.17 says this changed.
+    - Not re-measured since:  no release note from rc.14 to 2.0.4 says this changed.
       Solid's own docs still name the two ways:  `<Errored>`, or the effect's `error` option.
   - an uncaught error still halts the page;
     since rc.17 the dev `REACTIVITY_HALTED` message names where it escaped (`in <App> › <Composer> › effect`)
@@ -320,6 +329,10 @@ draw() {
   - for a context that may be empty, use `null`:  `createContext<T | null>(null)`
 - Dynamic components:  `dynamic(() => source())`, created once outside JSX.
   - `dynamicComponent` is in `solid-js` since rc.15;  `@solidjs/web` re-exports it, and keeps `dynamic`
+- Optimistic values (`createOptimistic`, `createOptimisticStore`), since 2.0.4:  a guess NEVER becomes the real value.
+  - it always goes back when its action settles;  the real value comes from the source the action refreshes
+  - an optimistic write outside an action does nothing
+  - Spell writes none today (grepped, 2026-11-26)
 - New since rc.13, for when you need them:
   - `createDeferred(fn)` (rc.16):  an async memo that may lag, never lead;
     after its first answer, readers keep the old one until the new one lands, and `isPending` reports it
@@ -402,6 +415,8 @@ const Active = dynamic(() => (editing() ? Editor : Viewer))
   - uncontrolled:  `defaultValue` / `defaultChecked`
 - Refs are callbacks or directive factories, composable as arrays.  No `.current`, no `forwardRef`.  Ref callbacks
   are unowned -- create effects in the factory, not the callback.
+  - Since 2.0.4 a ref callback that makes an effect, a memo or an `onCleanup` THROWS in dev:  make it in the factory
+    that returns the ref (the component body), and return nothing from the callback.
 - `render(() => <App />, el)` returns `dispose`.  A ShadowRoot works as the container.
 - `<Portal>` defaults to `document.body`:  inside a shadow root ALWAYS pass `mount`.
 - JSX types for `<ui-*>`:  Spell UI's, exact, generated from its vocabularies:
@@ -496,7 +511,8 @@ expect(button.textContent).toBe("Clicks: 1")
 
 ## Router (`@solidjs/router@next`)
 
-- `2.0.0-next.44` runs on rc.19 and later, pinned exactly (was next.41 on rc.15 and later, next.35 on rc.13).
+- `2.0.1`, the release for Solid 2.0, pinned exactly (was `2.0.0-next.44` on rc.19 to rc.21, next.41 on rc.15 and
+  later, next.35 on rc.13).
   Config objects, no `<Route>` / `<A>` components.
 - Since next.35:
   - params are DECODED, per segment (next.40):
@@ -518,7 +534,7 @@ expect(button.textContent).toBe("Clicks: 1")
 - A dev diagnostic code:  read `node_modules/solid-js/skills/reactivity-diagnostics/SKILL.md` (Solid's own repair
   guide;  hoisted to the kit's root `node_modules`).
   - the same codes as data:  `solid-js`'s `diagnostics.json`;  and in `cheatsheet.html`
-  - the dev console message links the code's page on v2.solidjs.com
+  - the dev console message links the code's page on docs.solidjs.com
 - `PRIMITIVE_IN_EFFECT_CALLBACK` thrown from a `connectedCallback()` or a prop read:
   SEE "Effects" above (rc.17).
 - Nothing updates after an error:  the scheduler halted -- find the first thrown error, not the last symptom.

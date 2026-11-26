@@ -382,7 +382,8 @@ As the kit's ([AGENTS.md](../AGENTS.md), "Commands"), plus:
 ## Solid 2
 
 - `spell`'s editor app, runners and web components are Solid 2, on `spell-ui`.
-  - Version `2.0.0-rc.21`, for every folder of the kit:  one copy, pinned by the kit's `resolutions`.
+  - Version `2.0.4` (2.0 final;  `@solidjs/h` and the compiler `2.0.3`), for every folder of the kit:
+    one copy, pinned by the kit's `resolutions`.
   - So is what compiled spell draws (epic `output-targets` P10-P11).
   - React is left only in the `spell` CLI's terminal screens (Ink).
 - The rules:  [solid-2.md](../agents/solid/solid-2.md), read IN FULL before Solid work
@@ -391,7 +392,7 @@ As the kit's ([AGENTS.md](../AGENTS.md), "Commands"), plus:
   - Claude also has the [solid-2 skill](.claude/skills/solid-2/SKILL.md), which triggers on Solid work.
 - The why and the measurements:  [the Solid 2 guide](../guides/solid/solid-2.html).
 - The API:  [the Solid 2 cheatsheet](../spell.epics/guides/solid/cheatsheet.html).
-- MUST keep `solid-2.md` up to date when a Solid decision changes, or an RC bump changes behaviour.
+- MUST keep `solid-2.md` up to date when a Solid decision changes, or a Solid release changes behaviour.
 - How `ui` writes its elements on Solid:  "Solid authoring" in [spell-ui's AGENTS.md](../ui/AGENTS.md).
 - House style for app components, on top of `solid-2.md`:  WWOD §17 ([solid.md](agents/wwod/solid.md)).
 

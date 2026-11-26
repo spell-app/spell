@@ -447,13 +447,58 @@ describe("ShadowEvents only the kinds a root uses", () => {
     expect(log).toEqual(["click"])
   })
 
-  test("Solid still gives a node its handler as `_$$<kind>`, and its container a `handlers` map", async () => {
+  test("a kind first delegated after the root was registered is held, then heard once a node uses it", async () => {
+    const log: string[] = []
+    const [isShown, setShown] = createSignal(false)
+    // spread props delegate their kinds only as they're set:  `touchmove` reaches Solid long after the root
+    const handlers = { onTouchMove: () => log.push("touchmove") }
+    // recorded from before the root is made:  the bridge keeps the `addEventListener()` it found then
+    const added = recordListeners()
+    const host = await mount(
+      defineElement("late-kind", () => (
+        <Show when={isShown()} fallback={<span>none</span>}>
+          <button {...handlers}>go</button>
+        </Show>
+      ))
+    )
+    added.clear()
+    setShown(true)
+    flush()
+    await Promise.resolve()
+    inside(host, "button").dispatchEvent(new Event("touchmove", { bubbles: true, composed: true }))
+    expect(log).toEqual(["touchmove"])
+    expect([...(added.get(host.shadowRoot!) ?? [])]).toEqual(["touchmove"])
+  })
+
+  test("Solid still gives a node its handler as `_$$<kind>`, and adds a container's listener after one shared capture reset", async () => {
     const host = await mount(defineElement("internals", () => <button onClick={() => {}}>go</button>))
     expect(Object.hasOwn(inside(host, "button"), "_$$click")).toBe(true)
-    const state = (registerDelegatedContainer as (root: Node, owner: Node) => unknown)(host.shadowRoot!, host) as {
-      handlers?: unknown
+    // what `ShadowEvents` tells Solid's listener apart by:  for each kind, a capture listener, then the listener
+    const added: { target: EventTarget; type: string; listener: unknown; capture: boolean }[] = []
+    const add = EventTarget.prototype.addEventListener
+    EventTarget.prototype.addEventListener = function (
+      this: EventTarget,
+      type: string,
+      listener: unknown,
+      options?: unknown
+    ) {
+      if (DelegatedEvents.has(type)) added.push({ target: this, type, listener, capture: options === true })
+      return (add as (...args: unknown[]) => void).call(this, type, listener, options)
+    } as typeof add
+    const [one, other] = [document.createElement("div"), document.createElement("div")]
+    try {
+      for (const element of [one, other]) {
+        expect(registerDelegatedContainer(element)).toBeUndefined()
+        onTestFinished(() => unregisterDelegatedContainer(element))
+      }
+    } finally {
+      EventTarget.prototype.addEventListener = add
     }
-    expect(state.handlers).toBeInstanceOf(Map)
-    unregisterDelegatedContainer(host.shadowRoot!, host)
+    const clicks = (target: EventTarget) => added.filter((each) => each.target === target && each.type === "click")
+    expect(clicks(one).map((each) => each.capture)).toEqual([true, false])
+    expect(clicks(other).map((each) => each.capture)).toEqual([true, false])
+    // the reset is one function on every container;  the listener is the container's own
+    expect(clicks(one)[0].listener).toBe(clicks(other)[0].listener)
+    expect(clicks(one)[1].listener).not.toBe(clicks(other)[1].listener)
   })
 })

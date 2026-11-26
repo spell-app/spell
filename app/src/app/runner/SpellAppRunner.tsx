@@ -66,7 +66,7 @@ import "./SpellAppRunner.css"
  ****************/
 export function SpellAppRunner(props: SpellAppRunnerProps) {
   // `run()` reads props from an effect's callback, and a conditional prop is a memo made on its first read:
-  // since Solid rc.17, a memo made there needs an owner (`PRIMITIVE_IN_EFFECT_CALLBACK`)
+  // in Solid 2 a memo made there needs an owner (`PRIMITIVE_IN_EFFECT_CALLBACK`, since rc.17)
   const owner = getOwner()
   /** A running site's host for a new run:  the page's own (`siteHost`), else one keeping its address to itself. */
   const newSiteHost = (): SiteHost => untrack(() => props.siteHost)?.() ?? new ViewerSiteHost()

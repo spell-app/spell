@@ -36,8 +36,8 @@
             components), or reasoning about Spell's reactivity</ui-item
           >
           <ui-item icon="flask"
-            >Checked: 2026-11-21, on Solid <code>2.0.0-rc.21</code>, every experiment beside this page re-run that
-            day</ui-item
+            >Checked: 2026-11-26, on Solid <code>2.0.4</code> (2.0 final), every experiment beside this page re-run that
+            day, on rc.21 and 2.0.4, with the same results</ui-item
           >
           <ui-item icon="book open"
             >The rules beside it:
@@ -55,8 +55,8 @@
               and compiled Spell, in JavaScript and TypeScript alike.
             </li>
             <li>
-              <b>Every package is pinned to <code>2.0.0-rc.21</code></b
-              >, one copy at the kit's root: one Solid per page is not optional.
+              <b>Every package is pinned to Solid 2.0 final, <code>2.0.4</code></b> (<code>@solidjs/h</code> and the
+              compiler <code>2.0.3</code>), one copy at the kit's root: one Solid per page is not optional.
             </li>
             <li>
               <b>Spell state is NOT Solid signals.</b> It's Spell cells: a plain record read and written at once, which
@@ -180,6 +180,10 @@
               </li>
               <li>The layer is dropped when the action settles, pass or fail, so there's no rollback code</li>
               <li>
+                Since 2.0.4 a guess never becomes the real value: it always goes back when its action settles, and an
+                optimistic write outside an action does nothing (Spell writes none today)
+              </li>
+              <li>
                 Errors are another status of part of the graph: <code>&lt;Errored&gt;</code> heals by itself when the
                 data underneath recovers
               </li>
@@ -211,7 +215,7 @@
           <ui-icon slot="icon" name="bolt"></ui-icon>
           <ui-section
             id="what-solid-2-actually-does-measured-rc-11"
-            label="What Solid 2 actually does (measured on rc.21)"
+            label="What Solid 2 actually does (measured on 2.0.4)"
             sticky
             collapsible
             dividing
@@ -220,7 +224,7 @@
             <p>
               None of this is spelled out in the docs. Each row is a script beside this page (<a href="#experiments"
                 >Experiments</a
-              >), re-run on rc.21.
+              >), re-run on 2.0.4: every one read the same as on rc.21.
             </p>
             <ui-table celled padding="compact" appearance="striped">
               <table>
@@ -488,9 +492,11 @@ bridgeSolid({ enableExternalSource, flush })</ui-code>
                 <b><code>observe(fn)</code></b> re-runs a plain function at once as what it read changes.
               </li>
               <li>
-                <b>One Solid per page:</b> the app's bundles share <a href="/app/app/dist-page/spell-solid.js" target="src-app-app-dist-page-spell-solid-js"><code>spell-solid.js</code></a>, which holds Solid, Spell
-                UI's element core and the <code>h()</code> compiled Spell draws with; the runtime takes Solid from the
-                page, never a copy of its own.
+                <b>One Solid per page:</b> the app's bundles share
+                <a href="/app/app/dist-page/spell-solid.js" target="src-app-app-dist-page-spell-solid-js"
+                  ><code>spell-solid.js</code></a
+                >, which holds Solid, Spell UI's element core and the <code>h()</code> compiled Spell draws with; the
+                runtime takes Solid from the page, never a copy of its own.
                 <a href="/app/README-app.md" target="src-app-readme-app-md">README-app</a>, "How the bundles share one
                 Solid".
               </li>
@@ -658,15 +664,15 @@ bridgeSolid({ enableExternalSource, flush })</ui-code>
               <li><b>After any event, flush before asserting.</b></li>
               <li>
                 <b>Every package is pinned exactly</b>, in the kit's root <code>resolutions</code>, and upgraded
-                together: <code>solid-js</code>, <code>@solidjs/web</code>, <code>@solidjs/h</code>,
-                <code>@solidjs/signals</code> at <code>2.0.0-rc.21</code>.
+                together: <code>solid-js</code>, <code>@solidjs/web</code> and <code>@solidjs/signals</code> at
+                <code>2.0.4</code>, <code>@solidjs/h</code>, the compiler and the Babel plugin at <code>2.0.3</code>.
               </li>
               <li>
-                <b>On an RC bump</b>, run the experiments on the old and the new Solid and compare:
+                <b>On a Solid upgrade</b>, run the experiments on the old and the new Solid and compare:
                 <code>SOLID_NODE_MODULES=&lt;dir&gt;</code> picks the one an experiment loads.
               </li>
               <li>
-                What changed since rc.13, and bit us, is in
+                What changed from rc.13 to 2.0, and bit us, is in
                 <a href="/agents/solid/solid-2.md" title="agents/solid/solid-2.md" target="src-agents-solid-solid-2-md"
                   >the Solid 2 rules</a
                 >, marked with the release.
@@ -882,7 +888,12 @@ const rest = omit(props, "class", "ref")    // was splitProps
                   </tr>
                   <tr>
                     <td><code>STRICT_READ_UNTRACKED</code></td>
-                    <td>a reactive read in a component body: read in JSX or a memo; don't destructure props</td>
+                    <td>
+                      a reactive read in a component body: move the read to where the value is used (JSX, a memo, an
+                      effect's compute, the handler, an accessor handed to a hook); don't destructure props. Never
+                      <code>untrack()</code> it to quiet the warning (Solid's own advice since 2.0.4): the value still
+                      goes stale
+                    </td>
                   </tr>
                   <tr>
                     <td><code>REACTIVITY_HALTED</code></td>
@@ -916,7 +927,8 @@ const rest = omit(props, "class", "ref")    // was splitProps
           <ui-section id="read" label="Read" sticky collapsible dividing open="false">
             <ul>
               <li>
-                <a href="https://v2.solidjs.com/" target="ext-v2-solidjs-com">v2.solidjs.com</a>: the 2.0 reference
+                <a href="https://docs.solidjs.com/" target="ext-docs-solidjs-com">docs.solidjs.com</a>: the 2.0
+                reference
               </li>
               <li>
                 <a href="/agents/solid/solid-2.md" title="agents/solid/solid-2.md" target="src-agents-solid-solid-2-md"
@@ -985,7 +997,7 @@ const rest = omit(props, "class", "ref")    // was splitProps
         </ui-section>
         <footer class="spell-doc-footer">
           <ui-divider></ui-divider>
-          <p class="meta">Last checked 2026-11-21, on Solid 2.0.0-rc.21, against the kit's code that day.</p>
+          <p class="meta">Last checked 2026-11-26, on Solid 2.0.4, against the kit's code that day.</p>
         </footer>
       </main>
     </div>

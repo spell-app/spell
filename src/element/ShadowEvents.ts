@@ -1,5 +1,5 @@
 /*! Derived from `@solidjs/element` and `component-register`:  MIT licence, (c) Ryan Carniato. */
-import { DelegatedEvents, getDelegatedRoot, registerDelegatedContainer, unregisterDelegatedRoot } from "@solidjs/web"
+import { DelegatedEvents, getDelegatedRoot, registerDelegatedRoot, unregisterDelegatedRoot } from "@solidjs/web"
 
 /****************
  * ### `ShadowEvents`
@@ -31,6 +31,9 @@ import { DelegatedEvents, getDelegatedRoot, registerDelegatedContainer, unregist
  *     the editor's 5,594 elements held about 28,700 listeners, most for kinds nothing inside them handles.
  *   - So the bridge HOLDS Solid's listener for a kind back,
  *     and adds it to the root the first time a node in that root is given a handler of that kind.
+ *   - Solid's own listener is told apart from a component's by how Solid adds it (`noteAdded()`):
+ *     a capture-phase reset listener for the kind (one function, the same on every root), then its listener.
+ *     Both are held, and added together.
  *   - How it hears of a handler:  Solid gives the node its handler as `node._$$click = handler`;
  *     a setter for each kind on `Element.prototype` (`watchHandlers()`) notes the node, then steps aside
  *     (an own property from then on, so Solid reads and rewrites it as before).
@@ -41,36 +44,33 @@ import { DelegatedEvents, getDelegatedRoot, registerDelegatedContainer, unregist
  *     a root that uses a kind gets Solid's own listener, behind the same bridge:  nothing about order changes.
  * - Cost:  one wrapper call per delegated event per render root on its path.
  *   - A `composedPath()` only for nested roots, or when the host itself has a delegated handler.
- * - HACK:  reads dom-expressions internals, as of `@solidjs/web` rc.21 (`ShadowEvents.test.tsx` fails when they move):
- *   - `registerDelegatedContainer()` returns the container's state (typed `void`):
- *     its `handlers` map tells Solid's listener apart from a component's own
+ * - HACK:  reads dom-expressions internals, as of `@solidjs/web` 2.0.4 (`ShadowEvents.test.tsx` fails when they move):
+ *   - a container's listener for a kind is added right after a capture-phase reset listener for it
+ *     (`attachDelegatedEvent()`), the reset ONE function for every container:  how Solid's listener is told apart
+ *     - rc.21 handed back the container's state from `registerDelegatedContainer()`, its `handlers` map;
+ *       2.0 returns nothing, and finds roots by their owners itself (`registerDelegatedRoot()` counts them)
  *   - `_$SOLID_EVENT_OWNER` (the marker) and `_$$<type>` / `_$$<type>Data` (a node's delegated handler)
  *   - a node's handler is SET as `node._$$<type> = handler` (dom-expressions `addEvent()`), which the setter hears
- *   - Solid 2.0 final (this epic's "Solid 2.0 Final" phase) must keep all three, or this file follows it;
- *     if Solid itself adds a container's listener only for the kinds used inside it, the holding goes
+ *   - What 2.0.4 does itself now:  its walk deletes the `target` / `currentTarget` it set (the restore is fixed);
+ *     but an outer container still drops an event from inside a shadow root (`contains()` stops there),
+ *     which is why the bridge stays
+ *   - If Solid itself adds a container's listener only for the kinds used inside it, the holding goes
  * - STATIC and instance-free:  one set of bridged roots per page.
  * - Began as solid-element's fix 10 (numbered in its old `UPSTREAM.md`),
  *   moved here as is (epic `spell-element`, Q10).
  ****************/
 export class ShadowEvents {
-  /** Register `root` as a delegation root, as `registerDelegatedRoot` does, with the shadow-safe bridge. */
+  /** Register `root` as a delegation root, as `registerDelegatedRoot()` does, with the shadow-safe bridge. */
   static register(root: HTMLElement | ShadowRoot) {
     ShadowEvents.watchHandlers()
     if (!bridged.has(root)) ShadowEvents.bridge(root)
     // every delegated listener added while Solid registers the root is Solid's own
     registering = root
-    let state: DelegationState | undefined
     try {
-      state = (registerDelegatedContainer as (root: Node, owner: Node) => unknown)(root, root) as
-        | DelegationState
-        | undefined
+      registerDelegatedRoot(root as HTMLElement)
     } finally {
       registering = undefined
     }
-    if (!state) return
-    // `registerDelegatedRoot()` ~== this + the `roots` count, which `getDelegatedRoot()` (portals) looks for
-    state.roots = (state.roots ?? 0) + 1
-    states.set(root, state)
   }
 
   /** Undo `register()`. */
@@ -82,7 +82,8 @@ export class ShadowEvents {
    * Wrap Solid's delegated listeners on `root`.
    * - Every `addEventListener()` of a function for a type Solid may delegate (`DelegatedEvents`)
    *   goes through a wrapper.
-   * - At call time, the wrapper recognises Solid's own listener (`states`) and runs `before()` / `after()` around it.
+   * - At call time, the wrapper recognises Solid's own listener (`solidListeners`) and runs `before()` / `after()`
+   *   around it.
    * - SIDE EFFECT:  own `addEventListener` / `removeEventListener` on the root instance.
    *   Other listeners (a component's `renderRoot.addEventListener(...)`) pass straight through.
    * - Why not a listener of our own:  Solid attaches per event type LAZILY
@@ -103,36 +104,74 @@ export class ShadowEvents {
       return wrapper
     }
     const used = new Set<string>()
-    // a shadow root holds Solid's listener for a kind until a node inside uses it;  an element root never does
+    // Solid's listener for each kind, and the kinds whose reset was just added (its listener comes next)
+    const solids = new Map<string, EventListener>()
+    solidListeners.set(root, solids)
+    const resetAdded = new Set<string>()
+    // before the reset is known:  a capture listener for a kind, which Solid's listener may follow
+    const maybeReset = new Map<string, EventListener>()
+    // a shadow root holds Solid's listeners for a kind until a node inside uses it;  an element root never does
     if (shadow) {
       kindsInUse.set(root, {
         used,
         use(type) {
           if (used.has(type)) return
           used.add(type)
-          const listener = states.get(root)?.handlers.get(type)
-          if (listener) add.call(root, type, wrapperFor(listener))
+          const listener = solids.get(type)
+          if (!listener) return
+          if (solidReset) add.call(root, type, solidReset, true)
+          add.call(root, type, wrapperFor(listener))
         }
       })
+    }
+    /**
+     * Whether `listener` is one of Solid's for `type`, as Solid adds them (`attachDelegatedEvent()`):
+     * its capture-phase reset, then its listener, one call after the other.
+     * - The reset is learned the first time Solid adds one:  while a root is registered, every capture listener for a
+     *   kind is Solid's;  otherwise (a kind first delegated after every root was registered) the capture listener
+     *   that Solid's listener comes straight after.
+     *   - Until then that first reset goes on as it is, and comes off again when the root holds the kind.
+     */
+    const isSolids = (type: string, listener: EventListener, capture: boolean): boolean => {
+      const maybe = maybeReset.get(type)
+      maybeReset.delete(type)
+      if (capture) {
+        if (listener === solidReset || (registering === root && !solidReset)) {
+          solidReset = listener
+          resetAdded.add(type)
+          return true
+        }
+        if (!solidReset) maybeReset.set(type, listener)
+        return false
+      }
+      if (!resetAdded.delete(type) && registering !== root) {
+        if (!maybe) return false
+        solidReset = maybe
+        if (shadow && !used.has(type)) remove.call(root, type, maybe, true)
+      }
+      solids.set(type, listener)
+      return true
     }
     Object.defineProperties(root, {
       addEventListener: {
         configurable: true,
         value(type: string, listener: EventListenerOrEventListenerObject | null, options?: AddEventListenerOptions) {
-          if (typeof listener !== "function" || options !== undefined || !DelegatedEvents.has(type)) {
+          const capture = options === true
+          if (typeof listener !== "function" || (options !== undefined && !capture) || !DelegatedEvents.has(type)) {
             return add.call(root, type, listener!, options)
           }
-          const wrapper = wrapperFor(listener)
-          // Solid's own, for a kind nothing inside uses yet:  held, `use()` adds it
-          const isSolids = registering === root || states.get(root)?.handlers.get(type) === listener
-          if (shadow && isSolids && !used.has(type)) return
-          return add.call(root, type, wrapper)
+          const isSolid = isSolids(type, listener, capture)
+          // Solid's own, for a kind nothing inside uses yet:  held, `use()` adds them
+          if (shadow && isSolid && !used.has(type)) return
+          if (capture) return add.call(root, type, listener, true)
+          return add.call(root, type, wrapperFor(listener))
         }
       },
       removeEventListener: {
         configurable: true,
         value(type: string, listener: EventListenerOrEventListenerObject | null, options?: EventListenerOptions) {
           const wrapper = options === undefined ? wrappers.get(listener as EventListener) : undefined
+          if (solids.get(type) === listener) solids.delete(type)
           return remove.call(root, type, wrapper ?? listener!, options)
         }
       }
@@ -141,7 +180,7 @@ export class ShadowEvents {
     /** `listener`, with the bridge around it when it is Solid's. */
     function wrap(listener: EventListener): EventListener {
       return function (this: unknown, event: Event) {
-        if (states.get(root)?.handlers.get(event.type) !== listener) return listener.call(this, event)
+        if (solids.get(event.type) !== listener) return listener.call(this, event)
         if (shadow) ShadowEvents.before(event as Walked, root as ShadowRoot)
         try {
           listener.call(this, event)
@@ -386,8 +425,14 @@ function settle() {
   }
 }
 
-/** Each registered root's delegation state (from `registerDelegatedContainer()`). */
-const states = new WeakMap<Node, DelegationState>()
+/** Each bridged root's delegated listeners of Solid's, by kind:  told apart as they're added (`bridge()`). */
+const solidListeners = new WeakMap<Node, Map<string, EventListener>>()
+
+/**
+ * Solid's capture-phase reset listener, ONE function on every container (dom-expressions `resetDelegatedEvent`):
+ * learned the first time a root is registered.
+ */
+let solidReset: EventListener | undefined
 
 ShadowEvents.watchHandlers()
 
@@ -401,14 +446,6 @@ const progress = new WeakMap<Event, { node: Node; marker: Node | true }>()
 ////////////////
 // ## Types
 ////////////////
-
-/** dom-expressions' per-container state (the parts used here). */
-type DelegationState = {
-  /** event type => Solid's listener on the container */
-  handlers: Map<string, EventListener>
-  /** registered as a root (`registerDelegatedRoot`), counted */
-  roots?: number
-}
 
 /** An event as Solid's walk leaves it. */
 type Walked = Event & { [OWNER]?: Node | true; composedPath: () => EventTarget[] }

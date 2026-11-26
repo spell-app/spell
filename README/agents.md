@@ -287,7 +287,7 @@ Each is opt-in:  take WWOD, the Solid 2 rules, both, or neither.
 - The limits:
   - WWOD's examples cite Spell's own files (its editor's `editor.ts` ...):  read them as illustrations.
   - The Solid 2 rules' "Status" and "Spell's decisions" sections are Spell's;  the rest is Solid 2 itself, pinned to
-    the release Spell runs (rc.21).
+    the release Spell runs (2.0.4).
   - A rule in your own `AGENTS.md` wins where it disagrees:  say so there.
 
 ### The one rule you choose:  §21, the code is the spec

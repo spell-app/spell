@@ -256,7 +256,7 @@ export default function appCommands(spell: Command): void {
     )
     .option(
       "--full",
-      "every measurement:  load, leaks, huge lists, typing, accessibility, listeners, sheets, CPU, the pipeline"
+      "every measurement:  load, leaks, huge lists, typing, accessibility, listeners, sheets, CPU, the pipeline, Solid's warnings in the running editor"
     )
     .option(
       "--page <pages>",
