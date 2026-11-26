@@ -131,6 +131,16 @@ describe("a table showing it", () => {
     expect(code).toContain(`h("ui-cell", "Notes")`)
   })
 
+  test("a sort of two words:  the property as compiled code names it", () => {
+    const lines = PLACE(
+      `\t- its "measurement order" is a sort:  created at, newest first`,
+      ...TABLE.map((line) => line.replace("the order", "the measurement order"))
+    )
+    const { errors, compiled: code } = compiled(lines)
+    expect(errors).toEqual([])
+    expect(code).toContain(`"prop:sort": () => core.sortShown(this, "measurementOrder")`)
+  })
+
   test("naming something that isn't a sort a page holds:  an error", () => {
     const lines = PLACE(`\t- its "count" is a number`, ...TABLE.map((line) => line.replace("the order", "the count")))
     expect(compiled(lines).errors.join("\n")).toContain(`A table's sort="the count" names the sort it shows and sets`)
