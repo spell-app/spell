@@ -12,8 +12,46 @@ import { RovingTabindex, type RovingTabindexProps } from "./RovingTabindex"
  *   every component with a shadow root breaks naive focus code.
  * - `<dialog>.showModal()` traps focus natively;
  *   `trap()` is only for the non-dialog cases (a flyout inside a popover, a menu that must keep focus).
+ * - It also says whether a focus came from the keyboard (`isKeyboardFocus()`), for tooltips:
+ *   `start()` listens on the document for that, for the life of the page.
  ****************/
 export class Focus {
+  /**
+   * A key that moves focus is down (Tab, an arrow, Home, End ...), and no pointer was pressed since.
+   * - Set by `start()`'s listeners;  read by `isKeyboardFocus()`.
+   */
+  private isMovingByKeyboard = false
+  /** `start()` ran. */
+  private isStarted = false
+
+  /**
+   * Start following the keyboard and the pointer, for `isKeyboardFocus()`.
+   * - SIDE EFFECT:  capture listeners on the document, for the life of the page.
+   * - Does nothing on a server, or when started already.
+   * - NEVER throws.
+   */
+  start(): void {
+    if (this.isStarted || typeof document === "undefined") return
+    this.isStarted = true
+    const options = { capture: true, passive: true }
+    document.addEventListener("keydown", (event) => (this.isMovingByKeyboard = FOCUS_KEYS.has(event.key)), options)
+    document.addEventListener("keyup", () => (this.isMovingByKeyboard = false), options)
+    document.addEventListener("pointerdown", () => (this.isMovingByKeyboard = false), options)
+  }
+
+  /**
+   * Did `element` just take focus from the keyboard:  Tab, or an arrow key moving it, as a person finds their way?
+   * - For tooltips, which show at once on such a focus.
+   * - NOT a click, a script, or a menu or dialog handing focus back to its button as it closes,
+   *   even when that close was Escape or Enter (epic `editor` I368):  the browser's `:focus-visible` is on then,
+   *   since the last thing used was a key, but the tooltip would pop up on a button nobody moved to.
+   * - So:  `:focus-visible`, while a key that moves focus is down (`start()`), and no pointer was pressed since.
+   * - Call it from a `focusin` / `focus` listener:  the key's `keyup` ends it.
+   */
+  isKeyboardFocus(element: Element | null | undefined): boolean {
+    return this.isMovingByKeyboard && Boolean(element?.matches(":focus-visible"))
+  }
+
   /**
    * The element that really has focus, descending through open shadow roots.
    * - `undefined` when nothing (or only `root`'s document's `<body>`) is focused.
@@ -212,3 +250,19 @@ export class Focus {
     return true
   }
 }
+
+/**
+ * The keys that move focus by themselves (Tab) or through a widget's roving focus (arrows, Home, End, Page Up / Down).
+ * - Not Escape, Enter or Space:  they close or choose, and focus that follows is handed back, not moved to.
+ */
+const FOCUS_KEYS: ReadonlySet<string> = new Set([
+  UIT.Key.tab,
+  UIT.Key.arrowUp,
+  UIT.Key.arrowDown,
+  UIT.Key.arrowLeft,
+  UIT.Key.arrowRight,
+  UIT.Key.home,
+  UIT.Key.end,
+  UIT.Key.pageUp,
+  UIT.Key.pageDown
+])
