@@ -24,6 +24,8 @@ import { StallWatch, type WatchProps } from "./StallWatch"
  * - FIRST COME, FIRST SERVED (epic `epic-engine` I313):  a waiter takes a TICKET, a file in `turns/<kind>.queue/`
  *   named by its time and pid;  the turn goes to the oldest live ticket, and a ticket whose process is gone is dropped.
  *   - Before I313 whoever looked first after the lock freed won, so an early waiter could lose to later ones.
+ * - While a turn is waited for or held, its checkout is marked IN USE (`SRV.CheckoutUse`, I459):  Spell's server
+ *   keeper never stops that worktree's page server and editor as unused meanwhile.
  * - A holder is taken over at once when its process is gone, STOPPED (suspended) or a zombie (`holderState()`);
  *   a live one only once STALLED (below), never for how long it runs (J233, I400):  its waiters wait, and say so.
  * - HOW LONG IS USUAL:  every turn's run is written down (`turns/history.jsonl`);  usual is the median of its kind's
@@ -81,32 +83,42 @@ export class Turns {
    */
   static take<T>(kind: string, label: string, fn: () => T, props: TakeProps = {}): T {
     if (Turns.inTurn(kind)) return fn()
-    const queue = new TurnQueue(kind, label, props)
+    const unmark = Turns.markInUse(kind, label)
     try {
-      if (!queue.tryNow() && !waitUntilSync(() => queue.poll(), { timeout: queue.waitSeconds, every: 1 }))
-        throw queue.timeout()
+      const queue = new TurnQueue(kind, label, props)
+      try {
+        if (!queue.tryNow() && !waitUntilSync(() => queue.poll(), { timeout: queue.waitSeconds, every: 1 }))
+          throw queue.timeout()
+      } finally {
+        queue.leave()
+      }
+      return Turns.holding(kind, queue, fn)
     } finally {
-      queue.leave()
+      unmark()
     }
-    return Turns.holding(kind, queue, fn)
   }
 
   /** `take()` for async `fn`:  waits with timers, so the process keeps running meanwhile. */
   static async takeAsync<T>(kind: string, label: string, fn: () => Promise<T>, props: TakeProps = {}): Promise<T> {
     if (Turns.inTurn(kind)) return fn()
-    const queue = new TurnQueue(kind, label, props)
+    const unmark = Turns.markInUse(kind, label)
     try {
-      if (!queue.tryNow() && !(await waitUntil(() => queue.poll(), { timeout: queue.waitSeconds, every: 1 })))
-        throw queue.timeout()
+      const queue = new TurnQueue(kind, label, props)
+      try {
+        if (!queue.tryNow() && !(await waitUntil(() => queue.poll(), { timeout: queue.waitSeconds, every: 1 })))
+          throw queue.timeout()
+      } finally {
+        queue.leave()
+      }
+      process.env[Turns.ENV] = [...Turns.kindsHeld(), kind].join(",")
+      const started = Date.now()
+      try {
+        return await fn()
+      } finally {
+        Turns.release(kind, queue, started)
+      }
     } finally {
-      queue.leave()
-    }
-    process.env[Turns.ENV] = [...Turns.kindsHeld(), kind].join(",")
-    const started = Date.now()
-    try {
-      return await fn()
-    } finally {
-      Turns.release(kind, queue, started)
+      unmark()
     }
   }
 
@@ -395,6 +407,15 @@ export class Turns {
   ////////////////
   // ## Helpers
   ////////////////
+
+  /**
+   * Mark this process's checkout in use while it waits for or holds a `kind` turn (`SRV.CheckoutUse`, I459):  Spell's
+   * server keeper then never stops its page server and editor as unused, which a 30-minute wait in the test line did.
+   * - its undo;  NEVER throws
+   */
+  private static markInUse(kind: string, label: string): () => void {
+    return SRV.CheckoutUse.hold(process.cwd(), `epic turns ${kind}:  ${label}`)
+  }
 
   /** Whether this process (or the turn that started it) holds the `kind` turn already. */
   private static inTurn(kind: string): boolean {

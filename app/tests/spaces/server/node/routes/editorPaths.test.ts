@@ -30,4 +30,12 @@ describe("editorPageFor():  the page an address opens (epic `solid-2-final` P12)
     expect(editorPageFor("/edit/@acme/portal", folders)).toBe("index.html")
     expect(editorPageFor("/@acme/portal")).toBe("index.html")
   })
+
+  test("`?editor`:  the editor, whatever the address -- its own tab loaded again in Run (I364)", () => {
+    expect(editorPageFor("/run/@spell/examples/Solitaire?editor")).toBe("index.html")
+    expect(editorPageFor("/run/@spell/examples/Solitaire?x=1&editor")).toBe("index.html")
+    expect(editorPageFor("/run/@spell/examples/Solitaire?editors")).toBe("run.html")
+    expect(editorPageFor("/run/@spell/examples/Solitaire?x=1")).toBe("run.html")
+    expect(editorPageFor("/@acme/portal?editor", { isGroup: () => true, hasOwnPage: () => true })).toBe("index.html")
+  })
 })

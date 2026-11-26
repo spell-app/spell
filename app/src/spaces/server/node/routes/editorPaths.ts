@@ -47,11 +47,17 @@ export const SERVER_TOKEN_HEADER = "x-server-token"
  *     `home`, which the run page runs, the address kept;  else `index.html`, whose `<GroupPage>` shows the group
  *   - `/run/@acme`, an org alone:  `index.html`, the org's page;  nothing runs at an org's address
  * - `index.html`, the editor, for every other address
+ * - `?editor` (`EDITOR_QUERY`):  the editor, whatever the address (epic `editor` I364):
+ *   the editor's own tab loaded again in Run, which the run page sends on (the app's `editorTab.ts`)
+ * - `url`:  the path, and its query if any
  * - The built editor's server (`EditorServer.builtServer()`) and the dev server (`runPageInDev()`, the app's
  *   `vite.config.ts`) both ask it, so they send the same page for an address.
  * - Inside the editor, a switch to Run asks no server:  the editor's page stays, live edits and all.
  */
-export function editorPageFor(pathname: string, folders: GroupFolders = NO_GROUPS): EditorPage {
+export function editorPageFor(url: string, folders: GroupFolders = NO_GROUPS): EditorPage {
+  const queryAt = url.indexOf("?")
+  const pathname = queryAt < 0 ? url : url.slice(0, queryAt)
+  if (queryAt >= 0 && new URLSearchParams(url.slice(queryAt + 1)).has(EDITOR_QUERY)) return "index.html"
   const isRun = RUN_ADDRESS.test(pathname)
   const address = ORG_ADDRESS.exec(pathname.replace(/^\/run\//, "/"))
   if (address && !address[2]) return "index.html"
@@ -62,6 +68,9 @@ export function editorPageFor(pathname: string, folders: GroupFolders = NO_GROUP
   }
   return isRun ? "run.html" : "index.html"
 }
+
+/** The query asking for the editor at any address:  the app's `editorTab.ts`'s `EDITOR_QUERY`, a copy (the app is above). */
+const EDITOR_QUERY = "editor"
 
 /** What `editorPageFor()` asks of an org group's address on disk:  spaces' `OrgGroupFolders`. */
 export type GroupFolders = {

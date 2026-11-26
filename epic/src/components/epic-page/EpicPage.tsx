@@ -192,7 +192,9 @@ import crumbsCSS from "./Crumbs.css?inline"
  *   - in the shadow root:  not a section, so the rail and counts never see it
  * - THE GEAR (epic `epic-engine` P53, `gear()`), at the header's right:  Auto Send and Theme, each a sub-menu.
  *   No page-wide git toggle since:  the Log lists every commit (P52), each phase and item shows its own.
- *   - while reviewed, Focus mode first (P57):  it opens the overlay
+ *   - while reviewed, Tidy first (epic `epic-engine` T168):  asks the epic's session to run `/epic tidy <epic>`
+ *     (`askTidy()`);  not on a saga page
+ *   - then Focus mode (P57):  it opens the overlay
  * - FOCUS MODE (epic `epic-engine` P57, `<epic-focus>`), while the page is reviewed:  a full-screen overlay walking
  *   the open items one at a time, drawn here, opened from the gear or asked for by a block (`epic-focus-asked`:  the
  *   Manual tests section's Start testing, decision Q65)
@@ -1268,6 +1270,25 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         >
           <div class="gear-panel">
             <div class={GEAR_ROWS} role="menu" aria-label={this.translationForKey("gearTip")} onKeyDown={this.onRowKey}>
+              <Show when={this.review.reviewing() && !this.isSaga}>
+                <button
+                  type="button"
+                  class={[GEAR_ROW, "tidy-row"]}
+                  part={this.partForName("gear-row")}
+                  role="menuitem"
+                  value={TIDY_ROW}
+                  tabindex="-1"
+                  aria-description={this.translationForKey("tidyTip")}
+                  onClick={() => this.askTidy()}
+                >
+                  {/* the tooltip on its words, not the row:  the menu focuses its first row as it opens, and a tooltip
+                      shown on that focus covered the rows under it */}
+                  <span class="tidy-words" data-tooltip={this.translationForKey("tidyTip")}>
+                    <ui-icon name="broom" class="lead" aria-hidden="true" padding="none" />
+                    <span class="name">{this.translationForKey("tidy")}</span>
+                  </span>
+                </button>
+              </Show>
               <Show when={this.review.reviewing()}>
                 <button
                   type="button"
@@ -1450,8 +1471,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     if (event.defaultPrevented) return
     const row = (event.target as Element).closest?.(`.${GEAR_ROW}`) as HTMLButtonElement | null
     if (!row) return
-    // Focus mode's row opens no sub-menu:  Enter and Space click it
-    if (event.key === "ArrowRight" && row.value !== FOCUS_ROW) {
+    // Tidy's and Focus mode's rows open no sub-menu:  Enter and Space click them
+    if (event.key === "ArrowRight" && row.value !== FOCUS_ROW && row.value !== TIDY_ROW) {
       event.preventDefault()
       return this.openSub(row.value as GearSub)
     }
@@ -1500,6 +1521,16 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         </Show>
       </epic-focus>
     )
+  }
+
+  /**
+   * The gear's Tidy (epic `epic-engine` T168):  its menu closes, and the epic's session is asked to run
+   * `/epic tidy <epic>`, as the pill asks for a review (`ReviewClient.startReview()`);  its notice says what came of it.
+   */
+  @E.untracked
+  private askTidy() {
+    if (this.gearMenu) this.gearMenu.visible = false
+    void this.review.client?.startReview("tidy")
   }
 
   /** The gear's Focus mode:  its menu closes, the overlay opens where it was left. */
@@ -1798,6 +1829,9 @@ const GEAR_ID = "gear"
 
 /** Focus mode's row in the gear's menu, its `value`:  an action, no sub-menu. */
 const FOCUS_ROW = "focus"
+
+/** Tidy's row in the gear's menu, its `value`:  an action, no sub-menu (T168). */
+const TIDY_ROW = "tidy"
 
 /** Each Auto Send choice's text key. */
 const AUTO_SEND_TEXTS = {

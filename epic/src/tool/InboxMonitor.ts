@@ -44,6 +44,8 @@ import { ReviewInbox } from "./ReviewInbox"
  *   - A review asked for from the page while the poller runs (`ReviewInbox.reviewAsked`, epic `epic-engine` I144):
  *     waiting too, its line asking for `/epic review <epic>` (`askNotice()`):  the page server tells the session
  *     through its poller rather than typing into its tab, which VS Code refuses while the tab is open.
+ *   - A tidy asked for from the page's gear (`ReviewInbox.tidyAsked`, epic `epic-engine` T168):  the same, its line
+ *     asking for `/epic tidy <epic>` (`tidyNotice()`);  a review asked for at the same time comes first
  *   - `batch`:  what's waiting, as one string, so a poller started after the line (the next turn's hook) never
  *     announces the same work twice
  * - NEVER throws:  a page or inbox it can't read is looked at again next time.
@@ -117,14 +119,16 @@ export class InboxMonitor {
       return { watch: [epic.inbox], waiting: false, recheckMs: LOCK_RECHECK_MS }
     const guideSends = epic.guides.newSends
     const hasWork = inbox.hasWork || Boolean(guideSends)
-    const waiting = hasWork || Boolean(inbox.reviewAsked)
+    const waiting = hasWork || Boolean(inbox.reviewAsked || inbox.tidyAsked)
     return {
       watch: [epic.inbox, ...epic.guides.files],
       waiting,
       ...(waiting && {
         notice: hasWork
           ? InboxMonitor.notice(epic.name, InboxMonitor.summaryOf(inbox, Boolean(guideSends)))
-          : InboxMonitor.askNotice(epic.name),
+          : inbox.reviewAsked
+            ? InboxMonitor.askNotice(epic.name)
+            : InboxMonitor.tidyNotice(epic.name),
         batch: InboxMonitor.batchOf(inbox, guideSends)
       }),
       recheckMs: RECHECK_MS
@@ -147,6 +151,7 @@ export class InboxMonitor {
       `now=${now}`,
       `cancel=${canceled}`,
       `ask=${inbox.reviewAsked ?? ""}`,
+      `tidy=${inbox.tidyAsked ?? ""}`,
       guideSends
     ].join(";")
   }
@@ -226,6 +231,11 @@ export class InboxMonitor {
   /** The one line that tells the session the person asked for a review from epic `name`'s page (I144). */
   static askNotice(name: string): string {
     return `📬 ${name}:  the person pressed "start review" on the epic page.  Start it:  the /epic skill, \`/epic review ${name}\`.`
+  }
+
+  /** The one line that tells the session the person pressed Tidy in epic `name`'s page gear (epic `epic-engine` T168). */
+  static tidyNotice(name: string): string {
+    return `📬 ${name}:  the person pressed Tidy on the epic page.  Run it:  the /epic skill, \`/epic tidy ${name}\` ("14. Tidy").`
   }
 }
 

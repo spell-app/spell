@@ -1233,12 +1233,14 @@ export class ReviewClient extends PageStore {
   /**
    * "Start a review" (epic `airplane` P12):  ask the page server to type `/epic review <epic>` into the ONE running
    * Claude session titled for the epic (`POST /api/epics/review/start`);  says what came of it (a notice).
+   * - `ask` `tidy`:  the gear's Tidy (epic `epic-engine` T168), `/epic tidy <epic>` the same way
    * - its answer, or `undefined` when the server couldn't be asked (the notice says why)
    * - NEVER throws
    */
-  async startReview(): Promise<StartAnswer | undefined> {
+  async startReview(ask: "review" | "tidy" = "review"): Promise<StartAnswer | undefined> {
     try {
-      const answer = (await this.link.post(`${REVIEW_API}/start`, { page: this.options.page })) as StartAnswer
+      const body = ask === "tidy" ? { page: this.options.page, ask } : { page: this.options.page }
+      const answer = (await this.link.post(`${REVIEW_API}/start`, body)) as StartAnswer
       this.notify(answer.message)
       return answer
     } catch (failure) {

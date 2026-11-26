@@ -252,13 +252,14 @@ and went with that view (epic `epic-engine` Q73).
 
 ## Which server answers:  the first of four
 
-A view never shows a file:  it shows a live page from a server on `127.0.0.1`.
+A view never shows a file:  it shows a live page from a server on this machine (`127.0.0.1`, or a worktree's name).
 That's what reloads the page when it changes, and what your review marks are sent to.
 For a page file, the extension takes the first of these that answers:
 
 1. **the epic server**, spell-epic's one per machine (`epic hub`, on port 4848),
    for a page in a registered repo's epic folder:  every repo's pages on one port, from any window
-2. **the main checkout's page server**, for a worktree's page, when it serves worktrees (at `/worktrees/<name>/`)
+2. **the main checkout's page server**, for a worktree's page, when it serves worktrees:
+   at the worktree's name, `http://<name>.localhost:4747/`, which it passes on to the worktree's own page server
 3. **the page's own page server**, when one runs:  in a Spell kit, the kit's, for a page of any repo in it;
    else its checkout's
 4. **a small server of the extension's own**, inside VS Code, one per checkout, for as long as the window runs

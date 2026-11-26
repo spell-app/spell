@@ -43,7 +43,7 @@ spell editor is an app
 	its "code is showing" is yes or no
 		// The code shows, in Edit
 	its "compiled code is showing" is yes or no
-		// The compiled code shows beside the code, in Edit
+		// The compiled code shows in Edit:  beside the code, or alone in its column while the code is closed
 	its "program panel showing" is yes or no
 		// The Program panel shows under the code, in Edit
 	its "inspector open" is yes or no
@@ -217,7 +217,7 @@ spell editor is an app
 		// The add bar runs down the left edge before them, in Edit:  the editor's own (`<PaletteRail>`).
 		// What's in each is still the editor's own, `SpellEditor` in `SpellEditor.tsx`:  each is an editor part here, which draws itself.
 		// The app takes every change of size (`grows`, its place across):  dragging the code's bar sizes the code, the app gives or takes the room, and the Inspector keeps its width.
-		// The code's column stays where it is when it isn't showing, hidden:  so nothing moves or redraws as the others come and go, and the running app keeps running.
+		// The code's column shows while the code or the compiled code does;  it stays where it is when it isn't showing, hidden:  so nothing moves or redraws as the others come and go, and the running app keeps running.
 		its "code" is an editor part
 			// The file tabs and the code
 		its "program panel" is an editor part

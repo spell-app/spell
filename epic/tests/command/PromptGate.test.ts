@@ -12,6 +12,7 @@ import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 import { afterAll, beforeEach, describe, expect, test } from "vite-plus/test"
 
+import { EPIC_VERBS } from "spell/epic/command/command.types"
 import { PromptGate, type GateAnswer, type GateInput, type GateWindow } from "spell/epic/command/PromptGate"
 
 /** The temp folders. */
@@ -96,7 +97,34 @@ describe("parseCommand()", () => {
     ignored.push("/epic phase", "/epic phase J1 J5, t3\nfrom these", "/epic start P2", "/epic start J3 J4 T6 go")
     // this session's epic, to a new session:  never renamed
     ignored.push("/epic fresh", "/epic fresh --force", "/epic fresh all", "/epic fresh all --pause")
+    // this session's epic, or the one named, or every one (epic `epic-engine` I482)
+    ignored.push(
+      "/epic tidy",
+      "/epic tidy seo",
+      "/epic Tidy",
+      "/epic hush",
+      "/epic hush seo --dryrun",
+      "/epic hush all"
+    )
     for (const prompt of ignored) expect(PromptGate.parseCommand(prompt), prompt).toBeNull()
+  })
+
+  // epic `epic-engine` I482:  `/epic tidy` was taken for an epic named `tidy`
+  test("no reserved first word is ever an epic's name", () => {
+    for (const verb of EPIC_VERBS) {
+      expect(PromptGate.isVerb(verb), verb).toBe(true)
+      // `/epic demo` is handed on, for `gate()` to look for the staged demo's step files
+      const expected = verb === "demo" ? { skill: "epic", name: "demo", text: "", color: null } : null
+      expect(PromptGate.parseCommand(`/epic ${verb}`), verb).toEqual(expected)
+    }
+    expect(PromptGate.isVerb("seo")).toBe(false)
+  })
+
+  test('the skill\'s "Some first words are reserved" lists exactly `EPIC_VERBS`', () => {
+    const skill = readFileSync(resolve(import.meta.dirname, "../../skills/epic/SKILL.md"), "utf8")
+    const section = /^- Some first words are reserved:[\s\S]*?(?=^- `<name>` is the first word)/m.exec(skill)?.[0] ?? ""
+    const words = new Set([...section.matchAll(/^ {2}- `([a-z]+)`/gm)].map((match) => match[1]))
+    expect([...words].sort()).toEqual([...EPIC_VERBS].sort())
   })
 
   test("a look right after the name is the window's, not the text;  `/epic color` passes", () => {
@@ -213,6 +241,14 @@ describe("gate()", () => {
       /epic window launch foo --prompt "\/epic resume foo"`\./
     )
     rmSync(transcript)
+  })
+
+  // epic `epic-engine` I482:  `/epic tidy` typed in the language session meant "open a window for epic `tidy`"
+  test("a reserved word in another epic's session passes untouched:  the skill runs it there", () => {
+    const prompts = ["/epic tidy", "/epic tidy seo", "/epic hush all", "/epic fresh all", "/epic done", "/epic demo"]
+    for (const prompt of prompts) {
+      expect(gate({ prompt, cwd: WORKTREE, session_title: "🚧 other" }, OTHER_WINDOW), prompt).toBeNull()
+    }
   })
 
   test("`/epic <name>` in another worktree:  through, not renamed, a note to ask;  text saved", () => {
@@ -395,11 +431,12 @@ describe("the staged demo (epic `epic-engine` P77)", () => {
     rmSync(repo, { recursive: true, force: true })
   })
 
-  test("no step files:  /epic demo is an epic like any other", () => {
+  // epic `epic-engine` I482:  `demo` is reserved;  the skill's `epic demo check` says why it can't run
+  test("no step files:  /epic demo passes untouched, never an epic of its own", () => {
     const repo = stagedRepo(false)
     expect(PromptGate.isStagedDemo(repo)).toBe(false)
-    const answer = gate({ prompt: "/epic demo", cwd: repo }, null)
-    expect(answer?.hookSpecificOutput?.additionalContext ?? "").not.toMatch(/STAGED DEMO/)
+    expect(gate({ prompt: "/epic demo", cwd: repo }, null)).toBeNull()
+    expect(gate({ prompt: "/epic demo", cwd: repo }, OTHER_WINDOW)).toBeNull()
     rmSync(repo, { recursive: true, force: true })
   })
 })

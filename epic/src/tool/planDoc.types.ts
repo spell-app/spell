@@ -619,6 +619,18 @@ export type RenameResult = {
   links: number
 }
 
+/** What `PlanDoc.removePhase()` did:  the phase it removed, and the items it unqueued. */
+export type RemovedPhase = {
+  /** its id:  `p-epic-migrate` */
+  id: string
+  /** its number before:  `P6` */
+  label: string
+  /** its title */
+  name: string
+  /** the items queued into it, now unqueued:  their ids */
+  unqueued: string[]
+}
+
 /**
  * What `PlanDoc.keepOriginal()` (and `restoreOriginal()`) did:
  * `added` a version, found it `unchanged` (one saying the same is there), or found nothing but whitespace (`empty`).

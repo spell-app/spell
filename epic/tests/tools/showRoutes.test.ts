@@ -9,10 +9,11 @@ import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 import { afterAll, beforeAll, expect, test } from "vite-plus/test"
 
+import { SRV } from "spell/server"
 import { PageServer } from "spell/server/page"
 import { ask } from "spell/server/test/serve"
 
-import showRoutes, { pageFile, pickWindow, type WindowEntry } from "spell/epic/tools/showRoutes"
+import showRoutes, { originOf, pageFile, pickWindow, type WindowEntry } from "spell/epic/tools/showRoutes"
 
 let root: string
 let server: PageServer
@@ -91,6 +92,17 @@ test("pickWindow():  an epic folder's page, in every window as deep, goes to its
   expect(pickWindow(99, `${epics}/epics/epic-engine/details/x.html`, entries)?.pid).toBe(2)
   expect(pickWindow(99, `${epics}/epics/data/data.plan.html`, entries)?.pid).toBe(1)
   expect(pickWindow(99, `${epics}/guides/x.html`, entries)?.pid).toBe(1)
+})
+
+// epic `epic-engine` T167:  a worktree's page reached by name opens in the browser by that name, not its own port
+test("originOf():  the name main's page server passed it on from, else its own host", () => {
+  const requestWith = (headers: Record<string, string>) => new SRV.Request({ headers } as never)
+  expect(originOf(requestWith({ host: "127.0.0.1:4901" }))).toBe("http://127.0.0.1:4901")
+  const named = { host: "127.0.0.1:4901", "x-forwarded-host": "seo.localhost:4747" }
+  expect(originOf(requestWith(named))).toBe("http://seo.localhost:4747")
+  expect(originOf(requestWith({ ...named, "x-forwarded-proto": "https" }))).toBe("https://seo.localhost:4747")
+  // a forwarded host that isn't a worktree's name is ignored
+  expect(originOf(requestWith({ ...named, "x-forwarded-host": "example.com" }))).toBe("http://127.0.0.1:4901")
 })
 
 // epic `epic-engine` I136:  the side bar shows a set's page by the address `epic pages link` prints

@@ -8,6 +8,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, afterEach, beforeAll, describe, expect, test } from "vite-plus/test"
 
+import { SRV } from "spell/server"
 import { Turns } from "spell/epic/command/Turns"
 
 const HOME = mkdtempSync(join(tmpdir(), "turns-"))
@@ -35,6 +36,17 @@ describe("Turns", () => {
     expect(seen.env).toBe("merge")
     expect(Turns.held()).toEqual([])
     expect(process.env[Turns.ENV]).toBeUndefined()
+  })
+
+  test("take() and runCommand():  the checkout is marked in use while the turn is held, so the keeper never stops its servers (I459)", async () => {
+    const checkout = SRV.checkoutOf(process.cwd())!.root
+    expect(SRV.CheckoutUse.isInUse(checkout)).toBe(false)
+    expect(Turns.take("merge", "epic merge seo", () => SRV.CheckoutUse.isInUse(checkout))).toBe(true)
+    expect(SRV.CheckoutUse.isInUse(checkout)).toBe(false)
+    expect(await Turns.takeAsync("test", "yarn test", async () => SRV.CheckoutUse.marks())).toMatchObject([
+      { checkout, why: "epic turns test:  yarn test", pid: process.pid }
+    ])
+    expect(SRV.CheckoutUse.marks()).toEqual([])
   })
 
   test("take():  the same kind inside a turn runs straight away;  another kind takes its own", () => {

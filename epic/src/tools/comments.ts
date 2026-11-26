@@ -27,6 +27,9 @@
  *   markup, as is);  `--commit`, the commit it was built in (the thread's Done line shows it)
  * - `wait [<page>...] [--timeout 8h]`:  block until a comment starts waiting for Claude (on those pages, else on any),
  *   print it as `list` does, exit 0;  timeout:  exit 2.  Run it in the background:  its exit wakes the session
+ * - `delete <page>#<id>`:  the comment taken off the page by hand, whatever its status (`CommentList.clear()`:  only
+ *   its writer may);  `<page>` a docs page, or an epic by its name (`seo#C3`), its page's log saying so (epic
+ *   `epic-engine` T170).  A comment whose item is gone goes by itself:  `links-agree` (the epic page's migration)
  * - `working <page>#<id> on | off`:  Claude is thinking about the comment (on), or stopped:  its thread shows a
  *   "Claude: thinking…" stub meanwhile;  `answer` turns it off
  * - a THREAD:  Owen answers Claude's answer on the page (that's good, reply, skip it:  `CommentList`);  his reply is
@@ -47,13 +50,14 @@ import { join, resolve } from "node:path"
 import { waitUntil } from "spell/util/timing"
 import { EpicCommandError, duration, parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
 import { ThreadFacts } from "spell/epic/comments"
-import { CommentList, CommentsError } from "spell/epic/tool/CommentList"
+import { CommentList, CommentsError, type Comment } from "spell/epic/tool/CommentList"
 import { GuideInbox } from "spell/epic/tool/GuideInbox"
+import { PlanDocFiles, removedCommentLine } from "spell/epic/tool/PlanDocFiles"
 import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
 import { SeeAlso, epicNamed } from "spell/epic/tool/SeeAlso"
 
 import { FEEDBACK, GuideChanges } from "./GuideChanges"
-import { CONTENT, ROOT, pageAndId, pageFile, pagePath } from "./pages.js"
+import { CONTENT, ROOT, pageAndId, pageFile, pagePath, planDocIn } from "./pages.js"
 
 if (import.meta.main) {
   const { positional, flags } = parseVerbArgs(process.argv.slice(2))
@@ -67,6 +71,7 @@ export async function run([verb = "list", ...rest]: string[], flags: Record<stri
     if (verb === "gather") return await gather(rest, flags)
     if (verb === "wait") return await wait(rest, flags)
     if (verb === "working") return working(pageAndId(rest))
+    if (verb === "delete") return await deleteComment(pageAndId(rest))
     if (verb !== "answer") return usage()
     const [page, id] = pageAndId(rest)
     if (!page || !id || typeof flags.file !== "string") return usage()
@@ -99,6 +104,36 @@ function working([page, id, on]: string[]): number {
   console.log(`${pagePath(pageFile(page))}#${CommentList.label(id)}  working:  ${on}`)
   return 0
 }
+
+/**
+ * `delete <page>#<id>`:  comment `id` taken off `page` by hand, whatever its status (`CommentList.clear()`:  only its
+ * writer's;  anyone else's is refused, exit 1).
+ * - `page` an epic's name (`seo`):  its epic page's comment, out of its review inbox, a log line on the page
+ *   (`removedCommentLine()`, as `links-agree` writes for one whose item is gone);  else a docs page
+ * - its words stay in the epic repo's history:  its comments file as committed before
+ */
+async function deleteComment([page, id]: string[]): Promise<number> {
+  if (!page || !id) return usage()
+  const epicPage = EPIC_NAME.test(page) ? planDocIn(join(CONTENT, "epics", page), page) : undefined
+  if (!epicPage) {
+    GuideInbox.update(GuideInbox.fileFor(pageFile(page)), (comments) => comments.clear(id))
+    console.log(`${pagePath(pageFile(page))}#${CommentList.label(id)}  deleted`)
+    return 0
+  }
+  let gone: Comment | undefined
+  await ReviewInbox.updateAsync(ReviewInbox.pathFor(epicPage), (box) => {
+    gone = box.commentList.comment(id)
+    box.commentList.clear(id)
+  })
+  await new PlanDocFiles({ root: ROOT }).edit(epicPage, (plan) =>
+    plan.log(removedCommentLine(id, gone, "deleted by hand"))
+  )
+  console.log(`${page}#${CommentList.label(id)}  deleted`)
+  return 0
+}
+
+/** An epic's name, as `delete` takes one for its page (`seo`):  no folder, no `.html`. */
+const EPIC_NAME = /^[a-z0-9][a-z0-9-]*$/
 
 /**
  * A session answering comments on a page an epic owns is still listening to that epic (epic `epic-workflow` P13):
@@ -231,7 +266,8 @@ function usage(): number {
       "        epic comments gather [<page>... | --all] [--epic <name>] [--json]\n" +
       "        epic comments wait [<page>...] [--timeout 8h]\n" +
       "        epic comments answer <page>#<id> --file <reply.html> [--commit <sha>]\n" +
-      "        epic comments working <page>#<id> on | off"
+      "        epic comments working <page>#<id> on | off\n" +
+      "        epic comments delete <page>#<id>"
   )
   return 2
 }

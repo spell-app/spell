@@ -7,8 +7,10 @@
  * - Both go through the page server's `GET /api/docs/show` (`scripts/showRoutes.ts`):  the Claude panel follows only
  *   http(s) links (a `vscode://` one does nothing), and opens a plain `localhost` link in a VS Code tab, not Chrome.  `window` is THIS session's VS Code
  *   window, so the page shows beside the session that named it.
- * - Which server:  a worktree's page on the MAIN checkout's server (one port for every link), else this checkout's
- *   (started if need be).  Each must have the route (a server started before it existed doesn't):  else the next;
+ * - Which server:  a worktree's page on the MAIN checkout's server, else this checkout's (started if need be).
+ *   - a worktree's page BY ITS NAME, `http://<w>.localhost:4747/...` (`https://` while main's server speaks HTTPS;
+ *     `SRV.namedAddress()`, epic `epic-engine` T167):  one port for every link, main's server passing it on
+ *   - Each must have the route (a server started before it existed doesn't):  else the next;
  *   none:  the browser link alone, and a note on stderr.
  * - Which side bar tab:  the page's kind decides, in the extension (`docViewFor()`, epic `epic-engine` P59):
  *   a details or choice page "Details", anything else "Review" (epic `epic-engine` Q73).
@@ -31,7 +33,7 @@ import { EpicTargets } from "spell/epic/tool/EpicTargets"
 import { SRV } from "spell/server"
 
 import { Window } from "spell/epic/window.mjs"
-import { ROOT, ensurePageServer, pageFile, serverUrl } from "./pages.js"
+import { ROOT, ensurePageServer, openerBase, pageFile, serverUrl } from "./pages.js"
 
 const { positional, flags } = parseVerbArgs(process.argv.slice(2))
 const addressed = positional[0] && EpicAddress.isAddress(positional[0]) ? addressOf(positional[0]) : undefined
@@ -86,16 +88,24 @@ export async function markdownLink(
   return `[${title}](${pages[0] ?? `file://${file}`}${anchor})`
 }
 
-/** `file`'s URL on this checkout's page server, started if need be;  `undefined` if it won't start. */
+/**
+ * `file`'s URL on this checkout's page server, started if need be, a worktree's at its name (`openerBase()`);
+ * `undefined` if it won't start
+ */
 function ownUrl(file: string): string | undefined {
-  const served = ensurePageServer()
-  return served && serverUrl(served.base, file)
+  const base = openerBase(ensurePageServer())
+  return base && serverUrl(base, file)
 }
 
-/** Whether the page server at `origin` has `/api/docs/show`:  asked with no path, it answers 400, not 404. */
+/**
+ * Whether the page server at `origin` has `/api/docs/show`:  asked with no path, it answers 400, not 404.
+ * - asked over plain HTTP, which the same port answers too:  node trusts no certificate the Mac's keychain does
+ */
 async function hasShowRoute(origin: string): Promise<boolean> {
   try {
-    const answer = await fetch(`${origin}/api/docs/show`, { signal: AbortSignal.timeout(1000) })
+    const answer = await fetch(`${origin.replace(/^https:/, "http:")}/api/docs/show`, {
+      signal: AbortSignal.timeout(1000)
+    })
     return answer.status === 400
   } catch {
     return false

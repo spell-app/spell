@@ -416,6 +416,25 @@ test("WORKING:  `epic comments working` -- the GET carries it (the thread's thin
   await post({ page, action: "clear", id })
 })
 
+test("DELETE:  `epic comments delete <page>#<id>` takes a comment off a docs page, whatever its status (T170)", async () => {
+  const page = "/epics/big/notes.html"
+  const file = join(root, "epics/big/notes.html")
+  const inbox = GuideInbox.fileFor(file)
+  const { id } = (await post({ page, action: "add", ...ON_TABLE, text: "Still wanted?" })).answer
+  const log = vi.spyOn(console, "log").mockImplementation(() => undefined)
+  const error = vi.spyOn(console, "error").mockImplementation(() => undefined)
+  try {
+    expect(await run(["delete", `${file}#${CommentList.label(id)}`], {})).toBe(0)
+    expect(GuideInbox.read(inbox).comments[id]).toBeUndefined()
+    // gone already:  1;  no id:  usage
+    expect(await run(["delete", file, id], {})).toBe(1)
+    expect(await run(["delete", file], {})).toBe(2)
+  } finally {
+    log.mockRestore()
+    error.mockRestore()
+  }
+})
+
 test("WAIT:  `epic comments wait <page>` exits with a comment new since it started, not one already waiting", async () => {
   const page = "/epics/big/notes.html"
   const file = join(root, "epics/big/notes.html")

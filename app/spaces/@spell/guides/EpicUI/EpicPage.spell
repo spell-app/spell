@@ -50,7 +50,7 @@
 		</>
 		<text paragraph>What that draws, above its blocks:</>
 		<list bulleted>
-			<item>ONE line of crumbs, <text code>EPICS / SEO</>, the epic's name in their type, twice their size and bold: the h1 (a click on the name copies <text code>/epic resume seo</>, and a toast says so), and at the header's right the step label: <text code>P2</>, the phase under way, outlined grey, then the gear (Auto Send, Theme)</>
+			<item>ONE line of crumbs, <text code>EPICS / SEO</>, the epic's name in their type, twice their size and bold: the h1 (a click on the name copies <text code>/epic resume seo</>, and a toast says so), and at the header's right the step label: <text code>P2</>, the phase under way, outlined grey, then the gear (while reviewed Tidy and Focus mode, then Auto Send, Theme)</>
 			<item>under the header, the review line (<text code>To review this doc, type /epic review seo</>), then the meta lines: the branch, the worktree, <text code>Started 10/1/26, updated 10/7/26</>, and <text code>Saga: Spell UI</>, a link to the saga's page, its purpose the tooltip (the page server says the saga's title and purpose;  until it does, and from disk, the link reads <text code>spell-ui</>)</>
 			<item>served by the page server, a See Also box above the blocks: the epic's guide, every page it made for itself in its <link target="src-pages-details" link="/pages/details/"><text code>details/</></> folder (details pages, choice pages, its review page), then every guide its page and parts link to, each with its kind's icon and word (guide, details, choices, guide)</>
 			<item>no Send: it shows only while an epic page is being reviewed through the page server</>
@@ -441,13 +441,13 @@
 					<cell>
 						<text code>gear-menu</>
 					</>
-					<cell>The gear's menu, a <text code>&lt;ui-popup&gt;</>: its two rows, and the sub-menu open beside them.</>
+					<cell>The gear's menu, a <text code>&lt;ui-popup&gt;</>: its rows, and the sub-menu open beside them.</>
 				</>
 				<row>
 					<cell>
 						<text code>gear-row</>
 					</>
-					<cell>A row of the gear's menu: <text code>Auto Send · 2 minutes</>, <text code>Theme · Paper</>.</>
+					<cell>A row of the gear's menu: <text code>Tidy</> (while reviewed, epic <text code>epic-engine</> T168: asks the epic's session to run <text code>/epic tidy</>), <text code>Focus mode</>, <text code>Auto Send · 2 minutes</>, <text code>Theme · Paper</>.</>
 				</>
 				<row>
 					<cell>
@@ -613,7 +613,7 @@
 					<text code>P1 · Name</>
 				</>
 				<cell>Accept Phases, on the Phases section's title row</>
-				<cell>Looks good, Defer</>
+				<cell>Looks good</>
 			</>
 			<row>
 				<cell><text code>building</>, or none</>
@@ -629,7 +629,7 @@
 			<item>The header's Send is the paper plane in every stage (epic <text code>epic-engine</> I180;  2026-10-29: "This should just be normal paper plane"):  the Accept is on the title row of the work it accepts, a green thumbs up and its words (<text code>&lt;epic-stage-button&gt;</>), there while the section is folded. Its tooltip counts the open questions ("2 questions open"): a reminder, never a lock. Before I180 it took the plane's place;  Auto Send's countdown only ever sends the marks, never accepts (J143).</>
 			<item>A press of Accept starts a FIVE-MINUTE countdown (epic <text code>epic-engine</> I181;  2026-10-29:  "make 'accept overview' and 'accept phases' 5 minute countdown"):  a green ring fills in round its thumbs up, its tooltip says how long is left, and a second press calls it off.  Its accept mark waits in the inbox, held till then: no Send before then carries it, and a reload carries on where it was.  When it runs out, the page sends it with what's unsent, waking the epic when nobody listens.  Nothing typed on the page starts it again. The session's <text code>epic inbox apply</> moves the page on a stage, then writes the phases (after the Overview) or starts building (after the phases). Pressed, Accept is outlined green until then.</>
 			<item>Building, while Claude's build plan for a phase waits for your Accept, the header keeps Send, never green (2026-10-25: "I may not be accepting the phases"): the pill is RINGED, its border 2px #666, darker than its hairline, waiting on you, dotted once each waiting phase has your mark; its tooltip names them, "2 build plans wait for your Accept: P43, P44". Accepting is per phase, on its row, whose buttons wear the same ring.</>
-			<item>Defer moves a phase after the others, still to do; Looks good says it stands as written. Both wait for Send, as every pill does.</>
+			<item>Looks good says a phase stands as written, and waits for Send, as every pill does. Defer, which moves a phase after the others, still to do, is in each phase's gear (epic <text code>epic-engine</> T169), with Remove for a phase never started.</>
 			<item><text code>epic create</> starts a new epic in <text code>overview</>, a future one too; <text code>epic stage &lt;epic&gt; overview|phases|building</> sets it by hand.</>
 		</>
 		<text paragraph>A page agreeing its Overview:</>

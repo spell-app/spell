@@ -237,6 +237,32 @@ export const TITLE_ICONS = { active: "🚧", future: "📅", done: "✅", errors
  */
 export const STAGED_DEMO = { epic: "demo", folder: "epics/epic-engine/staged-demo", firstStep: "00-paste.md" } as const
 
+/**
+ * The first words `/epic` takes as a VERB, never an epic's name:  the ONE list (epic `epic-engine` I482).
+ * - The epic skill's "1. Name", "Some first words are reserved", lists the same words, each with what it does;
+ *   `PromptGate.test.ts` fails when the two drift.
+ * - Read by the prompt hook (`PromptGate.parseCommand()`), which never takes one for "open a window for epic `<word>`",
+ *   and by the epic list page's New epic (`epicName()`), which names such an epic `<word>-epic`.
+ * - `demo` is the staged demo's epic (`STAGED_DEMO.epic`):  made by the demo's own steps, never by `/epic demo`.
+ */
+export const EPIC_VERBS = [
+  "review",
+  "resume",
+  "color",
+  "future",
+  "phase",
+  "start",
+  "tidy",
+  "request",
+  "fresh",
+  "demo",
+  "done",
+  "hush"
+] as const
+
+/** One of `EPIC_VERBS`. */
+export type EpicVerb = (typeof EPIC_VERBS)[number]
+
 /** Icons titles may still start with from before:  😴, sleeping (gone 2026-10-10:  epic `airplane` P8). */
 const OLD_TITLE_ICONS = ["😴"]
 

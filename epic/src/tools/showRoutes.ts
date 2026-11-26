@@ -53,7 +53,7 @@ const showRoutes: RouteModule = {
       const hash = typeof request.query.hash === "string" && request.query.hash ? request.query.hash : undefined
       if (request.query.in === "browser") {
         const key = path.slice(Math.max(0, path.indexOf("/packages/")))
-        openUrlInChrome(`http://${request.get("host")}${path}${hash ? `#${hash}` : ""}`, key, { front: true })
+        openUrlInChrome(`${originOf(request)}${path}${hash ? `#${hash}` : ""}`, key, { front: true })
         closeShownTab(pickWindow(Number(request.query.window), file))
         return void reply.noStore().send(closingPage(path, "Chrome"))
       }
@@ -111,6 +111,20 @@ export function pickWindow(pid: number, file: string, entries: Map<number, Windo
     }
   }
   return best ?? entries.values().next().value
+}
+
+/**
+ * The origin `request` was asked at, for the browser to open:  a worktree's NAME when main's page server passed it on
+ * (`X-Forwarded-Host`, `epic-engine.localhost:4747`, and its scheme;  `SRV.HostRoutes`, epic `epic-engine` T167),
+ * else this server's own `Host`
+ */
+export function originOf(request: SRV.Request): string {
+  const forwarded = request.get("x-forwarded-host")
+  if (forwarded && SRV.HostRoutes.isNamedHost(forwarded)) {
+    const scheme = request.get("x-forwarded-proto") === "https" ? "https" : "http"
+    return `${scheme}://${forwarded}`
+  }
+  return `http://${request.get("host")}`
 }
 
 /** A page of an epic, in the epic folder:  its epic's id. */

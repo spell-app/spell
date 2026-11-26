@@ -87,6 +87,7 @@ const OUTPUT_ROOM = 440
  *   the code:  its output and compiled code.  Its Close hides it.
  * - Showing or hiding the panel never redraws the code or the program:  a pane that comes or goes moves no other.
  * - The compiled code, while someone's asked for it (`CodeOutputShown`) and there's room, sits beside the code.
+ *   - With the code closed, it has the code's column alone (epic `editor` I366):  the column shows while either does.
  * - The panes are `<ui-split-panel>`s, their sizes remembered as dragged (`rememberedSizes()`).
  *   - How they're arranged is Spell, the `editor layout` of `SpellEditor.spell`;  what's in each is still the editor's, handed over here,
  *     each a thing that draws itself.
@@ -110,33 +111,39 @@ export function SpellEditor(props: { mode: Mode }) {
   Preview.follow(mode)
   // a change to the open file from outside the editor:  read again, and taken as any edit
   onSettled(() => editor.watchOpenFile())
-  // the code's column:  hidden in Run, and for a project with its code closed
+  // the code:  hidden in Run, and for a project with its code closed
   const hidesCode = () => isRunning() || CodeShown.isClosed(editor.project?.path)
+  // the code's column:  hidden in Run, and while neither the code nor the compiled code shows (I366)
+  const hidesColumn = () => isRunning() || (hidesCode() && !CodeOutputShown.target)
   const showsProgramPanel = () => !hidesCode() && ProgramPanelShown.isShowing
   // the Inspector's pane:  never in Run, which is the app alone (Owen, 2026-11-07);  still open for Edit, and a phone's sheet
   const showsInspector = () => Inspector.isOpen && props.mode !== "run"
   // ... and nothing stays selected in Run:  `<ProjectPageRoute>` lets go as the address leaves for it (`letGoForRun()`)
-  const columns = rememberedSizes(() => columnsFor(hidesCode(), showsInspector(), !!CodeOutputShown.target))
+  const columns = rememberedSizes(() =>
+    columnsFor(hidesColumn(), showsInspector(), !hidesCode() && !!CodeOutputShown.target)
+  )
   const codeRows = rememberedSizes(() => ({
     id: "spellEditor-left",
     sizes: showsProgramPanel() ? "65%" : "100%"
   }))
-  // the compiled code beside the code, while there's room:  a narrow column keeps the code
+  // the compiled code beside the code, while there's room:  a narrow column keeps the code;  alone, it has the column
   const [codeWidth, setCodeWidth] = createSignal(0)
-  const outputTarget = () => (codeWidth() >= OUTPUT_ROOM ? CodeOutputShown.target : undefined)
-  const codeColumns = rememberedSizes(() => ({
-    id: "spellEditor-code-output",
-    sizes: outputTarget() ? "50%,50%" : "100%"
-  }))
+  const outputTarget = () => (hidesCode() || codeWidth() >= OUTPUT_ROOM ? CodeOutputShown.target : undefined)
+  const showsBoth = () => !hidesCode() && !!outputTarget()
+  const codeColumns = rememberedSizes(() =>
+    showsBoth() ? { id: "spellEditor-code-output", sizes: "50%,50%" } : { id: "spellEditor-code-alone", sizes: "100%" }
+  )
   const parts = {
     code: {
       draw: () => (
         <WidthWatchedPane onWidth={setCodeWidth}>
-          <Show when={!hidesCode()}>
+          <Show when={!hidesColumn()}>
             <ui-split-panel class="EditorCodeOutput" columns={codeColumns.sizes()} resizable>
-              <div class="SplitPane">
-                <InputRoot />
-              </div>
+              <Show when={!hidesCode()}>
+                <div class="SplitPane">
+                  <InputRoot />
+                </div>
+              </Show>
               <Show when={outputTarget()} keyed>
                 {(target) => (
                   <div class="SplitPane">
@@ -177,7 +184,7 @@ export function SpellEditor(props: { mode: Mode }) {
     columns: columns.sizes(),
     codeRows: codeRows.sizes(),
     grows: APP_GROWS,
-    mode: hidesCode() ? "run" : "edit"
+    mode: hidesColumn() ? "run" : "edit"
   })
   const layout = drawnView((app) => app.editorLayout, parts, settings)
   createEffect(
@@ -210,7 +217,7 @@ export function SpellEditor(props: { mode: Mode }) {
           <ui-split-panel class="EditorColumns" columns={columns.sizes()} grows={APP_GROWS} resizable>
             {parts.app.draw()}
             {parts.inspector.draw()}
-            <ui-split-panel class="EditorCode" rows={codeRows.sizes()} resizable hidden={hidesCode()}>
+            <ui-split-panel class="EditorCode" rows={codeRows.sizes()} resizable hidden={hidesColumn()}>
               {parts.code.draw()}
               {parts.programPanel.draw()}
             </ui-split-panel>

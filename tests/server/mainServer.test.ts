@@ -50,7 +50,11 @@ describe("mainServerUrl()", () => {
       expect(await SRV.mainServerUrl(file)).toBeUndefined()
       server.web.router.get(SRV.RUNNING_EPICS_API, (_request, reply) => reply.json([]))
       const url = await SRV.mainServerUrl(file)
-      expect(url).toBe(`http://127.0.0.1:${server.info.port}/worktrees/seo/packages/docs/content/a%20b.html`)
+      // by the worktree's name (epic `epic-engine` T167);  plain HTTP, as main's server speaks no HTTPS here
+      expect(url).toBe(`http://seo.localhost:${server.info.port}/packages/docs/content/a%20b.html`)
+      expect(await SRV.mainServerUrl(file, undefined, { secure: true })).toBe(
+        `https://seo.localhost:${server.info.port}/packages/docs/content/a%20b.html`
+      )
     } finally {
       await server.stop()
       rmSync(root, { recursive: true, force: true })
@@ -124,7 +128,7 @@ describe("mainServerUrl()", () => {
   })
 
   // epic `epic-engine` I136:  by its folder's path (`/worktrees/seo/ui/docs/...`) it loaded none of its `_assets/`
-  it("gives a worktree's component set page its address, under the worktree's", async () => {
+  it("gives a worktree's component set page its address, at the worktree's name", async () => {
     const root = fakeMainCheckout(mkdtempSync(join(tmpdir(), "srv-sets-")))
     const worktree = fakeWorktree(root, join(root, ".claude", "worktrees", "seo"))
     const set = { pageServer: { componentSets: { ui: { name: "UI", dir: "ui/docs", assets: "ui/site/_assets" } } } }
@@ -133,7 +137,7 @@ describe("mainServerUrl()", () => {
     const server = await new PageServer({ root }).start({ port: 0, routes: false })
     try {
       server.web.router.get(SRV.RUNNING_EPICS_API, (_request, reply) => reply.json([]))
-      const base = `http://127.0.0.1:${server.info.port}/worktrees/seo`
+      const base = `http://seo.localhost:${server.info.port}`
       expect(await SRV.mainServerUrl(join(worktree, "ui", "docs", "ui-button.html"))).toBe(
         `${base}/components/ui/ui-button.html`
       )

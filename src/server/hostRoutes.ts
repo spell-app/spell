@@ -7,7 +7,8 @@ import { fileURLToPath } from "node:url"
 
 import type { Handler } from "spell/server"
 import { PidFile, editorAddressOf } from "./PidFile"
-import { EDITOR_SUFFIX, PortBook, hostNameOf } from "./PortBook"
+import { hostNameOf, namedAddress } from "./hostNames"
+import { PortBook } from "./PortBook"
 import { proxyTo, proxyUpgrade } from "./proxy"
 import { Request } from "./Request"
 
@@ -91,7 +92,6 @@ export class HostRoutes {
 
   /** every worktree, its addresses and whether its page server answers:  `NAMES_API`'s answer.  NEVER throws */
   async names(port: number, secure: boolean): Promise<NamedWorktree[]> {
-    const scheme = secure ? "https" : "http"
     return Promise.all(
       this.worktrees().map(async (each) => {
         const { worktree } = each
@@ -100,8 +100,8 @@ export class HostRoutes {
         return {
           name,
           worktree,
-          address: `${scheme}://${name}${LOCALHOST}:${port}/`,
-          editor: `${scheme}://${name}${EDITOR_SUFFIX}${LOCALHOST}:${port}/`,
+          address: `${namedAddress(worktree, { port, secure })}/`,
+          editor: `${namedAddress(worktree, { port, secure, editor: true })}/`,
           running: booked !== undefined && (await isAnswering(booked))
         }
       })
@@ -220,9 +220,6 @@ export type NamedWorktree = { name: string; worktree: string; address: string; e
 
 /** The names page's call, on any named host:  every worktree and how it stands. */
 export const NAMES_API = "/_spell/names"
-
-/** What every name ends in. */
-const LOCALHOST = ".localhost"
 
 /** A named host:  `<name>[--app].localhost[:port]`, its name letters, digits and dashes. */
 const NAMED_HOST = /^([a-z0-9](?:[a-z0-9-]*?[a-z0-9])?)(--app)?\.localhost(?::\d+)?$/i

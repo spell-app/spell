@@ -68,6 +68,14 @@ function nextToggle(host: Element) {
   return new Promise((resolve) => host.addEventListener("toggle", resolve, { once: true }))
 }
 
+/** Tab from `before` to the element after it, as a person moves there;  returns that element. */
+async function tabTo(before: HTMLElement) {
+  before.focus()
+  await Keys.tab()
+  await settle()
+  return document.activeElement as HTMLElement
+}
+
 /** Is `host` shown in the top layer? */
 function shown(host: Element) {
   return host.matches(":popover-open")
@@ -326,9 +334,10 @@ describe("<ui-popup> hover", () => {
   })
 
   it("opens on keyboard focus at once, and closes when focus leaves", async () => {
-    const { host, wrapper } = await popup(`<button>Target</button><ui-popup>Tip</ui-popup><button>Next</button>`)
-    wrapper.querySelector("button")!.focus()
-    await settle()
+    const { host, wrapper } = await popup(
+      `<button>Before</button><button>Target</button><ui-popup>Tip</ui-popup><button>Next</button>`
+    )
+    await tabTo(wrapper.querySelector("button")!)
     expect(shown(host)).toBe(true)
     await Keys.tab()
     await settle()
@@ -336,10 +345,8 @@ describe("<ui-popup> hover", () => {
   })
 
   it("Escape closes it, and focus stays on the target", async () => {
-    const { host, wrapper } = await popup(`<button>Target</button><ui-popup>Tip</ui-popup>`)
-    const button = wrapper.querySelector("button")!
-    button.focus()
-    await settle()
+    const { host, wrapper } = await popup(`<button>Before</button><button>Target</button><ui-popup>Tip</ui-popup>`)
+    const button = await tabTo(wrapper.querySelector("button")!)
     expect(shown(host)).toBe(true)
     await userEvent.keyboard("{Escape}")
     await settle()
@@ -348,12 +355,51 @@ describe("<ui-popup> hover", () => {
   })
 
   it("a vetoed ui-opening keeps it hidden", async () => {
-    const { host, wrapper } = await popup(`<button>Target</button><ui-popup>Tip</ui-popup>`)
+    const { host, wrapper } = await popup(`<button>Before</button><button>Target</button><ui-popup>Tip</ui-popup>`)
     host.addEventListener("ui-opening", (event) => event.preventDefault())
-    wrapper.querySelector("button")!.focus()
-    await settle()
+    await tabTo(wrapper.querySelector("button")!)
     expect(shown(host)).toBe(false)
     expect(host.visible).toBe(false)
+  })
+
+  it("a focus handed back by a script or a closing menu doesn't open it, Escape or not (epic `editor` I368)", async () => {
+    const { host, wrapper } = await popup(
+      `<button>Target</button><ui-popup>Tip</ui-popup><button class="menu-item">In the menu</button>`
+    )
+    const [button, item] = [wrapper.querySelector("button")!, wrapper.querySelector<HTMLElement>(".menu-item")!]
+    button.focus()
+    await settle()
+    expect(shown(host)).toBe(false)
+    // a menu that hands focus back to its button as Escape closes it
+    item.addEventListener("keydown", (event) => event.key === "Escape" && button.focus())
+    item.focus()
+    await userEvent.keyboard("{Escape}")
+    await settle()
+    expect(document.activeElement).toBe(button)
+    expect(button.matches(":focus-visible")).toBe(true)
+    expect(shown(host)).toBe(false)
+  })
+
+  it("a press on the target hides it, until the pointer leaves the target and comes back (epic `editor` I368)", async () => {
+    fakeTimers()
+    const { host, wrapper } = await popup(
+      `<button>Target</button><ui-popup show-delay="0" hide-delay="0">Tip</ui-popup>`
+    )
+    const button = wrapper.querySelector("button")!
+    await userEvent.hover(button)
+    await advance(20)
+    expect(shown(host)).toBe(true)
+    await userEvent.click(button)
+    await advance(20)
+    expect(shown(host)).toBe(false)
+    await userEvent.hover(button, { position: { x: 2, y: 2 } })
+    await advance(120)
+    expect(shown(host)).toBe(false)
+    await userEvent.hover(wrapper, { position: { x: 1, y: 1 } })
+    await advance(20)
+    await userEvent.hover(button)
+    await advance(20)
+    expect(shown(host)).toBe(true)
   })
 })
 
@@ -691,11 +737,10 @@ describe("<ui-popup> accessibility", () => {
 
   it("keyboard walkthrough:  Tab through two tooltip targets, each announces its own popup", async () => {
     const { wrapper } = await popup(
-      `<button>One</button><ui-popup label="First"></ui-popup><button>Two</button><ui-popup label="Second"></ui-popup>`
+      `<button>Before</button><button>One</button><ui-popup label="First"></ui-popup><button>Two</button><ui-popup label="Second"></ui-popup>`
     )
     const [first, second] = wrapper.querySelectorAll("ui-popup")
-    wrapper.querySelector("button")!.focus()
-    await settle()
+    await tabTo(wrapper.querySelector("button")!)
     expect([shown(first!), shown(second!)]).toEqual([true, false])
     await Keys.tab()
     await settle()

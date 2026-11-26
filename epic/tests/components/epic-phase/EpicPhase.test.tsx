@@ -733,7 +733,8 @@ describe("<epic-phase> ⌥-click", () => {
 })
 
 // epic `epic-engine` I161 (Owen, 2026-10-29:  "Should show pointer when over content in these headers, drag cursor when
-// over whitespace")
+// over whitespace");  I480 (Owen, 2026-11-26:  "you don't see the drag cursor when over the phase title, only when over
+// the background"):  a to-do phase's title grabs too
 describe("<epic-phase> its title row's cursors", () => {
   /** The cursor over each piece of `phase`'s title row. */
   function cursors(phase: Element) {
@@ -747,7 +748,7 @@ describe("<epic-phase> its title row's cursors", () => {
     }
   }
 
-  test("a to-do phase on a reviewed page:  grab over the empty space, the pointer over its content", async () => {
+  test("a to-do phase on a reviewed page:  grab over its title and the empty space, the pointer over its time", async () => {
     await adoptWorking([])
     try {
       const section = await render(
@@ -757,7 +758,7 @@ describe("<epic-phase> its title row's cursors", () => {
       )
       const todo = section.querySelector("#p-todo")!
       await vi.waitFor(() => expect(todo.matches(":state(movable)")).toBe(true))
-      expect(cursors(todo)).toEqual({ space: "grab", row: "grab", chevron: "pointer", time: "pointer" })
+      expect(cursors(todo)).toEqual({ space: "grab", row: "grab", chevron: "grab", time: "pointer" })
       // done:  it never drags, and a click on its empty space folds it:  the pointer all over
       expect(cursors(section.querySelector("#p-done")!)).toEqual({
         space: "pointer",
@@ -780,6 +781,46 @@ describe("<epic-phase> its title row's cursors", () => {
     await inner(host).ready
     await ElementFixture.settle(host)
     expect(cursors(host)).toEqual({ space: "pointer", row: "pointer", chevron: "pointer", time: "pointer" })
+  })
+})
+
+// epic `epic-engine` T169 (Owen, 2026-11-26:  "Add to this menu 'Remove this phase' for an unstarted phase.  Above it,
+// add 'Defer this phase' and remove icon from the pill menu")
+describe("<epic-phase> its gear's Defer and Remove", () => {
+  test("on a to-do phase while reviewed:  Defer, and Remove while never started;  each a mark, picked again to undo", async () => {
+    const routes = new SeenRoutes()
+    try {
+      // not reviewed:  neither
+      const quiet = await render(`<epic-phase id="p-quiet" title="Quiet" status="todo"></epic-phase>`)
+      expect(gearEntries(await gearOf(quiet))).toEqual([
+        "Show this phase's files:  off",
+        "Show this phase's checks:  off"
+      ])
+      await adoptSeenClient(routes)
+      const todo = await render(`<epic-phase id="p-todo" title="Later Work" status="todo"></epic-phase>`)
+      const gear = await gearOf(todo)
+      await vi.waitFor(() =>
+        expect(gearEntries(gear).slice(2)).toEqual(["Defer this phase:  off", "Remove this phase:  off"])
+      )
+      await pickGear(gear, "Defer this phase")
+      await vi.waitFor(() => expect(routes.inbox.marks["p-todo"]?.action).toBe("defer"))
+      await vi.waitFor(() =>
+        expect(gearEntries(gear).slice(2)).toEqual(["Defer this phase:  on", "Remove this phase:  off"])
+      )
+      await pickGear(gear, "Defer this phase")
+      await vi.waitFor(() => expect(routes.inbox.marks["p-todo"]).toBeUndefined())
+      // Remove:  its mark, and a notice naming it, with Undo
+      await pickGear(gear, "Remove this phase")
+      await vi.waitFor(() => expect(routes.inbox.marks["p-todo"]?.action).toBe("remove"))
+      // started (commits), or not to do:  no Remove;  done:  no Defer either
+      const started = await render(`<epic-phase id="p-started" title="Started" status="todo" commits></epic-phase>`)
+      const startedGear = await gearOf(started)
+      await vi.waitFor(() => expect(gearEntries(startedGear).slice(3)).toEqual(["Defer this phase:  off"]))
+      const done = await render(`<epic-phase id="p-done" title="Done" status="done"></epic-phase>`)
+      expect(gearEntries(await gearOf(done)).some((entry) => /Defer|Remove/.test(entry))).toBe(false)
+    } finally {
+      ReviewClient.adopt(undefined)
+    }
   })
 })
 

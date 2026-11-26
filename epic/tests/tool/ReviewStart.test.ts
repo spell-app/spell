@@ -292,6 +292,20 @@ test("start:  the session's inbox poller runs:  asked through the inbox, nothing
   })
 })
 
+// epic `epic-engine` T168
+test("start tidy:  the gear's Tidy asks through the inbox the same way, for /epic tidy", async () => {
+  await withBigSession(async (_id, planDoc) => {
+    pollers.set(process.pid, 4242)
+    const start = await starter().start("big", planDoc, "tidy")
+    expect(start).toMatchObject({ state: "asked", command: "/epic tidy big", sessions: ["🚧 big"] })
+    expect(start.message).toBe(
+      "Asked 🚧 big to tidy the epic page:  its inbox poller wakes it in a few seconds, nothing typed."
+    )
+    const inbox = ReviewInbox.read(ReviewInbox.pathFor(planDoc))
+    expect([inbox.tidyAsked, inbox.reviewAsked]).toEqual([expect.any(String), null])
+  })
+})
+
 test("start:  its tab open already (the bridge types nothing):  says so plainly, never that it typed", async () => {
   await withBigSession(async (id, planDoc) => {
     bridgeSays = { typed: false }

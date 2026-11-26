@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  ce321da636ddd6f2
+// sources:  5c8bdb67e0b8c448
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -11,6 +11,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-aside": {"folder":"epic-aside","attributes":["title"]},
   "epic-ask": {"folder":"epic-ask","skeleton":{"height":"6em"},"attributes":["name","multiple","select-all","filter","more-details","compact","chip","no-chip","label","off-for"]},
   "epic-away-line": {"folder":"epic-away-line","attributes":["line","state","badge","badge-item","badge-state","mixed","working","heading"]},
+  "epic-bells": {"folder":"epic-bells","attributes":[]},
   "epic-card": {"folder":"epic-list","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":2}]},"attributes":["epic","phases","updated","urgent","future","standing","running","active","worked","saga","saga-title","saga-purpose","favorite","away"]},
   "epic-cards": {"folder":"epic-cards","skeleton":{"height":"2em"},"attributes":["saga"]},
   "epic-change": {"folder":"epic-change","attributes":["id","item","at","answer","was","accepted"]},

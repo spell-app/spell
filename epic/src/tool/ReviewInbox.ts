@@ -90,8 +90,8 @@ import { SharedComments } from "./SharedComments"
  *       - a press holds it 5 minutes (`countdown: true`, epic `epic-engine` I181):  dated when it goes (`stamped()`),
  *         so no Send before then carries it (`heldMarks`);  then the page sends it, with whatever else is unsent
  *       - `epic inbox apply` moves the page on a stage
- *     - a phase's Defer, while the phases are agreed (P29):  `{ action: "defer" }`, applied by moving the phase after
- *       the others, still to do
+ *     - a phase's Defer (P29;  its gear's since T169):  `{ action: "defer" }`, applied by moving the phase after
+ *       the others, still to do;  its Remove (T169):  `{ action: "remove" }`, applied by taking it off the page
  *     - a CHANGE MARK's buttons (`<epic-change id="ch3">`, epic `epic-engine` P30), under its id (`CHANGE_ID`):
  *       `{ action: "accept" }` (the change stands:  `inbox apply` marks it `accepted`, the orange goes, its chip
  *       stays) or `{ action: "reopen" }` (`inbox apply` reopens the question it names;  the mark stays orange)
@@ -145,6 +145,8 @@ import { SharedComments } from "./SharedComments"
  *     POLLER runs (epic `epic-engine` I144), else `null`:  the poller's next look says so (`📬`), which wakes the
  *     session, instead of typing into it (`askReview()`)
  *     - gone once a session waits on the inbox itself (`setListening()` with no poller), `epic inbox watch`
+ *   - `tidyAsked`:  ISO time Owen pressed Tidy in the page's gear (epic `epic-engine` T168), else `null`:  asked as
+ *     `reviewAsked` is, its `📬` line asking for `/epic tidy`;  gone once the tidy starts (`epic stale`, `tidyStarted()`)
  * - Node only (`node:fs`, `spell/server`'s lock):  NOT in the `spell-epic` barrel, imported by path.
  *   Imports no other file of the tool but `CommentList` (its comments);  of the page's review code, only its plain
  *   functions (`review.types`:  a revisit's note naming comments, I158).
@@ -184,6 +186,8 @@ export class ReviewInbox {
   doing: InboxDoing | null = null
   /** when Owen asked for a review from the page, for the session's poller to pass on (I144), else `null` */
   reviewAsked: string | null = null
+  /** when Owen asked for a tidy from the page's gear, for the session's poller to pass on (T168), else `null` */
+  tidyAsked: string | null = null
 
   /**
    * An inbox:  empty, or the fields of `record` (a file's JSON) over an empty one's.
@@ -368,6 +372,7 @@ export class ReviewInbox {
       !Object.keys(this.comments).length &&
       !this.listening &&
       !this.reviewAsked &&
+      !this.tidyAsked &&
       !this.liveWoken()
     )
   }
@@ -799,6 +804,23 @@ export class ReviewInbox {
   askReview(at = isoTime()): string {
     this.reviewAsked = at
     return at
+  }
+
+  /**
+   * Owen pressed Tidy in the page's gear (epic `epic-engine` T168):  the session's next look prints the `📬` line
+   * asking for `/epic tidy`, which wakes it.
+   * - stays until the tidy starts:  its first step, `epic stale <epic>`, clears it (`tidyStarted()`)
+   */
+  askTidy(at = isoTime()): string {
+    this.tidyAsked = at
+    return at
+  }
+
+  /** The tidy Owen asked for has started (`epic stale <epic>`):  nothing left to ask.  True when one was asked. */
+  tidyStarted(): boolean {
+    const asked = Boolean(this.tidyAsked)
+    this.tidyAsked = null
+    return asked
   }
 
   /**
@@ -1461,6 +1483,7 @@ export type InboxRecord = {
   woken: InboxWoken | null
   doing: InboxDoing | null
   reviewAsked: string | null
+  tidyAsked: string | null
 }
 
 /** What the listening session is doing now (`ReviewInbox.doing`, epic `epic-engine` P35). */
@@ -1690,7 +1713,8 @@ export const INBOX_VERSION = 1
  * - `new`:  a new todo or question Owen asks for from the page (`setNew()`, epic `airplane` P2), under its own key
  * - `test`:  a test's answer from the page's test run (epic `epic-engine` P4):  `result`, maybe `note` and `shot`
  * - `accept`:  `<epic-stage-button>` (epic `epic-engine` P29):  the stage it ends (`stage`), under `STAGE_ID`
- * - `defer`:  a phase's Defer while the phases are agreed (P29):  after the others, still to do
+ * - `defer`:  a phase's Defer (P29;  its gear's "Defer this phase" since T169):  after the others, still to do
+ * - `remove`:  a phase's "Remove this phase" (its gear, epic `epic-engine` T169):  never started, taken off the page
  * - `accept` with no `stage`, and `reopen`:  a change mark's buttons (`<epic-change>`, P30), under its id
  * - `seen`:  an update block's Seen (`<epic-update id="up3">`, epic `epic-engine` I168), under its id
  * - `hold`:  an accepted phase's thumbs up un-clicked (epic `epic-engine` I218):  its plan waits for Accept again
@@ -1712,6 +1736,7 @@ export const ACTIONS = [
   "accept",
   "defer",
   "move",
+  "remove",
   "reopen",
   "seen",
   "hold",

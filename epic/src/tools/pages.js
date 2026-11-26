@@ -7,6 +7,7 @@ import { existsSync, lstatSync, readdirSync, readFileSync, statSync } from "node
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
+import { namedAddressOf } from "spell/server/hostNames.ts"
 import { openInChromeTab } from "spell/server/open"
 import { RealPath, pathInside } from "spell/server/RealPath"
 import {
@@ -564,6 +565,17 @@ export function ensurePageServer() {
 }
 
 /**
+ * Where this checkout's pages are OPENED:  a worktree's by its name through main's page server,
+ * `http://<w>.localhost:4747` (`SRV.namedAddressOf()`, epic `epic-engine` T167), else `served.base`, its own page
+ * server's (`ensurePageServer()`), as main's own pages
+ * - `secure`:  `false` for plain HTTP (VS Code's side bar);  default:  as main's page server speaks
+ * - main's page server down:  `served.base`;  `undefined` with neither
+ */
+export function openerBase(served, { secure } = {}) {
+  return (served && namedAddressOf(ROOT, { secure })) ?? served?.base
+}
+
+/**
  * The machine's epic server (`epic hub`, spell-epic's `bin/epic`), started in the background if it isn't running,
  * as this checkout's page server:  `{ base, port }`, `base` the URL this repo's content is served at
  * (`http://127.0.0.1:4848/r/<repo>`, or the server's root for the default repo), so `serverUrl()` works unchanged:
@@ -702,7 +714,8 @@ export async function openInVSCode(file, { hash, query, view } = {}) {
       if (!/^no window/.test(error.message)) console.error(`${error.message}:  falling back to the vscode:// URI`)
     }
   }
-  const url = served && `${serverUrl(served.base, path)}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`
+  const base = openerBase(served, { secure: false })
+  const url = base && `${serverUrl(base, path)}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`
   const params = new URLSearchParams({ ...(url && { url }), file: path, ...(view && { view }) })
   const editor = EpicConfig.of(ROOT).editor
   const run = editor.run(["--open-url", `${editor.url(DOC_PREVIEW)}?${params}`])
@@ -714,7 +727,8 @@ export async function openInVSCode(file, { hash, query, view } = {}) {
 
 /**
  * Show `file` in Chrome, in ONE tab per page, IN THE BACKGROUND:  `epic pages open <page>`;  `openInVSCode()`'s fallback.
- * - from this checkout's page server (live reload), started if need be;  `file://` if it can't start
+ * - from this checkout's page server (live reload), started if need be, a worktree's at its name (`openerBase()`);
+ *   `file://` if it can't start
  * - The tab is keyed by the page's path (`/epics/<name>/<name>.plan.html`:  `pagePath()`), not its full URL.
  *   - so the same page from another checkout (a worktree) reuses it:  re-pointed if the URL differs, else reloaded
  *   - the page names its tab the same way (`spell-doc-runtime.js` `window.name`;  links use that `target`)
@@ -728,8 +742,8 @@ export async function openInVSCode(file, { hash, query, view } = {}) {
  */
 export function openInChrome(page, { hash, query } = {}) {
   const file = inContent(page)
-  const served = ensurePageServer()
-  const url = served ? serverUrl(served.base, file) : pathToFileURL(resolve(file)).href
+  const base = openerBase(ensurePageServer())
+  const url = base ? serverUrl(base, file) : pathToFileURL(resolve(file)).href
   openUrlInChrome(`${url}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`, `/${pagePath(file)}`)
 }
 

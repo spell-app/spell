@@ -4,6 +4,7 @@ import { $fetch } from "spell/util"
 import { SP } from "spell/parser/spell"
 import { SPACES } from "spell/app/spaces"
 import { appTexts } from "spell/app/app/ui/AppTexts"
+import { leaveEditor } from "spell/app/app/editorTab"
 import { SpellPage, trackProjectRoot } from "spell/app/app/solid"
 import { ChooserToolbar, GroupCards, HomeSection, OrgSection } from "./ProjectChooser"
 
@@ -113,6 +114,7 @@ function showsOwnPage(group: SP.ProjectRootPath): void {
   } catch {
     return
   }
+  leaveEditor()
   location.reload()
 }
 

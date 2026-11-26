@@ -119,7 +119,10 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
           a ticked box while on
         - the Phases section's:  "Show each phase's files", "Show each phase's checks" (the Files / Verify toggles
           before, their memory kept);  each phase's:  "Show this phase's files", "Show this phase's checks", which win
-          over the section's for that phase
+          over the section's for that phase;  then, on a to-do phase while the page is reviewed (epic `epic-engine`
+          T169), its marks:  "Defer this phase" (the Defer pill until then) and, never started (no commits, nobody at
+          work on it), "Remove this phase", each ticked while it waits for Send and picked again to take it back;
+          Remove's notice has Undo
         - one `PhaseFields` per page holds both, remembered per page in this browser;  a pick for every phase forgets
           each phase's own choice of that field
         - its entries are a LIST the element builds (`GearEntry`):  a new setting is one more entry
@@ -127,8 +130,10 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
           badges into that menu")
       - its cursors (I161;  "pointer when over content in these headers, drag cursor when over whitespace"):
         the fold button is only as wide as its chevron, icon and title;  the pointer over those, the badge and the
-        buttons;  over the row's empty space, the pointer too (a click there folds it, `onTitleRowClick()`), but the grab
-        cursor on a to-do phase while the page is reviewed (`PhaseDrag`), grabbing while one is dragged
+        buttons;  over the row's empty space, the pointer too (a click there folds it, `onTitleRowClick()`);  but on a
+        to-do phase while the page is reviewed, the grab cursor over its chevron, icon, title and empty space, where a
+        press drags it (`PhaseDrag`;  I480:  "you don't see the drag cursor when over the phase title"), grabbing while
+        one is dragged
       - CSS and the elements' own drawing only:  the page's markup is unchanged, so no migration step
       - NOT `<ui-section>` on guides:  at phone width a title there still runs on under its buttons,
         fading out (`spell-doc.css`;  2026-10-10:  "stay in place and overlap")
@@ -760,6 +765,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         unless another listener holds it
       - says what's waiting, the `📬` line to print, its `batch`, which files to watch, and when to look again
       - "start review" asked for (`reviewAsked`):  waiting too, its line asking for `/epic review` (I144)
+      - the gear's Tidy (`tidyAsked`, epic `epic-engine` T168):  the same, its line asking for `/epic tidy`
     - `InboxPoller`:  the poller itself (epic `epic-engine` P19), run by [listen.mjs](../monitors/listen.mjs)
       - [InboxPoller.mjs](tool/InboxPoller.mjs)
       - started by the plugin's `Stop` hook at each turn's end, in every session (`--hook`, `asyncRewake`):  it prints
@@ -1605,7 +1611,11 @@ In `tools/`:
             and "Theme · Paper" (Spell UI's `<ui-theme-menu show="menu" bench="none">`)
           - each sub-menu to the left of its row, under it when narrow;  the arrow keys, Enter, Space and Escape
             move through them
-          - while reviewed, FOCUS MODE first (epic `epic-engine` P57;  2026-10-30:  "a mode where I can quickly
+          - while reviewed, TIDY first (epic `epic-engine` T168;  Owen:  "In the gear menu, add an entry at the top to
+            run epic tidy"):  asks the epic's session to run `/epic tidy <epic>`, as the pill asks for a review
+            (`ReviewClient.startReview("tidy")`), the notice saying what came of it;  its tooltip on its words, not the
+            row (the menu focuses its first row as it opens);  not on a saga page
+          - then FOCUS MODE (epic `epic-engine` P57;  2026-10-30:  "a mode where I can quickly
             walk through the open issues/questions/etc in a plan"):  `<epic-focus>`, drawn in the page's shadow root,
             never written in a page;  its Epic UI page, `/components/epics/epic-focus`
             - Spell UI's `<ui-modal fullscreen overlay>`, Escape and its × close it
@@ -2101,8 +2111,8 @@ the epic page shown in both tabs).
   - A PHASE's pills by where it stands (`<epic-phase>`'s `<epic-review buttons>`);  every button meaning "accept this" is a
     THUMBS UP (epic `epic-engine` I181;  2026-10-29:  the thumbs up "when it means 'accept this' rather than 'make
     this a todo'"):  Looks good, Accept plan, a plan accepted's state, Do this, the stage button
-    - while the page's phases are agreed (`stage="phases"`, P29):  Looks good (`approve`, noted) and Defer (`defer`,
-      moved after the others)
+    - while the page's phases are agreed (`stage="phases"`, P29):  Looks good (`approve`, noted);  Defer (`defer`,
+      moved after the others) is the phase's gear's since T169, as is Remove (`remove`, `PlanDoc.removePhase()`)
     - while Claude's build plan for it waits (`plan="waiting"`, epic `epic-engine` P33):  Accept plan (`approve`:
       `inbox apply` marks the plan accepted, "plan accepted:  build it") and Revisit
     - still to do, its plan accepted (`plan="accepted"`, epic `epic-engine` I140):  a green thumbs up, drawn as
@@ -2155,11 +2165,14 @@ the epic page shown in both tabs).
     - the page header, the Overview as a whole, a guide:  nothing new
   - A PHASE DRAGGED to another place (epic `epic-engine` P34;  the Phases section's `PhaseDrag`):  a to-do phase,
     by its title row, while the page is reviewed;  `{ action: "move", to }` under its id (`ReviewClient.move()`)
-    - a press that moves 6px is a drag, else a click (it folds);  a line shows where it would land, only where every
-      phase between is still to do;  Escape calls it off
+    - a press that moves 6px is a drag, else a click (it folds);  a line shows where it would land;  Escape calls it
+      off
     - the page moves it at once, and keeps it there (`ReviewClient.pendingMoves`) over live patches until applied
     - it waits for Send, as Defer does;  `epic inbox apply` moves it in the file (`PlanDoc.movePhase()`):  numbers,
       links and "P5 · Name" text follow;  dragged again, the newer mark replaces it
+    - only to-do phases trade places (`PhaseMoves`, I480):  a started or done one keeps its place and number, shown or
+      hidden by the filter;  aimed at its place, the phase lands on the nearest to-do place;  the page and the file
+      move by the same rule
   - A new item asked for from the page (epic `airplane` P2):  a todo, question, issue, manual test or phase;
     a mark under its own key, `new1` ...
     - `setNew()`:  `{ action: "new", kind, title, note?, near? }`
@@ -2241,6 +2254,9 @@ the epic page shown in both tabs).
   - `reviewAsked`:  "start review" pressed while the session's poller runs (epic `epic-engine` I144):  the poller's
     next look prints a `📬` line asking for `/epic review`, which wakes the session;  nothing typed.
     Gone once the session's own `epic inbox watch` listens.
+  - `tidyAsked`:  Tidy pressed in the page's gear (epic `epic-engine` T168), asked the same way (`POST
+    /api/epics/review/start` with `ask: "tidy"`;  no poller, `/epic tidy <epic>` typed into the session's tab):  its
+    `📬` line asks for `/epic tidy`.  Gone once the tidy starts:  its first step, `epic stale <epic>`, clears it.
   - `woken`:  the page server's last WAKE of the epic (epic `epic-workflow` P16), `{ at, state, did, message }`.
     - Send with nobody listening wakes it, inside the request:
       its session's poller told (`told`:  it hears the Send itself), `/epic review <epic>` typed into its session, or

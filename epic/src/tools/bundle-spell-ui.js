@@ -237,6 +237,8 @@ const ICONS = {
   "solid/unlock": ["unlock"],
   // an Epics card's star (`spell/epic/list/EpicCards`):  a favourite, or not;  the Favorites group's heading
   "solid/star": ["star"],
+  // the epic page gear's Tidy (epic `epic-engine` T168)
+  "solid/broom": ["broom"],
   "regular/star": ["star outline"],
   // epic pages' review (epic `review-review`):
   // section icons, the item action menu and filter, the page header's send / files / git buttons

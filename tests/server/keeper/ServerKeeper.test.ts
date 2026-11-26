@@ -102,6 +102,26 @@ describe("ServerKeeper:  every project's servers kept up (epic `epic-engine` P82
     expect(kept.dot()).toEqual({ dot: false })
   })
 
+  // epic `epic-engine` T167:  the Servers page links a worktree by its name, which starts it when it's stopped
+  it("a worktree's page server is at its name through main's page server, running or not", async () => {
+    const worktree = fakeWorktree(main, join(folder, "worktrees", "seo"))
+    writeFileSync(join(worktree, ".spell-server.json"), "{}\n")
+    writeFileSync(join(main, ".spell-server.json"), JSON.stringify({ pid: process.pid, port: 4747 }))
+    servers.running.add(worktree)
+    const kept = keeper()
+    await kept.look()
+    expect(rowOf(kept, "kit/seo/page server")).toMatchObject({
+      state: "running",
+      address: "http://seo.localhost:4747/"
+    })
+    servers.running.delete(worktree)
+    await kept.look()
+    expect(rowOf(kept, "kit/seo/page server")).toMatchObject({
+      state: "stopped",
+      address: "http://seo.localhost:4747/"
+    })
+  })
+
   it("a page open keeps a worktree's server up, however long since its last request", async () => {
     const worktree = fakeWorktree(main, join(folder, "worktrees", "seo"))
     writeFileSync(join(worktree, ".spell-server.json"), "{}\n")
@@ -110,6 +130,24 @@ describe("ServerKeeper:  every project's servers kept up (epic `epic-engine` P82
     servers.lastRequest.set(worktree, new Date(now - 3 * 3_600_000).toISOString())
     await keeper().look()
     expect(servers.running.has(worktree)).toBe(true)
+  })
+
+  it("a worktree marked in use (`epic turns` waiting or running there) keeps its server up, unused or not (I459)", async () => {
+    vi.stubEnv(SRV.KEEPER_HOME_VARIABLE, join(folder, "home"))
+    const worktree = fakeWorktree(main, join(folder, "worktrees", "seo"))
+    writeFileSync(join(worktree, ".spell-server.json"), "{}\n")
+    servers.running.add(worktree)
+    servers.lastRequest.set(worktree, new Date(now - 3 * 3_600_000).toISOString())
+    const done = SRV.CheckoutUse.hold(join(worktree, "src"), "epic turns:  yarn test")
+    try {
+      await keeper().look()
+      expect(servers.running.has(worktree)).toBe(true)
+    } finally {
+      done()
+      vi.unstubAllEnvs()
+    }
+    await keeper().look()
+    expect(servers.running.has(worktree)).toBe(false)
   })
 
   it("a project's own servers:  watched by port;  started by its command;  one without, down and shown", async () => {

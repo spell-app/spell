@@ -8,9 +8,12 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
+import { afterAll, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { PlanDoc } from "spell/epic/tool/PlanDoc"
+import { PlanDocCommands } from "spell/epic/tool/PlanDocCommands"
+import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
+import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
 import { StaleFacts } from "spell/epic/tool/StaleFacts"
 
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))
@@ -201,5 +204,24 @@ describe("StaleFacts", () => {
     expect(facts(id).settled).toBe(true)
     plan.item(id).setAttribute("review-as", "revisit")
     expect(facts(id).settled).toBe(false)
+  })
+})
+
+// epic `epic-engine` T168:  the gear's Tidy asks through the inbox;  `epic stale`, the tidy's first step, clears it
+describe("epic stale", () => {
+  test("a tidy asked for from the page's gear has started:  the inbox's tidyAsked cleared", async () => {
+    const content = join(root, "content")
+    const page = join(content, "epics", "x", "x.plan.html")
+    mkdirSync(join(content, "epics", "x"), { recursive: true })
+    writeFileSync(page, plan.toString())
+    const inboxFile = ReviewInbox.pathFor(page)
+    ReviewInbox.update(inboxFile, (inbox) => inbox.askTidy())
+    const owner = new PlanDocCommands({ files: new PlanDocFiles({ root, content }) })
+    const printed: string[] = []
+    vi.spyOn(owner, "print").mockImplementation((text) => void printed.push(text))
+    expect(await owner.run(["stale", "x", "--json"])).toBe(0)
+    expect(printed.length).toBe(1)
+    expect(ReviewInbox.read(inboxFile).tidyAsked).toBeNull()
+    rmSync(content, { recursive: true, force: true })
   })
 })

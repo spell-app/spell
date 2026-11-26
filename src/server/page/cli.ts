@@ -12,7 +12,7 @@
  * - `stop` -- stop it
  * - `status` -- JSON, or exit 1 when not running
  * - `url <file>` -- `start`, then print the URL that serves `file`
- *   - a worktree's file:  on the MAIN checkout's server (`/worktrees/<w>/...`),
+ *   - a worktree's file:  on the MAIN checkout's server, by the worktree's name (`https://<w>.localhost:4747/...`),
  *     when that one runs and serves worktrees (`SRV.mainServerUrl()`)
  *   - a file of the epic folder:  its path there (`/epics/...`), on the main checkout's server if it runs,
  *     else this checkout's (`SRV.contentPathOf()`)

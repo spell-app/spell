@@ -7,7 +7,7 @@
  * - `dropped`:  never built, and won't be (epic `epic-engine` I228;  from epic `atmosphere`'s r60, Owen, 2026-11-08:
  *   "P18 should show as 'done', or better, crossed out somehow"):  its row struck through, its Dropped field saying
  *   why (`Moved to P38`)
- *   - `epic move` won't renumber a started phase, so a phase moved after one is re-added there, and the old one dropped
+ *   - a phase never started is removed instead (`epic phase <epic>#P5 remove`, epic `epic-engine` T169)
  * - FINISHED (`isFinished()`):  `done` and `dropped`.  Everything that counts phases goes by it:  the next phase,
  *   `3/5 phases done`, what's left of the estimate, an epic being done, "While you were out".
  * - STATIC, pure, node-safe:  the elements, the epic tool and the lists alike read this ONE rule

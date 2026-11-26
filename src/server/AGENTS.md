@@ -211,6 +211,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     every start, so a link to them stays good;  forgotten when the worktree is removed (`forget()`)
     - `hostNames()`:  each checkout's two host names, `editor.localhost` and `editor--app.localhost`, which the page
       server's certificate lists (`hostNameOf()` makes a name one)
+  - [hostNames.ts](hostNames.ts) -- a WORKTREE'S ADDRESS BY NAME, the ONE maker of it (epic `epic-engine` T167):
+    `namedAddress(worktree, { port, secure, editor })`, `http://seo.localhost:4747` (`https://` while main speaks HTTPS,
+    `seo--app.localhost` its editor);  `namedAddressOf(path)` reads it off the path's main checkout's page server record
+    (`undefined` in main, or with main's server down);  `hostNameOf()` beside them
+    - who:  `HostRoutes`' names page, `mainServerUrl()`, the Servers page's worktree rows, spell-epic's openers
+      (`epic open`, `epic pages open`, `epic pages link`, the side bar's doc preview)
+    - node's modules, `checkout.ts` and `Heartbeat.ts` only:  plain `node` loads it as `spell/server/hostNames.ts`
   - `HostRoutes` -- ONE ADDRESS PER WORKTREE through main's page server (epic `editor` P49):  each request's name
     first, `<worktree>.localhost:4747` passed on to that worktree's page server, `<worktree>--app.localhost:4747` to its
     editor, websockets too (`WebServer.firstRoutes`, `upgrade(..., { first })`, before live reload)
@@ -261,6 +268,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - who beats:  a command run's wait, `epic ask wait`, `epic inbox wait`, `spell app changes wait`
     - beside it, the ONE process check:  `isProcessAlive(pid)`, `endProcess(pid, wait)` (`PidFile` re-exports them)
     - plain `node` loads it by its own name, `spell/server/Heartbeat`
+  - `CheckoutUse` -- a worktree marked IN USE by a program working in it (epic `epic-engine` I459):  a beat of its own
+    (`Heartbeat.hold()`), `~/.spell/in-use/<pid>-<n>.json`, `{ checkout, why }`;  the keeper never stops a marked
+    worktree's servers as unused
+    - who marks:  spell-epic's `Turns`, while an `epic turns` command waits in line or runs (a 30-minute wait in the
+      test line lost the editor its app tests needed)
   - `ServerLog` -- the page server's log (epic `epic-engine` T118):  a `Logger` (`spell/util/spell/Logger`, by file)
     whose lines a person reads in `.spell-server.log`
     - one per part, its prefix starting each line (`page server`, `bundles`, `projects`), its `SPELL_DEBUG`
@@ -276,7 +288,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - who:  live reload's watching half, the bundles' rebuild, the running epics, a command run's answers, the app's
       disk storage, `spell app watch`
   - [mainServer.ts](mainServer.ts) -- `mainServerUrl()`:  a worktree's file on the MAIN checkout's page server.
-    - A component set's page at its ADDRESS, `/worktrees/<w>/components/<set>/...` (`componentSetAddressOf()`, in
+    - BY THE WORKTREE'S NAME (`namedAddress()`, epic `epic-engine` T167):  `https://seo.localhost:4747/...` while main
+      speaks HTTPS, `{ secure: false }` for plain HTTP (VS Code's side bar);  `/worktrees/<w>/...` before
+    - A component set's page at its ADDRESS, `<w>.localhost:4747/components/<set>/...` (`componentSetAddressOf()`, in
       `page/settings.ts`;  epic `epic-engine` I136):  by its folder's path it loads none of its `_assets/`.
     - It asks that server for `/api/epics/running` (`RUNNING_EPICS_API`).
     - A file of the epic folder, by its own path (`.../spell.epics/epics/...`, as spell-epic hands them out):
@@ -340,6 +354,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Plain `node` loads it by path (epics' `EpicConfig`, for the hooks), so node built-ins only.
     - [Test helpers](test/checkouts.ts) that fake one:  `fakeMainCheckout()`, `fakeWorktree()`.
   - [proxy.ts](proxy.ts) -- `proxyTo()` / `proxyUpgrade()`:  HTTP and websockets to another local server
+    - the host asked for goes on as `X-Forwarded-Host`, its scheme as `X-Forwarded-Proto`:  a worktree reached by name
+      opens its pages in the browser by that name (spell-epic's `/api/docs/show`, `originOf()`;  epic `epic-engine` T167)
   - `WebServer` -- all of the above on node's HTTP server
     - with a `certificate`, HTTPS and HTTP/2 too, on the SAME port (epic `solid-2-final` P14):  each connection
       handed on by its first byte, a TLS hello to node's HTTP/2 server (`allowHTTP1`, so websockets still upgrade),
@@ -390,7 +406,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - NOT in the barrel, opt-in by path (WWOD §8 › "Barrels"):
   - `spell/server/keeper` -- Spell's SERVER KEEPER (epic `editor` P48;  the epic hub's `ServerKeeper` before):
     - `ServerKeeper`:  every main checkout's page server kept up on main's code, its editor through it, each worktree's
-      page server stopped after 30 minutes unused, the servers registered with it watched and started;  a look every
+      page server stopped after 30 minutes unused (never while `CheckoutUse` marks it in use), the servers registered with it watched and started;  a look every
       10 seconds;  its calls, `/api/servers/...` (the Servers tab's);  HTTPS (`HttpsSwitch`), hands off, Restart all
     - `KeeperList`:  what Spell's keeper keeps, `~/.spell/keeper.json5`:  main checkouts (`spell server start` in one
       adds it) and registered servers (`spell keeper add`);  worktrees come from git's own records, never a list

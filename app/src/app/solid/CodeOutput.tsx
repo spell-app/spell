@@ -48,21 +48,33 @@ function lookOf(target: OutputTarget) {
 /** The remembered value for no compiled code. */
 const NO_OUTPUT = "off"
 
-/** The preference that remembers which compiled code shows beside the code. */
+/** The preference that remembered which compiled code showed, for every project, before epic `editor` I366. */
 const OUTPUT_PREF = "codeOutput"
 editorPrefs.declare(OUTPUT_PREF, { oneOf: [NO_OUTPUT, ...(Object.keys(OUTPUT_TARGETS) as OutputTarget[])] })
 
-const [outputTarget, setOutputTarget] = createSignal<string>(editorPrefs.get<string>(OUTPUT_PREF) || NO_OUTPUT)
+/** The preference that remembers which compiled code shows, project by project:  its path => a target or `"off"`. */
+const OUTPUTS_PREF = "codeOutputs"
+editorPrefs.declare(OUTPUTS_PREF, { default: {} })
+
+/** What a project never shown or hidden here starts with:  what showed for every project before I366. */
+const startingTarget = editorPrefs.get<string>(OUTPUT_PREF) || NO_OUTPUT
+
+const [projectTargets, setProjectTargets] = createSignal<Record<string, string>>(
+  (editorPrefs.get(OUTPUTS_PREF) as Record<string, string> | undefined) ?? {}
+)
 
 /****************
  * ### `CodeOutputShown`
- * Which compiled code shows beside the code, if any:  none unless someone asks (Owen:  "Won't want to show output
- * language all the time, don't force it").  Remembered in the browser (`spellEditor:codeOutput`).
+ * Which compiled code shows in the code's column, if any, for the project open:  none unless someone asks
+ * (Owen:  "Won't want to show output language all the time, don't force it").
+ * - Shows whether or not the code does (epic `editor` I366):  the code closed, the compiled code has the column alone.
+ * - Remembered per project, in the browser, as the code's own button is (`CodeShown`, epic `editor` J49).
  ****************/
 export class CodeOutputShown {
-  /** The target showing;  `undefined`:  none (reactive). */
+  /** The target showing for the project open;  `undefined`:  none (reactive). */
   static get target(): OutputTarget | undefined {
-    const target = outputTarget()
+    const path = editor.project?.path
+    const target = (path && projectTargets()[path]) || startingTarget
     return target in OUTPUT_TARGETS ? (target as OutputTarget) : undefined
   }
 
@@ -71,11 +83,14 @@ export class CodeOutputShown {
     return CodeOutputShown.target ?? lastShown
   }
 
-  /** Show `target`'s code;  `undefined`:  hide it. */
+  /** Show `target`'s code for the project open;  `undefined`:  hide it. */
   static set(target: OutputTarget | undefined): void {
     if (target) lastShown = target
-    setOutputTarget(target ?? NO_OUTPUT)
-    editorPrefs.set(OUTPUT_PREF, target ?? NO_OUTPUT)
+    const path = editor.project?.path
+    if (!path) return
+    const targets = { ...projectTargets(), [path]: target ?? NO_OUTPUT }
+    setProjectTargets(targets)
+    editorPrefs.set(OUTPUTS_PREF, targets)
   }
 
   /** View › Compiled Code, and the top bar's button:  hide it, or show the one shown last (JavaScript the first time). */
@@ -85,12 +100,13 @@ export class CodeOutputShown {
 }
 
 /** The compiled code shown last, what View › Compiled Code shows again. */
-let lastShown: OutputTarget = CodeOutputShown.target ?? "js/solid"
+let lastShown: OutputTarget = startingTarget in OUTPUT_TARGETS ? (startingTarget as OutputTarget) : "js/solid"
 
 /****************
  * ### `<CompiledCodeButton>`
  * The top bar's compiled-code button, between the code's `</>` and Inspect app (epic `editor` T76):
- * shows the compiled code beside the code, or hides it, as View › Compiled Code does.
+ * shows the compiled code in the code's column, or hides it, as View › Compiled Code does;
+ * with the code closed, the compiled code has the column alone (epic `editor` I366).
  * - Its icon is the language it shows, `js` for JavaScript:  the one showing, else the one it'd show.
  * - Its tooltip says what a click does, "Show Compiled JavaScript" or "Hide Compiled JavaScript" (epic `editor` I230);
  *   its label names it, "Compiled JavaScript".
@@ -120,7 +136,7 @@ export function CompiledCodeButton(): JSX.Element {
 
 /****************
  * ### `<CodeOutputPane>`
- * The compiled code beside the code, read only:  a bar choosing its language, as every header, then the code.
+ * The compiled code, read only, beside the code or alone in its column:  a bar choosing its language, as every header, then the code.
  * - The project as `target` writes it, afresh after each compile, with its source map:  asked of the code's language
  *   service (`spell/codeWithMap`), the language worker's where it compiles the project (epic `solid-2-final` T36),
  *   else written from the page's own parse (`project.codeWithMapFor()`).

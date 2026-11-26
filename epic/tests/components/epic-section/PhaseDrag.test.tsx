@@ -58,18 +58,45 @@ describe("PhaseDrag (epic `epic-engine` P34)", () => {
     expect(host.querySelector("[data-drop], [data-dragged], [data-dragging]")).toBeNull()
   })
 
-  test("a done phase never drags;  nothing goes above one;  not while the page isn't reviewed", async () => {
+  test("a done phase never drags;  not while the page isn't reviewed", async () => {
     const host = await ElementFixture.render(SECTION)
     await ElementFixture.settle()
     const move = vi.fn()
     let reviewed = true
     undo = PhaseDrag.wire(host, { enabled: () => reviewed, move })
     dragTo(titleOf(host, "p-one"), topOf(host, "p-four"))
-    dragTo(titleOf(host, "p-three"), topOf(host, "p-one"))
     reviewed = false
     dragTo(titleOf(host, "p-three"), topOf(host, "p-two"))
     expect(order(host)).toEqual(["p-one", "p-two", "p-three", "p-four"])
     expect(move).not.toHaveBeenCalled()
+  })
+
+  test("dropped above a done phase:  as near as it goes, just after it;  the done one keeps its place", async () => {
+    const host = await ElementFixture.render(SECTION)
+    await ElementFixture.settle()
+    const move = vi.fn()
+    undo = PhaseDrag.wire(host, { enabled: () => true, move })
+    dragTo(titleOf(host, "p-three"), topOf(host, "p-one"))
+    expect(order(host)).toEqual(["p-one", "p-three", "p-two", "p-four"])
+    expect(move).toHaveBeenCalledWith("p-three", 2)
+  })
+
+  test("past done phases the filter HIDES (I480):  the to-do ones take each other's places around them", async () => {
+    const host = await ElementFixture.render(
+      `<epic-section id="phases" kind="phases">` +
+        `<epic-phase id="p-a" title="A" status="todo"></epic-phase>` +
+        `<epic-phase id="p-b" title="B" status="done" data-epic-filtered></epic-phase>` +
+        `<epic-phase id="p-c" title="C" status="todo"></epic-phase>` +
+        `<epic-phase id="p-d" title="D" status="done" data-epic-filtered></epic-phase>` +
+        `<epic-phase id="p-e" title="E" status="todo"></epic-phase>` +
+        `</epic-section>`
+    )
+    await ElementFixture.settle()
+    const move = vi.fn()
+    undo = PhaseDrag.wire(host, { enabled: () => true, move })
+    dragTo(titleOf(host, "p-e"), topOf(host, "p-a"))
+    expect(order(host)).toEqual(["p-e", "p-b", "p-a", "p-d", "p-c"])
+    expect(move).toHaveBeenCalledWith("p-e", 1)
   })
 
   test("the moves still waiting go back on top of the file's order (a live patch, the marks read again)", async () => {
