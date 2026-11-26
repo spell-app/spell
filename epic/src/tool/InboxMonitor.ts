@@ -7,6 +7,7 @@ import { SessionFolders } from "spell/epic/config/SessionFolders"
 import type { RunningSession } from "spell/epic/command/command.types"
 import { Sessions } from "spell/epic/command/Sessions"
 import { bareTitle } from "spell/epic/list/RunningEpics"
+import type { GearAsk } from "spell/epic/review/review.types"
 
 import { GuideSends } from "./InboxCommands"
 import { PlanDocFiles } from "./PlanDocFiles"
@@ -44,8 +45,10 @@ import { ReviewInbox } from "./ReviewInbox"
  *   - A review asked for from the page while the poller runs (`ReviewInbox.reviewAsked`, epic `epic-engine` I144):
  *     waiting too, its line asking for `/epic review <epic>` (`askNotice()`):  the page server tells the session
  *     through its poller rather than typing into its tab, which VS Code refuses while the tab is open.
- *   - A tidy asked for from the page's gear (`ReviewInbox.tidyAsked`, epic `epic-engine` T168):  the same, its line
- *     asking for `/epic tidy <epic>` (`tidyNotice()`);  a review asked for at the same time comes first
+ *   - Each ask from the page's gear (`ReviewInbox.gearAsks`):  the same, each its own line (`gearNotice()`)
+ *     - Tidy (epic `epic-engine` T168), Where are we?, Hush settled items, Start fresh, Merge and push (T174)
+ *     - a review asked for at the same time comes first;  then the asks in the order they were pressed
+ *     - SIDE EFFECT:  an ask's line said, the ask is gone (`ReviewInbox.askStarted()`):  the next look tells the next one
  *   - `batch`:  what's waiting, as one string, so a poller started after the line (the next turn's hook) never
  *     announces the same work twice
  * - NEVER throws:  a page or inbox it can't read is looked at again next time.
@@ -119,18 +122,20 @@ export class InboxMonitor {
       return { watch: [epic.inbox], waiting: false, recheckMs: LOCK_RECHECK_MS }
     const guideSends = epic.guides.newSends
     const hasWork = inbox.hasWork || Boolean(guideSends)
-    const waiting = hasWork || Boolean(inbox.reviewAsked || inbox.tidyAsked)
+    const gearAsk = inbox.firstAsk
+    const waiting = hasWork || Boolean(inbox.reviewAsked || gearAsk)
+    const notice = hasWork
+      ? InboxMonitor.notice(epic.name, InboxMonitor.summaryOf(inbox, Boolean(guideSends)))
+      : inbox.reviewAsked
+        ? InboxMonitor.askNotice(epic.name)
+        : gearAsk && InboxMonitor.gearNotice(epic.name, gearAsk)
+    // a gear ask is said once:  gone now, so the next look says the next one (held:  said again, the same batch)
+    if (!hasWork && !inbox.reviewAsked && gearAsk)
+      ReviewInbox.updateIfFree(epic.inbox, (box) => void box.askStarted(gearAsk))
     return {
       watch: [epic.inbox, ...epic.guides.files],
       waiting,
-      ...(waiting && {
-        notice: hasWork
-          ? InboxMonitor.notice(epic.name, InboxMonitor.summaryOf(inbox, Boolean(guideSends)))
-          : inbox.reviewAsked
-            ? InboxMonitor.askNotice(epic.name)
-            : InboxMonitor.tidyNotice(epic.name),
-        batch: InboxMonitor.batchOf(inbox, guideSends)
-      }),
+      ...(waiting && { notice, batch: InboxMonitor.batchOf(inbox, guideSends) }),
       recheckMs: RECHECK_MS
     }
   }
@@ -151,7 +156,9 @@ export class InboxMonitor {
       `now=${now}`,
       `cancel=${canceled}`,
       `ask=${inbox.reviewAsked ?? ""}`,
-      `tidy=${inbox.tidyAsked ?? ""}`,
+      `gear=${Object.entries(inbox.gearAsks)
+        .map(([ask, at]) => `${ask}@${at}`)
+        .join(",")}`,
       guideSends
     ].join(";")
   }
@@ -233,9 +240,12 @@ export class InboxMonitor {
     return `📬 ${name}:  the person pressed "start review" on the epic page.  Start it:  the /epic skill, \`/epic review ${name}\`.`
   }
 
-  /** The one line that tells the session the person pressed Tidy in epic `name`'s page gear (epic `epic-engine` T168). */
-  static tidyNotice(name: string): string {
-    return `📬 ${name}:  the person pressed Tidy on the epic page.  Run it:  the /epic skill, \`/epic tidy ${name}\` ("14. Tidy").`
+  /**
+   * The one line that tells the session the person pressed `ask` in epic `name`'s page gear, and what to run.
+   * - Tidy (epic `epic-engine` T168);  Where are we?, Hush settled items, Start fresh, Merge and push (T174)
+   */
+  static gearNotice(name: string, ask: GearAsk): string {
+    return `📬 ${name}:  the person pressed ${GEAR_NOTICES[ask](name)}`
   }
 }
 
@@ -306,6 +316,24 @@ const LOCK_RECHECK_MS = 1_000
 
 /** How many items `summaryOf()` names before counting the rest. */
 const SUMMARY_IDS = 6
+
+/**
+ * Each gear ask's line, after "the person pressed":  the row's name, then what to run (`gearNotice()`).
+ * - Merge and push is the person's go-ahead to push:  the tooling home's session is the one that pushes (the kit's
+ *   `AGENTS.md`, "Commands")
+ */
+const GEAR_NOTICES: Record<GearAsk, (name: string) => string> = {
+  tidy: (name) => `Tidy on the epic page.  Run it:  the /epic skill, \`/epic tidy ${name}\` ("14. Tidy").`,
+  status: () => `"Where are we?" on the epic page.  Post a short status:  the /wtf skill, \`/wtf\`.`,
+  hush: (name) =>
+    `"Hush settled items" on the epic page.  Run it:  the /epic skill, \`/epic hush ${name}\` ("17. Hush":  ` +
+    `the dry run first, then ask before greying).`,
+  fresh: () => `"Start fresh" on the epic page.  Run it:  the /epic skill, \`/epic fresh\` ("16. Fresh").`,
+  push: (name) =>
+    `"Merge and push" on the epic page:  their go-ahead to push.  Merge the finished work into main ` +
+    `(\`epic worktree merge-main\`, \`epic merge ${name}\`), push main to GitHub (\`git push origin main\`), ` +
+    `and say what was pushed.`
+}
 
 /** A mark's or request's action, as the page's button says it. */
 const ACTION_WORDS: Record<string, string> = {

@@ -814,6 +814,16 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       }
     },
     {
+      name: "retire",
+      usage: "[--dry-run]",
+      description:
+        "title the old sessions an /epic fresh replaced 🗄️ <epic> (replaced):  each epic keeps its newest and running ones",
+      example: "epic session retire --dry-run",
+      flags: {
+        "--dry-run": "only say what it would do"
+      }
+    },
+    {
       name: "window",
       usage: "[<pid>]",
       description: "the VS Code window id a process runs in (default this session's)",

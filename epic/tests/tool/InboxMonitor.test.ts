@@ -161,23 +161,55 @@ test("check:  a review asked for from the page is waiting, its own line;  gone o
   expect(ReviewInbox.read(inboxFile).reviewAsked).toBeNull()
 })
 
-// epic `epic-engine` T168:  the gear's Tidy asks the same way;  `epic stale`, the tidy's first step, clears it
-test("check:  a tidy asked for from the gear is waiting, its own line;  gone once the tidy starts", () => {
+// epic `epic-engine` T168, T174:  the gear's asks go the same way, each its own line, said once
+test("check:  a tidy asked for from the gear is waiting, its own line;  said once, then gone", () => {
   const each = monitor()
   each.check(MONITOR)
-  ReviewInbox.update(inboxFile, (box) => box.askTidy())
+  ReviewInbox.update(inboxFile, (box) => box.askFromGear("tidy"))
   const found = each.check(MONITOR)
-  expect(found).toMatchObject({ waiting: true, notice: InboxMonitor.tidyNotice("x") })
-  expect(found.batch).toContain("tidy=")
-  expect(InboxMonitor.tidyNotice("x")).toContain("/epic tidy x")
-  // a review asked for too:  its line first
-  ReviewInbox.update(inboxFile, (box) => box.askReview())
-  expect(each.check(MONITOR)).toMatchObject({ notice: InboxMonitor.askNotice("x") })
+  expect(found).toMatchObject({ waiting: true, notice: InboxMonitor.gearNotice("x", "tidy") })
+  expect(found.batch).toContain("gear=tidy@")
+  expect(InboxMonitor.gearNotice("x", "tidy")).toContain("/epic tidy x")
+  expect(ReviewInbox.read(inboxFile).gearAsks).toEqual({})
+  expect(each.check(MONITOR)).toMatchObject({ waiting: false })
+})
+
+test("check:  a review asked for too:  its line first;  the gear's ask waits for its turn", () => {
+  const each = monitor()
+  each.check(MONITOR)
   ReviewInbox.update(inboxFile, (box) => {
-    box.setListening("s1")
-    expect(box.tidyStarted()).toBe(true)
+    box.askFromGear("tidy")
+    box.askReview()
   })
-  expect(ReviewInbox.read(inboxFile).tidyAsked).toBeNull()
+  expect(each.check(MONITOR)).toMatchObject({ notice: InboxMonitor.askNotice("x") })
+  expect(ReviewInbox.read(inboxFile).gearAsks.tidy).toBeTruthy()
+  ReviewInbox.update(inboxFile, (box) => box.setListening("s1", undefined, process.ppid))
+  ReviewInbox.update(inboxFile, (box) => void (box.reviewAsked = null))
+  expect(each.check(MONITOR)).toMatchObject({ notice: InboxMonitor.gearNotice("x", "tidy") })
+})
+
+test("check:  several gear asks:  told one a look, in the order they were pressed", () => {
+  const each = monitor()
+  each.check(MONITOR)
+  ReviewInbox.update(inboxFile, (box) => {
+    box.askFromGear("push", "2026-11-26T10:02:00.000-05:00")
+    box.askFromGear("status", "2026-11-26T10:01:00.000-05:00")
+  })
+  expect(each.check(MONITOR).notice).toBe(InboxMonitor.gearNotice("x", "status"))
+  expect(each.check(MONITOR).notice).toBe(InboxMonitor.gearNotice("x", "push"))
+  expect(each.check(MONITOR)).toMatchObject({ waiting: false })
+})
+
+test("gearNotice:  each line names the row pressed and what to run", () => {
+  expect(InboxMonitor.gearNotice("x", "status")).toBe(
+    '📬 x:  the person pressed "Where are we?" on the epic page.  Post a short status:  the /wtf skill, `/wtf`.'
+  )
+  expect(InboxMonitor.gearNotice("x", "hush")).toContain('`/epic hush x` ("17. Hush"')
+  expect(InboxMonitor.gearNotice("x", "fresh")).toContain('`/epic fresh` ("16. Fresh")')
+  const push = InboxMonitor.gearNotice("x", "push")
+  expect(push).toContain("their go-ahead to push")
+  expect(push).toContain("`epic merge x`")
+  expect(push).toContain("`git push origin main`")
 })
 
 test("check:  a review asked AND work sent:  the work's line, which takes the session to its review anyway", () => {

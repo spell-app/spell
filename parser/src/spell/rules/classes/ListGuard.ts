@@ -172,7 +172,9 @@ export class ListGuard extends SpellStatement<"type|verb?|item?|when?|body?|neve
     const { item } = match.groups
     const word = item && `${item.value}`.toLowerCase()
     const desktop = word ? SP.Language.of(match.scope).words.desktopFileWords[word] : undefined
-    if (desktop && !match.scope.getType(SP.typeName(word!))) (match.data as ListGuardData).desktop = desktop
+    if (!desktop || match.scope.getType(SP.typeName(word!))) return
+    ;(match.data as ListGuardData).desktop = desktop
+    SP.SpellWarnings.noteFilesNotInPython(match)
   }
 
   /**

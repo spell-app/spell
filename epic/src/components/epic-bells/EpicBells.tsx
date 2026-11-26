@@ -39,9 +39,12 @@ export class DOMEpicBellsElement extends E.DOMElement<EpicBells> {
  * all of the things that are expensive / that someone might want to turn off and let's make a modal in the epic doc
  * gear menu to turn them on and off").
  * - Spell UI's `<ui-modal>`:  the browser's top layer;  its ×, Escape and Cancel drop what wasn't saved, Save keeps it
- * - TOKEN BURN, at the top, ONE row:  its name, then a three-stop `<ui-slider>` (Low, Medium, High) that sets the
- *   switches below at once (`BellSteps.withBurn()`);  a switch flipped while it's down shows a Custom chip beside its
- *   name (`BellSteps.burnShown()`), the only time it has one:  the slider shows the level itself (T171)
+ * - it fills the window (the side bar's pane, the browser's), 20px from each edge, at every size;  only its rows
+ *   scroll (T173)
+ * - TOKEN BURN, in the footer at the left, Cancel / Save at the right (T173):  its name, then a three-stop
+ *   `<ui-slider>` (Low, Medium, High), no tick marks, that sets the switches above at once (`BellSteps.withBurn()`);
+ *   a switch flipped while it's down shows a Custom chip beside its name (`BellSteps.burnShown()`), the only time it
+ *   has one:  the slider shows the level itself (T171)
  * - a section per group, in `BellSteps.STEPS`' order (by cost, the costliest first);  each row a toggle with its cost
  *   badge under it, in one column, then the bold title and one sentence, the full width left (T171)
  * - every rule is `BellSteps`':  this draws a DRAFT of the settings' `bells` group and asks it
@@ -74,7 +77,7 @@ export class EpicBells extends E.UIComponent<EpicBellsVocabulary> {
   /** Auto Send as changed here, not saved yet. */
   @E.state accessor autoSend: AutoSend = DEFAULT_AUTO_SEND
 
-  /** What's said under the slider:  loading, or why a save failed;  else nothing. */
+  /** What's said beside the slider:  loading, or why a save failed;  else nothing. */
   @E.state accessor note = ""
 
   /** A save is on its way. */
@@ -200,7 +203,6 @@ export class EpicBells extends E.UIComponent<EpicBellsVocabulary> {
         ref={(modal: HTMLElement) => this.adoptModal(modal)}
         class="bells-modal"
         part={this.partForName("base")}
-        size="small"
         closedby="closerequest"
         aria-label={this.translationForKey("heading")}
       >
@@ -218,12 +220,12 @@ export class EpicBells extends E.UIComponent<EpicBellsVocabulary> {
             />
           </div>
           <p class="lede">{this.translationForKey("lede")}</p>
-          {this.burn()}
           <div class="scroller">
             <For each={BellSteps.GROUPS}>{(group) => this.group(group)}</For>
             <p class="servers">{this.translationForKey("servers")}</p>
           </div>
           <div class="actions">
+            {this.burn()}
             <ui-button class="cancel" appearance="basic" onClick={() => this.close()}>
               {this.translationForKey("cancel")}
             </ui-button>
@@ -242,8 +244,8 @@ export class EpicBells extends E.UIComponent<EpicBellsVocabulary> {
   }
 
   /**
-   * The Token burn slider, one row:  its name (and Custom, once a switch was flipped below High), the three stops;
-   * under them only a note (loading, a refused save).
+   * The Token burn slider, the footer's left:  its name (and Custom, once a switch was flipped below High), the three
+   * stops;  under them only a note (loading, a refused save).
    */
   private burn(): JSX.Element {
     return (
@@ -267,7 +269,6 @@ export class EpicBells extends E.UIComponent<EpicBellsVocabulary> {
           max="2"
           step="1"
           labeled=""
-          ticked=""
           disabled={this.draft ? undefined : ""}
           step-labels={BellSteps.BURN_LEVELS.map((level) => this.translationForKey(level))}
           value={BellSteps.BURN_LEVELS.indexOf(this.draft?.burn ?? "high")}

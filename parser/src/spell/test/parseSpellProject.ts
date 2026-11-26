@@ -27,7 +27,8 @@ export function parseSpellProject(
   {
     parentScope = SP.Language.rootScopeFor(languagesOf(files)),
     projectPath = "/test-project",
-    natives = []
+    natives = [],
+    targets = []
   }: {
     parentScope?: P.Scope
     /** The project's address, for a line that reads it:  `@spell/examples/recipe-box`.  Default:  none. */
@@ -37,6 +38,8 @@ export function parseSpellProject(
      * (`SP.NativeCode`).  Default:  none.
      */
     natives?: SP.NativeSource[]
+    /** What its project file says it compiles to besides javascript, e.g. `["py"]`, for a line that warns.  Default:  none. */
+    targets?: string[]
   } = {}
 ): ParsedSpellProject {
   const projectScope = new P.ProjectScope({
@@ -45,6 +48,7 @@ export function parseSpellProject(
     parser: parentScope.parser!.clone({ module: projectPath }),
     parentScope
   })
+  SP.SpellWarnings.compilesTo(projectScope, targets)
   if (natives.length) SP.NativeCode.listIn(projectScope, SP.NativeCode.of(natives, projectPath.replace(/^\//, "")))
   const parsers = files.map(({ path, contents }) => parserFor(projectScope, path, contents))
 

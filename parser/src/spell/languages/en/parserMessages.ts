@@ -326,6 +326,12 @@ export const PARSER_MESSAGES = {
   "not-a-property-body-line":
     "Only a property's rules and aliases go under it:  this line still works, but write it after the property, not under it",
   /**
+   * A line about files from the person's computer (a file dropped on a view, the uploader's), in a project also
+   * compiled to Python (epic `language` I166):  that version never gets them.
+   */
+  "files-not-in-python":
+    "Your project is also set up to turn into a Python program, which runs outside a web page.  That version can't receive files from your computer, so this line does nothing there.  You don't need to change anything.",
+  /**
    * A drag line about a `file` or `folder`, in a program with its own type of that name (epic `language` P67, Q78):
    * the line is about the program's own things, never a file dragged in from the computer.
    */

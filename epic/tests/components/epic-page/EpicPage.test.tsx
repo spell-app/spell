@@ -1542,9 +1542,11 @@ describe("<epic-page> the header (P53)", () => {
   /** The gear's menu:  the button, the popup, its rows' words. */
   function gear(host: Element) {
     const shadow = host.shadowRoot!
-    // the settings' rows;  Focus mode's, an action, apart (P57)
+    // the settings' rows;  the dialogs' (Tidy, Bells & Whistles, Focus mode) apart (P57, T173)
     const rows = () =>
-      Array.from(shadow.querySelectorAll<HTMLButtonElement>('[part~="gear-row"]:not(.focus-row, .tidy-row)'))
+      Array.from(
+        shadow.querySelectorAll<HTMLButtonElement>('[part~="gear-row"]:not(.focus-row, .tidy-row, .bells-row)')
+      )
     return {
       button: shadow.querySelector<HTMLButtonElement>('[part~="gear"]')!,
       focusRow: () => shadow.querySelector<HTMLButtonElement>(".focus-row"),
@@ -1646,7 +1648,10 @@ describe("<epic-page> the header (P53)", () => {
     it.button.click()
     await vi.waitFor(() => expect(it.menu.matches(":popover-open")).toBe(true))
     const row = it.focusRow()!
-    expect([row.textContent, row.previousElementSibling]).toEqual(["Focus mode", it.tidyRow()])
+    // Owen's order (T173):  Tidy, Bells & Whistles, Focus mode, a divider, Auto Send, Theme
+    const order = Array.from(row.parentElement!.children, (child) => child.getAttribute("value") ?? child.localName)
+    expect(order).toEqual(["tidy", "bells", "focus", "ui-divider", "autoSend", "theme"])
+    expect(row.textContent).toBe("Focus mode")
     row.click()
     const focus = host.shadowRoot!.querySelector<HTMLElement & { open: boolean; close(): void }>("epic-focus")!
     await vi.waitFor(() => expect(focus.open).toBe(true))
