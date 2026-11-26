@@ -72,7 +72,7 @@ export class PlaceReferenceSource implements ReferenceSource {
    * - NEVER throws.
    */
   static async at(path: string, say: Say): Promise<PlaceReferenceSource | undefined> {
-    const place = await PlaceReferenceSource.placeAt(path)
+    const place = await PlaceReferenceSource.placeAt(path, { withDeployments: true })
     if (!place) return undefined
     const spellPath = path.replace(/\.json5$/, ".spell")
     const text = spellPath === path ? undefined : await textAt(spellPath)
@@ -80,18 +80,24 @@ export class PlaceReferenceSource implements ReferenceSource {
   }
 
   /**
-   * The place whose description is at `path`, read over the page server:  its name, its description, where it runs.
+   * The place whose description is at `path`, read over the page server:  its name, its description, and, asked
+   * `withDeployments`, where it runs.
    * - Its project is the folder it's in.
+   * - Where it runs is in the project's file:  one more request, so only the reference page asks for it,
+   *   never the Data tab, for each place it lists (epic `data` I126).
    * - `undefined` when it won't load or parse, said in the console.
    * - NEVER throws.
    */
-  static async placeAt(path: string): Promise<PlaceOnServer | undefined> {
+  static async placeAt(
+    path: string,
+    { withDeployments = false }: { withDeployments?: boolean } = {}
+  ): Promise<PlaceOnServer | undefined> {
     const projectId = path.slice(0, path.lastIndexOf("/"))
     try {
       const text = await textAt(path)
       if (text === undefined) throw new Error("it isn't there")
       const description = JSON5.parse(text) as PlaceDescriptionOnDisk
-      const deployments = await deploymentsOf(projectId, description.about.name)
+      const deployments = withDeployments ? await deploymentsOf(projectId, description.about.name) : undefined
       return { name: description.about.name, path, description, ...(deployments && { deployments }) }
     } catch (error) {
       console.error(`PlaceReferenceSource:  couldn't read the place description ${path}`, error)
@@ -263,11 +269,13 @@ export class PlaceReferenceSource implements ReferenceSource {
       .map(([param, kind]) => `${param} (${kind})`)
       .join(", ")
     const isAsItsList = (operation.state?.is ?? "unverified") === (listState?.is ?? "unverified")
+    // a refused write's own words from its server, which no label's tooltip says:  `Tenant with this Name already exists`
+    const refused = operation.state?.is === "failed" ? operation.state.reason : undefined
     return {
       id: `change:${list}:${name}`,
       name,
       code: `${operation.method} ${operation.at}`,
-      says: params ? [this.say("takes", { params })] : [],
+      says: [...(params ? [this.say("takes", { params })] : []), ...(refused ? [refused] : [])],
       ...(!isAsItsList && { state: this.stateOf(operation.state) })
     }
   }
@@ -359,7 +367,10 @@ export type PlaceOnServer = {
   path: string
   /** What `spell place ingest` wrote of it. */
   description: PlaceDescriptionOnDisk
-  /** Where it runs, by name, as its project's file lists them (`dev`, `production`):  left out, none listed. */
+  /**
+   * Where it runs, by name, as its project's file lists them (`dev`, `production`):  left out, none listed, or not
+   * asked for (`placeAt()`'s `withDeployments`).
+   */
   deployments?: Record<string, Deployment>
 }
 
