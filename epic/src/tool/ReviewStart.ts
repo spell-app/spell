@@ -51,6 +51,7 @@ import { fileURLToPath } from "node:url"
 import { clockTime } from "spell/util/time"
 import { Processes } from "spell/server/Processes"
 import { RealPath } from "spell/server/RealPath"
+import { Bells } from "spell/epic/config/Bells"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
 
@@ -100,6 +101,8 @@ export type StartResult = {
  *   - `no-window`:  the one session titled for it has no window bridge (a terminal session)
  *   - `no-vscode`:  no VS Code window is open to start a session in
  *   - `failed`:  a window's bridge didn't answer, or refused
+ *   - `off`:  nobody listens, and Open a chat when no one is listening is off in Bells & Whistles (epic `epic-engine`
+ *     P86):  no session started, the message says so
  * - didn't try (`wakeFor()`'s claim):  `airplane`, `nothing-new`, or `already` (woken at `at`, nobody listening since)
  */
 export type WakeResult = {
@@ -110,6 +113,7 @@ export type WakeResult = {
     | "tab-open"
     | "no-vscode"
     | "failed"
+    | "off"
     | "airplane"
     | "nothing-new"
     | "already"
@@ -308,6 +312,8 @@ export class ReviewStart {
         const did = `typed ${command} into ${session.title}`
         return result("typed", did, `${sentence(did)}:  press Enter there.`, [session.title])
       }
+      if (!Bells.isOn("openChat", { cwd: this.mainRoot }))
+        return result("off", "", `${Bells.offLine("openChat")}:  type ${command} in a new session.`)
       if (existsSync(this.worktreeOf(epic))) {
         const window = this.worktreeWindowOf(epic)
         // nothing typed (I286):  its inbox poller, which the session's start runs, hears the Send and wakes it;

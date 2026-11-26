@@ -1,7 +1,8 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs"
-import { join } from "node:path"
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
+import { dirname, join } from "node:path"
 
 import { CLI } from "spell/cli"
+import { BellSteps } from "spell/epic/bells"
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 
 import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
@@ -21,6 +22,9 @@ import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
  *   or such a file on a skill that doesn't say so
  * - a front matter whose `name` isn't its folder's, or a description over `DESCRIPTION_LIMIT` characters
  * - the descriptions Codex lists over `LIST_BUDGET` characters, all told:  Codex cuts them past it
+ * - a Bells & Whistles step (`BellSteps.STEPS`, epic `epic-engine` P86) that nothing reads:  no skill or kit
+ *   instruction file names `bells.<key>`, and no code beside `Bells` asks for `"<key>"` (`bellsReaders`);  only
+ *   over the real skills, where those readers are
  *
  * - A Claude-only skill's own steps aren't checked one by one:  its first line says it all.
  * - SEE:  https://learn.chatgpt.com/docs/build-skills (the skill format, `agents/openai.yaml`, the list's budget)
@@ -31,8 +35,12 @@ export class SkillsCheck {
   /** the skills folder:  the plugin's `skills/` */
   readonly folder: string
 
-  constructor({ folder = SKILLS_FOLDER }: { folder?: string } = {}) {
+  /** where Bells & Whistles' steps are read:  folders and files;  none (made-up skills), no such check */
+  readonly bellsReaders: string[]
+
+  constructor({ folder = SKILLS_FOLDER, bellsReaders }: { folder?: string; bellsReaders?: string[] } = {}) {
     this.folder = folder
+    this.bellsReaders = bellsReaders ?? (folder === SKILLS_FOLDER ? BELLS_READERS() : [])
   }
 
   /** Run `epic skills <args>`;  resolves to the exit code:  1 with any problem. */
@@ -70,7 +78,30 @@ export class SkillsCheck {
         skill: "*",
         message: `the descriptions Codex lists come to ${used} characters, over its ${LIST_BUDGET}:  shorten some`
       })
+    problems.push(...this.unreadBells())
     return { folder: this.folder, skills, problems, budget: { used, limit: LIST_BUDGET } }
+  }
+
+  /**
+   * Each Bells & Whistles step nothing reads, as a problem:  its switch would do nothing.
+   * - read:  a text names `bells.<key>` (a skill's line, `epic settings bells.<key>`), or a code file that names
+   *   `Bells` names `"<key>"` (`Bells.isOn("<key>")`, `defaultSkipReason("<key>")`)
+   * - Auto Send's step is the page's own (`inBrowser`):  `<epic-bells>` reads it
+   */
+  private unreadBells(): SkillProblem[] {
+    if (!this.bellsReaders.length) return []
+    const texts = this.bellsReaders.flatMap(textsIn)
+    return BellSteps.SETTINGS_STEPS.filter(
+      ({ key }) =>
+        !texts.some(
+          ({ file, text }) =>
+            text.includes(`bells.${key}`) ||
+            (/\.(ts|mjs)$/.test(file) && /\bBells\b/.test(text) && text.includes(`"${key}"`))
+        )
+    ).map(({ key }) => ({
+      skill: "*",
+      message: `Bells & Whistles' ${key} is read nowhere:  check \`epic settings bells.${key}\` before the step it switches`
+    }))
   }
 
   /** The skills' folder names, sorted:  each folder holding a `SKILL.md`. */
@@ -238,3 +269,35 @@ const FRONT_MATTER = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/
 
 /** The plugin's skills:  `epic/skills/`. */
 const SKILLS_FOLDER = EngineFiles.path("skills")
+
+/**
+ * Where the real Bells & Whistles' steps are read:  the skills, the engine's code and hooks, and the kit's instruction
+ * files when there's a kit around it (a checkout;  not an npm install).
+ * - not the files that only LIST the steps:  their table, their words, the settings, the command
+ */
+const BELLS_READERS = () => {
+  const kit = dirname(EngineFiles.root)
+  return [
+    SKILLS_FOLDER,
+    EngineFiles.path("src"),
+    EngineFiles.path("hooks"),
+    join(kit, "CLAUDE.md"),
+    join(kit, "AGENTS.md")
+  ].filter((path) => existsSync(path))
+}
+
+/** The files that only list Bells & Whistles' steps:  never a reader. */
+const BELLS_LISTS =
+  /(BellSteps|EpicBells\.en|EpicBells|Bells|Settings|LayeredSettings)\.tsx?$|epic_settings\.json5$|__pack/
+
+/** Every text file in `path` (a file, or a folder walked), with its text. */
+function textsIn(path: string): { file: string; text: string }[] {
+  if (!statSync(path).isDirectory())
+    return BELLS_LISTS.test(path) ? [] : [{ file: path, text: readFileSync(path, "utf8") }]
+  return readdirSync(path, { withFileTypes: true }).flatMap((entry) => {
+    if (entry.name.startsWith(".") || entry.name === "node_modules" || entry.name === "demo") return []
+    const child = join(path, entry.name)
+    if (entry.isDirectory()) return textsIn(child)
+    return /\.(md|ts|tsx|mjs|js)$/.test(entry.name) ? textsIn(child) : []
+  })
+}

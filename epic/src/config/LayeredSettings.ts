@@ -1,7 +1,10 @@
+import { mkdirSync } from "node:fs"
 import { homedir } from "node:os"
-import { join } from "node:path"
+import { dirname, join } from "node:path"
 
 import { DataFile } from "spell/server/DataFile"
+import { FileLock } from "spell/server/FileLock"
+import { BellSteps, type BellsValues } from "spell/epic/bells/BellSteps.ts"
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 
 /****************
@@ -26,6 +29,9 @@ import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
  *   - a key no layer knows is skipped silently, so an older checkout reads a newer file
  *   - the kit's own file unreadable:  `BUILT_IN`, the same values
  * - Read fresh by `read()`:  nothing is cached, so an edit to a file counts at once.
+ * - ONE writer, `set()` (epic `epic-engine` P86):  the developer's file only, under its lock;  the page server's
+ *   `/api/epics/settings` and `epic settings <key> <value>` both call it.
+ * - An EMPTY object in `BUILT_IN` is a MAP:  any key, each value `true` or `false` (`bells.burnFlips`).
  * - Node only:  NOT in the `spell-epic` barrel, imported by path (`spell/epic/config/LayeredSettings`).
  * - Its position:  node's own modules and the kit's `DataFile`, so plain `node` can load it.
  ****************/
@@ -34,7 +40,15 @@ export class LayeredSettings {
   static readonly FILE = "epic_settings.json5"
 
   /** The values if the kit's own file can't be read;  and what says which keys there are, and their types. */
-  static readonly BUILT_IN: LayeredValues = { away: { finishedPhaseDays: 3 } }
+  static readonly BUILT_IN: LayeredValues = { away: { finishedPhaseDays: 3 }, bells: BellSteps.defaults() }
+
+  /** The keys whose text must be one of a few words. */
+  static readonly CHOICES: Readonly<Record<string, readonly string[]>> = { "bells.burn": BellSteps.BURN_LEVELS }
+
+  /** The folder holding the developer's `.spell/`:  `$SPELL_SETTINGS_HOME` (the tests' scratch one), else your home. */
+  static home(): string {
+    return process.env.SPELL_SETTINGS_HOME ?? homedir()
+  }
 
   /** The kit's own file:  worked out when read, as `EpicConfig.ENGINE_VOICES` is. */
   static get DEFAULT_FILE(): string {
@@ -53,9 +67,9 @@ export class LayeredSettings {
   /**
    * The settings in force, reading the three files now.
    * - `content`:  the epic repo's folder;  `undefined`:  no org layer
-   * - `home`:  the folder holding `.spell/`:  a test's own
+   * - `home`:  the folder holding `.spell/`:  a test's own;  default `home()`
    */
-  static read(content: string | undefined, { home = homedir() }: { home?: string } = {}): LayeredSettings {
+  static read(content: string | undefined, { home = LayeredSettings.home() }: { home?: string } = {}): LayeredSettings {
     return new LayeredSettings([
       { name: "default", file: LayeredSettings.DEFAULT_FILE },
       ...(content ? [{ name: "org" as const, file: join(content, LayeredSettings.FILE) }] : []),
@@ -65,6 +79,59 @@ export class LayeredSettings {
 
   private constructor(layers: Pick<SettingsLayer, "name" | "file">[]) {
     this.layers = layers.map((layer) => this.apply(layer))
+  }
+
+  /**
+   * Set `key` (dotted:  `bells.designReview`) to `value` in the DEVELOPER's file, `~/.spell/epic_settings.json5`,
+   * under its lock;  returns the settings as they read now.
+   * - a map (`bells.burnFlips`) takes a whole object of `true` / `false`, or one key of it (`bells.burnFlips.x`)
+   * - `undefined` takes the key out of the file:  the layer below stands
+   * - the file's comments kept (`DataFile.write()`)
+   * - throws `TypeError` for a key no layer knows, or a value of the wrong type, saying what it takes
+   * - SIDE EFFECT:  writes the developer's file (and its folder)
+   */
+  static set(key: string, value: unknown, options: LayeredSetOptions = {}): LayeredSettings {
+    return LayeredSettings.setMany({ [key]: value }, options)
+  }
+
+  /**
+   * `set()` for several keys at once, `{ "bells.burn": "low", ... }`:  one write, under one lock.
+   * - every value checked first:  one wrong, nothing written
+   */
+  static setMany(changes: Record<string, unknown>, { content, home = LayeredSettings.home() }: LayeredSetOptions = {}) {
+    for (const [key, value] of Object.entries(changes)) LayeredSettings.check(key, value)
+    const file = join(home, ".spell", LayeredSettings.FILE)
+    mkdirSync(dirname(file), { recursive: true })
+    const label = `epic settings ${Object.keys(changes).join(", ")}`
+    FileLock.run(file, () => DataFile.write(file, withChanges(DataFile.read<unknown>(file), changes)), { label })
+    return LayeredSettings.read(content, { home })
+  }
+
+  /** Throw a `TypeError` unless `value` is fit for `key`. */
+  private static check(key: string, value: unknown): void {
+    const names = key.split(".")
+    let wanted: unknown = LayeredSettings.BUILT_IN
+    let inMap = false
+    for (const name of names) {
+      if (inMap) {
+        wanted = false
+        inMap = false
+        continue
+      }
+      if (!isTree(wanted) || !(name in wanted)) throw new TypeError(`LayeredSettings.set():  no setting ${key}`)
+      wanted = wanted[name]
+      inMap = isMap(wanted)
+    }
+    if (value === undefined) return
+    if (isMap(wanted)) {
+      if (isBooleanMap(value)) return
+      throw new TypeError(`LayeredSettings.set():  ${key} takes an object of true or false`)
+    }
+    if (isTree(wanted)) throw new TypeError(`LayeredSettings.set():  ${key} is a group;  set one of its keys`)
+    if (!isValidValue(value, wanted) || !isChoice(key, value))
+      throw new TypeError(
+        `LayeredSettings.set():  ${key} takes ${describeValue(wanted, key)}, not ${JSON.stringify(value)}`
+      )
   }
 
   /** Which layer set `key` (`away.finishedPhaseDays`);  `built-in` when the kit's own file couldn't say. */
@@ -78,7 +145,7 @@ export class LayeredSettings {
     const walk = (values: SettingsTree, prefix: string) => {
       for (const [name, value] of Object.entries(values)) {
         const key = `${prefix}${name}`
-        if (isTree(value)) walk(value, `${key}.`)
+        if (isTree(value) && !isMap(valueAt(LayeredSettings.BUILT_IN, key.split(".")))) walk(value, `${key}.`)
         else entries.push({ key, value, source: this.sourceOf(key) })
       }
     }
@@ -109,14 +176,19 @@ export class LayeredSettings {
       if (!(name in raw)) continue
       const key = `${prefix}${name}`
       const given = raw[name]
-      if (isTree(wanted)) {
+      if (isMap(wanted)) {
+        if (isBooleanMap(given)) {
+          values[name] = { ...given }
+          this.sources.set(key, layer.name)
+        } else this.problem(layer, `${key} should be an object of true or false`)
+      } else if (isTree(wanted)) {
         if (isTree(given)) this.merge(values[name] as SettingsTree, given, wanted, `${key}.`, layer)
         else this.problem(layer, `${key} should be an object of settings`)
-      } else if (isValidValue(given, wanted)) {
+      } else if (isValidValue(given, wanted) && isChoice(key, given)) {
         values[name] = given
         this.sources.set(key, layer.name)
       } else {
-        this.problem(layer, `${key}:  ${JSON.stringify(given)} isn't a ${describeValue(wanted)}`)
+        this.problem(layer, `${key}:  ${JSON.stringify(given)} isn't ${describeValue(wanted, key)}`)
       }
     }
   }
@@ -138,6 +210,16 @@ export type LayeredValues = {
     /** how many days a finished phase (done or dropped), and a bedtime run's summary line, stay listed */
     finishedPhaseDays: number
   }
+  /** Bells & Whistles (epic `epic-engine` P86):  the steps' own switches, the Token burn slider and its flips */
+  bells: BellsValues
+}
+
+/** `set()`'s options:  the folders `read()` takes. */
+export type LayeredSetOptions = {
+  /** the epic repo's folder, for the settings returned;  none:  no org layer */
+  content?: string
+  /** the folder holding `.spell/`:  a test's own */
+  home?: string
 }
 
 /** A layer's name, lowest first. */
@@ -185,7 +267,49 @@ function isValidValue(given: unknown, wanted: unknown): boolean {
   return typeof given !== "number" || (Number.isFinite(given) && given >= 0)
 }
 
-/** What `wanted`'s type is, for a problem's words. */
-function describeValue(wanted: unknown): string {
-  return typeof wanted === "number" ? "number, 0 or more" : typeof wanted
+/** What `wanted`'s type is, for a problem's words:  `a number, 0 or more`, `one of low, medium, high`. */
+function describeValue(wanted: unknown, key: string): string {
+  const choices = LayeredSettings.CHOICES[key]
+  if (choices) return `one of ${choices.join(", ")}`
+  return typeof wanted === "number" ? "a number, 0 or more" : `a ${typeof wanted}`
+}
+
+/** `raw` (a settings file's data) with each dotted key of `changes` set, or taken out for `undefined`. */
+function withChanges(raw: unknown, changes: Record<string, unknown>): SettingsTree {
+  const tree: SettingsTree = isTree(raw) ? raw : {}
+  for (const [key, value] of Object.entries(changes)) {
+    const names = key.split(".")
+    let at = tree
+    for (const name of names.slice(0, -1)) {
+      if (!isTree(at[name])) at[name] = {}
+      at = at[name] as SettingsTree
+    }
+    const last = names.at(-1)!
+    if (value === undefined) delete at[last]
+    else at[last] = value
+  }
+  return tree
+}
+
+/** Is `given` one of `key`'s words, when it has a few? */
+function isChoice(key: string, given: unknown): boolean {
+  const choices = LayeredSettings.CHOICES[key]
+  return !choices || choices.includes(given as string)
+}
+
+/** An empty object in `BUILT_IN`:  a map of any keys. */
+function isMap(wanted: unknown): boolean {
+  return isTree(wanted) && Object.keys(wanted).length === 0
+}
+
+/** An object of `true` / `false`? */
+function isBooleanMap(given: unknown): given is Record<string, boolean> {
+  return isTree(given) && Object.values(given).every((value) => typeof value === "boolean")
+}
+
+/** The value at `names` in `tree`, or `undefined`. */
+function valueAt(tree: unknown, names: string[]): unknown {
+  let at = tree
+  for (const name of names) at = isTree(at) ? at[name] : undefined
+  return at
 }

@@ -32,6 +32,9 @@ try {
   if (CodexHome.skipPluginHook()) process.exit(0)
   const input = JSON.parse(readFileSync(0, "utf8") || "{}")
   const dir = input.tool_input?.path ?? input.cwd
+  // Notices at start off in Bells & Whistles (epic `epic-engine` P86):  nothing said
+  const { Bells } = await import("spell/epic/config/Bells.ts")
+  if (!Bells.isOn("startNotices", { cwd: dir })) process.exit(0)
   // loaded in here, so a config that won't read never fails the hook
   const { EpicConfig } = await import("spell/epic/config/EpicConfig.ts")
   const main = dir && EpicConfig.ofSetUp(dir)?.baseBranch

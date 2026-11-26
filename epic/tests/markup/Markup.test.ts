@@ -167,6 +167,7 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
   "epic-state-filter": { counts: "attention:1 open:4", shown: "open" },
   "epic-hidden-note": { count: 3 },
   "epic-focus": { for: "focus-sample" },
+  "epic-bells": {},
   "epic-threads": {},
   "epic-thread": {
     comment: '{"id":"c3","text":"Why?"}',

@@ -662,6 +662,8 @@ export class EpicConfig {
   /**
    * whether the prompt hook shows an "On it:  ..." line for a message sent while the session is busy
    * (`PromptAck`, epic `epic-engine` P18):  `promptAck`
+   * - DEPRECATED (epic `epic-engine` P86):  it moved to Bells & Whistles, `bells.promptAck` in the epic settings;  still
+   *   read, so a repo that turned it off here keeps it off
    */
   get promptAck(): boolean {
     return this.settings.promptAck

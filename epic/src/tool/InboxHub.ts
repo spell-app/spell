@@ -4,6 +4,7 @@ import { join } from "node:path"
 import { every } from "spell/util/timing"
 
 import type { RunningSession } from "spell/epic/command/command.types"
+import { Bells } from "spell/epic/config/Bells"
 import { Sessions } from "spell/epic/command/Sessions"
 
 import { InboxMonitor } from "./InboxMonitor"
@@ -26,6 +27,7 @@ import { WakeNotes } from "./WakeNotes.mjs"
  *     a poller that looks at the inbox itself (one started before T163, or while no hub ran)
  * - Work waiting:  a NOTE for the session (`WakeNotes.leave()`), once per batch, with the `📬` line;  the session's
  *   poller takes it while it's idle and wakes it, the `PostToolUse` hook while it's at work, at its next tool call
+ *   - none while Bells & Whistles has `wakeQuietChat` (idle) or `passSendToBusy` (busy) off:  the Send waits
  *   - nothing waiting any more (the session took the work):  its note goes (`clear()`)
  * - So a session never runs a `wait` of its own in the background, and nothing times out:  no turn is ever woken with
  *   nothing to do.
@@ -43,6 +45,8 @@ export class InboxHub {
   private readonly hearsHub: (sessionPid: number) => boolean
   /** the clock, ms */
   private readonly now: () => number
+  /** whether a Bells & Whistles step runs now, for a session started in `cwd` */
+  private readonly isOn: (key: string, cwd: string | undefined) => boolean
   /** what the last look at each session found, by session id */
   private readonly known = new Map<string, LastLook>()
   /** stops the timer, once started */
@@ -52,12 +56,14 @@ export class InboxHub {
     sessions = new Sessions(),
     notes = new WakeNotes(),
     hearsHub = listenerHearsHub,
-    now = Date.now
+    now = Date.now,
+    isOn = (key, cwd) => Bells.isOn(key, { cwd })
   }: InboxHubProps = {}) {
     this.sessions = sessions
     this.notes = notes
     this.hearsHub = hearsHub
     this.now = now
+    this.isOn = isOn
   }
 
   /** Start listening:  the hub's record written (`WakeNotes.writeHub()`), a look now, then every `LOOK_SECONDS`. */
@@ -77,6 +83,13 @@ export class InboxHub {
   /** One look at every running session that's due one.  NEVER throws. */
   look(): void {
     try {
+      // Watch for your Sends off in Bells & Whistles (epic `epic-engine` P86):  no look, said once
+      if (!this.isOn("watchSends", undefined)) {
+        if (!this.saidOff) console.error(`inbox hub:  ${Bells.offLine("watchSends")}`)
+        this.saidOff = true
+        return
+      }
+      this.saidOff = false
       const running = this.sessions.running()
       for (const session of running.values()) this.lookAt(session)
       for (const id of this.known.keys()) if (!running.has(id)) this.known.delete(id)
@@ -85,6 +98,9 @@ export class InboxHub {
       console.error("inbox hub:  a look failed;  the next one still comes", error)
     }
   }
+
+  /** Said that Watch for your Sends is off, once while it stays off. */
+  private saidOff = false
 
   /** Look at `session`'s epic, when it's due:  listen for it, and leave or clear its note. */
   private lookAt(session: RunningSession): void {
@@ -108,9 +124,12 @@ export class InboxHub {
       next: this.now() + Math.min(found.recheckMs, MAX_RECHECK_MS)
     })
     if (!found.epic) return
-    if (found.waiting && found.notice && found.batch)
-      this.notes.leave(id, { epic: found.epic, batch: found.batch, notice: found.notice })
-    else if (!found.waiting) this.notes.clear(id)
+    if (found.waiting && found.notice && found.batch) {
+      // Bells & Whistles (epic `epic-engine` P86):  a busy session takes the note at its next tool call (Pass a Send to
+      // a busy chat), an idle one is woken by it (Wake a quiet chat);  either off, no note:  the person's Send waits
+      if (this.isOn(session.status === "busy" ? "passSendToBusy" : "wakeQuietChat", session.cwd))
+        this.notes.leave(id, { epic: found.epic, batch: found.batch, notice: found.notice })
+    } else if (!found.waiting) this.notes.clear(id)
   }
 }
 
@@ -122,6 +141,8 @@ export type InboxHubProps = {
   notes?: WakeNotes
   /** whether session process `pid`'s inbox poller hears the hub;  default `listenerHearsHub()` */
   hearsHub?: (sessionPid: number) => boolean
+  /** whether Bells & Whistles step `key` runs now;  default `Bells.isOn()` */
+  isOn?: (key: string, cwd: string | undefined) => boolean
   /** the clock, ms;  default `Date.now` */
   now?: () => number
 }

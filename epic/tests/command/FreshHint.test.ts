@@ -11,6 +11,7 @@ import { join } from "node:path"
 import { afterAll, beforeEach, expect, test } from "vite-plus/test"
 
 import { FreshHint } from "spell/epic/command/FreshHint"
+import { LayeredSettings } from "spell/epic/config/LayeredSettings"
 
 const repo = mkdtempSync(join(tmpdir(), "fresh-hint-repo-"))
 spawnSync("git", ["init", "-q", repo])
@@ -118,5 +119,14 @@ test("again at a break point, past the threshold, at most once per quarter hour;
   } finally {
     if (saved === undefined) delete process.env.CLAUDE_CONFIG_DIR
     else process.env.CLAUDE_CONFIG_DIR = saved
+  }
+})
+
+test("its switch off in Bells & Whistles (`bells.freshHint`):  no line", () => {
+  LayeredSettings.set("bells.freshHint", false)
+  try {
+    expect(new FreshHint({ marks }).answer(input(2), null)).toBeNull()
+  } finally {
+    LayeredSettings.set("bells.freshHint", undefined)
   }
 })

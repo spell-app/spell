@@ -290,7 +290,8 @@ It prints `true`:  steps 2, 4, 7 and 8 are the ones in "Finish, when the base br
    - NEVER `git -C <main checkout>` or `cd` there:  a worktree session refuses both.
      `main` itself moves in step 7.
    - First, the changelog, if the repo keeps one (its root `AGENTS.md` says where and how):
-     add or move this branch's entry.
+     add or move this branch's entry;  unless `epic settings bells.changelog` says `off` (Bells & Whistles, epic
+     `epic-engine` P86):  then say `Keep the list of changes:  off in Bells & Whistles` instead.
      - It's in the epic repo:  write it straight in, nothing to commit on the branch for it.
      - It's committed for you at the turn's end.
    - A worktree cut before 2026-10-04:  `epic shared migrate <name>` first.

@@ -11,7 +11,8 @@ in a big folder, its own (`ui/AGENTS.md` ...), then its sub-folder's (`parser/sr
 
 The Claude-only rules, for every folder:
 
-In your own words, without jargon, narrate each step in the order it actually happens, and bold inline anything in the current PR that has drifted from my most recently stated intent.
+In your own words, without jargon, narrate each step in the order it actually happens, and bold inline anything in the current PR that has drifted from my most recently stated intent
+(the bold:  unless `epic settings bells.changesInBold` says `off`, Bells & Whistles).
 
 Questions that need a picture, or more than the AskUserQuestion modal holds (4 options per question, 4 questions):
 use `/details`, spell-epic's skill ([its folder](epic/skills/details/)).
