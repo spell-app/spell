@@ -3534,7 +3534,7 @@
           "ruleNames": ["file_upload_handler"],
           "internal": false,
           "file": "src/spell/rules/events/Uploading.ts",
-          "line": 50,
+          "line": 57,
           "purpose": "In a view's outline, after its `<ui-uploader>` posts each file, or fails to (epic `language` P67, r32; OK'd in epic `from-console` Q14).",
           "syntaxes": [
             {

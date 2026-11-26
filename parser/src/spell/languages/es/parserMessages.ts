@@ -21,6 +21,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     "Encanto no sabe qué campo nombra esto, así que {what} se lee entero:  nombra el campo con palabras si puedes",
   "read-whole-element-reads-it": "Encanto no ve qué lee de ello este elemento, así que {what} se lee entero",
   "read-whole-library-reads-it": "Encanto no ve qué lee esta biblioteca, así que {what} se lee entero",
+  "files-not-in-python":
+    "Tu proyecto también está preparado para convertirse en un programa de Python, que funciona fuera de una página web.  Esa versión no puede recibir archivos de tu computadora, así que esta línea no hace nada allí.  No necesitas cambiar nada.",
   "own-file-type":
     'Tu programa ya usa el nombre "{word}" para algo que crea.  Así que esta línea trata de esos, arrastrados dentro de tu programa, no de archivos arrastrados desde tu computadora.  Para recibir archivos de tu computadora, dale otro nombre a lo que creaste, como "mi {word}".',
   "say-is-able": 'Di "{line}":  "{old}" deja de funcionar en una versión próxima',

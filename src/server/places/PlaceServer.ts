@@ -6,6 +6,7 @@ import {
   type ListQuery,
   type Place,
   type PlaceChange,
+  type PlaceContext,
   type PlaceErrorCause,
   type PlaceErrorKind,
   type PlaceLines,
@@ -51,6 +52,8 @@ const STATUS_OF_KIND: Record<PlaceErrorKind, number> = {
  * - Answers:  refused 422, not found 404, out of date 409, too much 413;  anything else 500, which counts as no answer, so a change resends.
  *   - Refused as taken down (epic `atmosphere` P6):  451, `TAKEN_DOWN_STATUS`, still a refusal to `RemotePlace`.
  * - A change's `changeId` it has seen is made once:  it's answered with what it made.
+ * - Asked to make changes one at a time (`apply` with `oneAtATime`, epic `data` J304):  a failure says how many came
+ *   before it (`kept`), so the asker sends again only what it never tried.  A Python program's saves to a data folder.
  * - Each read stops as the asker hangs up.
  * - A place may be OPENED by its name, as it's first asked for, rather than listed (`open`):  a name then holds `/`s,
  *   an address, `/api/places/spaces/owen@spell/recipes/list` (the app's project data folders, epic `atmosphere` P1).
@@ -70,6 +73,8 @@ export class PlaceServer {
   private readonly prefix: string
   /** What each change's id made, by place:  oldest first. */
   private readonly changesMade = new Map<string, Map<string, PlaceRow | undefined>>()
+  /** A failure of `apply` with `oneAtATime`:  how many of the changes asked came before it, kept. */
+  private readonly keptBefore = new WeakMap<object, number>()
   /** Opens a place by its name, for one not in `places`. */
   private readonly open: PlaceServerProps["open"]
   /** Who's asking. */
@@ -170,11 +175,12 @@ export class PlaceServer {
   }
 
   /**
-   * `POST apply`:  `{ changes }` => an `ApplyAnswer`, and `versions`, by collection then id.
+   * `POST apply`:  `{ changes, oneAtATime? }` => an `ApplyAnswer`, and `versions`, by collection then id.
    * - A change whose id it's seen isn't made again.
+   * - `oneAtATime`:  each change made alone, in order;  a failure is answered with how many came before it, `kept`.
    */
   private async apply({ place, placeName, body, context }: PlaceAsk): Promise<object> {
-    const { changes } = body as { changes?: PlaceChange[] }
+    const { changes, oneAtATime } = body as { changes?: PlaceChange[]; oneAtATime?: boolean }
     if (!Array.isArray(changes)) throw new SRV.HttpError(400, "send JSON { changes }")
     if (!place.apply) {
       throw new PlaceError(`PlaceServer:  "${placeName}" can't be written`, {
@@ -183,11 +189,38 @@ export class PlaceServer {
     }
     const made = this.madeBy(placeName)
     const fresh = changes.filter(({ changeId }) => changeId === undefined || !made.has(changeId))
-    const answer = fresh.length ? await place.apply(fresh, context) : { rows: [] }
+    const answer = !fresh.length
+      ? { rows: [] }
+      : oneAtATime
+        ? await this.eachAlone(place, { changes, fresh, made }, context)
+        : await place.apply(fresh, context)
     this.remember(made, place, fresh, answer.rows)
     const seenAgain = changes.flatMap((change) => (fresh.includes(change) ? [] : (made.get(change.changeId!) ?? [])))
     const rows = [...answer.rows, ...seenAgain]
     return { ...answer, rows, versions: this.versionsAfter(place, changes) }
+  }
+
+  /**
+   * `fresh`, those of `changes` not made before, each made alone, in order:  what they made.
+   * - Each is remembered as made by `apply()`, once all are;  those before a failure, here.
+   * - throws what a change failed with, remembering what came before it as made (`keptBefore`)
+   */
+  private async eachAlone(
+    place: Place,
+    { changes, fresh, made }: EachAlone,
+    context: PlaceContext
+  ): Promise<{ rows: PlaceRow[] }> {
+    const rows: PlaceRow[] = []
+    for (const [index, change] of fresh.entries()) {
+      try {
+        rows.push(...(await place.apply!([change], context)).rows)
+      } catch (error) {
+        this.remember(made, place, fresh.slice(0, index), rows)
+        if (error instanceof Object) this.keptBefore.set(error, changes.indexOf(change))
+        throw error
+      }
+    }
+    return { rows }
   }
 
   /** `POST call`:  `{ name, input }` => `{ result }`. */
@@ -252,11 +285,13 @@ export class PlaceServer {
       status = PlaceServer.statusOf(error)
       const { kind, whyNot, needs } =
         error instanceof PlaceError ? (error.cause ?? {}) : ({} as Partial<PlaceErrorCause>)
+      const kept = error instanceof Object ? this.keptBefore.get(error) : undefined
       answered = {
         error: (error as Error).message,
         ...(kind && { kind }),
         ...(whyNot && { whyNot }),
-        ...(needs && { needs })
+        ...(needs && { needs }),
+        ...(kept !== undefined && { kept })
       }
       if (status >= 500 && !stop.signal.aborted) console.error(this.keys.scrubbed(`PlaceServer:  ${String(error)}`))
     }
@@ -339,6 +374,16 @@ export class PlaceServer {
       made.delete(oldest)
     }
   }
+}
+
+/** What `PlaceServer.eachAlone()` makes:  a request's changes, those not made before, and what each id made. */
+type EachAlone = {
+  /** every change asked, in order */
+  changes: readonly PlaceChange[]
+  /** those of them not made before */
+  fresh: readonly PlaceChange[]
+  /** what each change's id made, for the place */
+  made: Map<string, PlaceRow | undefined>
 }
 
 /** Constructor props of a `PlaceServer`. */

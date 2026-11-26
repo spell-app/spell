@@ -135,6 +135,26 @@ export class SpellWarnings {
     }
   }
 
+  /**
+   * Say which targets the project `scope` is for compiles to, from its project file (`SpellProject.getScope()`):
+   * a line may warn about what one of them can't do (`noteFilesNotInPython()`).
+   */
+  static compilesTo(scope: P.ProjectScope, targets: readonly string[]): void {
+    PROJECT_TARGETS.set(scope, targets)
+  }
+
+  /**
+   * On a line about files from the person's computer (a file dropped on a view, the uploader's), in a project also
+   * compiled to Python:  that version never gets them, so the line does nothing there (epic `language` I166, B).
+   * - The page can't hand a program running in Python the browser's own file, nor the uploader's events.
+   */
+  static noteFilesNotInPython(match: P.Match): void {
+    let at: P.Scope | undefined = match.scope
+    while (at && !(at instanceof P.ProjectScope)) at = at.parentScope
+    if (!at || !PROJECT_TARGETS.get(at)?.includes(PYTHON_TARGET)) return
+    SpellWarnings.note(match, SP.Language.of(match.scope).parserMessage("files-not-in-python"))
+  }
+
   /** Take back the warning `message` noted on `match` about itself. */
   private static forget(match: P.Match, message: string): void {
     const data = match.data as WarningsData
@@ -339,6 +359,12 @@ type WarningsData = {
 
 /** A warning as noted on a match:  `in()` reports it while `stillHolds()`, if given -- see `SpellWarnings.noteIf()`. */
 /** What each project's last compile noted through `SpellWarnings.readNoterFor()`, by its scope. */
+/** Each project's targets, from its project file, by its scope:  `compilesTo()`. */
+const PROJECT_TARGETS = new WeakMap<P.Scope, readonly string[]>()
+
+/** Python's target's name (`SP.TARGETS`). */
+const PYTHON_TARGET = "py"
+
 const READ_NOTED = new WeakMap<object, Array<[P.Match, string]>>()
 
 type NotedWarning = SP.SpellWarning & {

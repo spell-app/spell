@@ -27,6 +27,7 @@ import asyncio
 import json
 import os
 import re
+import secrets
 import threading
 import time
 import urllib.error
@@ -46,6 +47,8 @@ Change = dict[str, Any]
 
 # A row's id, in a place that isn't told otherwise.
 ID_FIELD = "id"
+# A change's own id, which the page server makes once however often it's sent (`PlaceServer`).
+CHANGE_ID_FIELD = "changeId"
 # The page server's address, `http://127.0.0.1:4747`:  `spell run --target py` sets it.
 SERVER_URL_VARIABLE = "SPELL_SERVER_URL"
 # The page server's write token, sent with each request:  `spell run --target py` sets it.
@@ -87,13 +90,18 @@ class PlaceError(Exception):
     - `why_not`:  for a refusal, what the place said:  `"owner"`, `"role"` ...
     - `has_kept_nothing`:  from a place that makes all or none, is it sure none of what was sent was kept?
       Then each change can be tried alone.
+    - `kept`:  from a place that says what it kept (`says_what_it_kept`), how many of the changes sent came before
+      this failure, kept:  the one after them failed, and the rest were never tried.  `None` when it doesn't say.
     """
 
-    def __init__(self, message: str, kind: str = "no answer", why_not: str | None = None) -> None:
+    def __init__(
+        self, message: str, kind: str = "no answer", why_not: str | None = None, kept: int | None = None
+    ) -> None:
         """A place's failure, `message` saying what it was and what to do."""
         super().__init__(message)
         self.kind = kind
         self.why_not = why_not
+        self.kept = kept
         self.has_kept_nothing = kind in NOTHING_KEPT
 
 
@@ -115,6 +123,8 @@ class PlaceBehind:
     kind = ""
     # is a send made all or none:  else each change is a send of its own, as a failure may follow some it kept
     makes_all_or_none = False
+    # does a failure say how many of the changes sent came before it, kept (`PlaceError.kept`):  then they go together
+    says_what_it_kept = False
     # what it can hold of Spell's two times (`created`, `modified`):  `EVERY_FIELD`, or those fields;  none by default
     times_held: str | Sequence[str] = ()
 
@@ -220,6 +230,9 @@ class ServerPlace(PlaceBehind):
     - `POST <address>/list` `{collection, query}`, `POST <address>/apply` `{changes}`, `POST <address>/call`.
     - With the page server's write token (`x-server-token`), on reads too:  its guard asks it of every request.
     - A program's lines go with each request (`lines`):  a CSV file's id column, the columns a line names.
+    - A data folder is sent its changes one at a time, in one request (`oneAtATime`, epic data J304):
+      it keeps what came before a refusal, and says how many that was (`says_what_it_kept`).
+    - Each change goes with an id of its own (`changeId`):  the page server never makes one twice.
     - Who's asking:  this machine's person, as the page server takes anyone with its token.
     - `post`:  sends a request, for a test to stand in for the server;  `urllib`'s by default.
     """
@@ -235,6 +248,7 @@ class ServerPlace(PlaceBehind):
         """The place at `address`, its whole URL, written with `token`."""
         self.kind = kind
         self.makes_all_or_none = kind in MAKES_ALL_OR_NONE
+        self.says_what_it_kept = not self.makes_all_or_none
         self.address = address
         self.token = token
         self.lines = dict(lines or {})
@@ -254,8 +268,13 @@ class ServerPlace(PlaceBehind):
         return list(answer.get("rows", [])) if isinstance(answer, dict) else []
 
     def apply(self, changes: list[Change]) -> None:
-        """Send `changes`, waiting for the server's answer:  what it refused, it says."""
-        self.ask("apply", {"changes": changes})
+        """Send `changes`, waiting for the server's answer:  what it refused, it says.
+
+        - SIDE EFFECT:  each change is given its `changeId` the first time it's sent, and keeps it.
+        """
+        for change in changes:
+            change.setdefault(CHANGE_ID_FIELD, f"py-{secrets.token_hex(8)}")
+        self.ask("apply", {"changes": changes, **({"oneAtATime": True} if self.says_what_it_kept else {})})
 
     def call(self, name: str, input: object) -> object:
         """Run the server side's operation `name`:  its result."""
@@ -291,7 +310,9 @@ def post_json(url: str, body: dict[str, object], headers: dict[str, str]) -> obj
         said = json_object_in(body_of(error, url))
         message = said.get("error") or f"the server answered {error.code}"
         kind = said.get("kind") or ("refused" if error.code in (401, 403) else "no answer")
-        raise PlaceError(f"{url}:  {message}", kind, said.get("whyNot")) from error
+        kept = said.get("kept")
+        kept = kept if isinstance(kept, int) and not isinstance(kept, bool) else None
+        raise PlaceError(f"{url}:  {message}", kind, said.get("whyNot"), kept) from error
     except (urllib.error.URLError, OSError) as error:
         raise PlaceError(f"{url}:  no answer ({error}):  is the page server running?  `spell server start`") from error
     except HTTPException as error:

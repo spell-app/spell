@@ -727,6 +727,82 @@ card.turnOver()
     await waitFor(() => moved()?.getAttribute("pile") === "DiscardPile#discard-pile")
   })
 
+  describe("a card dragged in Solitaire, and in Solitario, sends the page its drag events (epic `language` I171)", () => {
+    /** Drag `card` over `target` with the pointer, as a mouse does, and let go there. */
+    async function dragTo(card: HTMLElement, target: HTMLElement) {
+      const middle = (element: HTMLElement) => {
+        const box = element.getBoundingClientRect()
+        return { clientX: box.x + box.width / 2, clientY: box.y + box.height / 2 }
+      }
+      const send = (on: EventTarget, type: string, at: { clientX: number; clientY: number }) =>
+        on.dispatchEvent(
+          new PointerEvent(type, { bubbles: true, composed: true, pointerId: 7, pointerType: "mouse", ...at })
+        )
+      const [from, to] = [middle(card), middle(target)]
+      send(card, "pointerdown", from)
+      for (const step of [0.25, 0.5, 0.75, 1]) {
+        send(window, "pointermove", {
+          clientX: from.clientX + (to.clientX - from.clientX) * step,
+          clientY: from.clientY + (to.clientY - from.clientY) * step
+        })
+      }
+      send(window, "pointerup", to)
+      await ElementFixture.settle(document.body)
+    }
+
+    /** Run `source`, deal, drag the discards' top card over the first column:  the events `host` heard, in order. */
+    async function dragInto(source: SpellAppSource, tags: { column: string; discards: string }, names: string[]) {
+      const host = await mount(source)
+      await waitFor(
+        () =>
+          host.querySelectorAll(tags.column)[6]?.children.length === 7 &&
+          host.querySelector(tags.discards)?.children.length === 1,
+        10_000
+      )
+      await ElementFixture.settle(host)
+      const heard: Array<{ type: string; thing?: unknown; list?: unknown }> = []
+      const listen = (event: Event) => heard.push({ type: event.type, ...(event as CustomEvent).detail })
+      for (const name of names) host.addEventListener(name, listen)
+      const card = host.querySelector(tags.discards)!.lastElementChild as HTMLElement
+      const column = host.querySelector<HTMLElement>(tags.column)!
+      await dragTo(card, column)
+      for (const name of names) host.removeEventListener(name, listen)
+      return { heard, column }
+    }
+
+    test("Solitaire:  ui-dragged-over as the card comes over a column, then ui-dropped or ui-dragged-out, the card and the column in each", async () => {
+      const names = ["ui-dragged-over", "ui-dragged-out", "ui-dropped"]
+      const { heard } = await dragInto(
+        await solitaireSource(),
+        { column: "test-project-column", discards: "test-project-discard-pile" },
+        names
+      )
+      expect(heard[0]?.type).toBe("ui-dragged-over")
+      // the column takes it, or not, by Solitaire's own rule:  either way the page hears which
+      expect(["ui-dropped", "ui-dragged-out"]).toContain(heard.at(-1)?.type)
+      // the same card in each, and a pile:  on its way it may cross another pile, which hears it too
+      expect(new Set(heard.map((each) => each.thing)).size).toBe(1)
+      for (const each of heard) expect(each.list).toBeDefined()
+    })
+
+    test("Solitario, in Spanish:  the same events by their Spanish names", async () => {
+      const program = await snapshotText("Solitario", "Solitario.snapshot.js")
+      const words = (await import(
+        /* @vite-ignore */ new URL("../../spell/__examples__/Solitario/Solitario.es.snapshot.js", import.meta.url)
+          .pathname
+      )) as { words: SpellAppSource["words"] }
+      const names = ["arrastrado-sobre", "arrastrado-fuera", "soltado", "ui-dragged-over", "ui-dropped"]
+      const { heard } = await dragInto(
+        { ...source(program, "Solitario"), words: words.words },
+        { column: "test-project-columna", discards: "test-project-pila-de-descartes" },
+        names
+      )
+      expect(heard[0]?.type).toBe("arrastrado-sobre")
+      expect(["soltado", "arrastrado-fuera"]).toContain(heard.at(-1)?.type)
+      expect(heard.some((each) => each.type.startsWith("ui-"))).toBe(false)
+    })
+  })
+
   test('a viewable list\'s frame:  its cards in its <children/>, a child written in="header" in its <children name="header"/>', async () => {
     const host = await mount(source(CARD_TABLE, "Table"))
     type Element = HTMLElement & { ready: Promise<void> }

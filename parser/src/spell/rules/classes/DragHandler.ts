@@ -68,8 +68,11 @@ export class DragHandler extends SpellStatement<"item?|moment?|body?|over?"> {
     const { item } = match.groups
     const language = SP.Language.of(scope)
     const word = item && `${item.value}`.toLowerCase()
-    if (word && language.words.desktopFileWords[word] && scope.getType(SP.typeName(word)))
-      SP.SpellWarnings.note(match, language.parserMessage("own-file-type", { word }))
+    if (word && language.words.desktopFileWords[word]) {
+      if (scope.getType(SP.typeName(word)))
+        SP.SpellWarnings.note(match, language.parserMessage("own-file-type", { word }))
+      else SP.SpellWarnings.noteFilesNotInPython(match)
+    }
     return match
   }
 

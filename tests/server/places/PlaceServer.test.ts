@@ -226,6 +226,30 @@ describe("PlaceServer and RemotePlace", () => {
     expect(first.rows[0]).toMatchObject({ count: 1 })
   })
 
+  test("changes made one at a time say how many were kept before a failure;  sent again, none is made twice (epic `data` J304)", async () => {
+    const memory = new MemoryPlace({ collections: { n: [{ id: "a", count: 0 }] } })
+    const apply = vi.spyOn(memory, "apply")
+    const { port } = await placeServer({ n: memory })
+    const path = "/api/places/n/apply"
+    const changes = [
+      { kind: "update", collection: "n", id: "a", fields: { count: 1 }, changeId: "c-1" },
+      { kind: "update", collection: "n", id: "gone", fields: { count: 1 }, changeId: "c-2" },
+      { kind: "insert", collection: "n", id: "b", fields: { count: 2 }, changeId: "c-3" }
+    ]
+    const refused = await posted(port, path, { changes, oneAtATime: true })
+    expect(refused.status).toBe(404)
+    expect(JSON.parse(refused.text)).toMatchObject({ kind: "not found", kept: 1 })
+    expect(apply).toHaveBeenCalledTimes(2)
+    // what it never tried, and the one kept, sent again:  the kept one isn't made again
+    const again = await posted(port, path, { changes: [changes[0], changes[2]], oneAtATime: true })
+    expect(again.status).toBe(200)
+    expect(apply).toHaveBeenCalledTimes(3)
+    expect((await memory.list("n", {})).rows).toEqual([
+      { id: "a", count: 1 },
+      { id: "b", count: 2 }
+    ])
+  })
+
   test("changesSince goes through;  a place with none says so", async () => {
     const { remote, file } = await folder()
     const { version } = await remote.list("recipes", {}, {})
