@@ -6,7 +6,9 @@ import {
   readlinkSync,
   realpathSync,
   rmSync,
+  statSync,
   symlinkSync,
+  utimesSync,
   writeFileSync
 } from "node:fs"
 import { tmpdir } from "node:os"
@@ -150,5 +152,37 @@ describe("SessionFolders", () => {
     expect(SessionFolders.requeueTitle("untitled", home)).toBeNull()
     expect(SessionFolders.requeueTitle("none", home)).toBeNull()
     expect(SessionFolders.requeueTitle("../x", home)).toBeNull()
+  })
+
+  test("writeTitle():  a custom-title line on every copy of the transcript, its modified time kept (T175)", () => {
+    const home = join(HOME, "write")
+    for (const dir of ["-a", "-b"]) mkdirSync(join(home, "projects", dir), { recursive: true })
+    const line = JSON.stringify({ type: "custom-title", customTitle: "🚧 editor" })
+    // one copy ends its last line, the other doesn't
+    writeFileSync(join(home, "projects", "-a", "old.jsonl"), `${line}\n`)
+    writeFileSync(join(home, "projects", "-b", "old.jsonl"), line)
+    const then = new Date("2026-11-20T10:00:00Z")
+    for (const dir of ["-a", "-b"]) utimesSync(join(home, "projects", dir, "old.jsonl"), then, then)
+
+    // Claude Code's own copy beside one of them, which wins over the lines
+    mkdirSync(join(home, "projects", "-a", "old"))
+    writeFileSync(join(home, "projects", "-a", "old", "custom-title.json"), '{"customTitle":"🚧 editor"}')
+
+    const written = SessionFolders.writeTitle("old", "🗄️ editor (replaced)", home)
+    const sidecar = join(home, "projects", "-a", "old", "custom-title.json")
+    expect(written).toHaveLength(3)
+    expect(JSON.parse(readFileSync(sidecar, "utf8"))).toEqual({ customTitle: "🗄️ editor (replaced)" })
+    for (const path of written.filter((it) => it.endsWith(".jsonl"))) {
+      const lines = readFileSync(path, "utf8").trim().split("\n")
+      expect(lines.map((it) => JSON.parse(it))).toEqual([
+        { type: "custom-title", customTitle: "🚧 editor" },
+        { type: "custom-title", customTitle: "🗄️ editor (replaced)", sessionId: "old" }
+      ])
+      expect(statSync(path).mtimeMs).toBe(then.getTime())
+    }
+    expect(SessionFolders.customTitle("old", home)).toBe("🗄️ editor (replaced)")
+    // no transcript, a bad id:  nothing written
+    expect(SessionFolders.writeTitle("none", "x", home)).toEqual([])
+    expect(SessionFolders.writeTitle("../x", "x", home)).toEqual([])
   })
 })

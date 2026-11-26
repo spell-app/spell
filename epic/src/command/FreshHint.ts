@@ -6,7 +6,7 @@ import { Bells } from "spell/epic/config/Bells.ts"
 import { ClaudeHome } from "spell/epic/config/ClaudeHome.ts"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 import { EpicHome } from "spell/epic/config/EpicHome.ts"
-import { bareTitle } from "spell/epic/command/command.types.ts"
+import { bareTitle, isSupersededTitle } from "spell/epic/command/command.types.ts"
 
 /****************
  * ### `FreshHint`
@@ -139,8 +139,10 @@ export class FreshHint {
   /**
    * The epic a session works on, or `undefined`:  its title without its icon (`🚧 seo` -> `seo`), else its folder's
    * worktree, whichever has an epic page (as `InboxMonitor.epicOf()`).
+   * - a superseded session (`🗄️ seo (replaced)`, epic `epic-engine` T175):  none, though it sits in the worktree
    */
   static epicOf(cwd: string, title = ""): string | undefined {
+    if (isSupersededTitle(title)) return undefined
     const config = EpicConfig.of(cwd)
     const epics = join(EpicConfig.contentOf(cwd), "epics")
     for (const name of [bareTitle(title), config.worktreeNameOf(cwd)]) {

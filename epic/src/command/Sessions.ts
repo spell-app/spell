@@ -20,6 +20,7 @@ import {
   TITLE_ICONS,
   bareTitle,
   parseVerbArgs,
+  supersededTitle,
   type LiveSession,
   type NamedSession,
   type RunningSession,
@@ -60,6 +61,9 @@ import { Worktrees } from "./Worktrees"
  *     - reopening the work takes the ✅ off (`PromptGate`)
  *   - `icons [--dry-run]`:  queues, for every named session of this repo,
  *     the icon its work's state calls for (`workIcon()`)
+ *   - `retire [--dry-run]`:  titles every SUPERSEDED epic session of this repo `🗄️ <epic> (replaced)`:  each epic's
+ *     sessions titled `🚧 <epic>` but its newest, a running one, or one used in the last 10 minutes (`retirees()`;
+ *     epic `epic-engine` T175)
  *   - `window [pid]`:  the VS Code window id a process runs in (default this session's)
  *   - `transcript <id prefix>`:  another session's prompts, last reply and waiting question
  *   - `listen [--json] [--monitor <pid>]`:  ONE look at THIS session's epic page for it (`InboxMonitor`):  takes the
@@ -100,6 +104,8 @@ export class Sessions {
         return this.markDone(rest.join(" ").trim())
       case "icons":
         return this.refreshIcons(Boolean(flags.dryRun))
+      case "retire":
+        return this.retire(Boolean(flags.dryRun))
       case "window": {
         const window = Sessions.windowOf(rest[0] ? Number(rest[0]) : Sessions.thisPid())
         CLI.out(String(window ?? "none"))
@@ -121,7 +127,7 @@ export class Sessions {
       }
       default:
         throw new EpicCommandError(
-          `unknown verb '${verb}':  list, find, open, title, done, icons, window, transcript or listen`
+          `unknown verb '${verb}':  list, find, open, title, done, icons, retire, window, transcript or listen`
         )
     }
   }
@@ -295,6 +301,111 @@ export class Sessions {
         : "every named session already has its icon"
     )
     return EXIT.OK
+  }
+
+  /**
+   * `retire`:  title every superseded epic session of this repo `🗄️ <epic> (replaced)` (`supersededTitle()`), at once,
+   * in its transcript (`SessionFolders.writeTitle()`), and queued too (`queueTitle()`), so a resume keeps it.
+   * - which:  `retirees()`, over this repo's saved sessions (`saved()`) and the epics with a page
+   * - a session running by the time it's written (`running()`, looked at again) is left:  NEVER a running one
+   * - says each epic's count, what it keeps and why;  `dryRun`:  what it would do, writing nothing
+   * - why (Owen, 2026-11-26):  every `/epic fresh` left its old session in the panel's list as `🚧 <epic>`, several per
+   *   epic, days old, looking live
+   */
+  private retire(dryRun: boolean): number {
+    const live = this.running()
+    const epics = Sessions.epicNames(Git.mainRoot())
+    const plans = Sessions.retirees(
+      this.saved().map((it) => ({
+        id: it.id,
+        title: it.named ? it.title : "",
+        last: it.last,
+        running: live.has(it.id)
+      })),
+      { isEpic: (name) => epics.has(name) }
+    )
+    let retired = 0
+    for (const plan of plans) {
+      const kept = plan.keep.map((it) => `${it.id.slice(0, 8)} (${it.why})`).join(", ")
+      const verb = dryRun ? "would retire" : "retires"
+      CLI.out(`${plan.epic}:  keeps ${kept};  ${verb} ${plan.retire.length}`)
+      if (dryRun) {
+        for (const it of plan.retire) CLI.out(`  ${it.id.slice(0, 8)}  ${stamp(it.last)}`)
+        retired += plan.retire.length
+        continue
+      }
+      const title = supersededTitle(plan.epic)
+      for (const it of plan.retire) {
+        if (this.running().has(it.id)) {
+          CLI.out(`  ${it.id.slice(0, 8)} started running:  left as it is`)
+          continue
+        }
+        SessionFolders.writeTitle(it.id, title, this.home)
+        this.queueTitle(it.id, title)
+        retired++
+      }
+    }
+    if (!plans.length) CLI.out("no superseded epic sessions:  every epic has one session titled for it")
+    else
+      CLI.out(
+        `${retired} session${retired === 1 ? "" : "s"} ${dryRun ? "to retitle" : "retitled"} \`${supersededTitle("<epic>")}\`` +
+          (dryRun
+            ? ""
+            : ";  the Claude panel shows it once it reads its list again (reopen the list, or reload the window)")
+      )
+    return EXIT.OK
+  }
+
+  /**
+   * Which epic sessions are SUPERSEDED (epic `epic-engine` T175):  for each epic (`isEpic()`), its sessions titled
+   * `🚧 <epic>` or `<epic>` (a `custom-title`), in `sessions`;  an epic with none to retire is left out.
+   * - each epic KEEPS:
+   *   - its newest session (`last`):  the one a `/epic fresh` handed it to, or the one Owen works in
+   *   - every running one (`running`):  NEVER retitled, whatever its age
+   *   - one used in the last `quietMs` (10 minutes):  it may be starting, its process not in the registry yet
+   * - the rest it retires, newest first
+   * - a session listed twice (copied into two folders) is one, its latest `last` kept
+   * - static:  pure
+   */
+  static retirees(
+    sessions: RetireCandidate[],
+    { isEpic, now = Date.now(), quietMs = RETIRE_QUIET_MS }: RetireOptions
+  ): RetirePlan[] {
+    const byId = new Map<string, RetireCandidate>()
+    for (const it of sessions) {
+      const seen = byId.get(it.id)
+      byId.set(it.id, seen ? { ...seen, last: Math.max(seen.last, it.last), running: seen.running || it.running } : it)
+    }
+    const byEpic = new Map<string, RetireCandidate[]>()
+    for (const it of byId.values()) {
+      const name = bareTitle(it.title)
+      if (!name || !isEpic(name) || (it.title !== name && it.title !== `${TITLE_ICONS.active} ${name}`)) continue
+      byEpic.set(name, [...(byEpic.get(name) ?? []), it])
+    }
+    const plans: RetirePlan[] = []
+    for (const [epic, list] of [...byEpic].sort(([a], [b]) => a.localeCompare(b))) {
+      const ordered = [...list].sort((a, b) => b.last - a.last || b.id.localeCompare(a.id))
+      const keep: RetirePlan["keep"] = []
+      const retire: RetireCandidate[] = []
+      ordered.forEach((it, index) => {
+        if (it.running) keep.push({ id: it.id, why: "running" })
+        else if (index === 0) keep.push({ id: it.id, why: "newest" })
+        else if (now - it.last < quietMs) keep.push({ id: it.id, why: "used just now" })
+        else retire.push(it)
+      })
+      if (retire.length) plans.push({ epic, keep, retire })
+    }
+    return plans
+  }
+
+  /**
+   * The epics with a page in checkout `root`'s epic folder:  each `epics/<name>/` holding `<name>.plan.html`.
+   * - static:  about the epic folder, not Claude's
+   */
+  static epicNames(root: string): Set<string> {
+    const folder = join(EpicConfig.contentOf(root), "epics")
+    if (!existsSync(folder)) return new Set()
+    return new Set(readdirSync(folder).filter((name) => existsSync(join(folder, name, `${name}.plan.html`))))
   }
 
   /**
@@ -728,6 +839,40 @@ export type SessionsProps = {
   /** Claude Code's own folder;  default `ClaudeHome.home()` */
   home?: string
 }
+
+/** One saved session, for `Sessions.retirees()`. */
+export type RetireCandidate = {
+  /** its session id */
+  id: string
+  /** the title Owen gave it (its `custom-title`);  `""` for none */
+  title: string
+  /** when it was last used:  its transcript's modified time, in ms */
+  last: number
+  /** its process runs now (Claude Code's registry) */
+  running: boolean
+}
+
+/** What `Sessions.retirees()` takes besides the sessions. */
+export type RetireOptions = {
+  /** whether `name` is an epic's:  it has an epic page */
+  isEpic: (name: string) => boolean
+  /** now, in ms;  default `Date.now()` */
+  now?: number
+  /** a session used this recently is kept;  default `RETIRE_QUIET_MS` */
+  quietMs?: number
+}
+
+/** One epic's superseded sessions (`Sessions.retirees()`):  the ones to retitle, and the ones kept, with why. */
+export type RetirePlan = {
+  epic: string
+  /** kept as `🚧 <epic>`:  `running`, `newest` or `used just now` */
+  keep: { id: string; why: string }[]
+  /** to retitle `🗄️ <epic> (replaced)`, newest first */
+  retire: RetireCandidate[]
+}
+
+/** How recently a session must have been used for `epic session retire` to leave it:  10 minutes. */
+const RETIRE_QUIET_MS = 10 * 60_000
 
 /** The `TranscriptIndex`'s file, in Claude Code's folder (`Sessions.home`). */
 const TRANSCRIPT_INDEX = join("spell-epic", "transcript-index.json")

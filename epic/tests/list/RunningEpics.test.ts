@@ -461,6 +461,8 @@ describe("sessions titled for an epic", () => {
   it("names it as its bare title, or as a whole word;  never inside a longer name", () => {
     expect(titleNames("🚧 airplane", "airplane")).toBe(true)
     expect(titleNames("⏸️ airplane", "airplane")).toBe(true)
+    // a session an /epic fresh replaced (T175):  never the epic's
+    expect(titleNames("🗄️ airplane (replaced)", "airplane")).toBe(false)
     expect(titleNames("airplane", "airplane")).toBe(true)
     expect(titleNames("review the airplane epic", "airplane")).toBe(true)
     expect(titleNames("🚧 airplane-mode", "airplane")).toBe(false)
