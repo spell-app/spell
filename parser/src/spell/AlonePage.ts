@@ -11,8 +11,12 @@ import { SP } from "spell/parser/spell"
  */
 export class AlonePage implements P.FileHead {
   constructor(
-    /** The parser that read it:  its language makes the name's words singular. */
-    private readonly parser: SP.SpellParser,
+    /**
+     * The parser that read it:  its language makes the name's words singular.
+     * - Or what finds it, once it's needed (`declareIn()`):  a head read before the grammar loaded
+     *   (`SP.SpellProject.headFor()`).
+     */
+    private readonly reader: SP.SpellParser | (() => SP.SpellParser),
     /** The page's name, as its head says it:  `button usage`. */
     readonly words: string,
     /** Its file, as its `P.FileScope`'s `path`. */
@@ -31,7 +35,8 @@ export class AlonePage implements P.FileHead {
 
   /** SIDE EFFECT:  a type and its one instance, in `scope`:  journaled, so a re-parse takes them back. */
   declareIn(scope: P.Scope): void {
-    this.parser.inPlay(() => {
+    const parser = typeof this.reader === "function" ? this.reader() : this.reader
+    parser.inPlay(() => {
       scope.types!.add({ name: this.className, superType: "Page", alonePage: this.path })
       const name = SP.SpellParser.oneOfAKindVariableName(this.words)
       if (!scope.variables?.get(name, "LOCAL_ONLY"))

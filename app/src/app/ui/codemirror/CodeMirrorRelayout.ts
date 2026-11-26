@@ -79,7 +79,13 @@ export class CodeMirrorRelayout {
   static extension(
     decorationsOf: (state: EditorState) => DecorationSet | LaidOut | undefined,
     msec: number,
-    { isAwaitingParse = () => false, isParseOnItsWay = () => false, drawnAtOnce, marksTyped }: RelayoutOptions = {}
+    {
+      isAwaitingParse = () => false,
+      isParseOnItsWay = () => false,
+      drawnAtOnce,
+      marksTyped,
+      waitFor
+    }: RelayoutOptions = {}
   ): Extension {
     /** each view on this extension, so a transaction can find its own and keep its caret's line still */
     const views = new Set<EditorView>()
@@ -194,6 +200,13 @@ export class CodeMirrorRelayout {
           // once more as a view takes the state:  a parse that came while it was shown nowhere told no plugin
           // (epic `editor` I215:  the code pane drew the `if`s it opened on as plain lines)
           this.relayoutSoon()
+          // what the layout needs, still loading:  laid out again at once as it comes
+          void waitFor?.(view.state)?.then(
+            () => {
+              if (views.has(view)) view.dispatch({ effects: laidOut.of(null) })
+            },
+            (error: unknown) => console.error("CodeMirrorRelayout:  what the layout waits for didn't load", error)
+          )
         }
 
         update(update: ViewUpdate) {
@@ -333,6 +346,13 @@ export type RelayoutOptions = {
    * - MUST NOT throw.
    */
   marksTyped?: (marks: DecorationSet, transaction: Transaction) => DecorationSet
+  /**
+   * What the layout needs that's still loading, as a view takes `state`:  laid out again as it comes.
+   * - e.g. Spell's grammar, for a layout made on the page (`SP.loadGrammar()`, epic `solid-2-final` P20);
+   *   `undefined` when nothing is.
+   * - MUST NOT throw.
+   */
+  waitFor?: (state: EditorState) => Promise<unknown> | undefined
 }
 
 /** The editor's class while its lines wait for their parse:  `codemirror.css` hides them. */

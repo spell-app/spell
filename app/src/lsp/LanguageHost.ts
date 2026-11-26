@@ -136,15 +136,20 @@ export class LanguageHost {
    * for the editor to take as its own (`SP.SpellProject.takeCompiled()`), the program run on the page as ever.
    * - Nothing saved:  the editor saves what it takes, as it would its own compile's.
    * - `pagesInPlay`:  the alone pages the editor's compile is limited to, by path (`SP.SpellProject.pagesInPlay`)
+   * - `texts`:  its files' text as the editor holds them, taken first;  a file a code editor has open keeps its own
    * - SIDE EFFECT:  its parse is the one of every edit before it, so what that found is sent, as after the host's own
    *   parse, the compile failed or not:  else a big page opened showed plain till it was typed in (epic
    *   `solid-2-final` I48).
    * - throws what the compile throws
    */
-  async compile({ projectId, pagesInPlay }: LanguageCompile): Promise<SP.CompiledEntry> {
+  async compile({ projectId, pagesInPlay, texts }: LanguageCompile): Promise<SP.CompiledEntry> {
     await this.pending
     const project = await this.projectFor(projectId)
     project.pagesInPlay = pagesInPlay ? new Set(pagesInPlay) : undefined
+    for (const [uri, text] of Object.entries(texts ?? {})) {
+      const file = this.texts.has(uri) ? undefined : this.fileFor(uri)
+      if (file?.project === project && file.contents !== text) project.takeText(file, text)
+    }
     clearTimeout(this.parseTimers.get(project))
     this.parseTimers.delete(project)
     try {
@@ -371,6 +376,11 @@ export type LanguageCompile = {
   projectId: string
   /** the alone pages the compile is limited to, by path;  none:  every file */
   pagesInPlay?: string[]
+  /**
+   * Its spell files' text as the editor holds them, by address:  for a project no code editor has open, whose edits
+   * come as no changes (epic `solid-2-final` P20);  none:  its open files' text is what's compiled.
+   */
+  texts?: Record<string, string>
 }
 
 /** A file's text changed:  `LanguageHost.change()`. */

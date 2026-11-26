@@ -22,6 +22,8 @@ const [spellSrc = "", module = ""] = args.filter((arg) => !arg.startsWith("--"))
 await import(new URL("node/packageVersion.node.ts", spellSrc).href)
 const { SP } = (await import(new URL("index.ts", spellSrc).href)) as typeof import("spell/parser/spell")
 const { P } = (await import(new URL("../parser/index.ts", spellSrc).href)) as typeof import("spell/parser/parser")
+// the grammar:  the barrel holds none since epic `solid-2-final` P20;  an older checkout's has it already
+await (SP as Partial<typeof SP>).loadGrammar?.()
 
 /** How many times `timeEachTest()` runs every test, after one run to warm up -- as `speedTest()` does. */
 const RUNS = 20

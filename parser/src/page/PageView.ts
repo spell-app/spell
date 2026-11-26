@@ -13,6 +13,7 @@ import { PG } from "spell/parser/page"
  *   - Its diagnostics are what the tokenizer noted on them (`SP.pageErrorOf()`).
  *     What the RULES say is the parsed file's (`SP.SpellFile.errors`).
  * - Pure, and cheap:  no scope, no rules, nothing compiled;  every hole stays raw spell text.
+ *   - So it needs no grammar:  its tokenizer is the language's own, from its words (`SP.Language.tokensReader()`).
  * - Above `spell/parser/spell` in the import graph:  it uses the language's tokenizer there;  `spell` never imports it.
  */
 export class PageView {
@@ -24,8 +25,8 @@ export class PageView {
    */
   static read(text: string, options: PageReadOptions = {}): PG.PageFile {
     const language = options.language ?? SP.Language.forFile(options.path)
-    const parser = language.parser.clone({ module: "page view", form: "page" } as P.ParserProps) as SP.SpellParser
-    const { tokenizer } = parser
+    // its words alone, no rules:  so the editor reads a page's chunks without the grammar (epic `solid-2-final` P20)
+    const { tokenizer } = language.tokensReader("page")
     // an `<html>` block stays one, its markup inside it
     if (tokenizer instanceof SP.PageTokenizer) tokenizer.unwrapsHtml = false
     const [root] = tokenizer.breakIntoIndentedBlocks(tokenizer.tokenize(text))

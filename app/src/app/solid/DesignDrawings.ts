@@ -97,6 +97,9 @@ export class DesignDrawings {
 
   /** The side `slot` is, by the name it compiles by:  `front` for Spanish's `frente`. */
   private static sideOf(slot: string, language: SP.Language): string {
+    // a pack with no parser here yet is English, the grammar not loaded (epic `solid-2-final` P20):  its sides are
+    // the names they compile by
+    if (!language.hasParser) return slot
     return language.rootScope.types.get(TWO_SIDED)?.slotOutput(slot) ?? slot
   }
 }

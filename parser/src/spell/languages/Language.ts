@@ -17,8 +17,9 @@ import { PARSER_MESSAGES } from "spell/parser/spell/languages/en/parserMessages"
  *   - its words for what the parser says to the person writing one (`parserMessages`)
  * - A FILE's name says its language (epic `spanish` P19):  `Carta.es.spell` is Spanish, a plain `Card.spell` English.
  *   - `Language.forFile(name)` finds its pack;  `Language.for(lang)` finds one by its code.
- * - English is always there;  every other pack loads on first use (epic `solid-2-final` P11):
- *   `await Language.loadFor(files)` before reading them -- see `loadsOnFirstUse()`.
+ * - English is always there, but its parser comes with the grammar (`SP.loadGrammar()`, epic `solid-2-final` P20);
+ *   every other pack loads on first use (P11):  `await Language.loadFor(files)` before reading them -- see
+ *   `loadsOnFirstUse()`.
  *   - So one project may mix languages:  see `rootScopeFor()`.
  * - The rule classes are shared:  a pack holds only words.
  */
@@ -27,8 +28,34 @@ export class Language {
   readonly lang: string
   /** Its name in English, for people choosing one, e.g. `Spanish`. */
   readonly name: string
-  /** Its parser:  spell's rule classes, registered with this language's syntax. */
-  readonly parser: SP.SpellParser
+  /**
+   * Its parser:  spell's rule classes, registered with this language's syntax.
+   * - English's comes with the grammar (`useParser()`, as `SP.loadGrammar()` loads it, epic `solid-2-final` P20):
+   *   throws a `TypeError` till then.
+   */
+  get parser(): SP.SpellParser {
+    if (this._parser) return this._parser
+    throw new TypeError(
+      `Language.parser:  ${this.name}'s parser comes with spell's grammar, which isn't loaded yet;  ` +
+        '`await SP.loadGrammar()` first, or import "spell/parser/spell/languages/all" in a node program'
+    )
+  }
+  private _parser: SP.SpellParser | undefined
+
+  /** Does this pack have its parser yet?  English's comes with the grammar -- see `parser`. */
+  get hasParser(): boolean {
+    return !!this._parser
+  }
+
+  /**
+   * A parser with NO rules, reading this language in `form`:  for its tokenizer alone, which needs only the pack's
+   * words, so it reads a file's tokens without the grammar (epic `solid-2-final` P20), e.g. a page's chunk tree
+   * (`PG.PageView`).
+   * - Made afresh each time:  a caller may set its tokenizer's options.
+   */
+  tokensReader(form: SP.SpellForm = "spell"): SP.SpellParser {
+    return new SP.SpellParser({ module: `tokens_${this.lang}`, language: this, form } as P.ParserProps)
+  }
   /** How its words go singular and plural. */
   readonly inflector: P.Inflector
   /** How a person writes spell's built-in types in it, e.g. `{ string: "text", "yes or no": "choice" }`. */
@@ -60,14 +87,24 @@ export class Language {
     this.decimalMark = props.decimalMark ?? "."
     this.lang = props.lang
     this.name = props.name
-    this.parser = props.parser
     this.inflector = props.inflector
     this.typeWords = props.typeWords
     this.words = props.words
     this.messages = props.messages
     this.parserMessages = props.parserMessages ?? {}
-    this.parser.language = this
-    this.parser.inflector ??= this.inflector
+    if (props.parser) this.useParser(props.parser)
+  }
+
+  /**
+   * Make `parser` our parser, once:  a pack made before its grammar loaded gets it here (English's, `languages/en`).
+   * - SIDE EFFECT:  `parser` reads in our language, and our inflector unless it has one.
+   * - Returns us.
+   */
+  useParser(parser: SP.SpellParser): this {
+    this._parser = parser
+    parser.language = this
+    parser.inflector ??= this.inflector
+    return this
   }
 
   /**
@@ -300,6 +337,9 @@ export class Language {
    * - throws a `TypeError`, as `for()`, for a language with no pack
    */
   static async load(lang: string): Promise<Language> {
+    // the grammar first, which brings English's parser:  every pack's parser is a twin of its parser
+    // (`SpellParser.twinFor()`)
+    await SP.loadGrammar()
     if (Language.all.has(lang)) return Language.all.get(lang)!
     const load = Language.loaders.get(lang)
     if (!load) return Language.for(lang)
@@ -313,14 +353,14 @@ export class Language {
    * Load the pack of every language `names` are written in:  files (`Carta.es.spell`), else language codes (`es`).
    * - What a program's files, or a project's declarations, are read in:  call it before reading them.
    * - And each component pack's words in those languages (`SP.ComponentPacks.loadLanguage()`).
-   * - A name in no language (`Card.spell`) is English, always there;  one in a language with no pack is left to
-   *   `for()` to say so.
+   * - A name in no language (`Card.spell`) is English, which comes with the grammar:  NOT loaded here, so a page can
+   *   hold an English project without it (`SP.loadGrammar()`);  one in a language with no pack is left to `for()`.
    */
   static async loadFor(names: Iterable<string | undefined>): Promise<void> {
     const langs = new Set<string>()
     for (const name of names) {
       const lang = name && LANGUAGE_CODE.test(name) ? name : Language.langOfFile(name)
-      if (lang && lang !== Language.default.lang && Language.isKnown(lang)) langs.add(lang)
+      if (lang && lang !== DEFAULT_LANG && Language.isKnown(lang)) langs.add(lang)
     }
     // and the component packs' words in it (Spell UI's Spanish tags):  a pack registered after the language loaded
     // gets its turn here too
@@ -337,10 +377,9 @@ export class Language {
     return Language.all.has(lang) || Language.loaders.has(lang)
   }
 
-  /** Add `language` to the packs `for()` finds;  the first is the default.  Returns it. */
+  /** Add `language` to the packs `for()` finds.  Returns it. */
   static register(language: Language): Language {
     Language.all.set(language.lang, language)
-    Language.fallback ??= language
     return language
   }
 
@@ -396,19 +435,21 @@ export class Language {
     return (P.Parser.current as SP.SpellParser | undefined)?.language ?? Language.default
   }
 
-  /** The pack a project gets when it names none:  the first registered, English. */
+  /** The pack a project gets when it names none:  English, always there (its parser with the grammar). */
   static get default(): Language {
-    if (!Language.fallback) throw new TypeError("Language.default:  no language pack is loaded")
-    return Language.fallback
+    return SP.english
   }
-  private static fallback: Language | undefined
 }
+
+/** The default language's code:  English's. */
+const DEFAULT_LANG = "en"
 
 /** What makes a `Language` -- see its fields. */
 export type LanguageProps = {
   lang: string
   name: string
-  parser: SP.SpellParser
+  /** None:  given later, with `useParser()` -- English's, as the grammar loads. */
+  parser?: SP.SpellParser
   inflector: P.Inflector
   typeWords: P.TypeWords
   words: LanguageWords

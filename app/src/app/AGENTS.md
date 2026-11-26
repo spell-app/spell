@@ -169,8 +169,13 @@ and in the app's build folder, `app/` at the app folder's root.
     - in the editor app, the editor's LANGUAGE WORKER answers ([languageWorker.ts](ui/codemirror/languageWorker.ts),
       an `LSP.LanguageHost`):  the parser and the service off the page's thread, its own parse of each project,
       sent each edit as changes, never the whole text
-      - started by the app alone (`startLanguageWorker()`, from `LazyCodeMirror`):  `<spell-editor>`, the static build
-        and the tests ask the page's own service, in-process (`LanguageClient.inThread()`)
+      - started by the app alone, on its first compile (`editorLanguage()`, the editor's ONE client, from `index.tsx`;
+        CodeMirror's editors ask the same one):  `<spell-editor>`, the static build and the tests ask the page's own
+        service, in-process (`LanguageClient.inThread()`)
+      - the page holds no grammar (epic `solid-2-final` P20):  a project opens, compiles and runs from the worker, in
+        Run too, the files' text sent with the compile while no code editor has them open;  the page loads its own copy
+        on first use (`SP.loadGrammar()`):  a Spell Console line, a project the worker can't load, code shown outside a
+        project (`CodeMirrorRelayout`'s `waitFor`)
       - a worker that stops hands every question to the page's own service;  so does a project the worker can't load
         (one only the page holds, made from a start card and not saved yet:  `LanguageClient.onFallback()`)
       - the editor's compile too (`editor.compileApp()`, through `editor.compileElsewhere`):  the worker compiles its

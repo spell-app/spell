@@ -42,6 +42,18 @@ describe("PerfBudget", () => {
     expect(all).toBeGreaterThan(scripts)
     expect(lazy).toBeGreaterThan(0)
     expect(lazy).toBeLessThan(15_000)
+    // the lazy file with what it imports up front (epic `solid-2-final` P20)
+    writeFileSync(
+      join(build, "assets", "worker.js"),
+      `import "./part.js";export const w = ${JSON.stringify("w ".repeat(9000))}`
+    )
+    writeFileSync(join(build, "assets", "part.js"), `export const p = ${JSON.stringify("part, ".repeat(5000))}`)
+    writeFileSync(join(build, "assets", "index.js"), 'import "./shared.js";const later = () => import("./lazy.js")')
+    const workerOnly = PerfBudget.sizeOf(entry({ only: "worker\\.js$", measure: "lazy" }), build)
+    const whole = PerfBudget.sizeOf(entry({ only: "worker\\.js$", measure: "lazy whole" }), build)
+    expect(whole).toBeGreaterThan(workerOnly)
+    rmSync(join(build, "assets", "worker.js"))
+    rmSync(join(build, "assets", "part.js"))
   })
 
   test("explainIn():  each file it counts, who loads it, what's in it;  a file with no map says so", () => {

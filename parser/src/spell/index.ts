@@ -43,34 +43,11 @@ export * from "./builtInTemplates"
 export * from "./builtInDimensions"
 
 /**
- * `spellParser`: shared `SpellParser` instance with spell's "core" rules already applied.
- * - Start here if you need the language's default parser.
- * - Also re-exports:
- *   - `ParseError`:  the fallback "couldn't parse this" rule
- *   - `parseExpression()`:  parse a bare expression string
+ * The grammar:  `spellParser` and what else the rules export, as live bindings, there once `loadGrammar()` has loaded
+ * them (epic `solid-2-final` P20) -- see `grammar.ts`.
+ * - The barrel never imports the rules themselves:  a page holding a project downloads no grammar till it parses.
  */
-export {
-  spellParser,
-  ParseError,
-  type DocComment,
-  commitStatement,
-  SpellStatement,
-  Block,
-  BlockLine,
-  parseExpression,
-  Negatable,
-  spellTagsIn,
-  type SpellTag,
-  ActionButton,
-  SpellJSX,
-  isBareComponentName,
-  type JSXMatchData,
-  MarkdownDescription,
-  MarkdownBlock,
-  ShowSitePart,
-  SiteAddressOf,
-  MemberReadExpression
-} from "./rules"
+export * from "./grammar"
 
 export * from "./SpellDeclarations"
 export * from "./NativeCode"
@@ -87,7 +64,8 @@ export * from "./SpellLines"
 
 import { Language } from "./languages/Language"
 
-// The language packs:  English first, the default;  Spanish on first use (epic `solid-2-final` P11),
-// so a page reading only English never downloads its grammar -- see `SP.Language.loadsOnFirstUse()`
-export { english } from "./languages/en"
+// The language packs:  English first, the default, its parser with the grammar (`loadGrammar()`, epic `solid-2-final`
+// P20);  Spanish on first use (P11), so a page reading only English never downloads its grammar -- see
+// `SP.Language.loadsOnFirstUse()`
+export { english } from "./languages/en/english"
 Language.loadsOnFirstUse("es", () => import("spell/parser/spell/languages/es"))

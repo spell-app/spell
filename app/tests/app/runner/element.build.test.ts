@@ -290,7 +290,12 @@ describe("runner builds", () => {
     const withRules = holding(SPELL_RULES)
     expect(withRules).toHaveLength(1)
     expect(staticImports(element, "spell-grammar.js")).toContain(withRules[0])
-    expect(staticImports(element, "spell-editor.js")).toContain(withRules[0])
+    // `<spell-editor>` loads that one on first use (`SP.loadGrammar()`, epic `solid-2-final` P20):  never up front,
+    // never a copy of its own
+    const editorFiles = staticImports(element, "spell-editor.js")
+    expect(editorFiles).not.toContain(withRules[0])
+    const loadsIt = (file: string) => readFileSync(join(element, file), "utf8").includes(posix.basename(withRules[0]!))
+    expect(editorFiles.filter(loadsIt).length).toBeGreaterThan(0)
     // Spanish's registrations:  one chunk too, which nothing loads up front (`SP.Language.loadsOnFirstUse()`)
     const spanish = holding(SPANISH_RULES)
     expect(spanish).toHaveLength(1)
@@ -399,8 +404,13 @@ const PACKAGES = {
 const CODE_EDITOR_CSS = /\.cmb-editor/
 
 /** The parser:  its rules, its writers (but `SourceMarks`, a program's source map), its tokenizer, and spell's grammar. */
-/** A grammar rule's module, `parser/src/spell/rules/...`, but Spanish's registrations:  in the one grammar chunk only. */
-const SPELL_RULES = /\/parser\/src\/spell\/rules\/.*(?<!\.es)\.ts$/
+/**
+ * The grammar:  the rules' English registrations, `<module>.en.ts`, and their assembly (`rules/index.ts`):  in the one
+ * grammar chunk only.
+ * - NOT every file of the rules' folder:  the language's barrel reads two word-rule classes (`Wording`, `Synonyms`)
+ *   by their files (epic `solid-2-final` P20).
+ */
+const SPELL_RULES = /\/parser\/src\/spell\/rules\/(index|.*\.en)\.ts$/
 
 /** Spanish's registrations of the rules, `<module>.es.ts`:  loaded on first use (epic `solid-2-final` P11). */
 const SPANISH_RULES = /\/parser\/src\/spell\/rules\/.*\.es\.ts$/

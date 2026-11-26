@@ -73,14 +73,14 @@ function loadCodeMirror(): Promise<CodeMirrorModule> {
   loading ??= import("spell/app/app/solid/codemirror").then(async (module) => {
     const { SpellCodeMirror } = module
     // what a person asks of the code answered off the page's thread, where the worker can load the projects
+    // the editor's one language client, which compiles in the worker before any code editor loads (`index.tsx`)
     if (!isStaticBuild && typeof Worker !== "undefined") {
-      const { startLanguageWorker } = await import("spell/app/app/ui/codemirror/startLanguageWorker")
-      SpellCodeMirror.languageWorker = startLanguageWorker
+      const { editorLanguage } = await import("spell/app/app/ui/codemirror/editorLanguage")
+      SpellCodeMirror.useLanguage(editorLanguage())
     }
     SpellCodeMirror.onEdit((file) => editor.onFileEdited(file))
     SpellCodeMirror.onTaken((file) => editor.onFileTextTaken(file))
     editor.codeEditorEdits = (file, edits, way) => SpellCodeMirror.states.applyEdits(file, edits, way)
-    editor.compileElsewhere = (project) => SpellCodeMirror.states.client.compile(project)
     editor.oldFormsElsewhere = (file) => SpellCodeMirror.states.oldForms(file)
     editor.askLanguage = (file, method, params) => SpellCodeMirror.states.ask(file, method, params)
     // the Types tab's tree, from the same language service:  `spell/app/lsp` is already in CodeMirror's chunk

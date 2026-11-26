@@ -330,11 +330,19 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     return this.spellFiles.some((file) => this.headFor(file))
   }
 
-  /** What the project knows of `file`, if it's a page alone in itself:  by its text, before it parses. */
+  /**
+   * What the project knows of `file`, if it's a page alone in itself:  by its text, before it parses.
+   * - Not parsed yet:  read with no grammar (epic `solid-2-final` P20), its parser found only when the page is
+   *   declared, as it parses (`SP.AlonePage`) -- so the editor knows which page is in play without the grammar.
+   */
   headFor(file: SP.SpellFile): P.FileHead | undefined {
     const parser = this.scope?.parser as SP.SpellParser | undefined
-    const reader = parser?.twinFor(file.language, file.form) ?? SP.SpellParser.headReaderFor(file.language, file.form)
-    return reader.aloneHead(file.parseText, file.path)
+    const twin = parser?.twinFor(file.language, file.form)
+    if (twin) return twin.aloneHead(file.parseText, file.path)
+    if (file.form !== "page") return undefined
+    const name = SP.alonePageName(file.parseText, file.language)
+    const reader = () => SP.SpellParser.headReaderFor(file.language, file.form)
+    return name ? new SP.AlonePage(reader, SP.plainPartName(name), file.path) : undefined
   }
 
   /** Does anything we can see, our files or our imports, declare `words` as a page or a dialog's view? */
@@ -406,8 +414,10 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * Parse project: cancel any in-flight parse, then run `this.parser` `TaskList`.
    * - NOTE: `parser` arg is actually `parentScope` to parse from:
    *   passed straight through to `this.parser.start()`, which calls `getScope(parentScope)` for the first task.
+   * - Loads the grammar first, if it isn't here (`SP.loadGrammar()`, epic `solid-2-final` P20).
    */
   parse(parser?: P.Scope): Promise<unknown> {
+    if (!SP.hasGrammar()) return SP.loadGrammar().then(() => this.parse(parser))
     this.parser.cancel()
     this.updateWaitingText()
     return this.parser.start(parser)
@@ -427,6 +437,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    *   - never with a `parser` passed in:  the cache's key can't vouch for a scope it didn't make
    *   - never with `cached: false`:  a compile behind a cache hit, for what reads the parse and each file's compile
    *     (another target's code and map, `compiled`), as the editor's `compileBehind()` does
+   * - Loads the grammar first, if it isn't here (`SP.loadGrammar()`, epic `solid-2-final` P20):
+   *   a cache hit parses nothing, but what reads it next will.
    */
   async compile(
     parser?: P.Scope,
@@ -437,6 +449,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
       compiledFor = "editor"
     }: { save?: SaveCompiled; targets?: string[]; cached?: boolean; compiledFor?: P.CompiledFor } = {}
   ): Promise<unknown> {
+    if (!SP.hasGrammar()) await SP.loadGrammar()
     this.parser.cancel()
     this.compiler.cancel()
     // text typed and not parsed yet (`takeText()`):  parsed first, so nothing compiles from an older parse
@@ -1695,8 +1708,10 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - The incremental parse is done before it returns its promise, so a caller that doesn't wait still sees it;
    *   only the parse from scratch, when the incremental one couldn't cope, comes later.
    *   A crash there is left in `parseError`, NOT thrown.
+   * - With no grammar here yet, loads it first (`SP.loadGrammar()`):  then the incremental parse waits for it too.
    */
   async parseWaitingText(): Promise<SP.SpellFile[]> {
+    if (!SP.hasGrammar()) await SP.loadGrammar()
     this.takeWaitingText()
     if (!this.textWaiting.size) return []
     const before = new Map(this.spellFiles.map((it) => [it, it.match]))
