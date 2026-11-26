@@ -1,3 +1,4 @@
+import { SPELL_COLORS } from "spell/util"
 import { P } from "spell/parser/parser"
 import { Wording } from "spell/parser/spell/rules/expressions"
 
@@ -107,3 +108,62 @@ function projectOf(scope: P.Scope): P.Scope {
   while (at && !(at instanceof P.ProjectScope)) at = at.parentScope
   return at ?? scope
 }
+
+////////////////
+// ## Colour words
+////////////////
+
+/** One of Spell UI's colours, by its hue name:  `red`, `grey` ... */
+export type SpellColor = (typeof SPELL_COLORS)[number]
+
+/**
+ * Each language's words for Spell UI's colours (epic `language` T114):  the ONE list every colour a program says reads,
+ * `notify ... in red` and a site's `colored blue` alike.
+ * - Its forms, `|` between them, longest first where one starts another (`verde oliva` before `verde`).
+ * - In the order a syntax tries them, so the same order in every language.
+ */
+export const COLOR_WORDS: Record<"en" | "es", Record<SpellColor, string>> = {
+  en: {
+    red: "red",
+    orange: "orange",
+    yellow: "yellow",
+    olive: "olive",
+    teal: "teal",
+    green: "green",
+    blue: "blue",
+    violet: "violet",
+    purple: "purple",
+    pink: "pink",
+    brown: "brown",
+    grey: "grey|gray",
+    black: "black"
+  },
+  es: {
+    red: "rojo|roja",
+    orange: "naranja",
+    yellow: "amarillo|amarilla",
+    olive: "verde oliva|oliva",
+    teal: "verde azulado|turquesa",
+    green: "verde",
+    blue: "azul",
+    violet: "violeta",
+    purple: "morado|morada|púrpura|purpura",
+    pink: "rosa",
+    brown: "marrón|marron",
+    grey: "gris",
+    black: "negro|negra"
+  }
+}
+
+/** A word rule's syntax for `colors` in `language`, each form's group its colour:  `((red:red)|...|(grey:grey|gray))`. */
+export function colorWordsSyntax(
+  language: keyof typeof COLOR_WORDS,
+  colors: readonly SpellColor[] = SPELL_COLORS
+): string {
+  const words = COLOR_WORDS[language]
+  const forms = (Object.keys(words) as SpellColor[]).filter((color) => colors.includes(color))
+  return `(${forms.map((color) => `(${color}:${words[color]})`).join("|")})`
+}
+
+/** The colours a site's board gives its cards:  Spell UI's, but black (epic `mockup`). */
+export const BOARD_COLORS: SpellColor[] = SPELL_COLORS.filter((color) => color !== "black")

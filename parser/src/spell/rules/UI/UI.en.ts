@@ -41,7 +41,7 @@ import { ShowTourStep } from "./ShowTourStep"
 import { MoveTourStep } from "./MoveTourStep"
 import { Prompt } from "./Prompt"
 import { Choose, ChooseSeveral } from "./Choose"
-import { MEDIA_KINDS, TEXT_SIZES } from "./UI.shared"
+import { colorWordsSyntax, MEDIA_KINDS, TEXT_SIZES } from "./UI.shared"
 import { Warn } from "./Warn"
 
 ////////////////
@@ -63,9 +63,7 @@ UI.addRule(Wording.specialize({ ruleName: "notify_kind", meanings: NOTIFY_KINDS 
 
 // A toast's colour, for `notify ... in red`:  each meaning Spell UI's hue name
 UI.addRule(Wording.specialize({ ruleName: "toast_color", meanings: TOAST_COLORS }), {
-  syntax:
-    "((red:red)|(orange:orange)|(yellow:yellow)|(olive:olive)|(green:green)|(teal:teal)|(blue:blue)" +
-    "|(violet:violet)|(purple:purple)|(pink:pink)|(brown:brown)|(grey:grey|gray)|(black:black))"
+  syntax: colorWordsSyntax("en")
 })
 
 // Where a toast goes, for `notify ... at the top left`:  each meaning Spell UI's `position`, `_` for its space

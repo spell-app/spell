@@ -245,7 +245,8 @@ class MarkupShapes {
       // alone on its line, or with other end tags only (`</></>`, I146):  a foot, on one row with the end tags on
       // the lines round it (I132)
       const line = doc.lineAt(foot.start)
-      if (END_TAGS_ONLY.test(doc.sliceString(line.from, line.to))) this.decorations.footAlone(foot, inside)
+      const endTags = END_TAGS_FIRST.exec(doc.sliceString(line.from, line.to))?.[0].length ?? 0
+      if (foot.end <= line.from + endTags) this.decorations.footAlone(foot, inside)
     }
 
     this.draw(block.inside, inside, depth + 1)
@@ -348,8 +349,11 @@ class MarkupShapes {
   }
 }
 
-/** A line of end tags only, `</>` or `</></>`:  each one a foot (`CodeMirrorDecorations.footAlone()`). */
-const END_TAGS_ONLY = /^\s*(?:<\/[^<>\s]*>\s*)+$/
+/**
+ * The end tags a line starts with, `</>` or `</></>`:  each one a foot (`CodeMirrorDecorations.footAlone()`);
+ * code after them on the line too (`</toolbar> <divider />`), drawn after the feet (I185)
+ */
+const END_TAGS_FIRST = /^\s*(?:<\/[^<>\s]*>\s*)+/
 
 /** A part of speech's colour on a mark:  `bubbly.css`'s hue, and the band's own shades of it (`cmb-hue`). */
 function hueOf(partOfSpeech: string): string[] {
@@ -547,8 +551,10 @@ export class CodeMirrorDecorations {
     const lineOf = (foot: FootAlone) => doc.lineAt(foot.start).number
     for (let first = 0; first < feet.length;) {
       let last = first
-      // on the next line, or on the same one (`</></>`, I146)
-      while (feet[last + 1] && lineOf(feet[last + 1]!) - lineOf(feet[last]!) <= 1) last++
+      // on the next line, or on the same one (`</></>`, I146);  never past code after one (`</toolbar> <divider />`, I185)
+      const joins = (one: FootAlone, next: FootAlone) =>
+        lineOf(next) - lineOf(one) <= 1 && !doc.sliceString(one.end, next.start).trim()
+      while (feet[last + 1] && joins(feet[last]!, feet[last + 1]!)) last++
       this.feetRow(feet.slice(first, last + 1))
       first = last + 1
     }
@@ -569,7 +575,9 @@ export class CodeMirrorDecorations {
     const { doc } = this.state
     const row = doc.lineAt(run[0]!.start)
     const rails = run.reduce((most, foot) => (foot.rails.length > most.length ? foot.rails : most), run[0]!.rails)
-    this.line(row.from, rails, ["cmb-feet-row"])
+    // code after its last end tag (`</toolbar> <divider />`, I185):  drawn after the feet, at the code's size
+    const thenCode = !!doc.sliceString(run.at(-1)!.end, row.to).trim()
+    this.line(row.from, rails, ["cmb-feet-row", ...(thenCode ? ["cmb-feet-then-code"] : [])])
     const rowDecoration = this.decorationOf(row.from)
     rowDecoration.feet = run.length
     for (const [level, foot] of run.entries()) {

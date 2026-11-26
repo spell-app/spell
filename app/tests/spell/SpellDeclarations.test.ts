@@ -102,7 +102,7 @@ describe("SpellDeclarations, inline", () => {
   })
 
   /**
-   * The Solitaire spell a statement's `defined` points to, e.g. `/Card.spell:312-365` => `<property "rank" ...`.
+   * The Solitaire spell a statement's `defined` points to, e.g. `/Card.spell:312-365` => `its "rank" is one of ...`.
    * - So a test reads the example as it is now, not as it was when the test was written.
    */
   function spellOf(defined: string) {

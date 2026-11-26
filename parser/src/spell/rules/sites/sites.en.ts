@@ -4,6 +4,7 @@
  */
 import { Synonyms, Wording } from "spell/parser/spell/rules/expressions"
 import { DefineGroup } from "spell/parser/spell/rules/classes"
+import { BOARD_COLORS, colorWordsSyntax } from "spell/parser/spell/rules/UI/UI.shared"
 import { sites } from "./sites.parser"
 import { CreateSite } from "./CreateSite"
 import { SiteOverlay } from "./SiteOverlay"
@@ -50,16 +51,9 @@ sites.addRule(Wording.specialize({ ruleName: "site_page_state", meanings: ["old"
 })
 
 // the colour of a part's card on the site editor's board, one of Spell UI's:  `- it has a films page at "/films", colored blue`
-sites.addRule(
-  Wording.specialize({
-    ruleName: "site_card_color",
-    meanings: ["red", "orange", "yellow", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"]
-  }),
-  {
-    syntax:
-      "((red:red)|(orange:orange)|(yellow:yellow)|(olive:olive)|(green:green)|(teal:teal)|(blue:blue)|(violet:violet)|(purple:purple)|(pink:pink)|(brown:brown)|(grey:grey))"
-  }
-)
+sites.addRule(Wording.specialize({ ruleName: "site_card_color", meanings: BOARD_COLORS }), {
+  syntax: colorWordsSyntax("en", BOARD_COLORS)
+})
 
 // a group of a site's parts, its section of the site editor's board in a colour (epic `language` T112):
 // `group "Hardware", color yellow`, `group "Hardware" with color yellow`, or as a part's line says it, `, colored yellow`

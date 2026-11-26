@@ -2036,7 +2036,7 @@ classes.addRule(OutlineSpecifierMedia, {
   tests: [{ tests: [[`a sound at "sounds/slide.mp3"`, `core.media("sound", "sounds/slide.mp3")`]] }]
 })
 
-// a percent, kept as its fraction:  `its "tip" is a percent`, `<property "tip" type="percent">18%</>` (epic `language` P34)
+// a percent, kept as its fraction:  `its "tip" is a percent` (epic `language` P34)
 // -- before `a {type}`, which would make `percent` a type of its own
 classes.addRule(OutlineSpecifierPercent, {
   syntax: "(a|an) (percent|percentage) (starting at {start:expression})?",
@@ -2048,7 +2048,7 @@ classes.addRule(OutlineSpecifierDatatype, {
   tests: [{ tests: [["a number", "number"]] }]
 })
 
-// a stored value and where it starts:  `its "count" is a number starting at 0`, `<property "count" type="number">0</>`
+// a stored value and where it starts:  `its "count" is a number starting at 0`
 classes.addRule(OutlineSpecifierDatatype, {
   syntax: "(a|an) {datatype:singular_type} (,)? starting at {start:expression}",
   tests: [{ tests: [["a number starting at 0", "number"]] }]

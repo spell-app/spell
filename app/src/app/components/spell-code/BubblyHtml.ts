@@ -8,8 +8,9 @@ import type { SP } from "spell/parser/spell"
  *   under it is a block too, `bubbly-control`.
  * - Each underlined stretch, one value or one question, ONE `<span class="bubbly-underline">` round its pieces:
  *   one box, so its dotted line runs on, its dots even, under bold and plain words alike.
- * - Every character of the code is in it, but the indents:  a copied line copies its words, quote marks too
- *   (drawn outside their pill, the file's own `"` kept transparent).
+ * - Every character of the code is in it, quote marks too (drawn outside their pill, the file's own `"` kept
+ *   transparent):  so a copied stretch copies the code as written.
+ *   - Each line's own indent too, drawn at no size (`INDENT`):  a copy of several lines keeps them indented (T106).
  * - `sections`:  each declaration wrapped in a `<ui-section class="bubbly-section" id="...">`, a block a docs
  *   page's comments anchor to (the drawn-bubbly page, `scripts/bubbly-page.ts`).
  * - Strings, not DOM:  `<ui-code>` takes its drawing as HTML, as it takes its coloured lines,
@@ -32,6 +33,9 @@ export class BubblyHtml {
 
   /** Round one value or one question (`SP.BubblyUnderline`):  ONE dotted line under all of it. */
   static readonly UNDERLINE = "bubbly-underline"
+
+  /** A line's indent as the file has it, its tabs:  drawn at no size, there only to be copied (T106). */
+  static readonly INDENT = "bubbly-indent-text"
 
   /** A Spell expression's `{` and `}`:  a step darker than the other marks, so a `{…}` reads as one (Owen). */
   static readonly BRACE = "bubbly-brace"
@@ -112,7 +116,7 @@ class BubblyWriter {
     const id = this.sections && this.idFor(block)
     const kind = `bubbly-${block.partOfSpeech}${block.isGroup ? " bubbly-group" : ""} bubbly-level-${block.level}`
     const ends = this.endsOf(block.head)
-    const head = this.head(block.head)
+    const head = this.indentOf(block.head) + this.head(block.head)
     const html = block.body.length
       ? `<div class="bubbly-block ${kind}"><p class="bubbly-head-pill${ends}">${head}</p><div class="bubbly-gutter"></div>` +
         `<div class="bubbly-body">${this.nodes(block.body)}</div><div class="bubbly-foot"></div></div>`
@@ -131,7 +135,13 @@ class BubblyWriter {
           : ""
     const body =
       style === " bubbly-comment" ? BubblyHtml.commentHtml(this.text.slice(line.start, line.end)) : this.pieces(line)
-    return `<p class="bubbly-line${style} bubbly-indent-${Math.min(line.depth, MAX_INDENT)}">${body}</p>`
+    return `<p class="bubbly-line${style} bubbly-indent-${Math.min(line.depth, MAX_INDENT)}">${this.indentOf(line)}${body}</p>`
+  }
+
+  /** The file's own indent before `line`, an `INDENT`, so a copy keeps it;  `""` for none. */
+  private indentOf(line: SP.BubblyLine): string {
+    const indent = this.text.slice(this.text.lastIndexOf("\n", line.start - 1) + 1, line.start)
+    return indent && !indent.trim() ? `<span class="${BubblyHtml.INDENT}">${indent}</span>` : ""
   }
 
   /**

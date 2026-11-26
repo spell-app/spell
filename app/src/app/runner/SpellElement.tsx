@@ -122,7 +122,7 @@ const STATES_CSS = `
  *   - The page builds the tag on that class (`core.useElement()`), so both targets draw the same element.
  *   - It reaches compiled code as `@spell/elements`:  see `spellElements.ts`.
  * - Dragging is opt-in, by the program's own words (epic `outline-spell` P28):
- *   - `- it is draggable` (`<view "card" draggable>`):
+ *   - `it is draggable`, or `a "card" is a draggable view`:
  *     a card its list will give up can be dragged, with a mouse or a finger;
  *     it, and its list's items after it, follow the pointer
  *   - `- it is droppable`:  a pile that will take the card glows as it comes over (`:state(accepting-drop)`)
@@ -407,7 +407,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   }
 
   /**
-   * Does a click do something to our thing now?  It's clickable (`- on click:`, `<on click>`, a double click, or
+   * Does a click do something to our thing now?  It's clickable (`when clicked`, a double click, or
    * `clickable`, by its condition if it has one), or selectable;  it shows the pointer cursor (`STATES_CSS`), and the
    * grab cursor once draggable.
    * - A click its thing hands up (`pass event`) to its list isn't counted:  the list's element shows it instead.
@@ -761,7 +761,8 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
 
   /**
    * Are files from the desktop dragged over us, and do we take them?
-   * - Only a view with a file or folder line (`when a file is dropped on it:` ...):
+   * - Only a view with a file or folder line (`when a file is dropped on it:` ...), or a rule for them
+   *   (`can take a file when:`, `canTakeFile()`;  epic `language` I167):
    *   anywhere else the page is left alone, and the browser does what it always does.
    * - Never one of Spell's own drags, which hold no files.
    * - The innermost view that takes them, of views inside each other:  the browser's events bubble out to the rest.
@@ -771,7 +772,9 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     if (FILES_HEARD.has(event) || !DroppedFiles.hasFiles(event) || !this.currentThing) return false
     // a program running elsewhere (Python):  a page's file can't reach it
     if (this.entry?.core.remote) return false
-    const takes = FILE_HANDLERS.some(([timing, item, moment]) => this.fileHandlerFor(timing, item, moment))
+    const takes =
+      FILE_HANDLERS.some(([timing, item, moment]) => this.fileHandlerFor(timing, item, moment)) ||
+      FILE_RULES.some((rule) => this.hasMethod(rule))
     if (takes) FILES_HEARD.add(event)
     return takes
   }
@@ -783,9 +786,27 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    */
   private fileHandlerFor(timing: "when" | "while", item: "File" | "Folder", moment: DragMoment): string | undefined {
     const method = `${timing}${item}${moment}`
-    return typeof (this.currentThing as Record<string, unknown> | undefined)?.[method] === "function"
-      ? method
-      : undefined
+    return this.hasMethod(method) ? method : undefined
+  }
+
+  /** Does our view have the method `name`? */
+  private hasMethod(name: string): boolean {
+    return typeof (this.currentThing as Record<string, unknown> | undefined)?.[name] === "function"
+  }
+
+  /**
+   * Does our view's rule take what was dropped (`can take a file when:`, `canTakeFile(file)`;  epic `language` I167)?
+   * - Yes with no rule;  a rule that throws says no, on the program's console.
+   * - Asked once it's dropped:  while it's dragged the browser shows only how many and their kinds.
+   */
+  private takesDropped(rule: (typeof FILE_RULES)[number], dropped: unknown): boolean {
+    if (!this.hasMethod(rule)) return true
+    try {
+      return !!(this.currentThing as unknown as Record<string, (item: unknown) => unknown>)[rule]!(dropped)
+    } catch (error) {
+      this.entry?.core.console.error(error)
+      return false
+    }
   }
 
   /** Are files from the desktop over us now?  We glow while they are (`STATES_CSS`), as for a card. */
@@ -881,6 +902,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    * - each folder:  `when a folder is dropped on it:` with `the folder` (its name, path, files, entry), and
    *   `ui-folder-dropped`;  then each file in it, as below, unless the folder's line took it
    * - each file:  `when a file is dropped on it:` with `the file`, the browser's own, and `ui-file-dropped`
+   * - A file or folder our rule turns away (`can take a file when:`) is left out:  no line, no event.
    */
   private heardDrop({ files, folders }: Arrival<typeof FILE_VIA>) {
     const view = this.currentThing
@@ -891,11 +913,13 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     const each = [...files]
     for (const folder of folders) {
       const detail = DroppedFiles.folderDetail(folder, FILE_VIA)
+      if (!this.takesDropped("canTakeFolder", detail)) continue
       this.sendPageEvent("folder-dropped-event", detail)
       if (folderLine) core.runPressed(view, folderLine, () => core.runHandler(view, folderLine, detail))
       else each.push(...folder.files)
     }
     for (const file of each) {
+      if (!this.takesDropped("canTakeFile", file.file)) continue
       this.sendPageEvent("file-dropped-event", DroppedFiles.fileDetail(file, FILE_VIA))
       if (fileLine) core.runPressed(view, fileLine, () => core.runHandler(view, fileLine, file.file))
     }
@@ -913,27 +937,33 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    *   `cancel uploading` cancels that too, at once (core's `SentEvent.cancel()`), so nothing is posted.
    * - The innermost view hears it:  a view around it leaves it alone (`ELEMENT_EVENTS_HEARD`).
    * - Which events:  `BRIDGED_EVENTS`, the uploader's today;  any element's event works the same, once it's listed.
+   *   - By every name the page gives them:  a Spanish `<es-cargador-archivos>` sends `es-subiendo` for
+   *     `ui-uploading`, heard as `uploading` all the same (`bridgedEventNames()`;  epic `language` I168).
    * - NOT for a program running elsewhere (Python's core has no `send()` yet):  its page hears them as before.
    */
   @E.whileConnected
   protected carryElementEvents() {
     const { domElement } = this
-    const carry = (event: Event) => this.carryElementEvent(event)
-    for (const name of BRIDGED_EVENTS) domElement.addEventListener(name, carry)
+    const names = bridgedEventNames()
+    const carry = (event: Event) => this.carryElementEvent(event, names.get(event.type) ?? event.type)
+    for (const name of names.keys()) domElement.addEventListener(name, carry)
     return () => {
-      for (const name of BRIDGED_EVENTS) domElement.removeEventListener(name, carry)
+      for (const name of names.keys()) domElement.removeEventListener(name, carry)
     }
   }
 
-  /** One element event, carried:  see `carryElementEvents()`;  and the uploader's own lines (`heardUploader()`). */
-  private carryElementEvent(event: Event) {
+  /**
+   * One element event, carried:  see `carryElementEvents()`;  and the uploader's own lines (`heardUploader()`).
+   * - `canonical`:  its name in English, `ui-uploading` for a Spanish `es-subiendo`.
+   */
+  private carryElementEvent(event: Event, canonical: string) {
     const view = this.currentThing
     const core = this.entry?.core
     if (!view || !core || core.remote || ELEMENT_EVENTS_HEARD.has(event) || !(event instanceof CustomEvent)) return
     // a view's own page events (`ui-file-dropped`, `sendPageEvent()`):  the page's, never the program's again
     if (SpellElement.componentOf(event.composedPath()[0] as Element) instanceof SpellElement) return
     ELEMENT_EVENTS_HEARD.add(event)
-    const name = event.type.replace(/^ui-/, "")
+    const name = canonical.replace(/^ui-/, "")
     const detail = (event.detail ?? {}) as Record<string, unknown>
     // handlers that don't wait have run by the time it returns:  a cancel is in the page's event already
     void core.send(view, name, { ...detail, pageEvent: event }).catch((error) => core.console.error(error))
@@ -2444,6 +2474,25 @@ const BRIDGED_EVENTS = [
   "ui-upload-failed"
 ]
 
+/** The element whose events `BRIDGED_EVENTS` are, for their names in the page's languages. */
+const BRIDGED_TAG = "ui-uploader"
+
+/**
+ * Every name `BRIDGED_EVENTS` go by on the page, each to its English name:
+ * `ui-uploading` => `ui-uploading`, Spanish `es-subiendo` => `ui-uploading` (Spell UI's `localizedEventNames()`).
+ * - Read as a view connects:  a Spanish program's language is the page's before it runs.
+ */
+function bridgedEventNames(): Map<string, string> {
+  const names = new Map<string, string>()
+  for (const name of BRIDGED_EVENTS) {
+    names.set(name, name)
+    // no runtime yet, no page language:  English names alone
+    if (!("vocabulary" in UI)) continue
+    for (const localized of UI.vocabulary.localizedEventNames(BRIDGED_TAG, name)) names.set(localized, name)
+  }
+  return names
+}
+
 /** The element events a view has carried to its program:  a view around it leaves them alone. */
 const ELEMENT_EVENTS_HEARD = new WeakSet<Event>()
 
@@ -2452,6 +2501,9 @@ const FILES_HEARD = new WeakSet<Event>()
 
 /** `via` in a desktop drop's detail, as `<ui-uploader>`'s word for a drop on it. */
 const FILE_VIA = "drop"
+
+/** A view's rules for desktop files, `can take a file when:` and `can take a folder when:` (`takesDropped()`). */
+const FILE_RULES = ["canTakeFile", "canTakeFolder"] as const
 
 /** Every line that makes a view take desktop files:  its timing, item and moment (`fileHandlerFor()`). */
 const FILE_HANDLERS: ReadonlyArray<["when" | "while", "File" | "Folder", DragMoment]> = [

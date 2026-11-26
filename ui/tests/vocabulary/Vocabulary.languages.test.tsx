@@ -87,6 +87,12 @@ describe("UI.vocabulary.defineComponents({ prefix, dictionary })", () => {
     expect(ui.vocabulary.canonicalTagFor("ui-card")).toBe("ui-card")
     expect(ui.vocabulary.canonicalTagFor("es-nada")).toBeUndefined()
   })
+
+  it("names a component's event in every page language, before its family loads (epic `language` I168)", () => {
+    expect(ui.vocabulary.localizedEventNames("ui-uploader", "ui-uploading")).toEqual(["es-subiendo"])
+    // an event the dictionary doesn't name takes the prefix
+    expect(ui.vocabulary.localizedEventNames("ui-uploader", "ui-nothing-said")).toEqual(["es-nothing-said"])
+  })
 })
 
 describe("UI.i18n.registerDictionary()", () => {

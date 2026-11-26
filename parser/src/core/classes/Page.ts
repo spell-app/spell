@@ -28,7 +28,7 @@ export class Page extends View {
 
   /**
    * SIDE EFFECT:  the running program's pages are listed as they're made, `core.RUNTIME.pages`:
-   * each hears what `trigger()` sends by its own handler, `<on fizz>` (epic `language` T78).
+   * each hears what `trigger()` sends by its own handler, `on fizz` (epic `language` T78).
    */
   constructor(props?: Record<string, unknown>) {
     super(props)
@@ -40,7 +40,7 @@ export class Page extends View {
 
   /**
    * Whether the page may be changed:  in a locked page, every edit is a try-out, saved for nobody.
-   * - `<page "x" locked>` says `locked`;  only the editor reads it, so far (`editor.isLocked()`).
+   * - `"x" is a locked page` says `locked`;  only the editor reads it, so far (`editor.isLocked()`).
    * - Whoever may save the page's design locks or unlocks it.
    * - Spanish's word for it is `candado` (`builtInMembers`).
    */

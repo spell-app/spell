@@ -242,7 +242,7 @@ class RuntimeMethods:
         """Trigger `event` in the program, for everyone to hear:  `core.trigger("card-click", card=card)`.
 
         - Who hears it, in order:
-          - the program's app and pages, each by its own handler, `<on fizz>` (`on_fizz()`;  epic `language` T78)
+          - the program's app and pages, each by its own handler, `on fizz` (`on_fizz()`;  epic `language` T78)
           - the program's own listeners, `core.on("fizz")`
         - Returns what each handler returned, in that order.
         - The twin of the JavaScript core's `trigger()`.

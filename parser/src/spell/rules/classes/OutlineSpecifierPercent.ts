@@ -5,7 +5,6 @@ import { SP } from "spell/parser/spell"
 /**
  * `outline_specifier_percent` rule:  a property that's a PERCENT (epic `language` P34, Owen's C1 on I47):
  * `its "tip" is a percent`, `its "tip" is a percent starting at 18%`;  Spanish `su "propina" es un porcentaje`.
- * - `<property "tip" type="percent">18%</>` reads as the second.
  * - A measure of the built-in proportion dimension (`SP.PROPORTION`), kept as its fraction:  the property holds a plain
  *   number, `0.18` for `18%`, so `the bill * the tip` works -- see `SP.measureKeptIn()`.
  * - Shown with its % sign, the reader's way (`core.measureShown()`):  `18%`, Spanish `18 %`.

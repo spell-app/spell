@@ -47,6 +47,21 @@ describe("SourceHomes.fieldHomes()", () => {
     expect(homes.start.count).toMatchObject({ kind: "default" })
   })
 
+  test("a default said on its type's own line, after `with`, is its home (epic `language` T111)", () => {
+    const PILES = [
+      `a "pile" is a list of cards`,
+      `\tits "layout" is one of stacked or vertical`,
+      ``,
+      `a "foundation" is a pile with layout "stacked"`,
+      `\tits "suit" is a text`,
+      ``
+    ].join("\n")
+    const homes = SourceHomes.fieldHomes(parsed(PILES), undefined, ["Foundation", "Pile"], ["layout"])
+    const home = homes.start.layout!
+    expect(home).toMatchObject({ kind: "default", typeName: "Foundation", place: "literal", style: "text" })
+    expect(PILES.slice(home.span!.start, home.span!.end)).toBe(`"stacked"`)
+  })
+
   test("a home whose text has changed since is no longer still", () => {
     const homes = SourceHomes.fieldHomes(parsed(), made, ["Card"], ["count"])
     const typed = CARD.replace("set its count to 2", "set its count to 27")

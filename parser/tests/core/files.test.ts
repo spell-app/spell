@@ -50,4 +50,9 @@ describe("core.readFile()", () => {
     await expect(core.readFile("notes.txt", "text")).rejects.toThrow(TypeError)
     await expect(core.readFile(undefined, "text")).rejects.toThrow(/nothing isn't a file/)
   })
+
+  test("a file still being dragged, only its summary, says to read it once it's dropped (I172)", async () => {
+    const summary = { count: 1, kinds: ["text/plain"], via: "drop", x: 10, y: 20 }
+    await expect(core.readFile(summary, "text")).rejects.toThrow(/still being dragged.*dropped on it/)
+  })
 })

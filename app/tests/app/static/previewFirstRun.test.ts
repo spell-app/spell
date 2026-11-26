@@ -162,7 +162,7 @@ describe.runIf(!!process.env.PREVIEW_TEST && existsSync(path.join(BUILD, "index.
       await page.waitForTimeout(SETTLE_MS)
       await shot("2-blank")
       expect(await page.locator(ADD_PANEL).first().isVisible()).toBe(true)
-      expect(await text()).toContain('<spell-app "my app">')
+      expect(await text()).toContain("my app is an app")
     })
 
     test("drag in a button and a card, change the words, reorder", async () => {
