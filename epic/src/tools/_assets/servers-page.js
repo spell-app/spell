@@ -728,14 +728,15 @@ function worktreeGroups(answer, named) {
 /**
  * Whether the page lists a worktree (`worktreeOrder()`'s group):  something is going on in it now
  * - any of its servers runs (starting, or down, counts:  as `worktreeCards()`)
- * - a Claude session runs for its epic (`session`), its agents work (`agents`), it holds a turn (`turn`), or a
+ * - a Claude session for its epic is mid-turn (`busy`), its agents work (`agents`), it holds a turn (`turn`), or a
  *   phase is under way (`phase`)
+ * - NOT a session merely open in a tab, idle (epic `epic-engine` J369)
  * - NOT commits waiting to merge alone:  a worktree untouched for weeks may hold hundreds
  * - pure:  the page's tests call it
  */
 export function isActiveWorktree({ epic, servers }) {
   if (worktreeCards(servers).length) return true
-  return Boolean(epic && (epic.session || epic.agents || epic.turn || epic.phase))
+  return Boolean(epic && (epic.busy || epic.agents || epic.turn || epic.phase))
 }
 
 /**

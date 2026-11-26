@@ -207,6 +207,20 @@ describe("RunningEpics", () => {
       )
       const running = new RunningEpics(stale, { claudeHome: join(stale, "claude") })
       expect(running.runningNames()).toEqual(new Set(["slow", "other"]))
+      // idle between turns (no `status: "busy"`):  not busy (the Servers tab's active worktrees, J369)
+      expect(running.runningNames("busy")).toEqual(new Set())
+      put(
+        stale,
+        "claude/sessions/1.json",
+        JSON.stringify({
+          pid: process.pid,
+          sessionId: "s1",
+          cwd: join(stale, ".claude/worktrees/slow"),
+          name: "🚧 other",
+          status: "busy"
+        })
+      )
+      expect(running.runningNames("busy")).toEqual(new Set(["slow", "other"]))
       expect(running.render(list(""))).toContain('<epic-card running id="epic-slow" epic="slow"')
       // a written card a session runs for (`other`, by its title) is marked too
       expect(running.render(list(`<epic-card id="epic-other" epic="other" phases="todo">x</epic-card>`))).toContain(

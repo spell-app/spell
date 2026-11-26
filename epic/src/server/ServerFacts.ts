@@ -18,7 +18,7 @@ import type { EpicWorktree, MainMove, NotOnGitHub, Repo, ServerFactsAnswer, Work
  *   than `AT_LEAST` shown
  *   - NOT a branch that only merged `main` into itself, then fast-forwarded `main` to that merge:  it brought nothing
  * - `epicWorktrees`:  every running epic's worktree, busy or idle:  its commits `main` hasn't got, the phase under way,
- *   its open issues, todos and questions, its agents, a turn it holds (the test queue)
+ *   its open issues, todos and questions, its agents, a session busy on it, a turn it holds (the test queue)
  *   - newest first, by when it was last worked on (`lastWorked()`), so one with no commit in weeks sinks to the
  *     bottom (epic `epic-engine` I449:  "prefs and undo hasn't had a checkin in weeks");  never worked out:  last
  * - `notOnGitHub`:  `main`'s commits `origin` hasn't got;  only the tooling home's session pushes
@@ -103,7 +103,7 @@ export class ServerFacts {
   static epicWorktrees(checkout: string, base: string, epics = epicsFolderOf(checkout)): EpicWorktree[] {
     const turns = Turns.held()
     const running = new RunningEpics(checkout)
-    const sessions = running.runningNames()
+    const busy = running.runningNames("busy")
     const worktrees = running.list().map((epic) => {
       const ahead = Number(SRV.Git.out(["rev-list", "--count", `${base}..${epic.worktree}`], checkout) || 0)
       const turn = turns.find(({ holder }) => holder.label.includes(epic.worktree))
@@ -120,7 +120,7 @@ export class ServerFacts {
         ...(epic.active && { phase: epic.active }),
         ...(open && { open }),
         ...(epic.agents && { agents: epic.agents }),
-        ...((sessions.has(epic.name) || sessions.has(epic.worktree)) && { session: true }),
+        ...((busy.has(epic.name) || busy.has(epic.worktree)) && { busy: true }),
         ...(turn && { turn: turn.kind }),
         ...(worked && { worked })
       }

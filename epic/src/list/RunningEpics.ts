@@ -275,11 +275,14 @@ export class RunningEpics {
    * - for each session whose process is alive (`sessions/<pid>.json`):
    *   - the worktree it works in (its `cwd` under `.claude/worktrees/<w>`, or any of the worktrees folders)
    *   - its title without its icon (`🚧 airplane` -> `airplane`:  `/isolate` and `/epic` title a session for its epic)
+   * - `which`:  `"busy"`, only the sessions mid-turn (their record's `status`), so an idle session open in a tab
+   *   doesn't count (the Servers tab's active worktrees, epic `epic-engine` J369)
    * - NEVER throws:  an unreadable record is skipped
    */
-  runningNames(): Set<string> {
+  runningNames(which: "every" | "busy" = "every"): Set<string> {
     const names = new Set<string>()
     for (const session of this.liveSessions()) {
+      if (which === "busy" && session.status !== BUSY) continue
       // by real paths:  a session started before a move behind a compat link keeps the old spelling (I59)
       const inside = this.worktrees.map((each) => RealPath.from(each, session.cwd)).find(Boolean)
       if (inside) names.add(inside.split("/")[0]!)
@@ -305,6 +308,9 @@ export class RunningEpics {
     }))
   }
 }
+
+/** A live session's `status` while it works on a turn (Claude Code's own word;  between turns:  `idle`). */
+const BUSY = "busy"
 
 /** A live Claude session, its title as its tab shows it (`RunningEpics.liveSessions()`). */
 export type TitledSession = {
