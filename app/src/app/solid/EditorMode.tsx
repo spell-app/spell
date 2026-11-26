@@ -140,7 +140,8 @@ export function toggleCode() {
  * the compiled code's (`compiled`), then Anatomy (`anatomy`)
  * (Owen:  "it should be part of the run|edit group";  T76:  "add a 'compiled code' button between `</>` and the
  * inspector";  2026-11-24, T168:  "button order should be:  inspect, spell code, JS, anatomy").
- * - No Add a View here since epic `editor` T167:  ⌥⌘V or View › Add a View… opens the add panel (`<PalettePanel>`).
+ * - No Add a View here since epic `editor` T167:  ⌥⌘V or View › Add a View… opens the add panel, beside the add bar in
+ *   Edit (`<PlusPanel>`, T175).
  * - The draft's pill is the bar's own part now, after Help (`<PublishDraft>`, T107).
  * - None of the icons is ever chosen, so the thumb stays on the mode:  each one's `aria-pressed` says whether it's on;
  *   a menu's opener says so with `aria-haspopup`.

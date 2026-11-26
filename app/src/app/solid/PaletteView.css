@@ -73,3 +73,150 @@
     background: var(--PalettePanel-paper);
   }
 }
+
+/*
+ * The add bar's SUB-PANELS:  a group's (`<RailFlyout>`) and the whole add panel (`<PlusPanel>`), epic `editor` T173, T174.
+ * - Each slides out of the bar from behind its edge, left to right:  it moves in as far as it's cut at the bar's edge,
+ *   so its left edge never moves (`translate` and `clip-path` together, in one ease);  back the same way as it goes.
+ * - It wears the bar's own surface, a panel's, not a popup's (`--PaletteRail-surface`):
+ *   the panel's glass over the page's wallpaper, painted again under it, as the bar shows it;
+ *   so it reads as the bar over an app of any colour (a blur of the app showed it through, green under Solitaire)
+ * - Its button and its header row share one fill, `--PaletteRail-head-fill` (the add panel's topic bands, `Palette.css`), joined
+ *   into one shape like a tab:  the panel starts at the bar's edge, its top at its button's, its top-left corner
+ *   square, its shadow cut on that side;  the button's fill runs on over the 4px to the bar's edge.
+ * - One opening where another was (`RailPanels`) glides there from it, up or down, as if the bar moved:  `.gliding`;
+ *   the one it replaces goes at once (`.switching`).
+ * - Reduced motion:  none of that moves.
+ * - Restyled through its `popup` part, outside it:  a page's `::part()` rules beat the popup's own sheet.
+ */
+:root {
+  --PaletteRail-surface:
+    linear-gradient(var(--spell-panel-wash, transparent), var(--spell-panel-wash, transparent)),
+    linear-gradient(var(--spell-pane-background, var(--ui-surface)), var(--spell-pane-background, var(--ui-surface))),
+    var(--ui-bar-wallpaper, linear-gradient(transparent, transparent)),
+    var(--ui-bar-wallpaper-color, var(--ui-background));
+  /* how far the panel's shadow reaches past its sides, kept by its cut */
+  --PaletteRail-shadow-room: 48px;
+}
+ui-popup.BarMenuPopup.PaletteFlyout::part(popup) {
+  /* at the bar's edge, its top its button's:  no gap for an arrow */
+  margin: 0 0 0 4px;
+  padding: 0 0 4px 0;
+  border: 0;
+  border-radius: 0 var(--spell-pane-radius, 8px) var(--spell-pane-radius, 8px) var(--spell-pane-radius, 8px);
+  background: var(--PaletteRail-surface);
+  /* the wallpaper where the page has it, as the bar sees it */
+  background-attachment: fixed;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: var(--spell-pane-shadow, var(--ui-shadow-raised));
+  opacity: 1;
+  transform: none;
+  translate: 0 0;
+  /* its shadow cut on its left, where it joins the bar */
+  clip-path: inset(
+    calc(var(--PaletteRail-shadow-room) * -1) calc(var(--PaletteRail-shadow-room) * -1)
+      calc(var(--PaletteRail-shadow-room) * -1) 0
+  );
+  transition:
+    translate var(--ui-duration-normal, 200ms) var(--ui-ease-out, ease-out),
+    clip-path var(--ui-duration-normal, 200ms) var(--ui-ease-out, ease-out);
+}
+/* ... no arrow */
+ui-popup.BarMenuPopup.PaletteFlyout::part(popup)::before {
+  content: none;
+}
+/* ... behind the bar while it's in */
+ui-popup.BarMenuPopup.PaletteFlyout:not(:popover-open)::part(popup) {
+  translate: -100% 0;
+  clip-path: inset(0 0 0 100%);
+}
+@starting-style {
+  ui-popup.BarMenuPopup.PaletteFlyout:popover-open::part(popup) {
+    translate: -100% 0;
+    clip-path: inset(0 0 0 100%);
+  }
+}
+/* ... opening where another was:  from there, up or down */
+@starting-style {
+  ui-popup.BarMenuPopup.PaletteFlyout.gliding:popover-open::part(popup) {
+    translate: 0 var(--PaletteFlyout-glide, 0px);
+    clip-path: inset(
+      calc(var(--PaletteRail-shadow-room) * -1) calc(var(--PaletteRail-shadow-room) * -1)
+        calc(var(--PaletteRail-shadow-room) * -1) 0
+    );
+  }
+}
+/* ... going as another opens:  at once */
+ui-popup.BarMenuPopup.PaletteFlyout.switching {
+  transition-duration: 0s;
+}
+ui-popup.BarMenuPopup.PaletteFlyout.switching::part(popup) {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  ui-popup.BarMenuPopup.PaletteFlyout::part(popup) {
+    transition: none;
+  }
+}
+
+/* its foot, over the rows scrolled under it:  the same surface */
+ui-popup.PaletteFlyout .PaletteFlyoutFoot {
+  background: var(--PaletteRail-surface);
+  background-attachment: fixed;
+}
+
+/* the button whose panel is out:  the fill of the panel's header, running on to the bar's edge, its left corners round */
+.PaletteRail ui-item.PaletteRailButton.open::part(item),
+.PaletteRail .PaletteRailAdd.open {
+  border-radius: var(--ui-radius-sm, 6px) 0 0 var(--ui-radius-sm, 6px);
+  background: var(--PaletteRail-head-fill);
+  box-shadow: 4px 0 0 var(--PaletteRail-head-fill);
+  color: var(--ui-text-color);
+}
+
+/*
+ * `<PlusPanel>`:  the whole add panel, out of the `+` (T174):  as wide as the add panel's columns, as tall as fits
+ * from the `+` to 8px above the window's bottom, so the longer topics still fit a 1440 x 800 window (I185);  its header row (what's under the mouse, the search) the `+`'s height, on the `+`'s fill
+ */
+ui-popup.BarMenuPopup.PalettePlus::part(popup) {
+  width: auto;
+  max-height: none;
+  overflow: visible;
+  padding: 0;
+}
+ui-popup.PalettePlus {
+  /* from 1400px wide, the room beside the bar takes 7 columns, as the dialog's widest does:
+     so the longer topics fit an 800px window, which 6 under the top bar can't (T175) */
+  @media (width >= 1400px) {
+    --palette-width: 1300px;
+  }
+}
+.PalettePlus {
+  & .PaletteBody {
+    gap: 0;
+    /* the `+`'s top, under the top bar, and 8px below */
+    max-height: calc(100dvh - 56px);
+  }
+  & .PaletteHead {
+    box-sizing: border-box;
+    height: 32px;
+    padding: 0 4px 0 12px;
+    border-start-end-radius: var(--spell-pane-radius, 8px);
+    background: var(--PaletteRail-head-fill);
+  }
+  & .PaletteSearch {
+    flex-basis: 240px;
+  }
+  & .PaletteGroups {
+    padding: 4px 12px;
+  }
+}
+
+/* the `+`, a button now (T174):  lit under the mouse, as the bar's other buttons are */
+.PaletteRail .PaletteRailAdd {
+  &:hover,
+  &:focus-visible {
+    color: var(--ui-text-color);
+  }
+}

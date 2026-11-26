@@ -46,7 +46,10 @@ export class Palette {
   /** The palette's menu and strip, loaded the first time it opens:  see `LazyPiece`. */
   static views = new LazyPiece(() => import("./PaletteView"))
 
-  /** Open the add panel by itself, the next time the add bar is drawn:  a blank app shows what it can hold. */
+  /**
+   * Open the add panel by itself, the next time the add bar is drawn:
+   * a blank app shows what it can hold;  ⌥⌘V in Run lands on it once Edit shows (epic `editor` T175).
+   */
   static openOnArrival(): void {
     opensOnArrival = true
     Palette.load()
@@ -60,13 +63,16 @@ export class Palette {
   }
 
   /**
-   * Show the add panel over the editor, a `<ui-modal>` of every part (`<PalettePanel>`;  epic `editor` T167):
-   * its key, ⌥⌘V, and View › Add a View….
-   * - SIDE EFFECT:  a `<div class="PalettePanelRoot">` in `<body>` holding it, until it closes.
+   * Show the add panel:  its key, ⌥⌘V, and View › Add a View….
+   * - In Edit, beside the add bar, as a click on its `+` opens it (`<PlusPanel>`;  epic `editor` T175, Owen:
+   *   "Beside the bar in Edit"), the cursor in its search.
+   * - With no add bar (Run, Design):  over the editor, a `<ui-modal>` of every part (`<PalettePanel>`;  T167).
+   *   - SIDE EFFECT:  a `<div class="PalettePanelRoot">` in `<body>` holding it, until it closes.
    * - Shown already:  nothing more.
    * - NEVER throws:  its view failing to load is the editor's error to show.
    */
   static async showPanel(): Promise<void> {
+    if (opensPlus) return opensPlus()
     if (panelRoot) return
     const root = (panelRoot = document.createElement("div"))
     root.className = "PalettePanelRoot"
@@ -85,6 +91,17 @@ export class Palette {
     } catch (error) {
       panelRoot = undefined
       editor.showError(error)
+    }
+  }
+
+  /**
+   * The add bar's `+` is drawn, and `open()` opens its panel (`<PlusPanel>`):  `showPanel()` opens that while it's here.
+   * - Returns what forgets it, as the add bar goes (Run, Design).
+   */
+  static offerPlus(open: () => void): () => void {
+    opensPlus = open
+    return () => {
+      if (opensPlus === open) opensPlus = undefined
     }
   }
 
@@ -214,6 +231,9 @@ let loading: Promise<void> | undefined
 
 /** Does the add panel open when the add bar is next drawn?  `Palette.openOnArrival()`. */
 let opensOnArrival = false
+
+/** Opens the add bar's `+` panel, while the add bar is drawn:  `Palette.offerPlus()`. */
+let opensPlus: (() => void) | undefined
 
 /** The add panel's place in `<body>`, while it shows:  `Palette.showPanel()`. */
 let panelRoot: HTMLElement | undefined

@@ -592,7 +592,7 @@ function tabFor(id: ProgramTabId): RunnerTab<ProgramTabId> {
  *   then File · Edit · View · Run · Help (`MenuBar.tsx`), then the draft's pill while you have drafts (T107)
  * - middle:  Run | Edit | Design | Site, then in Edit and Design, Inspect app, the code's icon,
  *   the compiled code's (its language's icon) and Anatomy, in the same group (epic `editor` T83, T168);
- *   no Add a View since T167:  ⌥⌘V or View › Add a View… opens the add panel
+ *   no Add a View since T167:  ⌥⌘V or View › Add a View… opens the add panel, beside the add bar (T175)
  * - right, ONE group of icons:  Restart, the theme, you
  *   - no Inspector button (T83):  View › Inspector shows or hides it, and the Inspector card's ✕ hides it
  * - `mode`:  the page's, pressed in `<ModeButtons>`.

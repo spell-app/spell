@@ -1,7 +1,7 @@
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { CodeEditor, EDITOR, SERVING, openAddPanel } from "./runningEditor"
+import { CodeEditor, EDITOR, SERVING, openAddPanel, ADD_PANEL } from "./runningEditor"
 
 /**
  * A drop, a move and a side-bar edit leave the running app alone (epic `editor`, Edit Without Redraw).
@@ -191,7 +191,7 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
     const before = await textOf("Solitaire.spell")
     await openAddPanel(page)
     await page.waitForTimeout(800)
-    const row = await page.locator('.PalettePanel ui-tree-item[label="Button"]').first().boundingBox()
+    const row = await page.locator(`${ADD_PANEL} ui-tree-item[label="Button"]`).first().boundingBox()
     // just above the board's first pile
     const stock = await page.locator(".AppPaneBody solitaire-stock-pile").first().boundingBox()
     await drag(row!.x + 40, row!.y + 10, stock!.x + 40, stock!.y - 4)

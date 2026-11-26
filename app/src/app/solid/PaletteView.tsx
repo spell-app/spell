@@ -1,10 +1,12 @@
-import { For, Show, createSignal, onSettled } from "solid-js"
+import { For, Show, createSignal, onCleanup, onSettled } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { kebabCase, upperFirst } from "spell/util"
+import { after, type CancelablePromise } from "spell/util/timing"
 import type { ComponentDefinition } from "spell/ui/components/ComponentDefinitions"
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
+import { hoverDelay } from "spell/app/app/ui/codePopups"
 import { barTooltip, type BarTooltip } from "./chrome"
 import { Inspector } from "./Inspector"
 import { on } from "./on"
@@ -36,18 +38,21 @@ import "./PaletteView.css"
 /****************
  * ### `<PaletteRail>`
  * The add bar down the editor's left edge, in Edit (epic `editor` T151):  a button per group of what can be added.
- * - Top to bottom:  a `+`, saying it's for adding (T162), Search, then the parts you've starred (T152),
- *   then App views (This page), then every group, as the palette's table orders them;  a divider wherever the table puts one under a group (`dividerAfter`, set on the
- *   palette groups page, `/palette`).
+ * - Top to bottom:  a `+`, opening the whole add panel (`<PlusPanel>`, T174), then the parts you've starred (T152),
+ *   then App views (This page), then every group, as the palette's table orders them;
+ *   a divider wherever the table puts one under a group (`dividerAfter`, set on the palette groups page, `/palette`).
  * - A group's button, its icon alone, its name the tooltip, opens its parts beside the bar (`<RailFlyout>`)
  *   once the mouse rests on it (T162):  a search over them at its top, then each by name, a family's parts inside
  *   its main one.  A click on one picks it up, to put in the app with the next
  *   click (`PartPlacing`, T153);  a drag places it;  its star stars it.
+ * - What a button opens slides out of the bar, from behind it, on the bar's own surface:
+ *   a SUB-PANEL, the button and the panel's header one shape (`RailPanels`, T173).
+ *   - While one is out, pointing at another button opens its panel at once, gliding there from the last.
  * - A starred part's button picks it up the same way;  a drag places it;  a right click takes its star away.
  * - Marked as the rail (`RAIL_MARK`), its flyouts too:  a press on it is its own while a part is picked up.
  * - Slides in the first time it shows on a page, under a top bar already drawn (epic `editor` I255);  never again,
  *   switching modes or pages:  it stays where it was.
- * - Drawn on a blank app just made (`Palette.openOnArrival()`), it opens the add panel (`<PalettePanel>`).
+ * - Drawn on a blank app just made, or by ⌥⌘V in Run (`Palette.openOnArrival()`), it opens its `+` panel.
  * - Spell UI's own:  a vertical icon `<ui-menu>`, its buttons `<ui-item>`s, its flyouts `<ui-popup>`s.
  ****************/
 export function PaletteRail(): JSX.Element {
@@ -62,14 +67,8 @@ export function PaletteRail(): JSX.Element {
     <div class={["PaletteRailPlace", { arriving: isArriving }]} {...{ [RAIL_MARK]: "" }}>
       <div class="SplitPane PaletteRail" data-tour="add-bar">
         <div class="PaletteRailColumn">
-          <div class="PaletteRailAdd">
-            <ui-icon name="plus" label={appTexts.text("addPart")} />
-          </div>
+          <PlusPanel />
           <ui-menu direction="vertical" icon appearance="text" aria-label={appTexts.text("addPart")}>
-            <RailFlyout id={SEARCH_FLYOUT_ID} name={appTexts.text("paletteSearchAll")} icon="search" isSearch>
-              {(words) => <SearchRows words={words} />}
-            </RailFlyout>
-            <ui-item kind="divider" />
             <Show when={Palette.favorites.length}>
               <For each={Palette.favorites}>{(definition) => <FavoriteButton definition={definition} />}</For>
               <ui-item kind="divider" />
@@ -101,8 +100,8 @@ export function PaletteRail(): JSX.Element {
 /** The start of each add bar button's id, which its flyout points at. */
 const FLYOUT_ID = "PaletteFlyout-"
 
-/** Search's id in the add bar. */
-const SEARCH_FLYOUT_ID = `${FLYOUT_ID}search`
+/** The `+`'s id in the add bar, which the whole add panel points at. */
+const PLUS_ID = `${FLYOUT_ID}plus`
 
 /** App views' (This page's) id in the add bar. */
 const THIS_FLYOUT_ID = `${FLYOUT_ID}this`
@@ -119,40 +118,41 @@ function railTooltip(text: string): BarTooltip {
 
 /**
  * ### `<RailFlyout>`
- * One button of the add bar, and the flyout it opens beside the bar.
+ * One button of the add bar, and the sub-panel it opens beside the bar.
  * - The button:  its icon alone, `name` its name for a screen reader;  no tooltip:  its menu, opening, names it (T162).
- * - The flyout opens as the mouse rests on the button, after the page's hover delay (`--ui-hover-delay`;  T162),
+ * - The panel opens as the mouse rests on the button, after the page's hover delay (`--ui-hover-delay`;  T162),
  *   or as the button gets the focus;  it stays open while the mouse is over it.
+ *   - At once while another is out:  it glides there from the last (`RailPanels`, T173).
  * - A click on the button opens it at once, with no wait (T170, Owen:  "Click opens it too").
- * - The flyout:  `name` atop, a search button beside it (T162), then `rows`, handed the words typed (lowercase);
+ * - The panel:  `name` atop, a search button beside it (T162), then `rows`, handed the words typed (lowercase);
  *   - the search button slides the field open over the name, "Search <group>" (`<ui-search collapsed>`);
- *     Search's own (`isSearch`) is open from the start
  *     ⌘F jumps into it (T166)
- *   at its foot, what the part under the mouse is (`<PartAbout>`, epic `editor` T165).
+ *   - at its foot, what the part under the mouse is (`<PartAbout>`, epic `editor` T165)
+ *   - its header and the button share one fill while it's out:  one shape (T173)
  * - Choosing a row, or dragging one, closes it (`Palette.closeMenus()`).
  */
 function RailFlyout(props: {
   id: string
   name: string
   icon: string
-  /** Search's own:  its field open from the start, as searching is all it's for */
-  isSearch?: boolean
   children: (words: () => string) => JSX.Element
 }): JSX.Element {
   const [filter, setFilter] = createSignal("")
+  const [isOut, setOut] = createSignal(false)
   const words = () => filter().trim().toLowerCase()
-  let flyout: (HTMLElement & { visible?: boolean }) | undefined
+  let flyout: RailPanel | undefined
+  let button: HTMLElement | undefined
   return (
     <>
       <ui-item
         id={props.id}
-        class="PaletteRailButton"
+        class={["PaletteRailButton", { open: isOut() }]}
         icon={props.icon}
         aria-haspopup="menu"
         aria-label={props.name}
-        onClick={() => {
-          if (flyout) flyout.visible = true
-        }}
+        ref={(item: HTMLElement) => (button = item)}
+        onPointerEnter={() => flyout && button && RailPanels.pointedAt(flyout, button)}
+        onClick={() => flyout && button && RailPanels.open(flyout, button)}
       />
       <ui-popup
         for={props.id}
@@ -160,9 +160,10 @@ function RailFlyout(props: {
         position="right top"
         class={["BarMenuPopup", "PaletteFlyout"]}
         aria-label={props.name}
-        ref={(popup: HTMLElement & { visible?: boolean }) => {
+        ref={(popup: RailPanel) => {
           flyout = popup
           closesWithPalette(popup)
+          RailPanels.follow(popup, () => button, setOut)
         }}
         {...{ [RAIL_MARK]: "" }}
       >
@@ -170,12 +171,12 @@ function RailFlyout(props: {
           <span class="PaletteFlyoutName">{props.name}</span>
           <ui-search
             class="PaletteFlyoutSearch"
-            collapsed={props.isSearch ? undefined : ""}
+            collapsed=""
             size="small"
             shortcut="mod+F"
             show-no-results="false"
             aria-label={appTexts.text("paletteSearchIn", { group: props.name })}
-            placeholder={props.isSearch ? props.name : appTexts.text("paletteSearchIn", { group: props.name })}
+            placeholder={appTexts.text("paletteSearchIn", { group: props.name })}
             onInput={(event: InputEvent) => setFilter((event.composedPath()[0] as HTMLInputElement).value ?? "")}
             ref={on<{ value: string }>("ui-changed", (event) => setFilter(event.detail.value))}
           />
@@ -191,26 +192,184 @@ function RailFlyout(props: {
   )
 }
 
-/** Search's rows:  every group with a match, each a row holding its matches;  App views (This page) first. */
-function SearchRows(props: { words: () => string }): JSX.Element {
-  const thisGroup = () => appTexts.text(Palette.isPageShown ? "thisPage" : "paletteAppViews")
+/**
+ * ### `<PlusPanel>`
+ * The `+` atop the add bar, and the whole add panel it opens beside the bar (epic `editor` T174, Owen:
+ * "Hovering over or clicking the plus in the bar should show the full add panel as we had it before, with columns,
+ * with the cursor in the search field").
+ * - The panel is the add panel's menu, `<PaletteMenu>`:  every part, in columns by topic,
+ *   sliding out of the bar as a group's does (`RailPanels`, T173);  its search has the cursor as it opens.
+ * - The mouse resting on the `+` opens it, after the page's hover delay;  a click, at once;
+ *   at once too while a group's panel is out.
+ * - It stays open as the mouse leaves, so typing in its search never closes it:
+ *   Escape, a click elsewhere, a part added or dragged, or another of the bar's buttons pointed at closes it.
+ * - The add bar's own Search button went with it (Owen:  "I think we can drop the search icon in this case"):
+ *   this search looks through every part.
+ * - ⌥⌘V and View › Add a View… open it too (`Palette.showPanel()`, epic `editor` T175);
+ *   with no add bar (Run, Design), the same menu in a dialog of its own (`<PalettePanel>`).
+ */
+function PlusPanel(): JSX.Element {
+  const [isOut, setOut] = createSignal(false)
+  let panel: RailPanel | undefined
+  let plus: HTMLElement | undefined
+  /** The mouse resting on the `+`, before the panel opens. */
+  let resting: CancelablePromise<unknown> | undefined
+  // ⌥⌘V and View › Add a View… open it while it's here, as a click on the `+` does (T175)
+  onCleanup(Palette.offerPlus(() => panel && plus && RailPanels.open(panel, plus)))
   return (
     <>
-      <Show when={thisGroupMatches(props.words())}>
-        <ui-tree-item label={thisGroup()} icon={OWN_VIEW_ICON} open>
-          <ThisGroupRows words={props.words} />
-        </ui-tree-item>
-      </Show>
-      <For each={groupsMatching(props.words())}>
-        {(group) => (
-          <ui-tree-item label={upperFirst(groupName(group))} icon={group.icon ?? GROUP_ICON} open>
-            <PartRows parts={partsOf(group)} words={props.words} picksUp />
-          </ui-tree-item>
-        )}
-      </For>
+      <div
+        id={PLUS_ID}
+        class={["PaletteRailAdd", { open: isOut() }]}
+        role="button"
+        tabindex="0"
+        aria-label={appTexts.text("addPart")}
+        aria-haspopup="dialog"
+        ref={(element: HTMLElement) => (plus = element)}
+        onKeyDown={(event: KeyboardEvent) => {
+          if (event.key !== "Enter" && event.key !== " ") return
+          event.preventDefault()
+          if (panel && plus) RailPanels.open(panel, plus)
+        }}
+        onPointerEnter={() => {
+          if (!panel || !plus || RailPanels.pointedAt(panel, plus)) return
+          resting = after(hoverDelay(), () => panel && plus && RailPanels.open(panel, plus))
+        }}
+        onPointerLeave={() => resting?.cancel()}
+        onClick={() => {
+          resting?.cancel()
+          if (panel && plus) RailPanels.open(panel, plus)
+        }}
+      >
+        <ui-icon name="plus" />
+      </div>
+      <ui-popup
+        for={PLUS_ID}
+        open-on="manual"
+        position="right top"
+        class={["BarMenuPopup", "PaletteFlyout", "PalettePlus"]}
+        aria-label={appTexts.text("addPart")}
+        ref={(popup: RailPanel) => {
+          panel = popup
+          closesWithPalette(popup)
+          RailPanels.follow(popup, () => plus, setOut)
+          // the cursor in its search as it opens
+          popup.addEventListener("toggle", (event) => {
+            if ((event as ToggleEvent).newState === "open") popup.querySelector<HTMLElement>(".PaletteSearch")?.focus()
+          })
+        }}
+        {...{ [RAIL_MARK]: "" }}
+      >
+        <PaletteMenu />
+      </ui-popup>
     </>
   )
 }
+
+/** One of the add bar's sub-panels:  a `<ui-popup>`, shown and hidden by `visible`. */
+type RailPanel = HTMLElement & { visible?: boolean }
+
+/**
+ * The add bar's sub-panels, as one (epic `editor` T173, Owen:  "When a submenu is displayed, hovering over other
+ * items in the bar should open them immediately with an animation like the bar is moving down"):
+ * - which is out, and the button it's out of
+ * - pointing at another button while one is out opens that one at once:
+ *   the one out goes as it opens, with no slide back, and the new one glides from where it was to its own button
+ *   (`gliding`, `--PaletteFlyout-glide`, `PaletteView.css`)
+ * - the same just after one went (`REOPENS_WITHIN_MS`):  the mouse crossing a gap
+ * - otherwise a panel slides out from behind the bar (the sheet's own `@starting-style`)
+ * - Static on purpose:  ONE add bar per page.
+ */
+class RailPanels {
+  /** The panel out, and the button it's out of. */
+  private static shown: { panel: RailPanel; button: HTMLElement } | undefined
+
+  /** The panel to go once the one replacing it opens. */
+  private static leaving: RailPanel | undefined
+
+  /** The last panel to go, its button, and when:  a button reached just after opens at once too. */
+  private static gone: { panel: RailPanel; button: HTMLElement; at: number } | undefined
+
+  /**
+   * Follow `panel`, out of `buttonOf()`, as it shows and hides:  `setOut()` says whether it's out.
+   * - Every way it opens and closes counts:  its own hover, a click, Escape, `Palette.closeMenus()`.
+   */
+  static follow(panel: RailPanel, buttonOf: () => HTMLElement | undefined, setOut: (isOut: boolean) => void): void {
+    panel.addEventListener("beforetoggle", (event) => {
+      const button = buttonOf()
+      const isOpening = (event as ToggleEvent).newState === "open"
+      setOut(isOpening)
+      if (isOpening) {
+        panel.classList.remove(SWITCHING)
+        if (button) RailPanels.shown = { panel, button }
+        // the one it replaces goes only now:  a panel opening for the first time takes a moment to draw
+        const leaving = RailPanels.leaving
+        RailPanels.leaving = undefined
+        if (leaving && leaving !== panel) leaving.visible = false
+        return
+      }
+      panel.classList.remove(GLIDING)
+      if (RailPanels.shown?.panel !== panel) return
+      RailPanels.shown = undefined
+      if (button) RailPanels.gone = { panel, button, at: performance.now() }
+    })
+  }
+
+  /**
+   * The mouse is on `button`:  open its `panel` at once if another is out, or just went (`REOPENS_WITHIN_MS`).
+   * - Returns whether it did:  otherwise the panel opens as it usually would, once the mouse rests.
+   */
+  static pointedAt(panel: RailPanel, button: HTMLElement): boolean {
+    if (RailPanels.shown?.panel === panel || !RailPanels.last) return false
+    RailPanels.open(panel, button)
+    return true
+  }
+
+  /** Open `panel`, out of `button`, at once:  gliding from the panel out (or just gone), else sliding out. */
+  static open(panel: RailPanel, button: HTMLElement): void {
+    if (RailPanels.shown?.panel === panel) return
+    const last = RailPanels.last
+    RailPanels.gone = undefined
+    if (last && last.panel !== panel) {
+      last.panel.classList.add(SWITCHING)
+      RailPanels.leaving = last.panel
+      // from the last one's place:  as far from its button as this one will be from its own
+      const glide = topOf(last.button) - topOf(button)
+      panel.style.setProperty(GLIDE_TOKEN, `${Math.round(glide)}px`)
+      panel.classList.add(GLIDING)
+    }
+    panel.visible = true
+  }
+
+  /** The panel out, else the one that went within `REOPENS_WITHIN_MS`. */
+  private static get last(): { panel: RailPanel; button: HTMLElement } | undefined {
+    const gone = RailPanels.gone
+    return RailPanels.shown ?? (gone && performance.now() - gone.at < REOPENS_WITHIN_MS ? gone : undefined)
+  }
+}
+
+/**
+ * Where `button` is drawn, down the window:  its own box, else its shadow root's first drawn box
+ * (a `<ui-item>` is `display: contents`, so it has no box of its own).
+ */
+function topOf(button: Element): number {
+  const own = button.getBoundingClientRect()
+  if (own.height) return own.top
+  const drawn = [...(button.shadowRoot?.children ?? [])].find((child) => child.getBoundingClientRect().height)
+  return drawn?.getBoundingClientRect().top ?? own.top
+}
+
+/** A panel opening where another was:  it glides from there (`PaletteView.css`). */
+const GLIDING = "gliding"
+
+/** A panel going as another opens:  at once, with no slide back. */
+const SWITCHING = "switching"
+
+/** How far a gliding panel starts from its own place, up or down:  `RailPanels.open()` sets it. */
+const GLIDE_TOKEN = "--PaletteFlyout-glide"
+
+/** How soon after a panel goes another still opens at once, gliding from it:  the mouse crossing to the next button. */
+const REOPENS_WITHIN_MS = 300
 
 /**
  * A starred part's button in the add bar (epic `editor` T152):  a click picks it up to place with the next click in
@@ -241,7 +400,8 @@ function FavoriteButton(props: { definition: ComponentDefinition }): JSX.Element
  * ### `<PalettePanel>`
  * The add panel, over the editor (epic `editor` T167:  "Shortcut key to bring up the Add View panel in a modal"):
  * the palette's menu, `<PaletteMenu>`, in a `<ui-modal>`.
- * - Opened by its key, ⌥⌘V, or View › Add a View…:  `Palette.showPanel()`, which mounts it and cleans up.
+ * - Opened by its key, ⌥⌘V, or View › Add a View…, where there's no add bar (Run, Design):
+ *   `Palette.showPanel()`, which mounts it and cleans up;  in Edit they open the `+` panel instead (T175).
  * - A click on a part adds it, a drag places it, as in the add bar's menus.
  * - Closes like every dialog:  its ✕, Escape, or a click beside it;
  *   and once a part is added, or a drag starts from it (`closesWithPalette`), so it lands on a page you can see.
@@ -480,11 +640,6 @@ function PartRows(props: {
       )}
     </For>
   )
-}
-
-/** `group`'s parts, all of them:  the palette's own group, not a search's cut of it (`groupsMatching()`). */
-function partsOf(group: PaletteGroup): readonly ComponentDefinition[] {
-  return offered().find((each) => groupName(each) === groupName(group))?.parts ?? group.parts
 }
 
 /** The description of the part under the mouse or focused, in a menu of parts:  `<PartAbout>` shows it. */

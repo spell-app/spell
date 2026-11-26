@@ -3,8 +3,10 @@
    - 4 columns, then 5 from 1280px wide, 6 from 1400px, 7 from 1800px
    - its rows 20px tall, not a tree's 22px:  a topic stays whole in its column, so Owen's longer topics
      (Forms, Text, Layout) still fit a 1440 x 800 window without scrolling
-   - and in a window no taller than 840px, less room between topics (epic `language` I182) */
-.PalettePanel {
+   - and in a window no taller than 840px, less room between topics (epic `language` I182)
+   - in its dialog (`<PalettePanel>`), and out of the add bar's `+` (`<PlusPanel>`, epic `editor` T174) */
+.PalettePanel,
+.PalettePlus {
   --palette-width: min(740px, 88vw);
   --ui-tree-row-height: 20px;
 
@@ -26,6 +28,11 @@
   width: var(--palette-width);
   /* within the window, below the top bar:  its body scrolls only when even that's too short */
   max-height: calc(100dvh - 64px);
+}
+
+/* a topic's band, the add panel's, and the add bar's sub-panels' header rows with the button they're out of (T173) */
+:root {
+  --PaletteRail-head-fill: color-mix(in oklab, var(--ui-text-color) 7%, transparent);
 }
 
 /* every part, by topic:  scrolls under the head, which stays put */
@@ -52,7 +59,7 @@
     /* its text lines up with the rows' icons */
     padding: 3px 8px;
     border-radius: var(--ui-radius-sm, 6px);
-    background: color-mix(in oklab, var(--ui-text-color) 7%, transparent);
+    background: var(--PaletteRail-head-fill);
     color: var(--ui-text-muted);
     font-size: 12px;
     font-weight: var(--ui-font-weight-bold, 700);
@@ -70,7 +77,9 @@
 }
 
 /* The add bar down the editor's left edge, in Edit (epic `editor` T151):  a panel of its own, as narrow as its buttons,
-   beside the app;  room above and below it the page's (`--spell-page-padding`), the app's column its gap
+   beside the app;  room above and below it the panels' own, its edges in line with the app's in every theme
+   (`--spell-page-room-top`, `-bottom`;  I346:  `padding-block` took the page's three-value padding, so it had none),
+   the app's column its gap
    - docked to the window's left edge (T162):  no room on its left, its left corners square
    - a `+` atop, then a column of 32px buttons, 4px apart, each its icon alone, centred, 4px in from the panel's sides:
      40px across */
@@ -79,7 +88,7 @@
   display: flex;
   box-sizing: content-box;
   width: 40px;
-  padding-block: var(--spell-page-padding);
+  padding-block: var(--spell-page-room-top) var(--spell-page-room-bottom);
 
   /* its first showing on the page, under the top bar already drawn:  a short fade and slide in (I255) */
   &.arriving {
@@ -100,7 +109,7 @@
     align-items: center;
     overflow-y: auto;
   }
-  /* the `+`:  what the bar is for, not a button (T162) */
+  /* the `+`:  what the bar is for (T162), and the button that opens the whole add panel (`<PlusPanel>`, T174) */
   & .PaletteRailAdd {
     display: flex;
     flex: none;
@@ -166,8 +175,8 @@
   border-end-start-radius: 0;
 }
 
-/* a group's flyout, beside the bar:  its name and search atop, its rows under, as many as fit the window, then they
-   scroll */
+/* a group's flyout, beside the bar:  its name and search atop, on its button's fill, its button's height (T173);
+   its rows under, as many as fit the window, then they scroll */
 ui-popup.PaletteFlyout::part(popup) {
   width: 220px;
   max-height: min(calc(100dvh - 120px), 560px);
@@ -180,8 +189,9 @@ ui-popup.PaletteFlyout::part(popup) {
   justify-content: space-between;
   gap: 8px;
   box-sizing: border-box;
-  height: 40px;
-  padding: 4px 8px;
+  height: 32px;
+  padding: 0 8px;
+  background: var(--PaletteRail-head-fill);
 
   & .PaletteFlyoutName {
     color: var(--ui-text-muted);
@@ -208,10 +218,10 @@ ui-popup.PaletteFlyout::part(popup) {
   }
 }
 /* its rows thinner, their icons further in:  the triangle's room kept, though it never shows (T162) */
-ui-popup.PaletteFlyout {
+ui-popup.PaletteFlyout:not(.PalettePlus) {
   --ui-tree-row-height: 24px;
 }
-ui-popup.PaletteFlyout .PaletteTree ui-tree-item::part(toggle) {
+ui-popup.PaletteFlyout:not(.PalettePlus) .PaletteTree ui-tree-item::part(toggle) {
   display: inline-flex;
   visibility: hidden;
 }

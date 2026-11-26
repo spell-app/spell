@@ -114,7 +114,6 @@ const APP_TEXTS_ES: AppTextPack = {
   paletteHint: "Haz clic o arrastra para añadir a la página",
   paletteMore: "{count} más",
   paletteAppViews: "Vistas de la app",
-  paletteSearchAll: "Buscar entre todo lo que puedes añadir",
   paletteSearchIn: "Buscar en {group}",
   paletteStar: "Haz clic en la estrella para tener {part} arriba en la barra de añadir",
   paletteUnstar: "Quitar la estrella a {part}",
