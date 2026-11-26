@@ -204,9 +204,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     (`SPELL_PORTS_FILE`;  epic `epic-engine` P82):  a worktree's page server and its editor are on the same ports at
     every start, so a link to them stays good;  forgotten when the worktree is removed (`forget()`)
   - `KeeperLink` -- asking the SERVER KEEPER, the one program that starts, stops and restarts a main checkout's
-    servers (spell-epic's `ServerKeeper`, in its hub;  epic `epic-engine` P82):  its record, `~/.spell/server-keeper.json`
-    (`SPELL_KEEPER_FILE`), `{ pid, base, token }`;  `ask("start" | "stop" | "restart", { checkout })`, `undefined` when
-    none runs, so the caller does it itself
+    servers (`ServerKeeper`, below;  epic `epic-engine` P82):  its record, `~/.spell/server-keeper.json`
+    (`SPELL_KEEPER_FILE`), `{ pid, base, token, keeper }`, `keeper` saying which (`spell`, `epic hub`);
+    `ask("start" | "stop" | "restart", { checkout, server })`, `undefined` when none runs, so the caller does it itself
+    - `keeperHome()`:  the keeper's files' folder, `SPELL_KEEPER_HOME` else `~/.spell`
     - `PageServer.ensure()`, `stop()` and `restart()` ask it for a MAIN checkout;  `ensureHere()` and `stopHere()` are
       what the keeper runs
     - `refusedStart(server, checkout)` (epic `epic-engine` P84):  why a main checkout's server mustn't start now:  an
@@ -363,6 +364,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - It went to spell-server when the repos split (P8), and into the kit with it (P9).
     spell-app's `page-server` (the bundles' build, the highlight.js swap, the `/ui/` bridge) joined it in P16.
 - NOT in the barrel, opt-in by path (WWOD §8 › "Barrels"):
+  - `spell/server/keeper` -- Spell's SERVER KEEPER (epic `editor` P48;  the epic hub's `ServerKeeper` before):
+    - `ServerKeeper`:  every main checkout's page server kept up on main's code, its editor through it, each worktree's
+      page server stopped after 30 minutes unused, the servers registered with it watched and started;  a look every
+      10 seconds;  its calls, `/api/servers/...` (the Servers tab's);  HTTPS (`HttpsSwitch`), hands off, Restart all
+    - `KeeperList`:  what Spell's keeper keeps, `~/.spell/keeper.json5`:  main checkouts (`spell server start` in one
+      adds it) and registered servers (`spell keeper add`);  worktrees come from git's own records, never a list
+    - `KeeperProgram`:  `spell keeper start | ensure | local`, its own small web server and record
+    - ONE keeper in charge:  the record names who wrote it;  a keeper that finds another live one stands aside,
+      forwarding what it's asked and showing that one's servers, and takes the record back if it goes
+    - the epic hub still runs one, handing in its own:  repos, their `.epic/config.json5` servers and app, what
+      merged into main, its hand-over;  epic `epic-engine`'s switch-over (P85) takes it out of the hub
+    - not in `SRV`:  it imports the page server, which imports the barrel
+    - its holds, `~/.spell/server-keeper-holds.json`:  servers stopped by hand, and hands off
   - `spell/server/page/...` -- the page server, the KIT's (one per kit:  the main one, each worktree's):
     - its CLI, `spell server`
       - started from the kit's root ONLY (epic `repo-split` P16):

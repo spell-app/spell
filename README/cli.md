@@ -305,6 +305,7 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 | Command | What it does |
 | --- | --- |
 | `spell server <verb>` | the kit's page server, from any folder of the kit:  docs, epic pages, the app's `/api`;  `start all`, every web server of the kit |
+| `spell keeper <verb>` | the server keeper:  one program per Mac that keeps every main checkout's page server and editor up, and the servers you register with it ([below](#the-server-keeper)) |
 | `spell bundle [names...]` | builds the bundles the page server serves, which are built on demand and never committed:  Spell UI's docs site, `ui-site`;  and the generated files its pages need, which are committed:  `ui-root`, `epics-pack`, `epic-docs` |
 | `spell bundle check [names...]` | says which bundles are out of date, and why;  exit 1 if any are |
 | `spell commands [list \| check]` | every yarn script, `spell` command, `epic` verb and skill, against the commands page;  `check` exits 1 on a gap |
@@ -334,7 +335,10 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 | `spell server start all` | every web server of the kit:  the page server, the app's editor, Spell UI's site;  a row for each, and exit 1 if one didn't come up |
 | `spell server stop` | stops the page server, waiting for its process to end;  its editor stops with it |
 | `spell server stop all` | the page server, then the app's editor too, even one left running, and the local site, which a plain stop leaves up |
+| `spell server start \| stop \| restart <server>` | one server by name:  `page-server`, `editor`, or one `spell keeper add` registered;  in a main checkout the server keeper does it, and a stop keeps it stopped until a start |
+| `spell server restart` | the page server again, on its code now;  its editor stays up for the next one |
 | `spell server status` | the running page server's details (JSON);  exit 1 when it isn't running |
+| `spell server status <server>` | that server's line, as the server keeper last saw it;  exit 1 when it isn't running |
 | `spell server url <file>` | starts the page server if needed, then prints the address that serves `<file>`, of this checkout or the epic folder |
 | `spell server certificate [--check] [--undo]` | makes the page server's HTTPS certificate with mkcert, and has this computer trust it (asks for the password once);  the page server then speaks HTTPS and HTTP/2 too, at its next start, on the same port ([README/server.md](server.md#https-and-http2-on-the-same-port)) |
 | `spell server prune [--dry-run]` | stops the page and Vite servers whose checkout is gone, on any checkout;  `--dry-run` only lists them |
@@ -347,6 +351,33 @@ run from any folder of an epic's worktree, `spell server start` starts that work
   Spell UI's site, only where they name its component set.
 - The kit's `yarn server` runs the same command line;  `epic server` runs it for the caller's kit.
 - What the page server serves, and how:  [README/server.md](server.md).
+
+### The server keeper
+
+One program per Mac keeps Spell's servers running:  kill main's page server, and it's back within 10 seconds.
+
+```sh
+spell keeper start                                   # in the background;  its log ~/.spell/keeper.log
+spell keeper status                                  # the keeper, then a line per server
+spell keeper add proxy --check 8080 --start "yarn proxy"   # one of your project's own servers, watched and started
+```
+
+- What it keeps:
+  - each main checkout on its list, `~/.spell/keeper.json5`:  its page server always on, restarted on main's new code;
+    its editor through the page server, when the page server serves one
+    - a main checkout's `spell server start` puts it there;  `spell keeper add --checkout <dir>` by hand
+  - each worktree's page server, found from git:  started by its first page, stopped after 30 minutes unused
+  - the servers you `add`:  checked by a URL or a port, started with `--start` when they're down, else only shown
+- Every `spell` command starts it in the background when none runs, once something is on its list
+  (`spell keeper ensure`;  not in CI or the tests, nor with `SPELL_KEEPER=off`).
+- A stop by hand (`spell server stop`, or `stop <server>`) keeps that server stopped until you start it again.
+- Only one keeper runs:  its record, `~/.spell/server-keeper.json`, names it.
+  A second one started takes over, and the first steps aside.
+  - The epic tooling's hub runs a keeper too, until it hands over to Spell's;  `spell keeper ensure` leaves the hub's
+    alone, and `ensure --take-over` takes over from it.
+- `spell keeper local` runs it in the terminal, until `Ctrl-C`;  `--port <n>` (default 4949) and `--here` (this
+  checkout's code, to try a branch) for `start` too.
+- `SPELL_KEEPER_HOME` moves `~/.spell` for the keeper's files:  a scratch one, to try it without touching yours.
 
 | Option | What it does |
 | --- | --- |
