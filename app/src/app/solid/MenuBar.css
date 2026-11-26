@@ -70,6 +70,76 @@ ui-popup.BarMenuPopup ui-submenu::part(flyout) {
   padding: 4px;
   backdrop-filter: blur(24px) saturate(1.4);
 }
+/*
+ * The top bar's own menus (`<BarMenu>`;  epic `editor` T187, Owen:  "Instead of these being pointing menus, I'd like them
+ * to look like they come from under the bar with a slide down animation"):
+ * - each hangs from the bar's bottom edge, its left its name's:  no arrow, no gap, its top corners square
+ * - it slides down from behind the bar:  it moves down as far as it's cut at the bar's edge, so its top edge never
+ *   moves (`translate` and `clip-path` together, in one ease);  back up the same way as it goes
+ * - one opening while another is out (the mouse onto another menu's name) glides there from it, sideways, growing or
+ *   shrinking to its own size, as the add bar's do (`.gliding`, `TOP_BAR_PANELS`, `BarPanels.ts`);  the one it
+ *   replaces goes at once (`.switching`)
+ * - its fill, edge, shadow and blur are the menus' own (above), as the add bar's sub-panels wear them (I367)
+ * - reduced motion:  none of that moves
+ * - its shadow is kept on three sides by its cut, never above the bar;  `::part()` rules here beat the popup's own sheet
+ * - only a popup right after its name in the bar (`ui-item.BarMenu + ...`):  never a right click's menu, nor the add
+ *   bar's
+ */
+:root {
+  /* how far a menu's shadow reaches past its sides and foot, kept by its cut */
+  --BarMenu-shadow-room: 48px;
+}
+ui-item.BarMenu + ui-popup.BarMenuPopup::part(popup) {
+  margin: 0;
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+  opacity: 1;
+  transform: none;
+  translate: 0 0;
+  clip-path: inset(
+    0 calc(var(--BarMenu-shadow-room) * -1) calc(var(--BarMenu-shadow-room) * -1) calc(var(--BarMenu-shadow-room) * -1)
+  );
+  transition:
+    translate var(--ui-duration-normal, 200ms) var(--ui-ease-out, ease-out),
+    clip-path var(--ui-duration-normal, 200ms) var(--ui-ease-out, ease-out);
+}
+/* ... no arrow */
+ui-item.BarMenu + ui-popup.BarMenuPopup::part(popup)::before {
+  content: none;
+}
+/* ... behind the bar while it's in */
+ui-item.BarMenu + ui-popup.BarMenuPopup:not(:popover-open)::part(popup) {
+  translate: 0 -100%;
+  clip-path: inset(100% 0 0 0);
+}
+@starting-style {
+  ui-item.BarMenu + ui-popup.BarMenuPopup:popover-open::part(popup) {
+    translate: 0 -100%;
+    clip-path: inset(100% 0 0 0);
+  }
+}
+/* ... opening where another was:  from there, left or right */
+@starting-style {
+  ui-item.BarMenu + ui-popup.BarMenuPopup.gliding:popover-open::part(popup) {
+    translate: var(--BarMenu-glide, 0px) 0;
+    clip-path: inset(
+      0 calc(var(--BarMenu-shadow-room) * -1) calc(var(--BarMenu-shadow-room) * -1)
+        calc(var(--BarMenu-shadow-room) * -1)
+    );
+  }
+}
+/* ... going as another opens:  at once */
+ui-item.BarMenu + ui-popup.BarMenuPopup.switching {
+  transition-duration: 0s;
+}
+ui-item.BarMenu + ui-popup.BarMenuPopup.switching::part(popup) {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  ui-item.BarMenu + ui-popup.BarMenuPopup::part(popup) {
+    transition: none;
+  }
+}
 .BarMenuPanel {
   display: flex;
   align-items: flex-start;
