@@ -5,6 +5,8 @@
  * - Node only;  loaded when the command runs, as it loads all of spell.
  * - The read through the Spell runs `core` here, by itself, in this process:  `readThroughSpell()`.
  */
+// the grammar first:  `PlaceIngest` reads rule files of its own, which need it loaded (epic `data` I110)
+import "spell/parser/spell/languages/all"
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { homedir } from "node:os"
 import { basename, dirname, join } from "node:path"
