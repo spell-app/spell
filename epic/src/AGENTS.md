@@ -1627,9 +1627,11 @@ In `tools/`:
             (`ReviewClient.startReview("tidy")`), the notice saying what came of it;  its tooltip on its words, not the
             row (the menu focuses its first row as it opens);  not on a saga page
           - last, BELLS & WHISTLES (epic `epic-engine` P86):  `<epic-bells>`, a `<ui-modal size="small">` drawn in the
-            page's shadow root, as Focus mode is:  the Token burn slider (`<ui-slider>`, Low / Medium / High, a
-            "Custom" label once a switch is flipped below High), then a section per group, each step's row a
-            `<ui-checkbox appearance="toggle">`, its bold title, one sentence and its cost (`<ui-label>`);  a DRAFT until
+            page's shadow root, as Focus mode is:  the Token burn slider, one compact row (its name, then a `<ui-slider>`,
+            Low / Medium / High;  a "Custom" chip by the name only once a switch is flipped below High), then a section
+            per group, its steps by cost (`BellSteps.COST_ORDER`:  high, medium, low, none, timesaver;  T171), each step's
+            row a `<ui-checkbox appearance="toggle">` with its cost (`<ui-label>`) under it, in one column, then its bold
+            title and one sentence;  its gear row has a bell, beside Tidy's broom (both in the docs bundle's icons);  a DRAFT until
             Save (`POST /api/epics/settings`, `ServerLink`), its ×, Escape and Cancel drop it;  Auto Send's row is the
             page's own choice (`SendCountdown`);  [check-bells.mjs](demo/check-bells.mjs) checks it headless
           - then FOCUS MODE (epic `epic-engine` P57;  2026-10-30:  "a mode where I can quickly

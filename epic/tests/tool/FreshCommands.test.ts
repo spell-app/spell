@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, afterEach, beforeEach, expect, test, vi } from "vite-plus/test"
 
-import { FreshAll } from "spell/epic/command/FreshAll"
+import { AFTER_FRESH, FreshAll } from "spell/epic/command/FreshAll"
 import { PlanDoc } from "spell/epic/tool/PlanDoc"
 import { PlanDocCommands } from "spell/epic/tool/PlanDocCommands"
 import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
@@ -114,4 +114,35 @@ test("status and drop:  who still waits, and one let off", async () => {
   await commands().run(["fresh", "status", "--json"])
   const pending = JSON.parse(printed.join("\n"))
   expect(pending.map((one: { epic: string }) => one.epic).sort()).toEqual(["docs", "seo"])
+})
+
+test("later (T172):  marks this session to go once its agents are done;  queued lists the post-fresh list;  drop calls it off", async () => {
+  const agents = join(root, "epics", "seo", "agents.json5")
+  expect(await commands().run(["fresh", "later", "seo"])).toBe(1)
+  expect(warned.at(-1)).toMatch(/none of seo's agents is running:  go fresh now/)
+  expect(FreshAll.pending(ME)).toBeUndefined()
+  writeFileSync(agents, '[{ name: "seo-docs", task: "the docs" }]\n')
+  try {
+    expect(await commands().run(["fresh", "later", "seo"])).toBe(0)
+    expect(printed[0]).toBe("fresh as soon as seo-docs finish")
+    expect(FreshAll.pending(ME)).toMatchObject({ epic: "seo", solo: true })
+    // the post-fresh list:  items queued "after the fresh"
+    const owner = commands()
+    const itemId = await FILES.edit(FILES.findDoc("seo"), (doc) => doc.addItem("todo", "Add a dark theme"))
+    await owner.run(["queue", "seo", itemId, AFTER_FRESH])
+    printed = []
+    expect(await commands().run(["fresh", "queued", "seo"])).toBe(0)
+    expect(printed[0]).toMatch(/queued for seo's fresh session/)
+    expect(printed[1]).toMatch(/Add a dark theme/)
+    printed = []
+    await commands().run(["fresh", "status"])
+    expect(printed[0]).toMatch(/seo \(0a1b2c3d\):  its agents are running \(seo-docs\)  \(its own \/epic fresh/)
+    expect(printed.join("\n")).toMatch(/Add a dark theme/)
+    printed = []
+    expect(await commands().run(["fresh", "drop"])).toBe(0)
+    expect(FreshAll.pending(ME)).toBeUndefined()
+    expect(printed.join("\n")).toMatch(/take these up yourself[\s\S]*Add a dark theme/)
+  } finally {
+    rmSync(agents, { force: true })
+  }
 })

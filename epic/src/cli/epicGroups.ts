@@ -624,9 +624,30 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       }
     },
     {
+      name: "later",
+      usage: "<epic>",
+      description:
+        "/epic fresh while the epic's agents run:  this session goes fresh by itself once they're done, and starts " +
+        "no new work meanwhile;  exit 1 when none runs (go now)",
+      example: "epic fresh later seo",
+      flags: {}
+    },
+    {
+      name: "queued",
+      usage: "<epic> [--json]",
+      description:
+        'the post-fresh list:  the epic\'s items queued "after the fresh", which the new session takes up first',
+      example: "epic fresh queued seo",
+      flags: {
+        "--json": "print them as JSON"
+      }
+    },
+    {
       name: "drop",
       usage: "[<session id>]",
-      description: "a session no longer waits to go fresh, this one by default:  its epic window fresh was refused",
+      description:
+        "a session no longer waits to go fresh, this one by default:  its epic window fresh was refused, or its " +
+        "fresh later called off",
       example: "epic fresh drop",
       flags: {}
     }

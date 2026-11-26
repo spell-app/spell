@@ -76,9 +76,11 @@ function isOn(host: Element, key: string): boolean {
   return rowOf(host, key).querySelector("ui-checkbox")!.hasAttribute("selected")
 }
 
-/** What the slider's label reads. */
+/** What the slider reads:  its level, or `custom`;  the Custom chip drawn only then. */
 function shown(host: Element): string {
-  return host.shadowRoot!.querySelector(".burn-shown")!.textContent!.trim()
+  const shown = host.shadowRoot!.querySelector<HTMLElement>(".burn")!.dataset.shown!
+  expect(Boolean(host.shadowRoot!.querySelector(".burn-custom")), "the Custom chip").toBe(shown === "custom")
+  return shown
 }
 
 /** Move the slider to stop `index`, as a person would. */
@@ -106,22 +108,42 @@ describe("<epic-bells>", () => {
     expect(row.querySelector(".sentence")!.textContent).toMatch(/screenshots/)
     expect(row.querySelector(".cost")!.textContent!.trim()).toBe("high")
     expect(BellSteps.STEPS.every((step) => isOn(host, step.key))).toBe(true)
-    expect(shown(host)).toBe("High")
+    expect(shown(host)).toBe("high")
+    // no line explaining the level (T171):  the slider says it
+    expect(shadow.querySelector(".burn-note")).toBeNull()
     await expectAccessible(shadow.querySelector(".bells")!)
+  })
+
+  test("each group lists its steps by cost, the costliest first, the timesavers last;  the badge under the switch", async () => {
+    const host = await open()
+    const rows = [...host.shadowRoot!.querySelectorAll<HTMLElement>(".group:last-of-type .row")]
+    expect(rows.map((row) => row.dataset.step)).toEqual([
+      "watchSends",
+      "refreshPages",
+      "startNotices",
+      "closeLeftovers"
+    ])
+    expect(rows.map((row) => row.querySelector(".cost")!.textContent!.trim())).toEqual([
+      "none",
+      "none",
+      "none",
+      "timesaver"
+    ])
+    expect(rows[0].querySelector(".side > .cost")).not.toBeNull()
   })
 
   test("the slider sets the switches at once;  a flip below High shows Custom;  a move clears it", async () => {
     const host = await open()
     await moveSlider(host, 0)
-    expect(shown(host)).toBe("Low")
+    expect(shown(host)).toBe("low")
     expect(isOn(host, "designReview")).toBe(false)
     expect(isOn(host, "stopStuckTests")).toBe(true)
     expect(rowOf(host, "designReview").querySelector("ui-checkbox")!.getAttribute("data-tooltip")).toMatch(/slider/)
     await flip(host, "designReview", true)
-    expect(shown(host)).toBe("Custom")
+    expect(shown(host)).toBe("custom")
     expect(isOn(host, "designReview")).toBe(true)
     await moveSlider(host, 1)
-    expect(shown(host)).toBe("Medium")
+    expect(shown(host)).toBe("medium")
     expect(isOn(host, "designReview")).toBe(false)
   })
 

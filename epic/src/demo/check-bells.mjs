@@ -91,20 +91,25 @@ async function look(width, scheme) {
   await openFromGear(page, where)
   await measure(page, where, "opened")
   await shot(page, `bells-${width}-${scheme}.png`)
+  // the last group, Background programs:  its steps by cost, the timesaver last (T171)
+  await page.evaluate(() => bellsRoot().querySelector(".group:last-of-type").scrollIntoView({ block: "end" }))
+  await page.waitForTimeout(200)
+  await shot(page, `bells-background-${width}-${scheme}.png`)
+  await page.evaluate(() => bellsRoot().querySelector(".scroller").scrollTo(0, 0))
 
   // the slider to Low, by its keys:  the switches follow at once
   await page.evaluate(() => thumb().focus())
   await page.keyboard.press("Home")
   await page.waitForTimeout(300)
   const low = await page.evaluate(() => ({ shown: shown(), design: isOn("designReview"), stuck: isOn("stopStuckTests") }))
-  if (low.shown !== "Low" || low.design || !low.stuck) problems.push(`${where}:  the slider at Low:  ${JSON.stringify(low)}`)
+  if (low.shown !== "low" || low.design || !low.stuck) problems.push(`${where}:  the slider at Low:  ${JSON.stringify(low)}`)
   await shot(page, `bells-low-${width}-${scheme}.png`)
 
   // a hand flip below High:  Custom
   await page.evaluate(() => rowOf("designReview").querySelector("ui-checkbox").click())
   await page.waitForTimeout(300)
   const custom = await page.evaluate(() => ({ shown: shown(), design: isOn("designReview") }))
-  if (custom.shown !== "Custom" || !custom.design) problems.push(`${where}:  a flip at Low:  ${JSON.stringify(custom)}`)
+  if (custom.shown !== "custom" || !custom.design) problems.push(`${where}:  a flip at Low:  ${JSON.stringify(custom)}`)
   await measure(page, where, "custom")
   await shot(page, `bells-custom-${width}-${scheme}.png`)
 
@@ -112,7 +117,7 @@ async function look(width, scheme) {
   await page.keyboard.press("Escape")
   await page.waitForFunction(() => !bellsEl().open, null, { timeout: 4000 }).catch(() => problems.push(`${where}:  Escape didn't close it`))
   await openFromGear(page, where)
-  if ((await page.evaluate(() => shown())) !== "High") problems.push(`${where}:  Escape kept the draft`)
+  if ((await page.evaluate(() => shown())) !== "high") problems.push(`${where}:  Escape kept the draft`)
 
   // a switch off, saved;  the page reloaded, still off
   await page.evaluate(() => rowOf("speedTest").querySelector("ui-checkbox").click())
@@ -137,6 +142,24 @@ async function openFromGear(page, where) {
   await page
     .waitForFunction(() => pageRoot().querySelector(".bells-row"), null, { timeout: 4000 })
     .catch(() => problems.push(`${where}:  no Bells & Whistles in the gear`))
+  // its bell drawn, in the icon column the other rows' icons (Focus mode's, Tidy's) share (T171)
+  const icons = await page.evaluate(async () => {
+    const leads = [...pageRoot().querySelectorAll(".gear-panel [role=menu] ui-icon.lead")]
+    await new Promise((done) => setTimeout(done, 300))
+    return leads.map((icon) => {
+      const drawn = icon.shadowRoot?.querySelector("svg")
+      const box = (drawn ?? icon).getBoundingClientRect()
+      return { name: icon.getAttribute("name"), drawn: Boolean(drawn) && box.width > 0, x: +(box.left + box.width / 2).toFixed(1) }
+    })
+  })
+  const bell = icons.find((icon) => icon.name === "bell")
+  if (!bell?.drawn) problems.push(`${where}:  the gear's bell isn't drawn:  ${JSON.stringify(icons)}`)
+  if (icons.some((icon) => Math.abs(icon.x - icons[0].x) > 0.75)) problems.push(`${where}:  gear icons not in one column:  ${JSON.stringify(icons)}`)
+  summary[`${where} gear icons`] = icons
+  if (!summary.gearShot) {
+    summary.gearShot = true
+    await shot(page, `bells-gear-${where.replace(" ", "-")}.png`)
+  }
   await page.evaluate(() => pageRoot().querySelector(".bells-row")?.click())
   await page
     .waitForFunction(() => bellsEl()?.open && !rowOf("designReview")?.querySelector("ui-checkbox")?.hasAttribute("disabled"), null, {
@@ -146,12 +169,17 @@ async function openFromGear(page, where) {
   await page.waitForTimeout(500)
 }
 
-/** Nothing wider than the window;  each row's switch, title and badge on one line;  the switches in one column. */
+/**
+ * Nothing wider than the window;  each row's toggle on its title's first line, its cost badge under it, both centred in
+ * the switch column, every row's column the same (T171);  the Token burn band one row:  its name and the slider side by
+ * side, no line under them, Custom drawn only when it reads Custom.
+ */
 async function measure(page, where, when) {
   const found = await page.evaluate(() => {
-    const rows = [...bellsRoot().querySelectorAll(".row")].slice(0, 12)
+    const rows = [...bellsRoot().querySelectorAll(".row")]
     const off = []
-    const lefts = new Set()
+    const centres = new Set()
+    const sides = new Set()
     for (const row of rows) {
       const toggle = row.querySelector("ui-checkbox").shadowRoot?.querySelector("label") ?? row.querySelector("ui-checkbox")
       const t = toggle.getBoundingClientRect()
@@ -162,18 +190,48 @@ async function measure(page, where, when) {
       const cost = row.querySelector(".cost")
       // the label's host draws no box:  its drawn label does
       const badge = (cost.shadowRoot?.querySelector(".label") ?? cost).getBoundingClientRect()
+      const side = row.querySelector(".side").getBoundingClientRect()
       const lineMid = line.top + line.height / 2
       const toggleMid = t.top + t.height / 2
-      const badgeMid = badge.top + badge.height / 2
-      lefts.add(Math.round(t.left))
-      if (Math.abs(toggleMid - lineMid) > 1.5 || Math.abs(badgeMid - lineMid) > 1.5)
-        off.push(`${row.dataset.step}:  toggle ${(toggleMid - lineMid).toFixed(1)}, badge ${(badgeMid - lineMid).toFixed(1)}`)
+      const toggleX = t.left + t.width / 2
+      const badgeX = badge.left + badge.width / 2
+      const sideX = side.left + side.width / 2
+      centres.add(Math.round(toggleX * 2) / 2)
+      sides.add(`${Math.round(side.left)}-${Math.round(side.width)}`)
+      if (Math.abs(toggleMid - lineMid) > 1.5) off.push(`${row.dataset.step}:  toggle ${(toggleMid - lineMid).toFixed(1)} off the title's line`)
+      if (Math.abs(toggleX - sideX) > 0.75 || Math.abs(badgeX - sideX) > 0.75)
+        off.push(`${row.dataset.step}:  toggle ${(toggleX - sideX).toFixed(1)}, badge ${(badgeX - sideX).toFixed(1)} off the column's centre`)
+      if (badge.top < t.bottom) off.push(`${row.dataset.step}:  badge not under the toggle`)
+      if (badge.left < side.left - 0.5 || badge.right > side.right + 0.5) off.push(`${row.dataset.step}:  badge wider than the column`)
     }
+    const burn = bellsRoot().querySelector(".burn")
+    const name = burn.querySelector(".burn-name").getBoundingClientRect()
+    const slider = burn.querySelector("ui-slider").getBoundingClientRect()
+    const band = burn.getBoundingClientRect()
     const box = bellsRoot().querySelector(".bells").getBoundingClientRect()
-    return { off, lefts: [...lefts], wide: box.right > innerWidth + 0.5 || box.left < -0.5, scrollX: document.documentElement.scrollWidth - innerWidth }
+    return {
+      rows: rows.length,
+      off,
+      centres: [...centres],
+      sides: [...sides],
+      burn: {
+        height: Math.round(band.height),
+        oneRow: name.top >= slider.top - 0.5 && name.bottom <= slider.bottom + 0.5,
+        nameMidToSliderMid: +(name.top + name.height / 2 - (slider.top + slider.height / 2)).toFixed(1),
+        line: Boolean(burn.querySelector(".burn-note")),
+        custom: Boolean(burn.querySelector(".burn-custom")),
+        shown: burn.dataset.shown
+      },
+      wide: box.right > innerWidth + 0.5 || box.left < -0.5,
+      scrollX: document.documentElement.scrollWidth - innerWidth
+    }
   })
   if (found.off.length) problems.push(`${where} ${when}:  rows out of line:  ${found.off.join("; ")}`)
-  if (found.lefts.length > 1) problems.push(`${where} ${when}:  switches not in one column:  ${found.lefts}`)
+  if (found.centres.length > 1) problems.push(`${where} ${when}:  toggles not in one column:  ${found.centres}`)
+  if (found.sides.length > 1) problems.push(`${where} ${when}:  switch columns differ:  ${found.sides}`)
+  if (!found.burn.oneRow) problems.push(`${where} ${when}:  Token burn not on one row:  ${JSON.stringify(found.burn)}`)
+  if (found.burn.line) problems.push(`${where} ${when}:  a line under the slider`)
+  if (found.burn.custom !== (found.burn.shown === "custom")) problems.push(`${where} ${when}:  the Custom chip:  ${JSON.stringify(found.burn)}`)
   if (found.wide || found.scrollX > 0) problems.push(`${where} ${when}:  wider than the window`)
   summary[`${where} ${when}`] = found
 }
@@ -191,7 +249,7 @@ function HELPERS() {
   window.bellsRoot = () => bellsEl()?.shadowRoot
   window.rowOf = (key) => bellsRoot()?.querySelector(`.row[data-step="${key}"]`)
   window.isOn = (key) => rowOf(key).querySelector("ui-checkbox").hasAttribute("selected")
-  window.shown = () => bellsRoot().querySelector(".burn-shown").textContent.trim()
+  window.shown = () => bellsRoot().querySelector(".burn").dataset.shown
   window.thumb = () => bellsRoot().querySelector("ui-slider").shadowRoot.querySelector('[role="slider"]')
 }
 
