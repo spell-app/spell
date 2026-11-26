@@ -29,9 +29,17 @@ import {
   type PlanDocParts
 } from "./planDoc.types"
 
+import { CommentList, type Comment } from "./CommentList"
 import { EpicDocs } from "./EpicDocs"
 import { EpicParts } from "./EpicParts"
-import { Migrations, type AnchorMove, type InboxView, type Migration, type MigrationContext } from "./migrations"
+import {
+  Migrations,
+  type AnchorMove,
+  type AnchorRemoval,
+  type InboxView,
+  type Migration,
+  type MigrationContext
+} from "./migrations"
 import { PlanCommits } from "./PlanCommits"
 import { PlanDoc } from "./PlanDoc"
 import { PlanMarkup } from "./PlanMarkup"
@@ -395,10 +403,12 @@ export class PlanDocFiles {
   /**
    * Run the epic page MIGRATIONS on the doc at `file`, under its lock, as an edit is.
    * - `Migrations`:  every step, or those named in `only`
-   * - resolves with what they did:  `{ ran, notes, moves, renames, written }`
+   * - resolves with what they did:  `{ ran, notes, moves, removals, renames, written }`
    * - `ran`:  the steps that changed the page
    * - `notes`:  what they fixed or found, a line each
    * - `moves`:  comments whose block moved, written into the page's review inbox after the page (`links-agree`)
+   * - `removals`:  comments whose item is gone (`links-agree`, epic `epic-engine` T170):  a log line each on the page,
+   *   then taken out of the inbox after it, this machine's person's only;  the epic repo's history keeps their words
    * - `renames`:  ids the page changed (`stable-phase-ids`),
    *   its inbox rekeyed after the moves (`ReviewInbox.renameIds()`)
    * - writes only when something changed:
@@ -426,7 +436,8 @@ export class PlanDocFiles {
         rootLinks: (html) => this.linker.rootLinks(html, dirname(file), { mend: true }).changes,
         history: () => this.historyOrNone(file),
         notes: [],
-        moves: []
+        moves: [],
+        removals: []
       }
       const before = new Set(plan.check())
       const ran = Migrations.run(plan.document, context, only)
@@ -434,12 +445,16 @@ export class PlanDocFiles {
         ran,
         notes: context.notes!,
         moves: context.moves!,
+        removals: context.removals!,
         renames: context.renames ?? {},
         files: context.files ?? [],
         written: false
       }
-      if (!ran.length || dryRun) return done
-      plan.log(`migrated:  ${ran.join(", ")}`)
+      if ((!ran.length && !done.removals.length) || dryRun) return done
+      if (ran.length) plan.log(`migrated:  ${ran.join(", ")}`)
+      // a comment whose item is gone (T170):  a log line each, so it's never silent;  its words are in the epic repo's history
+      for (const removal of done.removals)
+        plan.log(removedCommentLine(removal.id, inbox.comments[removal.id], "its item gone"))
       plan.updateStates()
       // a step may renumber phases (`whole-phase-numbers`):  the Overview's total names them by number
       plan.updateEstimate()
@@ -453,12 +468,18 @@ export class PlanDocFiles {
     })
     if (dryRun) return result
     let written = result.written
-    if (result.moves.length || Object.keys(result.renames).length) {
+    if (result.moves.length || result.removals.length || Object.keys(result.renames).length) {
       // after the page, under the inbox's own lock:  never both locks at once
       await ReviewInbox.updateAsync(inboxFile, (inbox) => {
         for (const move of result.moves) {
           const comment = inbox.comments[move.id]
           if (comment?.anchor === move.from) comment.anchor = move.to
+        }
+        // only one still where its item was, and this machine's person's (`clear()` refuses another's)
+        for (const removal of result.removals) {
+          const comment = inbox.comments[removal.id]
+          if (comment?.anchor === removal.anchor && inbox.commentList.isOwn(comment))
+            inbox.commentList.clear(removal.id)
         }
         inbox.renameIds(result.renames)
       })
@@ -941,12 +962,26 @@ export type MigrateResult = {
   notes: string[]
   /** comments moved to where their block is now (`links-agree`) */
   moves: AnchorMove[]
+  /** comments removed, their item gone from the page (`links-agree`, epic `epic-engine` T170) */
+  removals: AnchorRemoval[]
   /** ids the page changed, old => new, which its inbox follows (`stable-phase-ids`) */
   renames: Record<string, string>
   /** data files beside the page to rename, `.json` => `.json5` (`json5-data-files`);  a clash is left */
   files: DataFileMove[]
   /** was anything written:  the page, or its inbox */
   written: boolean
+}
+
+/**
+ * The page's log line for a comment taken off it (epic `epic-engine` T170):  its id, `why`, where it was, its first
+ * words:  `C1 removed, its item gone:  it was on T41 ("Should this ...")`.
+ * - `links-agree`'s removals, and `epic comments delete`'s
+ * - the comment itself stays in the epic repo's history:  its comments file as committed before (`git log -p`)
+ */
+export function removedCommentLine(id: string, comment: Comment | undefined, why: string): string {
+  const words = comment?.text ? ` ("${PlanMarkup.squeeze(comment.text).slice(0, 60)}")` : ""
+  const where = comment?.anchor ? `:  it was on ${comment.anchor.toUpperCase()}` : ""
+  return `${CommentList.label(id)} removed, ${why}${where}${words}`
 }
 
 /**
@@ -965,7 +1000,10 @@ function inboxView(inbox: ReviewInbox): InboxView {
       "request for now": now
     },
     comments: Object.fromEntries(
-      Object.entries(inbox.comments).map(([id, comment]) => [id, { anchor: comment.anchor, excerpt: comment.excerpt }])
+      Object.entries(inbox.comments).map(([id, comment]) => [
+        id,
+        { anchor: comment.anchor, excerpt: comment.excerpt, by: comment.by, own: inbox.commentList.isOwn(comment) }
+      ])
     )
   }
 }

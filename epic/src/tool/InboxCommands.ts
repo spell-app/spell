@@ -663,6 +663,10 @@ export class InboxCommands {
       box.clearUrgency(calmed.map((each) => each.entry))
       box.touchListening()
     })
+    // a phase removed (T169):  the comments on it go too, and links' words follow the phases after it
+    // (`links-agree`, T170);  after its marks are cleared, so they aren't reported as on a gone id
+    if (results.some((each) => each.applied && each.mark.action === REMOVE_PHASE))
+      for (const note of (await this.owner.files.migrate(file, { only: ["links-agree"] })).notes) this.owner.warn(note)
     const lines: string[] = []
     for (const each of results) if (each.applied) lines.push(`${each.mark.id.toUpperCase()}  ${each.did}`)
     for (const each of calmed) lines.push(`${each.entry.id.toUpperCase()}  ${each.did}`)
@@ -1091,3 +1095,6 @@ function timeoutOf(timeout: string | true): number {
   }
   throw new PlanDocError(`--timeout:  seconds (3300) or a time with its unit (8h, 30m), not '${timeout}'`)
 }
+
+/** A phase's "Remove this phase" mark (epic `epic-engine` T169):  `apply` runs `links-agree` after one (T170). */
+const REMOVE_PHASE: string = "remove"

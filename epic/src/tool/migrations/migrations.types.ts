@@ -94,6 +94,11 @@ export type MigrationContext = {
   /** Comments to move to another anchor, which the runner writes into the inbox after the page (`AnchorMove`). */
   moves?: AnchorMove[]
   /**
+   * Comments whose item is gone from the page (`links-agree`, epic `epic-engine` T170), which the runner takes out of
+   * the inbox after the page, a log line each (`AnchorRemoval`)
+   */
+  removals?: AnchorRemoval[]
+  /**
    * Ids the page no longer has, each => the id it has instead (`stable-phase-ids`:  `p7` => `p-epic-migrate`):  the
    * runner rekeys the inbox after the page, and after `moves` (`ReviewInbox.renameIds()`)
    */
@@ -109,8 +114,11 @@ export type MigrationContext = {
 export type InboxView = {
   /** marks, drafts, urgency, agents at work, requests called off:  each keyed by an item, phase or section id */
   keyed: Record<string, Record<string, unknown>>
-  /** Owen's comments, by id:  where each sits (`BlockAnchors.js`) */
-  comments: Record<string, { anchor: string; excerpt?: string }>
+  /**
+   * Owen's comments, by id:  where each sits (`BlockAnchors.js`);  `by`, who wrote it;  `own`, false for one this
+   * machine's person didn't write (`CommentList.isOwn()`:  only its writer's machine removes it)
+   */
+  comments: Record<string, { anchor: string; excerpt?: string; by?: string; own?: boolean }>
 }
 
 /** A comment whose block moved:  its anchor `from`, and `to` where the block is now. */
@@ -121,4 +129,12 @@ export type AnchorMove = {
   from: string
   /** where its block is now, `p11#field-1` */
   to: string
+}
+
+/** A comment whose item is gone (`links-agree`):  the runner removes it, if it's still on `anchor`. */
+export type AnchorRemoval = {
+  /** the comment's id, `c3` */
+  id: string
+  /** its anchor as the inbox holds it, `t41` or `p-x#field-1` */
+  anchor: string
 }

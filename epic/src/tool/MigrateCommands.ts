@@ -150,7 +150,10 @@ export class MigrateCommands {
       }
       if (result.ran.includes(RENUMBERS)) renaming = true
       if (result.ran.includes(RENUMBERS) && !running) renumbered[name] = { ...result.renames, ...SECTION_RENAMES }
-      const steps = [...result.ran, ...(result.moves.length && !result.ran.includes(LINKS) ? [LINKS] : [])]
+      const steps = [
+        ...result.ran,
+        ...((result.moves.length || result.removals.length) && !result.ran.includes(LINKS) ? [LINKS] : [])
+      ]
       for (const each of steps) counts.set(each, (counts.get(each) ?? 0) + 1)
       if (steps.length) changed++
       if (running && steps.length) tell.push({ epic: name, sessions, steps })

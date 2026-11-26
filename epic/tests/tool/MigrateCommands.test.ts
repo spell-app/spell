@@ -188,6 +188,31 @@ describe("migrate:  the runner", () => {
     expect(ReviewInbox.read(inbox).comments.c1!.anchor).toMatch(/^p-three#field-\d$/)
   })
 
+  test("links-agree removes a comment whose item is gone (T170):  a log line on the page, out of the inbox", async () => {
+    const inbox = ReviewInbox.pathFor(docOf("new"))
+    ReviewInbox.update(inbox, (each) => {
+      each.comments.c2 = {
+        anchor: "t41",
+        kind: "item",
+        label: "",
+        excerpt: "Gone",
+        text: "is this still wanted?",
+        at: "2026-10-11T09:00:00Z",
+        status: "new"
+      }
+    })
+    expect(await commands().run(["migrate", "new", "--step", "links-agree"])).toBe(0)
+    expect(printed[0]).toBe("new:  links-agree")
+    expect(printed).toContain("  links-agree:  comment c2 is on t41, which is gone:  removed")
+    expect(ReviewInbox.read(inbox).comments.c2).toBeUndefined()
+    const log = FILES.read(docOf("new")).document.querySelector('epic-section[kind="log"]')!.textContent
+    expect(log).toMatch(/C2 removed, its item gone:\s+it was on T41 \("is this still wanted\?"\)/)
+    // a second run:  nothing left to remove
+    printed = []
+    expect(await commands().run(["migrate", "new", "--step", "links-agree"])).toBe(0)
+    expect(printed[0]).toBe("new:  up to date")
+  })
+
   test("--list:  the epic page's steps, then the other kinds' (the docs tool)", async () => {
     expect(await commands().run(["migrate", "--list"])).toBe(0)
     expect(printed.map((line) => line.split(/\s+/).slice(0, 3).join(" "))).toEqual([

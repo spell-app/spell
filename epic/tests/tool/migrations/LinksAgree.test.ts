@@ -1,12 +1,18 @@
 /**
  * Tests of the migration `links-agree` and the anchors it checks comments by (`PlanAnchors`):  old titles in a link's
- * words fixed, a moved phase followed, a comment whose block moved re-anchored, what's gone reported, not changed.
+ * words fixed, a moved phase followed, a comment whose block moved re-anchored, one whose item is gone removed, the
+ * rest of what's gone reported, not changed.
  */
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
 
 import { PlanAnchors } from "spell/epic/tool/PlanAnchors"
-import type { AnchorMove, InboxView, MigrationContext } from "spell/epic/tool/migrations/migrations.types"
+import type {
+  AnchorMove,
+  AnchorRemoval,
+  InboxView,
+  MigrationContext
+} from "spell/epic/tool/migrations/migrations.types"
 import { Migrations } from "spell/epic/tool/migrations/Migrations"
 
 /** The step under test. */
@@ -41,7 +47,7 @@ function page(): Document {
 }
 
 /** A context with an inbox:  a comment on the old P3's second field (now P4's), one on a gone item, a mark. */
-function context(): MigrationContext & { notes: string[]; moves: AnchorMove[] } {
+function context(): MigrationContext & { notes: string[]; moves: AnchorMove[]; removals: AnchorRemoval[] } {
   const inbox: InboxView = {
     keyed: { mark: { t9: {}, j1: {}, summary: {}, new1: {} } },
     comments: {
@@ -50,7 +56,7 @@ function context(): MigrationContext & { notes: string[]; moves: AnchorMove[] } 
       m3: { anchor: "p2#field-1", excerpt: "Two's goal." }
     }
   }
-  return { now: new Date(2026, 9, 11), inbox, notes: [], moves: [] }
+  return { now: new Date(2026, 9, 11), inbox, notes: [], moves: [], removals: [] }
 }
 
 /** The page's links in its goal, as `href words`. */
@@ -68,7 +74,7 @@ describe("links-agree", () => {
     expect(links(document)).toEqual(["#p2 P2 · Two", "#j1 New call", "#p4 P4 · Docs", "#t9 T9 · Gone", "#p1 P1"])
     expect(run.notes.filter((note) => /gone/.test(note))).toEqual([
       'links-agree:  #t9 is gone (a link saying "T9 · Gone"):  left for you',
-      "links-agree:  comment m2 is on t9, which is gone:  left for you",
+      "links-agree:  comment m2 is on t9, which is gone:  removed",
       "links-agree:  mark on #t9, which is gone:  left for you"
     ])
     // the log is history:  its link keeps the old title
@@ -79,6 +85,40 @@ describe("links-agree", () => {
     const run = context()
     STEP.run(page(), run)
     expect(run.moves).toEqual([{ id: "m1", from: "p3#field-2", to: "p4#field-2" }])
+  })
+
+  test("a comment whose item is gone is removed (a removal for the inbox);  a block gone from a live item is reported", () => {
+    const run = context()
+    run.inbox!.comments.m4 = { anchor: "p2#field-9", excerpt: "nothing like it" }
+    STEP.run(page(), run)
+    expect(run.removals).toEqual([{ id: "m2", anchor: "t9" }])
+    expect(run.notes).toContain("links-agree:  comment m4 is on p2#field-9, which is gone:  left for you")
+  })
+
+  test("a comment inside a gone container is removed too;  one on the page itself never", () => {
+    const run = context()
+    run.inbox!.comments = {
+      m5: { anchor: "p-removed#field-1", excerpt: "words nowhere" },
+      m6: { anchor: "page#para-40", excerpt: "words nowhere" }
+    }
+    STEP.run(page(), run)
+    expect(run.removals).toEqual([{ id: "m5", anchor: "p-removed#field-1" }])
+  })
+
+  test("an id renamed in this run keeps its comment:  the runner rekeys it", () => {
+    const run = context()
+    run.renames = { t9: "t12" }
+    STEP.run(page(), run)
+    expect(run.removals).toEqual([])
+    expect(run.notes).toContain("links-agree:  comment m2 is on t9, which is gone:  left for you")
+  })
+
+  test("someone else's comment on a gone item is left for their own check", () => {
+    const run = context()
+    run.inbox!.comments.m2 = { anchor: "t9", excerpt: "Gone", by: "Ana", own: false }
+    STEP.run(page(), run)
+    expect(run.removals).toEqual([])
+    expect(run.notes).toContain("links-agree:  comment m2 is on t9, which is gone:  Ana's, left for their check")
   })
 
   test("idempotent:  a second run changes nothing, and reports only what's gone", () => {
