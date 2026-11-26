@@ -5,7 +5,8 @@
  *   `<ui-table celled padding="compact" appearance="striped" unstackable>`, the table inside it unchanged (its id too)
  * - a `<ui-table>` without `unstackable` gets it, its other attributes as they were (epic `epic-engine` I36;  Owen,
  *   2026-10-19, on a table drawn as its header cells, then each row's cells one under another:  "I hate it"):  no
- *   table ever stacks.  `spell-doc.css` holds them all unstacked anyway;  this keeps the page true without it.
+ *   table ever stacks.  Since epic `epic-engine` T176 Spell UI stacks none that isn't `stackable`, so the word
+ *   does nothing now:  kept so a page says what it shows to an older Spell UI.
  *   - one that asks to stack (`stackable`, `stack-by`) is left, and listed:  a demo of stacking
  * - a `<details>` aside (its first child a `<summary>`) becomes the house aside, the durable template's:
  *   `<ui-accordion class="spell-aside" appearance="styled">` > `<ui-title>` (the summary's contents) + `<ui-content>` (the rest)

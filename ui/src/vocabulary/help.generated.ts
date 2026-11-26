@@ -2171,14 +2171,14 @@ export const HELP_TABLE: Readonly<
         "Header cells sort the table: click / Enter / Space dispatches `ui-sorting`; the sorted one gets `aria-sort`.",
       appearance:
         "The look, several words at once: `basic` (no header fill), `very-basic` (no outer border or edge padding either), `striped` (every other body row tinted), `structured` (collapsed borders, for `rowspan` / `colspan` headers).",
-      unstackable:
-        "Never stacks rows into blocks, even on a viewport below 768px: wider than its box, it scrolls sideways in it instead.",
       padding: "Cell padding: `xs` and `compact` less, `md` and `lg` more.",
       "attach-to": "Joins a segment or another table: `both` (in the middle), `top` or `bottom`.",
       stackable:
-        'Rows become blocks on a viewport below 768px (the default, `stackable`); `stackable="tablet"` also below 992px.',
+        'Opts in to stacking: rows become blocks on a viewport below 768px (`stackable`), or below 992px too (`stackable="tablet"`).',
       "stack-by":
-        "What `stackable` measures: the `viewport` (Fomantic's way, the default), the table's own width (`container`: a table in a narrow column of a wide screen), or nothing (`none`: it never stacks, as `unstackable`, and scrolls sideways when too wide).",
+        "What `stackable` measures: the `viewport` (Fomantic's way, the default), or the table's own width (`container`: a table in a narrow column of a wide screen).",
+      unstackable:
+        "Old word, kept so old markup still reads: it does nothing now, as no table stacks without `stackable` (epic `epic-engine` T176).",
       scrolling:
         "Caps the height and scrolls, head and foot stuck; `short` / `very short` / `long` / `very long` change the cap.",
       overflowing: "Like `scrolling`, both ways, with nothing stuck; same height steps.",

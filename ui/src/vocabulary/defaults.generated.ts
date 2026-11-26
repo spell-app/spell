@@ -1770,11 +1770,11 @@ export const DEFAULTS_TABLE: Readonly<
       group: "appearance",
       values: ["basic", "very-basic", "striped", "structured"]
     },
-    { name: "unstackable", kind: "keyOnly", group: "layout" },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["xs", "compact", "md", "lg"] },
     { name: "attach-to", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
     { name: "stackable", kind: "keyOrValueAndKey", group: "layout", values: ["tablet"] },
-    { name: "stack-by", kind: "enum", group: "layout", values: ["viewport", "container", "none"] },
+    { name: "stack-by", kind: "enum", group: "layout", values: ["viewport", "container"] },
+    { name: "unstackable", kind: "boolean", group: "layout" },
     {
       name: "scrolling",
       kind: "keyOrValueAndKey",

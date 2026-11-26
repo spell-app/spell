@@ -42,16 +42,13 @@
 
 	<section label="Stacking">
 		<markdown>
-			`stackable` answers to the VIEWPORT, as in Fomantic: below 768px every table stacks unless it is `unstackable`;
-			`stackable="tablet"` also stacks below 992px.
+			A table stacks only when it asks to. `stackable` stacks its rows into blocks below 768px of the VIEWPORT, as in
+			Fomantic; `stackable="tablet"` also stacks below 992px. Without it a table never stacks: wider than its box, it
+			scrolls sideways in it. (`unstackable` is an old word, kept so old markup still reads: it does nothing now.)
 
-			A table in a narrow sidebar of a wide screen can follow its OWN width instead with `stack-by="container"`, or a
-			whole region with the token `--ui-table-stack-by: container` (on an ancestor or the page); the attribute wins
+			A stackable table in a narrow sidebar of a wide screen can follow its OWN width instead with `stack-by="container"`,
+			or a whole region with the token `--ui-table-stack-by: container` (on an ancestor or the page); the attribute wins
 			over the token.
-
-			`stack-by="none"` never stacks: `unstackable`, said the way the token can say it for a whole page.
-			`ui-table { --ui-table-stack-by: none }` keeps every table on the page a table, however narrow; a table that
-			should still stack opts back in with its own `stack-by="container"` or `stack-by="viewport"`.
 		</>
 	</>
 

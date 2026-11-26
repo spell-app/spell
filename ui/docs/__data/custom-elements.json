@@ -49571,14 +49571,6 @@
               "fieldName": "appearance"
             },
             {
-              "name": "unstackable",
-              "description": "Never stacks rows into blocks, even on a viewport below 768px:  wider than its box, it scrolls sideways in it instead.",
-              "type": {
-                "text": "boolean"
-              },
-              "fieldName": "unstackable"
-            },
-            {
               "name": "padding",
               "description": "Cell padding:  `xs` and `compact` less, `md` and `lg` more.  Old names:  `compact` (`compact=\"very\"` is `xs`), `padded` (`padded=\"very\"` is `lg`).",
               "type": {
@@ -49596,7 +49588,7 @@
             },
             {
               "name": "stackable",
-              "description": "Rows become blocks on a viewport below 768px (the default, `stackable`);  `stackable=\"tablet\"` also below 992px.  `stack-by=\"container\"` follows the table's OWN width instead.",
+              "description": "Opts in to stacking:  rows become blocks on a viewport below 768px (`stackable`), or below 992px too (`stackable=\"tablet\"`).  Without it a table never stacks:  wider than its box, it scrolls sideways in it.  `stack-by=\"container\"` follows the table's OWN width instead.",
               "type": {
                 "text": "boolean | \"tablet\""
               },
@@ -49604,11 +49596,19 @@
             },
             {
               "name": "stack-by",
-              "description": "What `stackable` measures:  the `viewport` (Fomantic's way, the default), the table's own width (`container`:  a table in a narrow column of a wide screen), or nothing (`none`:  it never stacks, as `unstackable`, and scrolls sideways when too wide).  Also a token for a whole region or page:  `--ui-table-stack-by: container` (or `none`);  the attribute wins.  Neither:  the page-wide `--ui-stack-with` (`<ui-root stack-with>`;  `page` ~== `viewport`).",
+              "description": "What `stackable` measures:  the `viewport` (Fomantic's way, the default), or the table's own width (`container`:  a table in a narrow column of a wide screen).  Nothing without `stackable`.  Also a token for a whole region or page:  `--ui-table-stack-by: container`;  the attribute wins.  Neither:  the page-wide `--ui-stack-with` (`<ui-root stack-with>`;  `page` ~== `viewport`).",
               "type": {
-                "text": "\"viewport\" | \"container\" | \"none\""
+                "text": "\"viewport\" | \"container\""
               },
               "fieldName": "stackBy"
+            },
+            {
+              "name": "unstackable",
+              "description": "Old word, kept so old markup still reads:  it does nothing now, as no table stacks without `stackable` (epic `epic-engine` T176).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "unstackable"
             },
             {
               "name": "scrolling",

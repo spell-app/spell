@@ -192,7 +192,6 @@ describe("<ui-docs-api tag>", () => {
     for (const name of ["celled", "definition"]) expect(table.hasAttribute(name)).toBe(true)
     expect(table.hasAttribute("stackable")).toBe(false)
     expect(table.getAttribute("padding")).toBe("compact")
-    expect(table.getAttribute("stack-by")).toBe("none")
     const native = table.querySelector("table")!
     expect(native.classList.contains("definition")).toBe(true)
     expect(native.getAttribute("aria-label")).toBe("Parts of <x-or>")

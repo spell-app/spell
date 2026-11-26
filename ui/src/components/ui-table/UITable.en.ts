@@ -102,14 +102,6 @@ export const tableVocabulary = {
         '`rowspan` / `colspan` headers).  Old names:  `basic` (`basic="very"`), `striped`, `structured`.'
     },
     {
-      name: "unstackable",
-      group: "layout",
-      kind: "keyOnly",
-      description:
-        "Never stacks rows into blocks, even on a viewport below 768px:  " +
-        "wider than its box, it scrolls sideways in it instead."
-    },
-    {
       name: "padding",
       group: "layout",
       kind: "valueOnly",
@@ -139,21 +131,29 @@ export const tableVocabulary = {
       kind: "keyOrValueAndKey",
       values: ["tablet"],
       description:
-        "Rows become blocks on a viewport below 768px (the default, `stackable`);  " +
-        '`stackable="tablet"` also below 992px.  `stack-by="container"` follows the table\'s OWN width instead.'
+        "Opts in to stacking:  rows become blocks on a viewport below 768px (`stackable`), " +
+        'or below 992px too (`stackable="tablet"`).  Without it a table never stacks:  wider than its box, ' +
+        'it scrolls sideways in it.  `stack-by="container"` follows the table\'s OWN width instead.'
     },
     {
       name: "stack-by",
       group: "layout",
       kind: "enum",
-      values: ["viewport", "container", "none"],
+      values: ["viewport", "container"],
       description:
-        "What `stackable` measures:  the `viewport` (Fomantic's way, the default), the table's own width " +
-        "(`container`:  a table in a narrow column of a wide screen), or nothing (`none`:  it never stacks, " +
-        "as `unstackable`, and scrolls sideways when too wide).  " +
-        "Also a token for a whole region or page:  `--ui-table-stack-by: container` " +
-        "(or `none`);  the attribute wins.  Neither:  the page-wide `--ui-stack-with` " +
-        "(`<ui-root stack-with>`;  `page` ~== `viewport`)."
+        "What `stackable` measures:  the `viewport` (Fomantic's way, the default), or the table's own width " +
+        "(`container`:  a table in a narrow column of a wide screen).  Nothing without `stackable`.  " +
+        "Also a token for a whole region or page:  `--ui-table-stack-by: container`;  the attribute wins.  " +
+        "Neither:  the page-wide `--ui-stack-with` (`<ui-root stack-with>`;  `page` ~== `viewport`)."
+    },
+    {
+      name: "unstackable",
+      group: "layout",
+      // a plain flag, not a class word:  it draws nothing
+      kind: "boolean",
+      description:
+        "Old word, kept so old markup still reads:  it does nothing now, as no table stacks " +
+        "without `stackable` (epic `epic-engine` T176)."
     },
     {
       name: "scrolling",

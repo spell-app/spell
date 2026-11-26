@@ -12,7 +12,7 @@
 	<section label="Types">
 		<section label="Table" sticky="stack" collapsible dividing>
 			<example "Table" description="A standard table:  `<ui-table>` around a native `<table>`. Rows, cells and their class words (positive, right aligned, collapsing ...) stay plain HTML.">
-				<table celled>
+				<table celled stackable>
 					<row header>
 						<cell>Name</cell>
 						<cell>Age</cell>
@@ -34,7 +34,7 @@
 						<cell data-label="Job">Designer</cell>
 					</row>
 				</table>
-				<message slot="description" state="positive" size="small">Tables will automatically stack their layouts for mobile devices. To disable this behavior, use <text code>unstackable</text>, or <text code>stackable="tablet"</text> to allow responsive adjustments for tablet.</message>
+				<message slot="description" state="positive" size="small">This table stacks its rows on phones, as it says <text code>stackable</text>;  <text code>stackable="tablet"</text> stacks them on tablets too. A table without it never stacks:  too wide, it scrolls sideways.</message>
 			</example>
 			<example "Table">
 				<html>
@@ -858,8 +858,8 @@
 		</>
 
 		<section label="Stacking" sticky="stack" collapsible dividing>
-			<example "Stacking" description="A table can specify how it stacks table content responsively.">
-				<table unstackable>
+			<example "Stacking" description="A table stacks only when it asks to:  `stackable` below 768px, `stackable` set to `tablet` below 992px too.">
+				<table stackable>
 					<row header>
 						<cell>Name</cell>
 						<cell>Status</cell>
@@ -2209,7 +2209,7 @@
 
 		<section label="Scrolling" sticky="stack" collapsible dividing>
 			<example "Scrolling" description="A table body can scroll vertically: `scrolling`, with the head and foot stuck.">
-				<table unstackable celled scrolling aria-label="People">
+				<table celled scrolling aria-label="People">
 					<row header>
 						<cell>Name</cell>
 						<cell>Age</cell>
@@ -2315,7 +2315,7 @@
 				<message slot="description" state="info" size="small">Add <text code>resizable</text> and a native resize drag handler will appear to the bottom right of the table body.</message>
 			</example>
 			<example "Scrolling" description="A scrolling table optionally supports predefined heights:  `scrolling` is long, very long, short or very short.">
-				<table scrolling="long" unstackable celled aria-label="People, long">
+				<table scrolling="long" celled aria-label="People, long">
 					<row header>
 						<cell>Name</cell>
 						<cell>Age</cell>
@@ -2538,7 +2538,7 @@
 		<section label="Stuck" sticky="stack" collapsible dividing>
 			<example "Stuck" description="A table can scroll horizontally, with its head, foot, first or last column staying stuck (`stuck`).  You can freely stick any combination like `stuck=\"head first\"`, `\"foot first last\"`, `\"head foot first\"`, `\"first last\"`, etc.">
 				<container scrolling="short">
-					<table stuck="head foot first last" unstackable celled aria-label="Jobs">
+					<table stuck="head foot first last" celled aria-label="Jobs">
 						<row header>
 							<cell>Name</cell>
 							<cell>Age</cell>

@@ -58847,13 +58847,6 @@
           ]
         },
         {
-          "name": "unstackable",
-          "description": {
-            "kind": "markdown",
-            "value": "Never stacks rows into blocks, even on a viewport below 768px:  wider than its box, it scrolls sideways in it instead.\n\nTakes:  flag (present / absent)"
-          }
-        },
-        {
           "name": "padding",
           "description": {
             "kind": "markdown",
@@ -58896,7 +58889,7 @@
           "name": "stackable",
           "description": {
             "kind": "markdown",
-            "value": "Rows become blocks on a viewport below 768px (the default, `stackable`);  `stackable=\"tablet\"` also below 992px.  `stack-by=\"container\"` follows the table's OWN width instead.\n\nTakes:  flag, or `tablet`"
+            "value": "Opts in to stacking:  rows become blocks on a viewport below 768px (`stackable`), or below 992px too (`stackable=\"tablet\"`).  Without it a table never stacks:  wider than its box, it scrolls sideways in it.  `stack-by=\"container\"` follows the table's OWN width instead.\n\nTakes:  flag, or `tablet`"
           },
           "values": [
             {
@@ -58908,7 +58901,7 @@
           "name": "stack-by",
           "description": {
             "kind": "markdown",
-            "value": "What `stackable` measures:  the `viewport` (Fomantic's way, the default), the table's own width (`container`:  a table in a narrow column of a wide screen), or nothing (`none`:  it never stacks, as `unstackable`, and scrolls sideways when too wide).  Also a token for a whole region or page:  `--ui-table-stack-by: container` (or `none`);  the attribute wins.  Neither:  the page-wide `--ui-stack-with` (`<ui-root stack-with>`;  `page` ~== `viewport`).\n\nTakes:  `viewport` · `container` · `none`"
+            "value": "What `stackable` measures:  the `viewport` (Fomantic's way, the default), or the table's own width (`container`:  a table in a narrow column of a wide screen).  Nothing without `stackable`.  Also a token for a whole region or page:  `--ui-table-stack-by: container`;  the attribute wins.  Neither:  the page-wide `--ui-stack-with` (`<ui-root stack-with>`;  `page` ~== `viewport`).\n\nTakes:  `viewport` · `container`"
           },
           "values": [
             {
@@ -58916,11 +58909,15 @@
             },
             {
               "name": "container"
-            },
-            {
-              "name": "none"
             }
           ]
+        },
+        {
+          "name": "unstackable",
+          "description": {
+            "kind": "markdown",
+            "value": "Old word, kept so old markup still reads:  it does nothing now, as no table stacks without `stackable` (epic `epic-engine` T176).\n\nTakes:  flag (present / absent)"
+          }
         },
         {
           "name": "scrolling",

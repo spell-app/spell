@@ -26,7 +26,7 @@
 			<markdown>
 				`inverted` swaps in its own `--ui-table-inverted-*` colours, and `padding` (`compact`, `md` ...) replaces the cell padding
 				with their own steps (`--ui-table-padded`, `--ui-table-compact-padding-*`). `--ui-table-stack-by: container`
-				makes every table in a region stack by its own width;  `--ui-table-stack-by: none`, never. Never set the `--_ui-*` names: they're the sheet's private
+				makes every stackable table in a region stack by its own width. Never set the `--_ui-*` names: they're the sheet's private
 				plumbing.
 			</>
 		</>

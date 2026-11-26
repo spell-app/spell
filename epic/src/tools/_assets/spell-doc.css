@@ -1216,19 +1216,6 @@ ui-tab > pre {
   overflow-wrap: normal;
   word-break: normal;
 }
-/*
- * NO table ever STACKS, `unstackable` written or not (Owen, 2026-10-19, I36 of `epic-engine`:  a table drawn as its
- * header cells, then each row's cells one under another, at the side bar's width:  "I hate it").  Too wide for its
- * column, it scrolls sideways inside its own box instead (the rule above), never the page.
- * - Spell UI stacks a `<ui-table>` below a 768px VIEWPORT unless it's `unstackable`.  Its public way to say "never" for
- *   a whole page is the token `--ui-table-stack-by: none` (`stack-by="none"` for one table;  epic `epic-engine` I40),
- *   read on the `<ui-table>` itself.
- * - Pages write `unstackable` too (the plan-doc rules, the migrations), so a page read without this sheet holds
- * - NOT a table that asks to stack (`stackable`, `stack-by`):  a demo of stacking, as the component creation guide's
- */
-ui-table:not([stackable], [stack-by]) {
-  --ui-table-stack-by: none;
-}
 /* cell borders in `--spell-table-rule`, a bare table's and a `ui-table`'s alike */
 .spell-doc-main ui-table {
   --ui-table-border-color: var(--spell-table-rule);
