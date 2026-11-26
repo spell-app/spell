@@ -2,7 +2,7 @@ import type * as vscode from "vscode"
 
 /**
  * A stand-in for VS Code's `vscode` module, for the extension's unit tests:
- * only what `ElementsHelp` and `BubblyDecorations` use, as tiny classes and records.
+ * only what `ElementsHelp`, `BubblyDecorations` and `StartingStatus` use, as tiny classes and records.
  * - The tests run it as `vscode` (`vitest.config.ts`, beside this folder:  an alias);
  *   their TYPES stay VS Code's own (`@types/vscode`).
  * - `vscode` exists only inside VS Code:  no package to import, so it's this or a whole VS Code
@@ -73,6 +73,12 @@ export enum DiagnosticSeverity {
   Hint = 3
 }
 
+/** Which side of the status bar an item goes on:  VS Code's own numbers. */
+export enum StatusBarAlignment {
+  Left = 1,
+  Right = 2
+}
+
 /** One item of a completion list. */
 export class CompletionItem {
   range?: Range
@@ -135,6 +141,33 @@ class FakeLogOutputChannel {
   dispose(): void {}
 }
 
+/** A status bar item:  what it says, and whether it shows;  every one made is in `statusBarItems`. */
+class FakeStatusBarItem {
+  name?: string
+  text = ""
+  tooltip?: string
+  isShown = false
+  isDisposed = false
+
+  constructor(
+    readonly id: string,
+    readonly alignment: StatusBarAlignment
+  ) {}
+
+  show(): void {
+    this.isShown = true
+  }
+
+  hide(): void {
+    this.isShown = false
+  }
+
+  dispose(): void {
+    this.isShown = false
+    this.isDisposed = true
+  }
+}
+
 /** One of `workspace`'s events:  subscribe as VS Code's do;  `fire()` from a test. */
 class FakeEvent<T> {
   /** Subscribe `listener`;  the result unsubscribes. */
@@ -155,6 +188,9 @@ class FakeEvent<T> {
 /** Every completion provider registered:  its selector, provider and trigger characters. */
 export const completionProviders: { selector: unknown; provider: unknown; triggerCharacters: string[] }[] = []
 
+/** Every status bar item made (`window.createStatusBarItem()`), oldest first. */
+export const statusBarItems: FakeStatusBarItem[] = []
+
 /** `workspace`'s document events, to `fire()` from a test. */
 export const documentEvents = {
   open: new FakeEvent<vscode.TextDocument>(),
@@ -168,6 +204,7 @@ const openDocuments: vscode.TextDocument[] = []
 /** Empty the registries, and open `documents`. */
 export function resetFakeVscode(documents: vscode.TextDocument[] = []): void {
   completionProviders.length = 0
+  statusBarItems.length = 0
   openDocuments.splice(0, Infinity, ...documents)
   for (const event of Object.values(documentEvents)) event["listeners"].clear()
 }
@@ -185,7 +222,12 @@ export const languages = {
 }
 
 export const window = {
-  createOutputChannel: (name: string) => new FakeLogOutputChannel(name)
+  createOutputChannel: (name: string) => new FakeLogOutputChannel(name),
+  createStatusBarItem(id: string, alignment = StatusBarAlignment.Left) {
+    const item = new FakeStatusBarItem(id, alignment)
+    statusBarItems.push(item)
+    return item
+  }
 }
 
 export const workspace = {

@@ -14,6 +14,7 @@
  *     from the kit's main checkout and from every epic's worktree.
  *   - So the editor always runs spell as it is on disk:  restart the server to pick up a change.
  * - The server asks to watch `project.json` / `.spell` files itself, so there's no `synchronize` here.
+ * - While it starts and reads the first file's project, the status bar says so (`StartingStatus`, epic `editor` T181).
  */
 import { existsSync } from "fs"
 import { dirname, resolve } from "path"
@@ -30,6 +31,7 @@ import { BubblyDecorations } from "./BubblyDecorations"
 import { ElementsHelp } from "./ElementsHelp"
 import { RunnerPanel } from "./RunnerPanel"
 import { findSpellApp } from "./spellAppRoot"
+import { StartingStatus } from "./StartingStatus"
 
 /**
  * A spell-app checkout's language server, from its root:  `tsx` runs it there, reading the root's `tsconfig.json`.
@@ -130,10 +132,18 @@ async function startLanguageServer(context: vscode.ExtensionContext): Promise<vo
     // `tsx` reads the `tsconfig.json` where it runs
     options: { cwd: repoRoot }
   }
+  // the status bar says it's starting, then reading the project, until the first file's problems come back
+  const status = StartingStatus.show(context)
   const clientOptions: LanguageClientOptions = {
     documentSelector: RunnerPanel.LANGUAGES.map((language) => ({ scheme: "file", language })),
     // an old form's hover ends in a "Fix it" link, `command:spell.fixIt?...`:  trust that one command only
-    markdown: { isTrusted: { enabledCommands: [FIX_IT_COMMAND] } }
+    markdown: { isTrusted: { enabledCommands: [FIX_IT_COMMAND] } },
+    middleware: {
+      handleDiagnostics(uri, diagnostics, next) {
+        status.ready()
+        next(uri, diagnostics)
+      }
+    }
   }
   client = new LanguageClient("spell", "Spell", serverOptions, clientOptions)
   client.info(`Language server from ${repoRoot}:  ${choice.reason}`)
@@ -149,7 +159,13 @@ async function startLanguageServer(context: vscode.ExtensionContext): Promise<vo
     vscode.commands.registerCommand("spell.showCompiledPython", () => showCompiled("py")),
     vscode.commands.registerCommand(FIX_IT_COMMAND, (edit: LspWorkspaceEdit) => fixIt(edit))
   )
-  await client.start()
+  try {
+    await client.start()
+  } finally {
+    // started, it reads the project;  failed, nothing more is coming
+    if (client.isRunning()) status.reading()
+    else status.ready()
+  }
   BubblyDecorations.register(context, client)
 }
 
