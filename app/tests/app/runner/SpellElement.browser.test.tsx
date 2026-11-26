@@ -889,6 +889,52 @@ describe("SpellElement", () => {
       }
     })
 
+    test("with the program running elsewhere (a Python app's page):  a drag still sends the page events, its lines go to the program, and a desktop file is left to the browser (language I171, I166)", async () => {
+      const token = new Token("a")
+      core.append(trays[0]!, token)
+      const { root, done } = await drawTrays()
+      const to = trays[1]! as Tray & Record<string, unknown>
+      // `- when a token is dropped on it:` and `- when a file is dropped on it:`, as the page file has them
+      to.whenTokenDroppedOn = () => {}
+      to.whenFileDroppedOn = () => {}
+      const calls: string[] = []
+      core.remote = {
+        run: (_owner, method) => void calls.push(method),
+        startWhile: (_owner, method) => void calls.push(`start ${method}`),
+        endWhile: (_owner, method) => void calls.push(`end ${method}`),
+        set: () => {},
+        trigger: (name) => void calls.push(`trigger ${name}`)
+      }
+      const heard: string[] = []
+      const names = ["ui-dragged-over", "ui-dragged-out", "ui-dropped", "ui-file-dragged-over"]
+      const listen = (event: Event) => heard.push(event.type)
+      for (const name of names) root.addEventListener(name, listen)
+      try {
+        const tray = root.querySelectorAll<HTMLElement>("game-tray")[1]!
+        await drag(root.querySelector("game-token") as HTMLElement, tray)
+        expect(heard[0]).toBe("ui-dragged-over")
+        expect(heard).toContain("ui-dropped")
+        expect(calls).toContain("whenTokenDroppedOn")
+        // a file from the desktop:  the program can't take it there, so the browser keeps it
+        const transfer = new DataTransfer()
+        transfer.items.add(new File(["hi"], "notes.txt", { type: "text/plain" }))
+        const enter = new DragEvent("dragenter", {
+          bubbles: true,
+          composed: true,
+          cancelable: true,
+          dataTransfer: transfer
+        })
+        tray.dispatchEvent(enter)
+        expect(enter.defaultPrevented).toBe(false)
+        expect(heard).not.toContain("ui-file-dragged-over")
+      } finally {
+        core.remote = undefined
+        for (const name of names) root.removeEventListener(name, listen)
+        for (const name of ["whenTokenDroppedOn", "whenFileDroppedOn"]) delete to[name]
+        done()
+      }
+    })
+
     test("a fast drag over a tray sends ui-dragged-over at once, then at most one every 100ms, with the last place (P67, Q77)", async () => {
       const token = new Token("a")
       core.append(trays[0]!, token)
