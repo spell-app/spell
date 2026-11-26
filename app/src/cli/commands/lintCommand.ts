@@ -34,8 +34,8 @@ const DESCRIPTION_BEFORE_EXAMPLE = "description-before-example"
  * - A `.spell` file's HTML habit it can't put right, `on-click=`, is an error -- see `htmlHabitsIn()`.
  * - A page's example described by a `<text>` just before it is a WARNING, which `--fix` puts right --
  *   see `pageHabitsIn()`;  so is each of Spell's old forms -- see `oldFormsIn()`.
- * - SIDE EFFECT:  compiles any project they import which has never been compiled --
- *   see `CliSession.compileImports()`.
+ * - SIDE EFFECT:  compiles any project they import which has never been compiled, or is out of date (its sources,
+ *   its own imports' declarations or Spell's compiler changed since) -- see `CliSession.compileImports()`.
  * - Returns the exit code:  `EXIT.ERRORS` if there were any errors;  warnings alone exit 0.
  */
 export async function lintCommand(session: CLI.CliSession, args: string[], options: CLI.LintOptions): Promise<number> {

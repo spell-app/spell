@@ -107,11 +107,14 @@ export class CliSession {
   ////////////////
 
   /**
-   * Parse `project` once, after compiling whatever it imports that's never been compiled -- see `compileImports()`.
+   * Parse `project` once, after compiling whatever it imports that's never been compiled, or is out of date -- see
+   * `compileImports()`.
+   * - Out of date too:  a compiled import is read from its declarations, which say what its places' lines say (what a
+   *   list filters and sorts by);  read stale, a read the import's place now takes is an error here.
    * - A crash is left in `project.parseError`, NOT thrown.
    */
   async parse(project: SP.SpellProject, status?: CLI.StatusReporter): Promise<void> {
-    await this.compileImports(project, status)
+    await this.compileImports(project, status, { stale: true })
     await this.workspace.track(project)
   }
 
@@ -120,7 +123,8 @@ export class CliSession {
    * `<Project>.declarations.json5` yet:  both are in its build folder, never committed.
    * - Why:  a compiled import is read from those files, so parsing `project` fails without them.
    * - NOTE: an existing one is used as is, even if its sources have changed since -- unless:
-   *   - `stale` (`spell compile --stale`):  recompiles those that are out of date, see `CLI.staleBecause()`
+   *   - `stale` (`spell compile --stale`, and every `parse()`:  `spell lint` and the rest):  recompiles those that are
+   *     out of date, see `CLI.staleBecause()`
    *   - `force` (`spell compile --force`):  recompiles them all
    *   - either way, what they import first
    * - Shows each on `status`, if given.

@@ -1129,7 +1129,7 @@ function savedInOf(Class: SavedClass): SavedIn {
 export type ReadUntil<T> = {
   /** How many it wants. */
   first: number
-  /** The test each must pass:  a `where`'s. */
+  /** The test each must pass:  a `where`'s, which may wait (a promise of its answer). */
   where: (thing: T, position: number, list: List) => unknown
 }
 
@@ -1370,15 +1370,26 @@ class SavedRead {
    */
   async firstPassing({ first, where }: ReadUntil<unknown>): Promise<List> {
     await this.firstPage()
-    const passing = () => (this.list.items as Thing[]).filter((thing, at) => where(thing, at, this.list))
-    for (let found = passing(); found.length < first && this.nextPage !== undefined; found = passing()) {
+    // a `where` that waits (`its job's name is ...`) answers a promise:  each answer waited for, in turn, as
+    // `core.filterInTurn()` does, and no more asked once there are enough
+    const passing = async (): Promise<Thing[]> => {
+      const things = [...(this.list.items as Thing[])]
+      const found: Thing[] = []
+      for (let at = 0; at < things.length && found.length < first; at++) {
+        if (await where(things[at], at, this.list)) found.push(things[at]!)
+      }
+      return found
+    }
+    let found = await passing()
+    while (found.length < first && this.nextPage !== undefined) {
       await (this.readingPage ??= this.readPage().finally(() => {
         this.readingPage = undefined
       }))
+      found = await passing()
     }
     const list = core.newScratch(List) as List
     whileReading(() => {
-      list.items = passing().slice(0, first)
+      list.items = found
     })
     return list
   }
