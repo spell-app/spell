@@ -473,3 +473,32 @@ describe("`the number of jobs, roughly`", () => {
     expect(code).toContain(`core.savedCount(Trabajo, {}, { roughly: true })`)
   })
 })
+
+describe("a sort whose key waits", () => {
+  test("`sorted by its name`, where some `name` waits:  `core.sortedByInTurn()`, never `sortedBy()` over promises", () => {
+    const { errors, compiled: code } = compiled([
+      `acme is a web server at "https://acme.test":`,
+      `\t- arena items live at "/api/items"`,
+      `\t- configs live at "/api/configs"`,
+      `an "arena item" is a thing:`,
+      `\t- it lives in acme`,
+      `\t- its "name" is text`,
+      `a "config" is a thing:`,
+      `\t- it lives in acme`,
+      `\t- its "environment" is text`,
+      // another type's `name` reads a field that follows an address:  every read of a `name` waits
+      `an "environment label" is a thing:`,
+      `\t- its "config" is a config`,
+      `\t- its "name" is`,
+      `\t\treturn its config's environment or "UNKNOWN"`,
+      `parts page is an app:`,
+      `\t- its "parts" is the first 100 arena items`,
+      `\t- its "found" is items in its parts, sorted by its name`
+    ])
+    expect(errors).toEqual([])
+    expect(code).toContain(
+      `await core.sortedByInTurn(await core.answerOf(this, "parts"), async (item) => await core.answerOf(item, "name"))`
+    )
+    expect(code).not.toMatch(/core\.sortedBy\([^\n]*async \(item\)/)
+  })
+})

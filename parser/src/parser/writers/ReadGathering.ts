@@ -18,7 +18,7 @@ const SAVED_READS = new Set(["savedThings", "savedThingAt", "savedThingWithId"])
 const SORTED_READ = "savedThingsSortedBy"
 
 /** `core`'s calls whose first value is a list, and whose answer is a list of the same things. */
-const SAME_ITEMS = new Set(["filter", "sortedBy", "sortedByValue", "firstFew", "reversed", "filterInTurn"])
+const SAME_ITEMS = new Set(["filter", "sortedBy", "sortedByValue", "firstFew", "reversed", "filterInTurn", "sortedByInTurn"])
 
 /** `core`'s calls after which a thing's whole row must be here:  undo puts it back, or it's written again. */
 const NEEDS_WHOLE_ROW = new Set(["removeSaved", "saveThing", "draftOf"])

@@ -518,11 +518,14 @@ export class WriterProject {
     return found
   }
 
-  /** Is `node` one of `core`'s loops, or a `where` (`filter`, `itemWhere`), whose function `waits` says yes to? */
+  /**
+   * Is `node` one of `core`'s loops, a `where` (`filter`, `itemWhere`), or a sort (`sortedBy`), whose function `waits`
+   * says yes to?
+   */
   protected functionWaits(node: P.ASTNode, waits: (callback: P.ASTMethodDefinition) => boolean): boolean {
     if (!isCoreCall(node)) return false
     const { methodName, args } = node as P.ASTScopedMethodInvocation
-    if (!P.CORE_LOOPS.has(methodName) && methodName !== "filter" && methodName !== "itemWhere") return false
+    if (!P.CORE_LOOPS.has(methodName) && !IN_TURN_TWINNED.has(methodName)) return false
     const arg = args.args?.[1]
     const callback = arg && unwrapped(arg)
     return callback instanceof P.ASTMethodDefinition && waits(callback)
@@ -1139,6 +1142,9 @@ function linkedFieldsOf(ast: P.ASTNode | undefined): readonly string[] {
   }
   return names
 }
+
+/** `core`'s calls with a function that waits written as their twin that waits for each answer (`JSWriter.inTurn()`). */
+const IN_TURN_TWINNED = new Set(["filter", "itemWhere", "sortedBy"])
 
 /** Each declaring line's tree's fields that follow an address:  `linkedFieldsOf()`. */
 const linkedFields = new WeakMap<P.ASTNode, readonly string[]>()
