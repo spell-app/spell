@@ -10,8 +10,8 @@
  *   (`plan="waiting"`), the rest to do, their plans accepted;  its inbox written here, a session listening
  * - the server:  a page server of its OWN (`DemoServer`), THIS checkout's pack and routes;  it wakes nobody
  * - where:  1200 x 760, the page itself;  400 x 760 and 320 x 600 in an IFRAME, as VS Code's side bar shows it
- * - what:  a waiting plan's Accept (thumbs up), Revisit and Defer;  an item's Approve (thumbs up), Revisit and Make
- *   Todo
+ * - what:  a waiting plan's Accept (thumbs up) and Revisit (its Defer is in its gear since epic `epic-engine` T169);
+ *   an item's Approve (thumbs up), Revisit and Make Todo
  * - placed two ways:
  *   - `mid`:  its phase or item folded, the button mid-screen
  *   - `stuck`:  its phase or item OPEN, scrolled into its body, so its title row is stuck under the page's titles, the
@@ -78,7 +78,6 @@ const WINDOWS = [
 const BUTTONS = [
   { what: "plan-accept", family: "phase", action: "approve", nth: 0, marks: true },
   { what: "plan-revisit", family: "phase", action: "revisit", nth: 1, marks: false },
-  { what: "plan-defer", family: "phase", action: "defer", nth: 2, marks: true },
   { what: "item-approve", family: "item", action: "approve", nth: 0, marks: true },
   { what: "item-revisit", family: "item", action: "revisit", nth: 1, marks: false },
   { what: "item-todo", family: "item", action: "todo", nth: 2, marks: true }

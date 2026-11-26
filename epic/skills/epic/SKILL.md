@@ -105,6 +105,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
 ## 1. Name
 
 - Some first words are reserved:  never an epic's name.
+  - The code's one list of them:  `EPIC_VERBS`, in the epic tooling's `command/command.types.ts`, which the prompt
+    hook reads;  a test fails when this list and it differ (epic `epic-engine` I482).
   - `review`:  NOT a new epic.
     Go to "7. Review", and skip everything else here.
   - `resume`:  NOT a new epic either.
@@ -132,6 +134,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
       Go to "16. Fresh", "Pause first" (epic `epic-engine` T139).
   - `demo`:  `/epic demo [pasted text]` runs the STAGED DEMO when its step files are ready (`epic demo check`):
     NOT a new epic.  Go to "15. Staged demo", and skip everything else here (epic `epic-engine` P77).
+  - `hush`:  `/epic hush [<epic> | all]` greys settled items the person won't look at again.
+    Go to "17. Hush" (epic `epic-engine` T122).
   - `done`:  `/epic done` is `/isolate done`, word for word.
     - In an epic's session, every prompt and question names it `/epic done`, never `/isolate done` (2026-10-24):
       the close-out modal's "Run `/epic done`", a reply's "`/epic done` when you're ready".
@@ -2256,6 +2260,7 @@ file <name> <rN> "same as T12"                      a duplicate:  only marked;  
 update <name>#P<N> --estimate "1-2h"                change a phase's estimate;  the Overview's total follows
 phase <name>#P<N> todo|active|done [--no-open]      done drops UPDATE labels / prose updates;  reloads the tab
 phase <name>#P<N> dropped --why "<p>Moved to P38</p>"   never built:  struck through, finished as done;  why in place of Done
+phase <name>#P<N> remove                            never started (no commits, no requests):  off the page, its queue unqueued
 phase <name>#P<N> planning [off]                    Claude writing its plan:  a blue spinner on its page, till --plan
 inbox working <name>#P<N> on|off                    Claude at work on a phase (or an item, a comment):  the spinner
 add <name>#Q|#J|#T|#I|#M|#D "title" [--details "<p>html</p>"] [--calm] [--requested]   prints the id (T3)

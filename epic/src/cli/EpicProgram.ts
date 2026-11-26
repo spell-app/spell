@@ -364,18 +364,20 @@ export class EpicProgram {
       epic.command("phase"),
       "set a phase's status;  done:  --done writes what was built, the time Claude took (took, from the " +
         "transcripts) and how long by the clock (span, from the log);  dropped:  never built, and won't be (struck through, finished as done is), --why writes why " +
-        "in place of Done, a phase it names (P38) linked;  took:  that time worked out again, for a phase done before;  planning:  Claude is writing " +
+        "in place of Done, a phase it names (P38) linked;  remove:  a phase never started taken off the page, its queued items " +
+        "unqueued;  took:  that time worked out again, for a phase done before;  planning:  Claude is writing " +
         "its plan, a blue spinner on its page (off:  ends it;  writing --plan ends it by itself)",
       'epic phase seo#P3 done --done "<ul><li>the sitemap, written on build</li></ul>"'
     ).usage(
       "<epic>#P3 todo | active | done | dropped [--done <html>] [--why <html>] [--no-open]  |  " +
+        "<epic>#P3 remove  |  " +
         "<epic>#P3 took [--dry-run]  |  " +
         "<epic>#P3 planning [off]"
     )
     this.page(
       epic.command("move"),
       "move a to-do phase to another place among the to-do phases:  each numbered by its place, the links and " +
-        "text naming them following",
+        "text naming them following;  a started or done phase keeps its place, the to-do ones trading places around it",
       "epic move seo#P7 P4"
     ).usage("<epic>#P7 <the phase whose place it takes:  P4>")
     this.page(

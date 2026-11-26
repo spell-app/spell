@@ -91,6 +91,7 @@ import {
   type PhaseFieldValues,
   type PhaseWindow,
   type PlanMark,
+  type RemovedPhase,
   type RenameResult,
   type ReviewAs,
   type AddStatusOptions
@@ -3111,6 +3112,52 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
+   * REMOVE the phase at place `n`, never started (its gear's "Remove this phase", epic `epic-engine` T169, applied by
+   * `inbox apply`;  or `epic phase <epic>#P5 remove`):  out of the page for good;  returns what it did.
+   * - only a phase NOT STARTED:  to do, no commits, no requests filed into it;  anything else throws, changing nothing
+   *   - started or built:  `epic phase <epic>#P5 dropped` keeps it, struck through, its number kept
+   *   - requests filed into it:  they'd lose where they were filed;  file them elsewhere first
+   * - the items queued into it (`work` naming it, `P5 · Name`) go back to unqueued, and stay
+   * - links to it (`href="#<its id>"`) become their words:  nothing on the page to land on
+   * - the phases after it move up a number, and what names them follows (`renumberAll()`)
+   * - its part file goes as the page is written:  nothing loads it any more (`PlanDocFiles.writeDoc()`)
+   * - SIDE EFFECT:  logs it
+   */
+  removePhase(n: number): RemovedPhase {
+    const element = this.phase(n)
+    const label = PhaseIds.labelOf(element)
+    const name = PlanItem.titleOf(element)
+    const status = element.getAttribute("status") ?? "todo"
+    const said = `remove ${label} ${name}`
+    if (status !== "todo")
+      throw new PlanDocError(
+        `${said}:  it's ${status};  only a phase not started is removed (\`phase ${label} dropped\` keeps it, struck)`
+      )
+    if (element.querySelector("epic-commit"))
+      throw new PlanDocError(
+        `${said}:  it has commits;  only a phase not started is removed (\`phase ${label} dropped\`)`
+      )
+    const requests = Array.from(
+      element.querySelectorAll(':scope > epic-field[name="requests"] > epic-field[label]'),
+      (block) => block.getAttribute("label")!.split(" · ")[0]!
+    )
+    if (requests.length)
+      throw new PlanDocError(`${said}:  ${requests.join(", ")} filed into it;  file them elsewhere first`)
+    const work = `${label} · ${name}`
+    const unqueued = this.allItems.filter((item) => item.getAttribute("work") === work).map((item) => item.id)
+    for (const id of unqueued) this.unqueue(id)
+    for (const link of this.document.querySelectorAll(`a[href="#${element.id}"]`))
+      link.replaceWith(...Array.from(link.childNodes))
+    const before = PhaseNumbers.snapshot(this.document)
+    element.remove()
+    this.renumberAll(before)
+    this.updateEstimate()
+    const back = unqueued.length ? `;  ${unqueued.map((id) => id.toUpperCase()).join(", ")} unqueued` : ""
+    this.log(`${label} ${name}:  removed, never started${back}`)
+    return { id: element.id, label, name, unqueued }
+  }
+
+  /**
    * After phases moved:  everything that names one by NUMBER follows, from `before` (`PhaseNumbers.snapshot()`:
    * each phase's id => its number then), ALL AT ONCE, so a number another phase takes is never renamed twice.
    * - items' and updates' `phase`, Updated lines' `of`, every bare `P5`, `P17-P20`, `P20's` in the page's words
@@ -3614,6 +3661,20 @@ export class PlanDoc extends PlanReader {
           return { applied: false, gone: true, left: `${part.label}:  built already, nothing to hold:  dropped` }
         this.holdPlan(part.element)
         return { applied: true, did: "on hold:  paused, not built till its plan is accepted again" }
+      }
+      case "remove": {
+        if (part.kind !== "phase")
+          return { applied: false, left: `${part.label} (${part.what}):  only a phase is removed` }
+        try {
+          const removed = this.removePhase(this.phaseElements.indexOf(part.element) + 1)
+          const back = removed.unqueued.length
+            ? `;  ${removed.unqueued.map((id) => id.toUpperCase()).join(", ")} unqueued`
+            : ""
+          return { applied: true, did: `removed:  never started, out of the page${back}` }
+        } catch (error) {
+          if (!(error instanceof PlanDocError)) throw error
+          return { applied: false, gone: true, left: `${part.label}:  ${error.message}:  dropped` }
+        }
       }
       case "defer": {
         if (part.kind !== "phase") return { applied: false, left: `${part.label} (${part.what}):  only a phase defers` }

@@ -239,6 +239,27 @@ describe("PlanDocCommands add-phase --before", () => {
   })
 })
 
+// epic `epic-engine` T169:  `epic phase <epic>#P5 remove`
+describe("PlanDocCommands phase remove:  a phase never started off the page", () => {
+  test("removes a to-do phase, the ones after it up a number;  refuses a started one, writing nothing", async () => {
+    const plan = FILES.read(file)
+    for (const name of ["Four", "Five"]) plan.addPhase(name)
+    await FILES.writeDoc(file, plan, true)
+    const owner = commands()
+    expect(await owner.run(["phase", "x", "4", "remove"])).toBe(0)
+    expect(printed.at(-1)).toBe("P4 Four removed")
+    expect(
+      FILES.read(file)
+        .phases.map((phase) => `P${phase.number} ${phase.name}`)
+        .slice(-2)
+    ).toEqual(["P3 Three", "P4 Five"])
+    const skeleton = readFileSync(file, "utf8")
+    expect(await owner.run(["phase", "x", "1", "remove"])).toBe(1)
+    expect(warned.at(-1)).toMatch(/^epic:  remove P1 .*only a phase not started is removed/)
+    expect(readFileSync(file, "utf8")).toBe(skeleton)
+  })
+})
+
 // epic `epic-engine` I174:  `epic update <epic>#M3 --failed I12`, the session filing a failed test itself
 describe("PlanDocCommands failed:  a manual test marked failed, filed as an issue;  off, or closing it, clears it", () => {
   test("writes `failed`, reopens it, a Noted card linking the issue, logged;  off and close take it off", async () => {
