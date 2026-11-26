@@ -14,7 +14,8 @@
  *     from the kit's main checkout and from every epic's worktree.
  *   - So the editor always runs spell as it is on disk:  restart the server to pick up a change.
  * - The server asks to watch `project.json` / `.spell` files itself, so there's no `synchronize` here.
- * - While it starts and reads the first file's project, the status bar says so (`StartingStatus`, epic `editor` T181).
+ * - While it starts, and while it reads a newly opened file's project, the status bar says so
+ *   (`StartingStatus`, epic `editor` T181).
  */
 import { existsSync } from "fs"
 import { dirname, resolve } from "path"
@@ -132,15 +133,24 @@ async function startLanguageServer(context: vscode.ExtensionContext): Promise<vo
     // `tsx` reads the `tsconfig.json` where it runs
     options: { cwd: repoRoot }
   }
-  // the status bar says it's starting, then reading the project, until the first file's problems come back
+  // the status bar says it's starting, then reading the project, until each open file's problems come back
   const status = StartingStatus.show(context)
+  const isSpellFile = (document: vscode.TextDocument) =>
+    document.uri.scheme === "file" && RunnerPanel.isSpellDocument(document)
+  for (const document of vscode.workspace.textDocuments.filter(isSpellFile)) status.opened(document.uri.toString())
+  context.subscriptions.push(
+    vscode.workspace.onDidOpenTextDocument(
+      (document) => isSpellFile(document) && status.opened(document.uri.toString())
+    ),
+    vscode.workspace.onDidCloseTextDocument((document) => status.closed(document.uri.toString()))
+  )
   const clientOptions: LanguageClientOptions = {
     documentSelector: RunnerPanel.LANGUAGES.map((language) => ({ scheme: "file", language })),
     // an old form's hover ends in a "Fix it" link, `command:spell.fixIt?...`:  trust that one command only
     markdown: { isTrusted: { enabledCommands: [FIX_IT_COMMAND] } },
     middleware: {
       handleDiagnostics(uri, diagnostics, next) {
-        status.ready()
+        status.published(uri.toString())
         next(uri, diagnostics)
       }
     }
@@ -163,8 +173,8 @@ async function startLanguageServer(context: vscode.ExtensionContext): Promise<vo
     await client.start()
   } finally {
     // started, it reads the project;  failed, nothing more is coming
-    if (client.isRunning()) status.reading()
-    else status.ready()
+    if (client.isRunning()) status.started()
+    else status.stop()
   }
   BubblyDecorations.register(context, client)
 }
