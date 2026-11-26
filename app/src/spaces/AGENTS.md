@@ -817,7 +817,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     (epic `atmosphere` P16), never a pattern or a split of its own.
   - THE CLOUD ([SpellCloud.ts](server/node/routes/SpellCloud.ts), epic `atmosphere` P8, Q8 B):
     the same folders and sign-in, for people OUTSIDE this machine.
-    - A plain web server of its own, never the page server:  `spell space cloud serve`, port 4949.
+    - A plain web server of its own, never the page server:  `spell space cloud serve`, port 4646.
     - Behind a tunnel or proxy, which gives it its `https` address.
       - It may have several, `--address https://spell.app --address https://spell.space` (`alsoAt`), the first its main
         one:  a sign-in begun at one finishes at that one, and a browser's cookie is per host, so people sign in once at

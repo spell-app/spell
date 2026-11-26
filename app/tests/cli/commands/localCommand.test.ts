@@ -115,7 +115,7 @@ function setUp({ installed = ["mkcert", "caddy"], trusted = false, relay = "", p
       })
       if (args.includes("serve")) {
         processes[pid] = COMMANDS["111"]!
-        listeners["-tiTCP:4949"] = [`${pid}`]
+        listeners["-tiTCP:4646"] = [`${pid}`]
       }
       if (command === "caddy") {
         processes[pid] = COMMANDS["443"]!
@@ -134,7 +134,7 @@ function setUp({ installed = ["mkcert", "caddy"], trusted = false, relay = "", p
     lanAddress: () => "192.168.4.30",
     askSecret: () => Promise.resolve(PASSWORD),
     askLine: () => Promise.resolve(""),
-    cloud: () => ({ port: 4949, address: "https://test.spell.app" }),
+    cloud: () => ({ port: 4646, address: "https://test.spell.app" }),
     newestMailTo: () => Promise.resolve(mails.shift()),
     post: (url, { headers, body }) => {
       posts.push({ url, headers, body })
@@ -305,7 +305,7 @@ describe("spell space local", () => {
     test("replaces a cloud and a Caddy already on its ports", async () => {
       world = setUp({ trusted: true })
       await world.site.setup({})
-      world.listeners["-tiTCP:4949"] = ["111"]
+      world.listeners["-tiTCP:4646"] = ["111"]
       world.listeners["-tiTCP:443"] = ["443"]
       await startAndStop(world)
       expect(world.stopped).toEqual([111, 443])
@@ -313,7 +313,7 @@ describe("spell space local", () => {
 
     test.each([
       ["-tiTCP:443", "port 443"],
-      ["-tiTCP:4949", "port 4949"]
+      ["-tiTCP:4646", "port 4646"]
     ])("leaves anything else on %s alone, and says so", async (listener, message) => {
       world = setUp({ trusted: true })
       await world.site.setup({})
@@ -467,7 +467,7 @@ describe("spell space local", () => {
 
     test("replaces a cloud and a Caddy left running, as a terminal's start does", async () => {
       await setUpMac()
-      world.listeners["-tiTCP:4949"] = ["111"]
+      world.listeners["-tiTCP:4646"] = ["111"]
       world.listeners["-tiTCP:443"] = ["443"]
       await world.pageServerSite().startWithPageServer()
       expect(world.stopped).toEqual([111, 443])
@@ -803,7 +803,7 @@ describe("spell space local", () => {
       world.mails.push("an old mail", `Open this:\n${LINK}\n`)
       expect(await world.site.signIn("ana@example.com", "@rs/OrgAdmin")).toBe(0)
       expect(world.posts[0]).toEqual({
-        url: "http://127.0.0.1:4949/api/sign-in/ask",
+        url: "http://127.0.0.1:4646/api/sign-in/ask",
         headers: { host: "test.spell.app", origin: "https://test.spell.app", "content-type": "application/json" },
         body: '{"email":"ana@example.com"}'
       })
@@ -859,7 +859,7 @@ describe("spell space local", () => {
     world = setUp()
     const file = caddyFileFor({ names: NAMES, certificate: "/c.pem", key: "/k.pem" })
     expect(file).toContain(
-      `test.spell.app, test.spell.space {\n\ttls "/c.pem" "/k.pem"\n\tencode zstd gzip\n\treverse_proxy 127.0.0.1:4949 {\n` +
+      `test.spell.app, test.spell.space {\n\ttls "/c.pem" "/k.pem"\n\tencode zstd gzip\n\treverse_proxy 127.0.0.1:4646 {\n` +
         `\t\tlb_try_duration 30s\n\t\tlb_try_interval 250ms\n\t}\n}`
     )
   })
@@ -871,7 +871,7 @@ describe("spell space local", () => {
     test("the editor's name goes to its dev server, the other to the cloud", () => {
       world = setUp()
       expect(file()).toContain(
-        `test.spell.space {\n\ttls "/c.pem" "/k.pem"\n\tencode zstd gzip\n\treverse_proxy 127.0.0.1:4949 {`
+        `test.spell.space {\n\ttls "/c.pem" "/k.pem"\n\tencode zstd gzip\n\treverse_proxy 127.0.0.1:4646 {`
       )
       expect(file()).toMatch(/\ntest\.spell\.app \{\n\ttls "\/c\.pem" "\/k\.pem"\n\tencode zstd gzip\n/)
       expect(file()).toContain("reverse_proxy 127.0.0.1:3456 {")
@@ -944,7 +944,7 @@ describe("spell space local", () => {
         editor: { name: "editor.example", port: 3456 }
       })
       expect(alone).not.toContain("redir")
-      expect(alone).not.toContain("127.0.0.1:4949")
+      expect(alone).not.toContain("127.0.0.1:4646")
     })
 
     test("editorNameAmong():  the first of two or more, or what the settings say, or none", () => {

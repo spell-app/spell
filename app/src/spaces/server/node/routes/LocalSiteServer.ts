@@ -82,7 +82,7 @@ const PAGE_SERVER = "the page server"
  *   - the page server's:  `startWithPageServer()` when it listens
  *   - a terminal's:  `spell space local start`, `spell/app/cli`'s `LocalSite`
  * - The page server starts it only:
- *   - from the MAIN checkout:  a machine has one 443 and one 4949
+ *   - from the MAIN checkout:  a machine has one 443 and one cloud port (4646)
  *   - on a Mac this has been set up on (`spell space local setup`, or the old scripts' certificate):
  *     anywhere else nothing happens, silently
  *   - while no terminal is running it:  a live run is left alone

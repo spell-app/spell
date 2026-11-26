@@ -398,7 +398,7 @@ export default function appCommands(spell: Command): void {
       collect,
       []
     )
-    .option("--port <port>", "its port on this machine -- default 4949", (value) => Number(value))
+    .option("--port <port>", "its port on this machine -- default 4646", (value) => Number(value))
     .action((_options, command: Command) => runCloud("serve", undefined, command))
 
   cloud
@@ -433,7 +433,7 @@ export default function appCommands(spell: Command): void {
     .command("service")
     .description("print the file that starts it with this machine, and again if it stops:  launchd's, or systemd's")
     .option("--address <url>", "where people reach it, e.g. https://spell.example.org;  give one or more", collect, [])
-    .option("--port <port>", "its port on this machine -- default 4949", (value) => Number(value))
+    .option("--port <port>", "its port on this machine -- default 4646", (value) => Number(value))
     .action((_options, command: Command) => runCloud("service", undefined, command))
 
   const local = space

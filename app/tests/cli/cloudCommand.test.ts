@@ -11,7 +11,7 @@ import { browserBundleCurrentOrDie, cloudCommand } from "spell/app/cli/commands/
 import { SpellCloud } from "spell/app/spaces/server/node/routes/SpellCloud"
 
 describe("spell space cloud password (epic `atmosphere` T64)", () => {
-  const RECORD = { port: 4949, token: "the-token", pid: 1, started: "now", address: "" }
+  const RECORD = { port: 4646, token: "the-token", pid: 1, started: "now", address: "" }
   const realStdin = Object.getOwnPropertyDescriptor(process, "stdin")!
 
   /** `spell space cloud password` with `piped` on standard input:  what it asked the running cloud. */
@@ -34,7 +34,7 @@ describe("spell space cloud password (epic `atmosphere` T64)", () => {
     const { fetched, result } = await ran("  spaced words here  \n")
     await expect(result).resolves.toBe(0)
     const [url, init] = fetched.mock.calls[0]!
-    expect(url).toBe("http://127.0.0.1:4949/api/sign-in/password/for")
+    expect(url).toBe("http://127.0.0.1:4646/api/sign-in/password/for")
     expect(new Headers(init.headers).get("x-server-token")).toBe("the-token")
     expect(JSON.parse(init.body as string)).toEqual({ email: "ana@example.com", password: "  spaced words here  " })
   })

@@ -656,7 +656,7 @@ Here they're files in a space's folder, `@family/__data/cookbook`, one per thing
 `family cookbook is saved in the cloud` is a person's own project data folder,
 `__data/family-cookbook` in their space, on Spell's cloud server.
 - Signed out, changes stay in the browser, and the sign-in bar says so;  signed in, they go up within seconds.
-- `spell space cloud serve` runs it, on port 4949, apart from the page server, for a tunnel or a proxy to give it an address.
+- `spell space cloud serve` runs it, on port 4646, apart from the page server, for a tunnel or a proxy to give it an address.
 - On an `https` address, it answers the file an atmosphere host asks each program for, so signing in to one takes no setup.
 - The example:  Family Cookbook ([README-examples](README-examples.md)).
 

@@ -24,8 +24,8 @@ import { APP_DIR } from "./EditorServer"
 /** Where the cloud serves a program:  `/apps/@spell/examples/FamilyCookbook`. */
 export const CLOUD_APPS_PREFIX = "/apps"
 
-/** The port it listens on, unless told otherwise:  the page server's is 4747, the preview's 4848. */
-export const CLOUD_PORT = 4949
+/** The port it listens on, unless told otherwise:  the page server's is 4747, the preview's 4848, the server keeper's 4949 (epic `epic-engine` I476:  it was 4949, and the keeper fell back to a random port). */
+export const CLOUD_PORT = 4646
 
 /** The program groups it serves, and only these:  the built-in ones, which anyone may read anyway. */
 const SERVED_GROUPS = /^\/@spell\/(?:examples|guides)\//
@@ -65,7 +65,7 @@ const ELEMENT_DIR = join(APP_DIR, "dist-element")
  *
  * ```ts
  * const cloud = new SpellCloud({ address: "https://spell.example.org" })
- * await cloud.listen({ port: 4949 })                     // `spell space cloud serve`
+ * await cloud.listen({ port: 4646 })                     // `spell space cloud serve`
  * ```
  *
  * - It serves ONLY what people outside need, never the page server's tools (no editor, no `/api/files`, no epics):
