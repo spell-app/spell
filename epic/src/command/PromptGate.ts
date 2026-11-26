@@ -4,7 +4,7 @@ import { join } from "node:path"
 
 // By relative path, `.ts` and all:  the `UserPromptSubmit` hook loads this file with plain `node` (types stripped)
 import { LOOKS, worktreeOf } from "spell/epic/window.mjs"
-import { STAGED_DEMO, TITLE_ICONS } from "./command.types.ts"
+import { EPIC_VERBS, STAGED_DEMO, TITLE_ICONS, type EpicVerb } from "./command.types.ts"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 import { EpicRepo, type EpicHome } from "spell/epic/config/EpicRepo.ts"
 import { ClaudeHome } from "spell/epic/config/ClaudeHome.ts"
@@ -27,9 +27,10 @@ import { Transcript } from "spell/epic/config/Transcript.ts"
  * - Input:  the hook's stdin, `{ prompt, cwd, session_id, session_title, transcript_path, permission_mode, ... }`
  * - Acts only on these (`parseCommand()`):
  *   - `/isolate <name>`, not `/isolate done`
- *   - `/epic <name> [plan]`, not `/epic review ...` or `/epic done` (which is `/isolate done`)
+ *   - `/epic <name> [plan]`, not `/epic <verb> ...` (below)
  *   - `/epic resume <name>` and `/unpark <name>`
- *   - `review`, `resume`, `color`, `future`, `phase`, `start`, `fresh` and `request` are reserved epic ids:
+ *   - the reserved first words, `EPIC_VERBS` (`command.types.ts`, the ONE list;  epic `epic-engine` I482), are never an
+ *     epic's name (`verbCommand()`):
  *     - a review runs from any window, and keeps the session's name
  *     - a resume, like `/unpark`, is only renamed (it picks its window itself)
  *     - `/epic color <look>` recolours the window it's typed in:  nothing to gate
@@ -40,6 +41,11 @@ import { Transcript } from "spell/epic/config/Transcript.ts"
  *       gate, no rename (the old tab is found by its title);  `/epic fresh all` (T113), typed in any session, too
  *     - `/epic request <epic> <rN>` takes up a request sent from another session (epic `epic-workflow`):
  *       only renamed, `🚧 <epic>`, as a resume is;  refused in a session titled for another epic (step 0)
+ *     - `/epic tidy [<epic>]` and `/epic hush [<epic> | all]` work on THIS session's epic, or the one named, from any
+ *       session:  nothing to gate, no rename (I482:  `/epic tidy` in another epic's session was taken for "open a
+ *       window for epic `tidy`")
+ *     - `/epic done` is `/isolate done`:  nothing to gate
+ *     - `/epic demo`:  the staged demo while its step files are there (below);  else nothing to gate
  *   - A look right after the name (`/epic x -purple`, epic `windows-and-review` P5) is the window's, not the plan's:
  *     left out of the text saved below.
  *   - `<name>` is lower-kebab-cased as the skills do (`"Docs Index"` -> `docs-index`).
@@ -125,8 +131,9 @@ export class PromptGate {
     if (!command) return null
     const { skill, name, text } = command
     // the staged demo (epic `epic-engine` P77):  no worktree, no window move, the step files followed
-    if (skill === "epic" && name === STAGED_DEMO.epic && PromptGate.isStagedDemo(input.cwd))
-      return demoNote(input, text)
+    // without its step files, `/epic demo` passes untouched:  the skill's `epic demo check` says why
+    if (skill === "epic" && name === STAGED_DEMO.epic)
+      return PromptGate.isStagedDemo(input.cwd) ? demoNote(input, text) : null
     // another repo's epic:  its own window, never a worktree here (epic `epic-engine` I47)
     const home = skill === "epic future" || !input.cwd ? undefined : EpicRepo.elsewhere(name, input.cwd)
     if (home) return elsewhereNote(home, command)
@@ -228,8 +235,8 @@ export class PromptGate {
 
   /**
    * `{ skill, name, text, color }` for an `/isolate <name>`, `/epic <name> [text]`, `/epic resume <name>` or
-   * `/unpark <name>` prompt;  `null` for any other prompt, a missing name, `/isolate done`, `/epic done`,
-   * `/epic review ...`, `/epic resume` alone or `/unpark ?`.
+   * `/unpark <name>` prompt;  `null` for any other prompt, a missing name, `/isolate done`, `/epic <verb> ...`
+   * (`verbCommand()`), `/epic resume` alone or `/unpark ?`.
    * - `skill`:  `"epic resume"` for `/epic resume <name>` (`"epic future"`, `"epic request"` likewise)
    * - `name`:  the first word, or a quoted phrase, lower-kebab-cased
    * - `text`:  the rest, trimmed (`""` when none)
@@ -245,29 +252,38 @@ export class PromptGate {
     const name = PromptGate.kebab(word)
     // `/isolate done` and `/epic done` (the same steps) leave a worktree:  nothing to gate, no rename
     if (!name || name === "done") return null
-    // `/epic review [<name>]` runs from any window and keeps the session's name:  nothing to gate
-    if (skill === "epic" && name === "review") return null
-    // `/epic color <look>` recolours this window:  nothing to gate, no rename
-    if (skill === "epic" && name === "color") return null
-    // `/epic phase [ids] ...` / `/epic start <phase | ids> ...` act on THIS session's epic (epic `skillz` P4):
-    // it's already named, isolated and planned:  nothing to gate, no rename
-    if (skill === "epic" && (name === "phase" || name === "start")) return null
-    // `/epic fresh [--force]` hands THIS session's epic to a new session in this window (epic `epic-engine` T110):
-    // nothing to gate, and NO rename:  its old tab is found by the title it has;  `/epic fresh all` (T113) likewise
-    if (skill === "epic" && name === "fresh") return null
-    // `/epic future <name> ...` writes an idea down, from any window, no worktree:
-    // renamed `📅 <name>`, never blocked
-    // `/epic request <epic> <rN>`:  a request sent from another session (epic `epic-workflow`):
-    // renamed `<epic>`, as a resume is, so later requests reach this session;
-    // alone, nothing to gate:  it's this session's own epic's
-    // `/epic resume <name>`:  renamed `<name>`, as `/unpark <name>` is;  alone, it asks which epic
-    if (skill === "epic" && (name === "future" || name === "request" || name === "resume")) {
-      const named = PromptGate.parseCommand(`/unpark ${rest}`)
-      return named && { ...named, skill: `epic ${name}` }
-    }
+    // a reserved first word (`EPIC_VERBS`) is a verb, never an epic's name (epic `epic-engine` I482)
+    if (skill === "epic" && PromptGate.isVerb(name)) return PromptGate.verbCommand(name, rest)
     const look = /^\s*-([a-z]+)(?=\s|$)([\s\S]*)$/i.exec(rest)
     const color = look && look[1]!.toLowerCase() in LOOKS ? look[1]!.toLowerCase() : null
     return { skill, name, text: (color ? look![2]! : rest).trim(), color }
+  }
+
+  /** Is `word` (kebab-cased) one of the reserved first words, `EPIC_VERBS`? */
+  static isVerb(word: string): word is EpicVerb {
+    return (EPIC_VERBS as readonly string[]).includes(word)
+  }
+
+  /**
+   * What `/epic <verb> <rest>` asks of the gate (`verb` one of `EPIC_VERBS`), or `null`:  nothing to gate, no rename.
+   * - `future`:  `/epic future <name> ...` writes an idea down, from any window, no worktree:
+   *   renamed `📅 <name>`, never blocked
+   * - `request`:  `/epic request <epic> <rN>`, a request sent from another session (epic `epic-workflow`):
+   *   renamed `<epic>`, as a resume is, so later requests reach this session;  alone, this session's own epic's
+   * - `resume`:  `/epic resume <name>`, renamed `<name>`, as `/unpark <name>` is;  alone, it asks which epic
+   * - `demo`:  handed on, so `gate()` can tell whether the staged demo's step files are there (`isStagedDemo()`)
+   * - every other verb (`review`, `color`, `phase`, `start`, `tidy`, `hush`, `fresh`, `done`):  `null`
+   *   - each acts on THIS session's epic, a named one, or every one, from whatever session it's typed in:
+   *     the skill does it;  never "open a window for epic `<verb>`", never a rename (`fresh`'s old tab is found by
+   *     the title it has)
+   */
+  static verbCommand(verb: EpicVerb, rest: string): GateCommand | null {
+    if (verb === "future" || verb === "request" || verb === "resume") {
+      const named = PromptGate.parseCommand(`/unpark ${rest}`)
+      return named && { ...named, skill: `epic ${verb}` }
+    }
+    if (verb === STAGED_DEMO.epic) return { skill: "epic", name: verb, text: rest.trim(), color: null }
+    return null
   }
 
   /**
