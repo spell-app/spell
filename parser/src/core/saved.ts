@@ -158,6 +158,16 @@ function wordsOfName(name: string): string {
   return name.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "")
 }
 
+/** One thing's list of what its links name:  see `ProgramPlaces.linkedList()`. */
+type LinkedList = {
+  /** The addresses it was made for, one a line. */
+  addresses: string
+  /** What each address was found to be:  nothing, where the place holds nothing. */
+  found: readonly unknown[]
+  /** The list itself. */
+  list: List
+}
+
 /** What a link's read asks for:  the one row at this address. */
 function linkQuery(address: string): ListQuery {
   return { ids: [address] }
@@ -414,8 +424,13 @@ class ProgramPlaces {
     this.personNow = { id, name }
     this.person.page = page
     this.personChanged.changed()
+    if (!wasSomeoneElse) return
+    // what each link found was the last person's, found or not (epic `data` I157):  each asks again, for them
+    this.linksFound.clear()
+    this.thingsReadSincePersonChanged = new WeakSet()
+    this.linksChanged.changed()
     // `recipes where its cook is them` means someone else's now
-    if (wasSomeoneElse) void this.refresh()
+    void this.refresh()
   }
 
   /** The class called `name`:  the program's own, by what's been read or saved, else what the program knows. */
@@ -615,15 +630,41 @@ class ProgramPlaces {
     return read
   }
 
-  /** What each link was found to be, by type and address:  `null` when the place holds nothing there. */
+  /**
+   * What each link was found to be, by type and address:  `null` when the place holds nothing there.
+   * - The person signed in's:  someone else signing in forgets it all (`adoptPerson()`).
+   */
   private readonly linksFound = new Map<string, Thing | null>()
+  /** What a link follows:  changed when what links found was forgotten, or a link's read said something new. */
+  private readonly linksChanged = new Cell()
+  /**
+   * The things a read brought since someone else signed in:  only these answer a link with no read of its own.
+   * - `undefined`:  nobody else has, so every thing a read made does.
+   */
+  private thingsReadSincePersonChanged: WeakSet<object> | undefined
   /** Each thing's list of what its links name, so it stays one list while they're the same. */
-  private readonly linkedLists = new WeakMap<object, Map<string, { addresses: string; list: List }>>()
+  private readonly linkedLists = new WeakMap<object, Map<string, LinkedList>>()
 
   /** The thing at `address`, if it's known already:  `null` if the place holds nothing there, `undefined` if nobody knows yet. */
   linkKnown(Class: SavedClass, address: string): Thing | null | undefined {
+    this.linksChanged.read()
     const found = this.linksFound.get(`${Class.name}\n${address}`)
-    return found !== undefined ? found : (this.things?.thingKnownAs(Class.name, address) as Thing | undefined)
+    if (found !== undefined) return found
+    const known = this.things?.thingKnownAs(Class.name, address) as Thing | undefined
+    // one the last person's reads brought isn't theirs to see:  it's asked for again
+    const since = this.thingsReadSincePersonChanged
+    return known && (!since || since.has(known)) ? known : undefined
+  }
+
+  /**
+   * A link's own read answered:  `thing`, or nothing there.
+   * - SIDE EFFECT:  an answer that changed (asked again, after someone else signed in) draws its links again.
+   */
+  linkAnswered(Class: SavedClass, address: string, thing: Thing | undefined): void {
+    const key = `${Class.name}\n${address}`
+    const before = this.linksFound.get(key)
+    this.linksFound.set(key, thing ?? null)
+    if (before !== undefined && before !== (thing ?? null)) this.linksChanged.changed()
   }
 
   /** The id `thing` is kept under in its place:  `undefined` for one in no place. */
@@ -655,7 +696,7 @@ class ProgramPlaces {
       const read = this.readOf(Class, linkQuery(address))
       try {
         const [thing] = (await read.answerNotGivenUp()).items as Thing[]
-        this.linksFound.set(`${Class.name}\n${address}`, thing ?? null)
+        this.linkAnswered(Class, address, thing)
       } catch (error) {
         // a drawing that came back holds it, and is waiting on this very answer:  give it up now, and it waits forever
         if (!isAbandoned(error) || !read.isHeld) throw error
@@ -671,6 +712,7 @@ class ProgramPlaces {
    *   so `the user whose id is ...` reads it whole, and a failure says so rather than showing the row.
    */
   private readById(Class: SavedClass, address: string, whole: SavedRead | undefined): Thing | null | undefined {
+    this.linksChanged.read()
     const found = this.linksFound.get(`${Class.name}\n${address}`)
     if (found !== undefined) return found
     const known = this.things?.thingKnownAs(Class.name, address) as Thing | undefined
@@ -678,7 +720,9 @@ class ProgramPlaces {
   }
 
   /**
-   * One list for `owner`'s `field`, the same one while `addresses` are:  each of `found` that's there, in order.
+   * One list for `owner`'s `field`, the same one while `addresses` and what they found are:
+   *   each of `found` that's there, in order.
+   * - What they found changes when someone else signs in (epic `data` I157):  a new list, of what they may see.
    * - `found` is `addresses`' things, each in its place, nothing where the place holds nothing.
    * - A change to it writes the addresses back (`rememberLinkedList()`).
    */
@@ -687,26 +731,21 @@ class ProgramPlaces {
     if (!lists) this.linkedLists.set(owner, (lists = new Map()))
     const said = addresses.join("\n")
     const kept = lists.get(field)
-    if (kept?.addresses === said) return kept.list
+    if (kept?.addresses === said && kept.found.every((thing, at) => thing === found[at])) return kept.list
     const list = core.newScratch(List) as List
     untrackCells(() => {
       whileReading(() => {
         list.items = found.filter(Boolean)
       })
     })
-    const madeNow = { addresses: said, list }
+    const madeNow = { addresses: said, found, list }
     lists.set(field, madeNow)
     this.heedLinkedList(madeNow, owner, field, found)
     return list
   }
 
   /** SIDE EFFECT:  a change to `kept.list`, `owner`'s `field` followed, writes the addresses back. */
-  private heedLinkedList(
-    kept: { addresses: string; list: List },
-    owner: object,
-    field: string,
-    found: readonly unknown[]
-  ): void {
+  private heedLinkedList(kept: LinkedList, owner: object, field: string, found: readonly unknown[]): void {
     const stored = getProp(owner, field) as unknown
     const entries = stored instanceof List ? stored.items.filter((item) => addressIn(item) !== undefined) : []
     const entryOf = new Map<unknown, unknown>()
@@ -906,7 +945,9 @@ class ProgramPlaces {
 
   /** Each thing `result` holds, made or changed in place:  `quietly`, see `PlaceThings.thingsFrom()`. */
   thingsOf(result: PlaceResult, options?: { quietly?: boolean }): Thing[] {
-    return this.things!.thingsFrom(result, options) as Thing[]
+    const things = this.things!.thingsFrom(result, options) as Thing[]
+    for (const thing of things) this.thingsReadSincePersonChanged?.add(thing)
+    return things
   }
 
   /**
@@ -1340,6 +1381,9 @@ class SavedRead {
       })
     })
     this.changes.changed()
+    // a link's own read:  what it found, which what follows the link reads
+    const { ids, ...rest } = this.query
+    if (ids?.length === 1 && !Object.keys(rest).length) this.program.linkAnswered(this.Class, ids[0]!, things[0])
   }
 
   /**
