@@ -5,6 +5,8 @@
 //  the file/folder helpers that produce them stay in their topical modules (`./file-utils`, `./project-utils`).
 //
 
+import type { SP } from "spell/parser/spell"
+
 ////////////////
 // ## File utilities
 ////////////////
@@ -84,6 +86,12 @@ export type ProjectFileJSON = {
   exports?: string[]
   /** Targets it compiles to, e.g. `["js/solid", "ts/solid"]` -- default `["js/solid"]`:  see `SP.TARGETS`. */
   targets?: string[]
+  /**
+   * Its own elements, in its `components/` folder, built into a component pack with its compiled output and loaded on
+   * every page that runs it or a project importing it:
+   * `{ "name": "widgets", "prefix": "widget-" }`.  See `SP.ComponentPackJSON`.
+   */
+  componentPack?: SP.ComponentPackJSON
   /**
    * The Spell it was written for, e.g. `"0.9.0"`:  see `SP.ProjectManifestJSON5.spellVersion` (epic `language` P68).
    * - Written when it's made, and by `spell upgrade`;  never by Project Settings.
@@ -185,7 +193,8 @@ export type ManifestJSON = Record<string, ManifestEntryJSON>
  * - And for other project-file routes that return the updated index.
  * - `manifest` -- current on-disk manifest:  NOT persisted, always freshly computed from file system.
  * - `imports` -- import list, synced with `manifest` and persisted back to the project file when it changes.
- * - `title` / `version` / `exports` / `targets` / `spellVersion` / `listsStartAt` / `development` / `places` -- straight from the project file (`ProjectFileJSON`).
+ * - `title` / `version` / `exports` / `targets` / `spellVersion` / `listsStartAt` / `development` / `places` /
+ *   `componentPack` -- straight from the project file (`ProjectFileJSON`).
  * - `buildFolder` -- where its compiled output goes, inside the checkout's `build/`:  `project-utils.buildFolderInBuild()`.
  * - `namesLanguages` -- the languages it has a names dictionary in, beside its project file (`Solitaire.es.names.json5`);
  *   left out when none:  see `SP.ProjectManifestJSON5`.
@@ -203,4 +212,5 @@ export type ProjectIndexJSON = {
   buildFolder?: string
   namesLanguages?: string[]
   places?: ProjectFileJSON["places"]
+  componentPack?: SP.ComponentPackJSON
 }

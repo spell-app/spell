@@ -113,7 +113,7 @@ describe("SpellProject imports", () => {
     expect(() => project.targets).toThrow(/There's no target 'nope':  try js\/solid/)
   })
 
-  test("a project that draws can't compile to a target that can't draw", async () => {
+  test("a target that can't draw writes only the files that don't;  a project whose every file draws can't compile to it", async () => {
     SP.TARGETS["test/no-draw"] = {
       ...SP.TARGETS["js/solid"]!,
       name: "test/no-draw",
@@ -122,7 +122,9 @@ describe("SpellProject imports", () => {
     }
     try {
       const draws = makeProject("draws", ["Card.spell"], { targets: ["test/no-draw"] })
-      await expect(draws.compile()).rejects.toThrow(/'draws' draws a UI, which target 'test\/no-draw' can't/)
+      await expect(draws.compile()).rejects.toThrow(
+        /'draws' draws a UI in every file, which target 'test\/no-draw' can't/
+      )
       const quiet = makeProject(
         "quiet",
         ["Quiet.spell"],
@@ -131,6 +133,27 @@ describe("SpellProject imports", () => {
       )
       await quiet.compile()
       expect(readFileSync(resolve(workspace, "quiet", "quiet.nodraw.js"), "utf8")).toContain('core.console.log("hi")')
+      // a file that draws beside one that doesn't:  the running code has both, the target only the one that doesn't
+      const mixed = makeProject(
+        "mixed",
+        ["Board.spell", "BoardWindow.spell", "BoardWindow.css"],
+        { targets: ["test/no-draw"] },
+        {
+          "Board.spell": 'a board is a thing\n\tits "size" is a number\n',
+          "BoardWindow.spell": "board window is an app\n\tto draw it\n\t\t<div>Boards</div>\n",
+          "BoardWindow.css": ".board-window { color: teal }\n"
+        }
+      )
+      await mixed.compile()
+      const running = readFileSync(resolve(workspace, "mixed", `mixed${SP.COMPILED_JS_SUFFIX}`), "utf8")
+      expect(running).toContain("class Board ")
+      expect(running).toContain("Boards")
+      expect(running).toContain(".board-window")
+      // ... and its stylesheet:  no page to style
+      const noDraw = readFileSync(resolve(workspace, "mixed", "mixed.nodraw.js"), "utf8")
+      expect(noDraw).toContain("class Board ")
+      expect(noDraw).not.toContain("Boards")
+      expect(noDraw).not.toContain(".board-window")
     } finally {
       delete SP.TARGETS["test/no-draw"]
     }

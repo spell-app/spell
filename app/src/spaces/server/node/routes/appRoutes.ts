@@ -27,6 +27,7 @@ import { TERMS_PATH } from "spell/app/spaces/server/node/places/SpaceExport"
 import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
 import { ProjectPlaces } from "spell/app/spaces/server/node/places/ProjectPlaces"
 import { onPrefSaved } from "spell/app/spaces/server/node/prefs/prefsRoutes"
+import { watchProjectPacks } from "spell/app/spaces/server/node/projects/ProjectPack"
 import { api, compileCache, projectBuild, spaceFiles } from "./api"
 import { spacesDailyRound } from "./DailyRound"
 import { APP_DIR, EditorServer } from "./EditorServer"
@@ -165,6 +166,8 @@ const appRoutes: RouteModule = {
     // a project file changed on disk (another window, an agent, git):  every open page hears it at its address,
     // so the editor shows it at once, with no poll
     onStop(watchSpaceFiles(live))
+    // an element of a project's own saved:  its component pack rebuilt, and swapped into every open page using it
+    onStop(watchPacks(live))
     // before `/api`'s own routes, whose last answers every path it doesn't know
     // and their live rooms, each write as its page's person (epic `atmosphere` T38)
     folders.route({ router, guard, upgrade: (prefix, handle) => web.upgrade(prefix, handle), signIn })
@@ -257,6 +260,46 @@ function watchSpaceFiles(live: SRV.LiveReload): () => void {
   return () => {
     for (const watch of watches) watch.close()
   }
+}
+
+/**
+ * Rebuild a project's component pack as one of its elements is saved, and tell every open page its script changed
+ * :  `watchProjectPacks()` (`ProjectPack.ts`) on the same folders as `watchSpaceFiles()`.
+ * - A page using the pack swaps the changed families in, with no reload (Spell UI's `PackHotSwap`:  on the editor's
+ *   page, the run page and the component sets' site).
+ * - The rebuild:  `ProjectBuild.rebuildPack()`, unminified, one at a time per project.
+ * - The page's report:  the pack's script, at its address (`/spaces/<project>/__pack/<name>.pack.js`), over the live
+ *   channel, as a rebuilt bundle's is.
+ * - A page Spell's dev server serves the pack's SOURCE to (the editor's `yarn start:dev`) never loaded the script:
+ *   the dev server's own hot replacement takes the save there, and this report passes it by.
+ * - Returns what stops it.
+ */
+function watchPacks(live: SRV.LiveReload): () => void {
+  const folders: Array<[string, string]> = [
+    ...Object.entries(environment.spaceFolders),
+    ...environment.moreSpaces.map(({ dir }): [string, string] => ["spaces", dir])
+  ]
+  return watchProjectPacks({
+    folders: folders.map(([base, dir]) => ({
+      dir,
+      projectFor: (inside: string) => {
+        if (inside.split("/").some(isSpaceName)) return undefined
+        const place = SP.SpellUrls.placeForFolder(base as SP.SpaceFolderBase, inside)
+        try {
+          const projectId = place && SP.SpellUrls.split(place).projectId
+          return projectId
+            ? { projectId, folder: SP.SpellLocation.getProjectLocation(projectId).serverPath }
+            : undefined
+        } catch {
+          // no group holds it
+          return undefined
+        }
+      }
+    })),
+    rebuild: (projectId) => projectBuild.rebuildPack(projectId),
+    report: (projectId, pack) =>
+      live.changed(pack.files.script, SP.SpellUrls.packUrl(SP.SpellUrls.packModuleFor(projectId, pack.name)))
+  })
 }
 
 /** Middleware:  403 for a write whose `Origin` isn't this machine (`localhost` / `127.0.0.1`, any port). */

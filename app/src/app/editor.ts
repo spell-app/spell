@@ -988,6 +988,7 @@ export class EditorStore extends Observable {
       onRestartNeeded: (reason) => editor.noteRestartNeeded(reason),
       loadImport: fetchCompiled,
       loadNative: fetchCodeFile,
+      loadPack: loadPackOf,
       messages: lang ? SP.SpellWords.messagesFor(lang) : undefined,
       projectId: project.projectId,
       sourceMap,
@@ -1057,6 +1058,7 @@ export class EditorStore extends Observable {
         coreUrl,
         loadImport: fetchCompiled,
         loadNative: fetchCodeFile,
+        loadPack: loadPackOf,
         messages
       })
     } catch (problem) {
@@ -3243,6 +3245,20 @@ globalThis.window?.addEventListener("focus", () => compiledImports.clear())
  */
 async function fetchCodeFile(module: string): Promise<string> {
   return $fetch<string>({ url: SP.SpellUrls.codeFileUrl(module), cache: "no-cache" })
+}
+
+/**
+ * Load the component pack a program draws with, `module` (`@spell/pack/...`), onto the editor's
+ * page:  its script beside its project's compiled output (`SP.SpellUrls.packUrl()`), or, from Spell's own dev server,
+ * its source.  Once per page.
+ * - `PagePacks.load()`, as the editor's page puts it on `SpellUI` (`PagePacks.share()`, in `index.tsx`):  imported
+ *   here, it would define `<ui-components>` wherever the editor's code loads (a test in node).
+ * - rejects on a page without it
+ */
+function loadPackOf(module: string): Promise<unknown> {
+  const page = (globalThis as { SpellUI?: { loadPack?: (module: string, url: string) => Promise<unknown> } }).SpellUI
+  if (!page?.loadPack) return Promise.reject(new Error(`no way to load the component pack ${module} on this page`))
+  return page.loadPack(module, SP.SpellUrls.packUrl(module))
 }
 
 /**

@@ -24,9 +24,11 @@
  *   - `ui-root` arrives later, from the site entry (`site.ts`), once it imports it:  importing it defines
  *     `<ui-root>`, which the site does only once its layout and theme are in.  A pack's script comes a network round
  *     trip after the root asks for it, by when it's in the map.
- * - The code and markdown families join the map then too (`shareFamilies()`), as a pack's `define()` starts:
- *   the app's `<spell-code>` and `<spell-markdown>` extend them (`spell-ui-shared.js`, app's `vite.solid.config.ts`),
- *   so on App UI's pages they extend the page's own.
+ * - The rest of Spell UI's ONE list (`PackModules`) joins the map then, as a pack's `define()` starts, from Spell UI's
+ *   barrel:  the code and markdown families, which the app's `<spell-code>` and `<spell-markdown>` extend
+ *   (`spell-ui-shared.js`, app's `vite.solid.config.ts`), so on App UI's pages they extend the page's own;  the graph
+ *   and tree families, which a pack's own elements may extend (`PACK_MODULES`).  The same list spell-app's pages fill
+ *   theirs from (`PagePacks.ts`).
  */
 import * as solidH from "@solidjs/h"
 import * as solidWeb from "@solidjs/web"
@@ -36,6 +38,7 @@ import * as uiForms from "spell/ui/forms"
 import * as imageZoom from "spell/ui/components/ui-zoom/ImageZoom"
 import type { ComponentPack } from "spell/ui/components/ui-components/UIComponents.types"
 import { registerPack } from "spell/ui/components/ui-components/ComponentPacks"
+import { PackModules } from "spell/ui/components/ui-components/PackModules"
 import { PackHotSwap } from "spell/ui/hot"
 
 // a rebuilt pack (a merge) swaps into the live page instead of reloading it (epic `epic-engine` I116):
@@ -60,20 +63,27 @@ const packModules: Record<string, unknown> = {
 
 /**
  * `registerPack()`, its `define()` after every Spell UI family's:  the ones its elements draw in their shadow roots.
- * - The families a pack's elements may EXTEND join `packModules` first (`shareFamilies()`).
+ * - The rest of the modules a pack may import join `packModules` first (`PackModules.share()`), from Spell UI's barrel.
  */
 function registerWithFamilies(pack: ComponentPack): void {
-  registerPack({ ...pack, define: () => import("spell/ui").then(shareFamilies).then(() => pack.define()) })
+  registerPack({
+    ...pack,
+    define: () => sharedFrom(import("spell/ui")).then(() => pack.define())
+  })
 }
 
-/** Put the families a pack's elements may extend in `packModules`, by their keys. */
-async function shareFamilies(): Promise<void> {
-  const [code, markdown] = await Promise.all([
-    import("spell/ui/components/ui-code"),
-    import("spell/ui/components/ui-markdown")
-  ])
-  packModules["spell/ui/components/ui-code"] = code
-  packModules["spell/ui/components/ui-markdown"] = markdown
+/** Fill `packModules` from Spell UI's one list, once all of Spell UI (`ui`) is in. */
+async function sharedFrom(ui: Promise<Record<string, unknown>>): Promise<void> {
+  const barrel = await ui
+  await PackModules.share(packModules, {
+    "solid-js": () => solid,
+    "@solidjs/web": () => solidWeb,
+    "@solidjs/h": () => solidH,
+    "spell/ui/core": () => uiCore,
+    "spell/ui/forms": () => uiForms,
+    "spell/ui/components/ui-zoom/ImageZoom": () => imageZoom,
+    "spell/ui": () => barrel
+  })
 }
 
 const spellUI = (globalThis as { SpellUI?: object }).SpellUI

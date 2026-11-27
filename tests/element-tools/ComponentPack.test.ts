@@ -81,9 +81,58 @@ describe("ComponentPack.read()", () => {
   test("a folder without a `spellPack` isn't one:  `read()` throws, `prefixOf()` says `undefined`", () => {
     const folder = writePack("plain", { "package.json": { name: "plain" } })
     expect(() => ComponentPack.read(folder)).toThrow(ComponentPackError)
-    expect(() => ComponentPack.read(folder)).toThrow(/has no "spellPack": \{ "prefix" \}, so it isn't a component pack/)
+    expect(() => ComponentPack.read(folder)).toThrow(/has no "spellPack": \{ "prefix" \}, and .* no "componentPack"/)
     expect(ComponentPack.prefixOf(folder)).toBeUndefined()
     expect(ComponentPack.prefixOf(join(ROOT, "nowhere"))).toBeUndefined()
+  })
+
+  // a Spell project declares its own elements in its project file, the same shape
+  test("a Spell project's pack:  its project file's `componentPack`, its code the whole project, no package name", () => {
+    const folder = writePack("widgets", {
+      "__project.json5": `{\n  // a comment, as project files have\n  "componentPack": { "name": "widgets", "prefix": "widget-" },\n  "imports": []\n}\n`,
+      "components/widget-card/index.ts": `import { READ } from "../../reader"\nexport const CARD = READ\n`,
+      "reader.ts": `export const READ = 1\n`,
+      "Widgets.spell": `widgets is a library\n`
+    })
+    const pack = ComponentPack.read(folder)
+    expect(pack).toMatchObject({
+      name: "widgets",
+      prefix: "widget-",
+      folder,
+      dir: folder,
+      src: folder,
+      components: join(folder, "components"),
+      generated: join(folder, "components", "__pack")
+    })
+    expect(pack.packageName).toBeUndefined()
+    expect(ComponentPack.prefixOf(folder)).toBe("widget-")
+    // what its elements import of the project counts;  its other files don't
+    expect(relativeSources(pack, folder)).toEqual(["components/widget-card/index.ts", "reader.ts"])
+  })
+
+  test("`generated`:  a project's pack built into its build folder, every generated file there", () => {
+    const folder = writePack("gadgets", {
+      "__project.json5": `{ "componentPack": { "name": "gadgets", "prefix": "gadget-", "components": "elements" } }\n`
+    })
+    const generated = join(ROOT, "build", "gadgets", "__pack")
+    const pack = ComponentPack.read(folder, { generated })
+    expect(pack.components).toBe(join(folder, "elements"))
+    expect(pack.files).toEqual({
+      catalog: join(generated, "gadgets.catalog.ts"),
+      entry: join(generated, "gadgets.entry.ts"),
+      devEntry: join(generated, "gadgets.pack.ts"),
+      script: join(generated, "gadgets.pack.js"),
+      families: join(generated, "gadgets")
+    })
+    expect(pack.needsBuild()).toBe(true)
+  })
+
+  test("a package's `spellPack` wins over a project file beside it", () => {
+    const folder = writePack("both", {
+      "package.json": { spellPack: { name: "pkg", prefix: "pkg-" } },
+      "__project.json5": `{ "componentPack": { "name": "proj", "prefix": "proj-" } }\n`
+    })
+    expect(ComponentPack.read(folder)).toMatchObject({ name: "pkg", prefix: "pkg-" })
   })
 })
 
@@ -280,6 +329,16 @@ describe("ComponentPack.withPageModules()", () => {
     expect(ComponentPack.withPageModules(code, "one.js")).toBe(
       `import"./rolldown-runtime-x.js";const{a:e,b:t}=${page("solid-js")};const n=${page("spell/ui/core")};` +
         `const{default:r,c}=${page("@solidjs/web")};import{d}from"./shared-y.js";e(t,n,r,c,d)`
+    )
+  })
+
+  test("a family a pack's element extends (the graph's, the tree's) is the page's, as Solid is", () => {
+    const code =
+      `import{UIGraph as e}from"spell/ui/components/ui-graph";import{UITree as t}from"spell/ui/components/ui-tree";` +
+      `class n extends e{}class r extends t{}`
+    expect(ComponentPack.withPageModules(code, "one.js")).toBe(
+      `const{UIGraph:e}=${page("spell/ui/components/ui-graph")};const{UITree:t}=${page("spell/ui/components/ui-tree")};` +
+        `class n extends e{}class r extends t{}`
     )
   })
 

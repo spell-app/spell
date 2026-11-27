@@ -37,6 +37,13 @@ describe("SpellUrls", () => {
     expect(() => SP.SpellUrls.codeFilePathFor("@spell/project/x")).toThrow(/isn't a code file's module/)
   })
 
+  test("a project's component pack:  its module, and its script's URL beside the project's compiled output", () => {
+    const module = SP.SpellUrls.packModuleFor("@local/My Folder/widgets", "widgets")
+    expect(module).toBe("@spell/pack/@local/My%20Folder/widgets/__pack/widgets.pack.js")
+    expect(SP.SpellUrls.packUrl(module)).toBe("/spaces/@local/My%20Folder/widgets/__pack/widgets.pack.js")
+    expect(() => SP.SpellUrls.packUrl("@spell/project/x")).toThrow(/isn't a pack's module/)
+  })
+
   test("each part is encoded on its own:  the slashes and the `@` stay as they are", () => {
     const url = SP.SpellUrls.fileUrl("@local/My Folder/my project/a folder/Card #2.spell")
     expect(url).toBe("/spaces/@local/My%20Folder/my%20project/a%20folder/Card%20%232.spell")

@@ -1252,6 +1252,15 @@ THE LINT GUARD (epic `spell-element` P10):  `yarn lint` holds component files to
     - `spell-pack` runs the tool's source through `tsx`, with the PACK's `tsconfig.json`:
       the pack's vocabularies import by package name (`spell-x/...`), as its own build resolves them.
     - Its generated files name `spell pack build <pack>` (epic `repo-split` P14, `spell-pack 2`).
+  - A SPELL PROJECT's pack :  its project file says
+    `"componentPack": { "name", "prefix" }`, the same shape, read by the same `ComponentPack.read()`;  its families in
+    its `components/`.
+    - Built by `spell compile` with its compiled output, into `__pack/` in its build folder, never committed;  loaded
+      by the runner wherever it or a project importing it runs (no `<ui-components source>`);  rebuilt by the page
+      server as an element is saved, and swapped into open pages (`PackHotSwap`).
+    - Its build writes a SOURCE entry too, `<name>.pack.ts`:  the same registration, each family imported from its
+      source, which Spell's own dev server serves for hot replacement (spell-app's `PagePacks.load()`).
+    - [The editor's README](../app/README-app.md), "A project's own elements".
   - A new pack:  `spell pack create <name>` writes a repo of its own
     (ALL its code in ONE `src/`, its families in `src/components/`, imports by package name);
     `spell pack add <pack> <tag>` adds a family, its test and its `exports` key ([templates](src/cli/templates/)).
@@ -1268,6 +1277,8 @@ THE LINT GUARD (epic `spell-element` P10):  `yarn lint` holds component files to
   - `ComponentPacks`:  static, one per page.
     - `load(source)` adds a `<script>` once per resolved URL.
       An already registered name resolves at once.
+      - `load(source, { module: true })`:  an ES module registering its pack as it runs, imported (a pack's source
+        entry, from a dev server).
     - `register()` finds its load by `document.currentScript`,
       else by the name the file implies (`epics.pack.js` => `epics`).
       Then it calls `define()`, and adds the catalog and prefix.
@@ -1296,6 +1307,9 @@ THE LINT GUARD (epic `spell-element` P10):  `yarn lint` holds component files to
 - Modules a pack shares with the page are `SpellUI.packModules`:
   the specifier its build leaves external, by the name its source imports it by (epic `repo-split` P14, Q45)
   => the page's module.
+  - ONE list of them, with the page's module holding each:  `PackModules`
+    ([its file](src/components/ui-components/PackModules.ts));  the site's bundle and spell-app's pages fill theirs
+    from it (`PackModules.share()`), each handing its own copy of each holder.
   - `solid-js`, `@solidjs/web`, `spell/element`, `spell/ui/core`, `spell/ui/forms`
   - `spell/element`, what a pack's elements are written on, is Spell UI's core module:  it carries all of it.
   - The site also offers the families a pack's elements may extend, once they load:
@@ -1305,8 +1319,9 @@ THE LINT GUARD (epic `spell-element` P10):  `yarn lint` holds component files to
     - the site's bundle, every component set's ([SitePacks.ts](site/_src/SitePacks.ts))
   - Those are the two places a Solid package is `import * as`'d, on purpose:
     a pack may use any export, so they must all stay ("One Solid per page" above).
-  - A new specifier goes there AND in the pack build's externals
-    (`PACK_MODULES`, the kit's [packModules.ts](../src/element-tools/packModules.ts)).
+  - A new specifier goes in `PackModules.HOLDERS` AND in the pack build's externals
+    (`PACK_MODULES`, the kit's [packModules.ts](../src/element-tools/packModules.ts));  and in the docs bundle's map,
+    still a copy of its own.
   - So a pack's elements extend the page's own `UIComponent` / `DOMElement`.
 - Tests:  [the component packs test](./tests/components/ui-components/ComponentPacks.test.ts).
   - On [the classic fixtures](src/test-helpers/fixtures/component-packs/), served by Vitest's dev server.

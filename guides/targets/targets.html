@@ -81,7 +81,8 @@ def play_fizzbuzz() -&gt; None:
                   <code>ts/solid</code>: the same program as a Solid developer types it, with types, decorators and JSX
                 </li>
                 <li>
-                  <code>ts/lib</code>: a project's classes as one TypeScript file, for code that isn't Spell to import
+                  <code>ts/lib</code>: a project's classes as one TypeScript file, for code that isn't Spell to import;
+                  its files that draw, e.g. the app that shows them, and its stylesheets are left out
                 </li>
                 <li>
                   <code>py</code>: Python on <code>spell_core</code>, the core's Python twin; a program that draws
@@ -225,8 +226,22 @@ def play_fizzbuzz() -&gt; None:
                     <td><code>There's no target 'wasm': try js/solid, ts/solid, py, ts/lib.</code></td>
                   </tr>
                   <tr>
-                    <td>a program that draws, as <code>ts/lib</code></td>
-                    <td><code>'Solitaire' draws a UI, which target 'ts/lib' can't.</code></td>
+                    <td>a program whose every file draws, as <code>ts/lib</code></td>
+                    <td>
+                      <code
+                        >'Solitaire' draws a UI in every file, which target 'ts/lib' can't: it writes only the files
+                        that don't draw.</code
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>a file that doesn't draw using a type from one that does, as <code>ts/lib</code></td>
+                    <td>
+                      <code
+                        >'Solitaire', for target 'ts/lib': Game.spell uses 'card', from Card.spell, which draws a UI, so
+                        'ts/lib' leaves it out.</code
+                      >
+                    </td>
                   </tr>
                   <tr>
                     <td><code>spell run --target ts/lib</code></td>

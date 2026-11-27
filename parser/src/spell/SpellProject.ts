@@ -1008,8 +1008,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
               await SP.loadTargets(this.targets)
               return this.scope!.parser!.inPlay(() => {
                 // each `.spell` file as its AST, so a class gets its members from every file
-                const files = this.filesInPlay
-                const parts = files.map((file, index) =>
+                const allFiles = this.filesInPlay
+                const allParts = allFiles.map((file, index) =>
                   file.AST instanceof P.ASTStatementGroup ? file.AST : (allCompiled as string[])[index]
                 )
                 const { version, exports } = this.contents ?? {}
@@ -1017,13 +1017,11 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                 const languages = [...new Set(this.spellFiles.map((file) => file.language.lang))]
                 // each target's code, through its writer -- `js/solid`'s first:  it's the one that runs
                 for (const target of this.targets) {
-                  if (target.can.draw === false && SpellProject.draws(parts)) {
-                    throw new P.ParserError({
-                      message: `'${this.projectName}' draws a UI, which target '${target.name}' can't.`,
-                      activity: "SpellProject.compile",
-                      params: { target: target.name }
-                    })
-                  }
+                  // a target that can't draw writes only our files that don't:  see `withoutDrawing()`
+                  const { parts, files } =
+                    target.can.draw === false
+                      ? SpellProject.withoutDrawing(allParts, allFiles, this.projectName ?? this.projectId, target.name)
+                      : { parts: allParts, files: allFiles }
                   const refusedKind = SpellProject.placeKindRefusedBy(target, parts)
                   if (refusedKind === "any") {
                     throw new P.ParserError({
@@ -1069,12 +1067,15 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                       options,
                       this.mainFileIn(files)
                     )
-                  const marked = sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()
+                  const combined = sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()
+                  // the component packs it loads, its own and its imports':  the running code alone
+                  const marked = target.name === SP.RUNNING_TARGET ? this.withPackImports(combined) : combined
                   // each declaring statement's marker comes out, into our declarations -- see `SP.SpellDeclarations`
                   const split = SP.SpellDeclarations.split(marked, this.scope!, {
                     version,
                     exports,
-                    languages
+                    languages,
+                    packs: this.packModules
                   })
                   const { declarations } = split
                   let { code } = split
@@ -1260,7 +1261,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
         this.writerOptions(),
         this.mainFileIn(files)
       )
-      return SP.SpellDeclarations.stripComments(marked)
+      return SP.SpellDeclarations.stripComments(name === SP.RUNNING_TARGET ? this.withPackImports(marked) : marked)
     })
   }
 
@@ -1318,7 +1319,9 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
           this.mainFileIn(files)
         )
       )
-      return marks.extract(SP.SpellDeclarations.stripComments(marked), {
+      // the packs it loads, as its compile's:  a debugging run draws the same elements
+      const withPacks = this.withPackImports(marked)
+      return marks.extract(SP.SpellDeclarations.stripComments(withPacks), {
         file: this.outputFileFor(target).location.file,
         sources: this.sourceTexts,
         nameOf: SpellProject.sourceNameOf
@@ -1605,6 +1608,63 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    */
   static draws(parts: Array<P.ASTStatementGroup | string | undefined>): boolean {
     return parts.some((part) => typeof part === "object" && containsJSX(part))
+  }
+
+  /**
+   * `parts` and their `files` for target `targetName`, which can't draw:  each file that draws left out, so it writes
+   * the rest, e.g. a library's classes beside the app that shows them.
+   * - Its stylesheets (`.css` files) too:  there's no page to style.
+   * - Left out quietly:  every target that draws, `js/solid` always, writes them all.
+   * - `files`:  each part's file, in order:  its path says a stylesheet, and names it in what it throws.
+   * - Throws when there's nothing left to write, every `.spell` file drawing, or when a file kept uses a type that only
+   *   a file left out declares:  as its class, a member's, a new one's ...  (the target's code would name a class it
+   *   hasn't).
+   */
+  static withoutDrawing<File extends { path: string }>(
+    parts: Array<P.ASTStatementGroup | string | undefined>,
+    files: readonly File[],
+    projectName: string,
+    targetName: string
+  ): { parts: Array<P.ASTStatementGroup | string | undefined>; files: readonly File[] } {
+    const drawing = parts.map((part) => typeof part === "object" && containsJSX(part))
+    const isStyles = (index: number) => typeof parts[index] === "string" && /\.css$/i.test(files[index]?.path ?? "")
+    const isKept = parts.map((_part, index) => !drawing[index] && !isStyles(index))
+    if (isKept.every(Boolean)) return { parts, files }
+    const kept = parts.filter((_part, index) => isKept[index])
+    if (drawing.some(Boolean) && !kept.some((part) => typeof part === "object")) {
+      throw new P.ParserError({
+        message: `'${projectName}' draws a UI in every file, which target '${targetName}' can't:  it writes only the files that don't draw.`,
+        activity: "SpellProject.compile",
+        params: { target: targetName }
+      })
+    }
+    const declaredIn = (part: unknown) => {
+      const names = new Set<string>()
+      P.forEachNode(part, (node) => {
+        if (node instanceof P.ASTClassDeclaration) names.add(node.type.name)
+      })
+      return names
+    }
+    const keptTypes = declaredIn(kept)
+    // each type only a drawing file declares, by name:  the first file it's in
+    const leftOut = new Map<string, number>()
+    parts.forEach((part, index) => {
+      if (!drawing[index]) return
+      for (const name of declaredIn(part)) if (!keptTypes.has(name) && !leftOut.has(name)) leftOut.set(name, index)
+    })
+    const fileName = (at: number) => files[at]!.path.split("/").at(-1)
+    parts.forEach((part, index) => {
+      if (!isKept[index]) return
+      P.forEachNode(part, (node) => {
+        if (!(node instanceof P.ASTTypeExpression) || !leftOut.has(node.name)) return
+        throw new P.ParserError({
+          message: `'${projectName}', for target '${targetName}':  ${fileName(index)} uses '${node.raw ?? node.name}', from ${fileName(leftOut.get(node.name)!)}, which draws a UI, so '${targetName}' leaves it out.`,
+          activity: "SpellProject.compile",
+          params: { target: targetName, type: node.name }
+        })
+      })
+    })
+    return { parts: kept, files: files.filter((_file, index) => isKept[index]) }
   }
 
   /**
@@ -1931,6 +1991,44 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     return [...this.sourceImportFiles, ...own]
   }
 
+  /** Our own elements, from our project file:  see `SP.ComponentPackJSON`;  `undefined` when it declares none. */
+  get componentPack(): SP.ComponentPackJSON | undefined {
+    const pack = this.contents?.componentPack
+    return pack && typeof pack.name === "string" && typeof pack.prefix === "string" ? pack : undefined
+  }
+
+  /**
+   * The module our running code loads our own component pack by (`SP.SPELL_PACK_MODULE`):
+   * `@spell/pack/acme/widgets/__pack/widgets.pack.js`;  `undefined` with none.
+   */
+  get packModule(): string | undefined {
+    const pack = this.componentPack
+    return pack && SP.SpellUrls.packModuleFor(this.projectId, pack.name)
+  }
+
+  /**
+   * Every component pack our running code loads, by module:  those of the projects we import (as their declarations
+   * list them, at any depth), deepest first, then our own;  each once.
+   * - So a page running us, or a project importing us, draws our elements, and theirs, whatever names it imports.
+   * - The imports' are known once `loadImportScope()` has run.
+   */
+  get packModules(): string[] {
+    return [...new Set([...this.importedPacks, ...(this.packModule ? [this.packModule] : [])])]
+  }
+
+  /** The packs of the projects we import, as `loadImportScope()` last read them:  see `packModules`. */
+  private importedPacks: string[] = []
+
+  /**
+   * `compiled`, our running code, with an `import {} from "@spell/pack/..."` for each of `packModules` first:
+   * a runner loads each before the program draws (`runCompiled()`'s `loadPack`).
+   * - Above everything, so no line below moves against another:  its marks still name their places.
+   */
+  withPackImports(compiled: string): string {
+    const lines = this.packModules.map((module) => `import {} from "${module}"\n`)
+    return lines.join("") + compiled
+  }
+
   /**
    * Other projects we import, from our project file:  entries naming a project, e.g. `@spell/library/people`.
    * - Kept out of `imports`:  they aren't files of ours.
@@ -1960,15 +2058,20 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * Import layer for our `projectImports`, under `parentScope`, or `parentScope` itself if we import none.
    * - A compiled import:  reads its `<Project>.declarations.json5`, fresh each time (`declarationsOf()`).
    * - A `source` import:  loads that project, so its files parse ahead of ours (`sourceImportFiles`).
+   * - SIDE EFFECT:  notes the component packs each one loads, for ours to load too (`packModules`).
    *   - It can't rename what it imports, e.g. `Card:Playingcard`:  its sources parse as they are.
    * - Throws `P.ParserError` if one can't be loaded, e.g. it's never been compiled.
    *   See `SP.SpellDeclarations.load()`.
    */
   async loadImportScope(parentScope: P.Scope): Promise<P.Scope> {
     const imports: SP.DeclarationsImport[] = []
+    const packs: string[] = []
+    this.importedPacks = packs
     for (const it of this.projectImports) {
       const project = new SP.SpellProject(it.projectId)
       await project.load(undefined)
+      // its own component pack, as its project file says now
+      const own = project.packModule
       if (it.source) {
         // its sources parse just as they are -- only a compiled import's declarations can be renamed
         const renaming = it.import?.find((pick) => pick.includes(":"))
@@ -1979,9 +2082,12 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
             params: { from: it.from }
           })
         }
+        if (own) packs.push(own)
         continue
       }
       const declarations = await SpellProject.declarationsOf(project)
+      // the packs it loads, the ones it imports deepest first, then its own
+      packs.push(...(declarations?.packs ?? []), ...(own ? [own] : []))
       if (!declarations) {
         throw new P.ParserError({
           message: `Can't import '${it.from}':  it has no compiled declarations -- compile it first.`,

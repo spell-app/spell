@@ -35,12 +35,19 @@ export class SpellDeclarations {
    * - `version` / `exports` come from its project file -- see `provides()`.
    * - `languages`:  the languages its files are written in, in file order, e.g. `["en", "es"]`:
    *   its declarations say them with the one its program speaks first (`speakingFirst()`), and none for English alone.
+   * - `packs`:  the component packs its running code loads, by module (`SpellProject.packModules`):  so a project
+   *   importing it loads them too;  none says nothing.
    * - A marker MUST start its line, and end one:  as `ASTPreservedComment` writes it, indented in a class body.
    */
   static split(
     compiled: string,
     scope: P.ProjectScope,
-    { version, exports, languages = [] }: { version?: string; exports?: string[]; languages?: string[] } = {}
+    {
+      version,
+      exports,
+      languages = [],
+      packs = []
+    }: { version?: string; exports?: string[]; languages?: string[]; packs?: string[] } = {}
   ): { code: string; declarations: SP.SpellDeclarationsData } {
     const code: string[] = []
     const statements: SP.SpellDeclaration[] = []
@@ -70,6 +77,7 @@ export class SpellDeclarations {
       languages: spoken.length === 1 && spoken[0] === SP.SpellWords.LANG ? undefined : spoken,
       provides: SpellDeclarations.provides(scope, exports, subclasses),
       subclasses: subclasses.length ? subclasses : undefined,
+      packs: packs.length ? packs : undefined,
       statements,
       codeLines
     })

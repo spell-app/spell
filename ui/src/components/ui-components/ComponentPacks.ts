@@ -95,9 +95,11 @@ export class ComponentPacks {
    * resolves with the pack once its script registered it.
    * - A pack already registered under the name its file implies (a page's own `<script src>`, an ES import)
    *   resolves at once, with no second script.
+   * - `module`:  `source` is an ES module that registers the pack as it runs, imported rather than added as a script:
+   *   a pack's source entry, which a dev server compiles (`<name>.pack.ts`, spell-app's `PagePacks.load()`)
    * - Rejects when the script can't load, ran without registering a pack, or its `define()` failed.  NEVER throws.
    */
-  static load(source: string): Promise<ComponentPack> {
+  static load(source: string, { module = false }: { module?: boolean } = {}): Promise<ComponentPack> {
     let url: string
     try {
       url = new URL(source, document.baseURI).href
@@ -106,7 +108,8 @@ export class ComponentPacks {
     }
     return ComponentPacks.loads.get(url, () => {
       const known = ComponentPacks.packs.get(ComponentPacks.nameFor(url))
-      return known ? Promise.resolve(known) : ComponentPacks.inject(url)
+      if (known) return Promise.resolve(known)
+      return module ? ComponentPacks.importModule(url) : ComponentPacks.inject(url)
     })
   }
 
@@ -262,12 +265,32 @@ export class ComponentPacks {
     })
   }
 
+  /**
+   * Import ES module `url`, a pack's source entry, which registers its pack as it runs;  resolves when it registered
+   * it (and its `define()` settled), rejects when it fails to (`load()`'s `module`).
+   * - Found by the name its file implies (`nameFor()`):  a module has no `document.currentScript`.
+   */
+  private static importModule(url: string): Promise<ComponentPack> {
+    return new Promise((resolve, reject) => {
+      const pending: PendingPack = { name: ComponentPacks.nameFor(url), resolve, reject }
+      const fail = (message: string) => {
+        if (!ComponentPacks.pending.delete(pending)) return
+        reject(new Error(`ComponentPacks.load():  ${message}`))
+      }
+      ComponentPacks.pending.add(pending)
+      import(/* @vite-ignore */ url).then(
+        () => fail(`${url} ran, but registered no pack;  it must call SpellUI.registerPack()`),
+        (error: unknown) => fail(`can't import ${url}:  ${error instanceof Error ? error.message : String(error)}`)
+      )
+    })
+  }
+
   /** The load waiting for the script running now, else for a pack named `name`. */
   private static pendingFor(name: string): PendingPack | undefined {
     const running = document.currentScript
     let byName: PendingPack | undefined
     for (const pending of ComponentPacks.pending) {
-      if (pending.script === running) return pending
+      if (pending.script && pending.script === running) return pending
       if (pending.name === name) byName ??= pending
     }
     return byName
@@ -306,8 +329,8 @@ export function registerPack(pack: ComponentPack): void {
 
 /** A pack load waiting for its script to call `registerPack()`. */
 type PendingPack = {
-  /** The `<script>` loading it:  `document.currentScript` while it runs. */
-  readonly script: HTMLScriptElement
+  /** The `<script>` loading it:  `document.currentScript` while it runs;  none for an ES module (`importModule()`). */
+  readonly script?: HTMLScriptElement
   /** The name its URL implies (`ComponentPacks.nameFor()`):  the match when `document.currentScript` is gone. */
   readonly name: string
   /** Resolve the load with the registered pack. */
@@ -332,5 +355,5 @@ const PACK_PREFIX = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*-$/
 /** Spell UI's own prefix, which no pack may take. */
 const UI_PREFIX = "ui-"
 
-/** What a pack's file name ends in, after its name:  `epics.pack.js`, else plain `.js`. */
-const PACK_FILE_SUFFIX = /(?:\.pack)?\.js$/
+/** What a pack's file name ends in, after its name:  `epics.pack.js`, else plain `.js`;  its source entry's, `.pack.ts`. */
+const PACK_FILE_SUFFIX = /(?:\.pack)?\.js$|\.pack\.ts$/

@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from "node:fs"
+import { createRequire } from "node:module"
 import path from "node:path"
 import { defineConfig, type Plugin } from "vite-plus"
 
@@ -8,6 +9,8 @@ import { KeeperLink } from "spell/server/KeeperLink"
 import environment from "spell/app/spaces/server/node/environment"
 import { editorPageFor } from "spell/app/spaces/server/node/routes/editorPaths"
 import { moreSpacesFrom, orgGroupFolders } from "spell/app/spaces/server/node/spellSpacesDir"
+import { hotElements } from "spell/element-tools/HotElements"
+import { PACK_MODULES } from "spell/element-tools/packModules"
 import { appConfig, pageServerProxy } from "./vite.shared.ts"
 
 /** Name of the runtime's entry in a build:  `dist/spell-runtime.js` -- see `editor.loadRuntime()`. */
@@ -44,7 +47,8 @@ export default defineConfig({
     repoSourceInDev(),
     runPageInDev(),
     runtimeCopyInDev(),
-    runtimeOwnCoreInBuild()
+    runtimeOwnCoreInBuild(),
+    ...projectPacksInDev()
   ],
   server: {
     ...APP_CONFIG.server,
@@ -247,4 +251,90 @@ function runtimeOwnCoreInBuild(): Plugin {
       return inlined.length ? { code: `${rewritten}\n${inlined.join(";")}\n`, map: null } : null
     }
   }
+}
+
+/** Where the page asks this dev server for a project's pack's source entry:  spell-app's `PagePacks.DEV_PACKS`. */
+const DEV_PACKS = "/@spell-pack/"
+
+/** The page server's route answering where a pack's source entry is:  `ProjectBuild.request_devPack()`. */
+const DEV_PACK_API = "/api/projects/pack/"
+
+/**
+ * In dev, a project's own elements, its COMPONENT PACK, served from their SOURCE :  a saved
+ * `.tsx` or `.css` of one shows on the open page through Vite's hot replacement, in well under a second, the way Spell
+ * UI's own elements take a save in its `yarn dev`.
+ * - The page asks for `/@spell-pack/<project>/__pack/<name>.pack.ts` (`PagePacks.load()`, in place of the pack's built
+ *   script):  the pack's SOURCE entry, which the pack build writes beside its script (the kit's `ComponentPack`), with
+ *   the same catalog and families as its built entry.  Where it is, the page server says (`DEV_PACK_API`), building it
+ *   first if it isn't there;  it registers the pack as the built script does, and each family imports its source.
+ * - The modules a pack shares with the page (`PACK_MODULES`, Solid, Spell UI's core ...), imported from a pack's files,
+ *   resolve as the editor's own imports do:  the page's ONE copy, as the built pack reads them from
+ *   `SpellUI.packModules`.  A project outside the kit would otherwise find its own install's.
+ *   - So does any other `spell/...` import of theirs:  the kit's code the built pack bundles in.
+ * - Hot replacement:  the kit's `hotElements()` (a family's barrel re-defines its tags in place, a sheet swaps), on the
+ *   packs' files alone;  a new tag rewrites the source entry, and the page reloads once.
+ * - Each project folder a pack is in is allowed to the dev server as it's first asked for (`server.fs.allow`):  it's
+ *   outside the kit (another checkout's spaces).
+ * - The page server rebuilds the pack's script as well, for every page that loads the script (the run page from a
+ *   built editor, a page-server page);  a page this server serves never loaded it, so that report passes it by.
+ * - A test holds this entry and the built one to the same tags and families (`ComponentPack.test.ts`).
+ */
+function projectPacksInDev(): Plugin[] {
+  const editorEntry = path.resolve(import.meta.dirname, "../src/app/index.tsx")
+  const pageServer = `http://${environment.api_server}:${environment.expressPort}`
+  // each pack's families' folder and project folder, as the page server named them
+  const packFolders = new Set<string>()
+  const inPack = (id: string) => {
+    const file = id.split("?")[0]!
+    for (const folder of packFolders) if (file.startsWith(`${folder}/`)) return true
+    return false
+  }
+  let allow: string[] | undefined
+  // its hooks are plain functions (`HotElements.ts`)
+  const hot = hotElements(createRequire(import.meta.url).resolve("spell/element/HotDefinitions.ts")) as unknown as {
+    transform: (this: unknown, code: string, id: string, options?: { ssr?: boolean }) => { code: string } | undefined
+    hotUpdate: (this: unknown, update: unknown) => [] | undefined
+  }
+  return [
+    {
+      name: "spell-app:project-packs-in-dev",
+      apply: "serve",
+      enforce: "pre",
+      configureServer(server) {
+        allow = server.config.server.fs.allow
+      },
+      async resolveId(id, importer) {
+        if (id.startsWith(DEV_PACKS)) {
+          const response = await fetch(`${pageServer}${DEV_PACK_API}${id.slice(DEV_PACKS.length).split("?")[0]}`)
+          if (!response.ok) {
+            this.error(`${id}:  the page server said ${response.status}, ${(await response.text()).slice(0, 400)}`)
+          }
+          const { entry, project } = (await response.json()) as { entry: string; components: string; project: string }
+          for (const folder of [project, path.dirname(entry)]) {
+            packFolders.add(folder)
+            if (allow && !allow.includes(folder)) allow.push(folder)
+          }
+          return entry
+        }
+        // a pack's import of what the page shares:  the page's own copy, as the editor resolves it
+        if (!importer || !inPack(importer) || id.startsWith(".") || path.isAbsolute(id)) return null
+        if (!PACK_MODULES.includes(id) && !/^(spell\/|solid-js(\/|$)|@solidjs\/)/.test(id)) return null
+        return this.resolve(id, editorEntry, { skipSelf: true })
+      }
+    },
+    {
+      name: "spell-app:project-packs-hot-in-dev",
+      apply: "serve",
+      // after the Solid plugin and Vite's CSS:  `hotElements()`' own place
+      enforce: "post",
+      transform(code, id, options) {
+        if (!inPack(id)) return undefined
+        return hot.transform.call(this, code, id, options)
+      },
+      hotUpdate(update) {
+        if (!update.modules.some((mod) => mod.id && inPack(mod.id))) return undefined
+        return hot.hotUpdate.call(this, update)
+      }
+    }
+  ]
 }

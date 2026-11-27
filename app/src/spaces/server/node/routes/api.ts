@@ -19,7 +19,7 @@ import * as homeOrderRoutes from "spell/app/spaces/server/node/projects/homeOrde
 import * as spellVersions from "spell/app/spaces/server/node/projects/spellVersions"
 import * as responseUtils from "spell/app/spaces/server/node/projects/response-utils"
 import { compilerVersion } from "spell/app/spaces/server/node/projects/compilerCode"
-import { ProjectBuild } from "./ProjectBuild"
+import { DEV_PACK_API, ProjectBuild } from "./ProjectBuild"
 
 /** Router mounted at `/api` by `./cli.ts` and `./appRoutes.ts`:  `spell/server`'s Express-shaped `SRV.Router`. */
 export const api = new SRV.Router()
@@ -77,6 +77,8 @@ api.get("/projects/files/*", projectUtils.request_getEveryFile)
 api.get("/projects/themes/*", projectUtils.request_getThemes)
 // how the compile a request for a project's built file waits for is coming along:  `ProjectBuild.progress()`
 api.get("/projects/building/*", projectBuild.request_progress())
+// where a project's component pack's source entry is, for Spell's dev server:  `ProjectBuild.request_devPack()`
+api.get(`${DEV_PACK_API}*`, projectBuild.request_devPack())
 api.post("/projects/file/*", projectUtils.request_saveFile)
 
 // your drafts, Publish and versions:  see `projectUtils.request_getDrafts` ... and `ProjectDrafts` (epic `editor` P24)

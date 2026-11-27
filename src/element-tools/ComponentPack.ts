@@ -3,6 +3,7 @@ import { createHash } from "node:crypto"
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative, resolve } from "node:path"
 
+import { readJSON5File } from "spell/util/node/json5.ts"
 import { readTypeScript } from "spell/util/node/typescript.ts"
 import { pathInside } from "spell/server/RealPath"
 
@@ -38,7 +39,16 @@ import {
  * - The catalog and entry are committed;  the script and the families are built where they're served (the page
  *   server's `spell bundle epics-pack`, `spell publish`), git-ignored:  their hashed chunk names would churn every diff
  * - then its set's docs data, `docs/__data/` (`buildSiteData()`)
- * - A pack is a package whose `package.json` has `"spellPack": { "prefix" }` (`read()`).
+ * - `<pack>.pack.ts`, a Spell project's pack's alone (`devEntry`):  the SAME registration as the entry (its tags, its
+ *   families), each family imported from its SOURCE, for a dev server that compiles the families itself (the
+ *   editor's Vite:  a saved element swapped in by its hot replacement, in well under a second;  app's
+ *   `vite.config.ts`, `projectPacksInDev()`);  rewritten only when its text changes (a tag or a family added or
+ *   dropped), so a save to an element leaves it alone
+ * - A pack is a package whose `package.json` has `"spellPack": { "prefix" }`, or a SPELL PROJECT whose project file,
+ *   `__project.json5`, has `"componentPack": { "name", "prefix" }`, the same shape (`read()`)
+ *   - a project's pack is built with its compiled output (spell-app's `spell compile`):  its generated folder is
+ *     beside `<Project>.spell.js`, in the project's BUILD folder (`generated`), never committed;  its code is the
+ *     whole project's (`src`:  an element may import the project's own files)
  * - Run by `spell-pack build | check` (the kit's `bin/spell-pack.mjs`), from any repo of the kit:
  *   spell-epic and the brand build theirs with it.  spell-app's `spell pack` calls it too.
  * - Node built-ins, `RootCatalog` and (only while building) Vite.
@@ -62,6 +72,12 @@ export class ComponentPack {
   /** its package's npm name (`spell-x`):  its own files, imported by it, are the pack's too (`sources()`) */
   readonly packageName: string | undefined
 
+  /** where its generated files go, absolute:  `<components>/__pack` (`PACK_FOLDER`), or a project's build folder's */
+  readonly generated: string
+
+  /** whether its build writes its source entry too, `<pack>.pack.ts`, for a dev server:  a Spell project's pack */
+  readonly devEntry: boolean
+
   constructor({
     name,
     prefix,
@@ -69,7 +85,9 @@ export class ComponentPack {
     dir = folder,
     src = join(dir, "src"),
     components = join(dir, COMPONENTS_FOLDER),
-    packageName
+    packageName,
+    generated = join(components, PACK_FOLDER),
+    devEntry = false
   }: ComponentPackProps) {
     this.name = name
     this.prefix = prefix
@@ -78,10 +96,13 @@ export class ComponentPack {
     this.src = src
     this.components = components
     this.packageName = packageName
+    this.generated = generated
+    this.devEntry = devEntry
   }
 
   /**
-   * The pack whose `package.json` is in `folder`, from its `"spellPack"`:
+   * The pack in `folder`:  its `package.json`'s `"spellPack"`, else its project file's `"componentPack"` (a Spell
+   * project's own elements) -- the same shape, read here alone.
    * - `prefix`, required;  `name`, by default the folder's name
    * - `dir`:  the folder holding its `components/` and `docs/`, relative to `folder`, and its code's folder
    *   (no `src/` inside it):  a repo that IS one pack (spell-epic:
@@ -90,37 +111,63 @@ export class ComponentPack {
    * - `components`:  the families' folder, relative to `folder`, when it isn't `<dir>/components`:  a package whose
    *   code is all in ONE `src/`, its docs outside it (the brand:  `"components": "src/components"`, epic `repo-split`
    *   P14)
-   * - Throws `ComponentPackError` when `folder` has no `package.json` naming a pack.
+   * - A project's:  its code is the whole project (`src` is `folder`), and it has no package name;  `dir` is never read
+   * - `generated`:  where its generated files go, when not `<components>/__pack`:  a project's build folder's
+   *   `__pack/`, as `spell compile` builds it
+   * - Throws `ComponentPackError` when `folder` has neither, naming both.
    */
-  static read(_folder: string): ComponentPack {
+  static read(_folder: string, { generated }: { generated?: string } = {}): ComponentPack {
     const folder = resolve(_folder)
     const { spellPack, name: ownName } = ComponentPack.packageJson(folder)
-    const packageName = ComponentPack.importNameOf(folder) ?? ownName
-    if (typeof spellPack?.prefix !== "string") {
+    const project = typeof spellPack?.prefix === "string" ? undefined : ComponentPack.projectPackOf(folder)
+    const declared = project ?? spellPack
+    if (typeof declared?.prefix !== "string") {
       throw new ComponentPackError(
-        `ComponentPack.read():  ${join(folder, "package.json")} has no "spellPack": { "prefix" }, so it isn't a ` +
-          'component pack;  add one, e.g. `"spellPack": { "prefix": "my-" }`'
+        `ComponentPack.read():  ${join(folder, "package.json")} has no "spellPack": { "prefix" }, and ` +
+          `${join(folder, PROJECT_FILE)} no "componentPack": { "name", "prefix" }, so it isn't a component pack;  ` +
+          'add one, e.g. `"componentPack": { "name": "widgets", "prefix": "widget-" }`'
       )
     }
+    const packageName = project ? undefined : (ComponentPack.importNameOf(folder) ?? ownName)
     const props = {
-      name: typeof spellPack.name === "string" ? spellPack.name : basename(folder),
-      prefix: spellPack.prefix,
+      name: typeof declared.name === "string" ? declared.name : basename(folder),
+      prefix: declared.prefix,
       folder,
-      ...(typeof spellPack.components === "string" && { components: join(folder, spellPack.components) }),
-      ...(typeof packageName === "string" && { packageName })
+      ...(typeof declared.components === "string" && { components: join(folder, declared.components) }),
+      ...(typeof packageName === "string" && { packageName }),
+      ...(generated !== undefined && { generated: resolve(generated) })
     }
-    if (typeof spellPack.dir !== "string") return new ComponentPack(props)
-    const dir = join(folder, spellPack.dir)
+    if (project) return new ComponentPack({ ...props, src: folder, devEntry: true })
+    if (typeof declared.dir !== "string") return new ComponentPack(props)
+    const dir = join(folder, declared.dir)
     return new ComponentPack({ ...props, dir, src: dir })
   }
 
   /**
-   * The prefix of the pack in folder `folder`, from its `package.json`'s `spellPack`;  `undefined` when it isn't one.
+   * The prefix of the pack in folder `folder`, from its `package.json`'s `spellPack` or its project file's
+   * `componentPack`;  `undefined` when it isn't one.
    * - NEVER throws:  no file, or bad JSON, is "not a pack".
    */
   static prefixOf(folder: string): string | undefined {
     const { spellPack } = ComponentPack.packageJson(folder)
-    return typeof spellPack?.prefix === "string" ? spellPack.prefix : undefined
+    const declared = typeof spellPack?.prefix === "string" ? spellPack : ComponentPack.projectPackOf(folder)
+    return typeof declared?.prefix === "string" ? declared.prefix : undefined
+  }
+
+  /**
+   * The `"componentPack"` of the Spell project in `folder`, from its project file (`PROJECT_FILE`);  `undefined` when
+   * it has none, or isn't a project.
+   * - NEVER throws:  a project file that won't read is "no pack" (the compile says what's wrong with it).
+   */
+  static projectPackOf(folder: string): PackDeclared | undefined {
+    try {
+      const file = join(folder, PROJECT_FILE)
+      if (!existsSync(file)) return undefined
+      const { componentPack } = readJSON5File<{ componentPack?: unknown }>(file)
+      return typeof componentPack === "object" && componentPack !== null ? (componentPack as PackDeclared) : undefined
+    } catch {
+      return undefined
+    }
   }
 
   /**
@@ -166,24 +213,43 @@ export class ComponentPack {
 
   /**
    * Build the pack:  its generated files (`files`), then its set's docs data (`buildSiteData()`).
+   * - `forPage`:  for a page that's open, which swaps it in (the page server's rebuild as an element is saved):
+   *   unminified (faster, and a stack names its lines), and its shared chunks named afresh, so a
+   *   family swapped back to what the page ran before (an edit undone) brings classes of its own, not the ones the
+   *   browser kept from that chunk's first load
    * - Throws `ComponentPackError` for a tag without the pack's prefix, an import of Spell UI or Solid the page can't
    *   share, or a docs data builder that fails.
    */
-  async build(): Promise<ComponentPackBuild> {
+  async build({ forPage = false }: { forPage?: boolean } = {}): Promise<ComponentPackBuild> {
     const hash = this.hash()
     const catalog = await this.catalog()
     const { files } = this
-    mkdirSync(join(this.components, PACK_FOLDER), { recursive: true })
+    mkdirSync(this.generated, { recursive: true })
     writeFileSync(files.catalog, this.catalogSource(catalog, hash))
     writeFileSync(files.entry, this.entrySource())
-    const written = await this.bundle(hash)
+    // only when it changes:  a dev server serving it reloads the page for a new one (a tag added), never for a save
+    const devEntry = this.devEntry ? this.devEntrySource(catalog) : undefined
+    if (devEntry !== undefined && ComponentPack.readText(files.devEntry) !== devEntry) {
+      writeFileSync(files.devEntry, devEntry)
+    }
+    const written = await this.bundle(hash, forPage)
     const data = this.buildSiteData() ? [join(this.dir, DOCS_DATA_FOLDER)] : []
     return {
       pack: this.name,
-      files: [files.catalog, files.entry, ...written, ...data],
+      files: [files.catalog, files.entry, ...(devEntry === undefined ? [] : [files.devEntry]), ...written, ...data],
       tags: Object.keys(catalog).sort(),
       hash
     }
+  }
+
+  /**
+   * Must its script be built again:  it's not there, or was built from other sources than there are now (`hash()`)?
+   * - What `spell compile` asks, before it builds a project's pack:  only when its sources changed.
+   * - Never runs the build;  reads its script's banner.
+   */
+  needsBuild(): boolean {
+    const script = ComponentPack.readText(this.files.script)
+    return script === undefined || ComponentPack.recordedHash(script) !== this.hash()
   }
 
   /**
@@ -326,10 +392,11 @@ export class ComponentPack {
 
   /** The pack's generated files, absolute. */
   get files() {
-    const folder = join(this.components, PACK_FOLDER)
+    const folder = this.generated
     return {
       catalog: join(folder, `${this.name}.catalog.ts`),
       entry: join(folder, `${this.name}.entry.ts`),
+      devEntry: join(folder, `${this.name}.pack.ts`),
       script: join(folder, `${this.name}.pack.js`),
       families: join(folder, this.name)
     }
@@ -400,9 +467,25 @@ const FAMILIES: Record<string, string> = {
 ${families.join(",\n")}
 }
 
-/** Import family \`folder\`'s module, which defines its tags. */
+/**
+ * Each family's versions this page imported, in order, by \`<pack>/<family>\`:  page-wide, so a rebuilt copy of this
+ * script (a swap) sees what the last one imported.
+ */
+const IMPORTED = ((globalThis as unknown as { __spellPackFamilies?: Record<string, string[]> }).__spellPackFamilies ??=
+  {})
+
+/**
+ * Import family \`folder\`'s module, which defines its tags.
+ * - Its query is its sources' hash, so an unchanged family is the module the page has;  a version the page had
+ *   BEFORE the last (an edit undone) gets a query of its own, or the browser would hand back that module, whose
+ *   \`define()\` ran long ago, and the page keep the newer one.
+ */
 function loadFamily(folder: string): Promise<unknown> {
-  const url = new URL(\`./${this.name}/\${folder}.js?v=\${FAMILIES[folder] ?? ""}\`, BASE)
+  const hash = FAMILIES[folder] ?? ""
+  const seen = (IMPORTED[\`${this.name}/\${folder}\`] ??= [])
+  if (seen[seen.length - 1] !== hash) seen.push(hash)
+  const again = seen.indexOf(hash) < seen.length - 1 ? \`-\${seen.length}\` : ""
+  const url = new URL(\`./${this.name}/\${folder}.js?v=\${hash}\${again}\`, BASE)
   return import(/* @vite-ignore */ url.href)
 }
 
@@ -423,29 +506,82 @@ else void SpellUI?.loading?.then(register)
   }
 
   /**
+   * The text of `<pack>.pack.ts`:  the entry's registration, its families imported from their sources, for a dev
+   * server that compiles them itself (see the class).
+   * - The same catalog as the entry's (inline, without the sources' hash, so a save leaves the file as it was) and
+   *   the same families;  no `families` hashes:  the dev server swaps a saved family in itself (`HotElements`).
+   * - Each family by its absolute path:  the dev server reads it from the project's folder.
+   */
+  private devEntrySource(catalog: Record<string, RootCatalogEntry>): string {
+    const lines = RootCatalog.lines(catalog)
+    const loaders = this.families().map(
+      (family) =>
+        `  ${JSON.stringify(family)}: () => import(${JSON.stringify(join(this.components, family, "index.ts"))})`
+    )
+    return `/* GENERATED -- do not edit:  \`spell pack build ${this.name}\`, its families from their sources, for a dev server */
+import type { RootCatalogEntry } from "spell/ui"
+
+/** The page's Spell UI, as the entry finds it. */
+const { SpellUI } = globalThis as unknown as { SpellUI?: { registerPack?(pack: object): void } }
+
+/** Every tag of the \`${this.name}\` pack => what \`<ui-root>\` needs before its family loads:  the catalog's. */
+const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
+${lines.join(",\n")}${lines.length ? "\n" : ""}}
+
+/** Each family folder => its module, from its source. */
+const FAMILIES: Record<string, () => Promise<unknown>> = {
+${loaders.join(",\n")}
+}
+
+/** Import family \`folder\`'s module, which defines its tags. */
+function loadFamily(folder: string): Promise<unknown> {
+  return FAMILIES[folder]?.() ?? Promise.reject(new Error(\`no family \${folder} in the ${this.name} pack\`))
+}
+
+SpellUI!.registerPack!({
+  name: ${JSON.stringify(this.name)},
+  prefix: ${JSON.stringify(this.prefix)},
+  catalog: CATALOG,
+  loadFamily,
+  define: () => Promise.all(Object.keys(FAMILIES).map(loadFamily)).then(() => undefined)
+})
+`
+  }
+
+  /**
+   * Vite's cache, for a pack whose generated folder isn't in its own folder (a project's, in its build folder):
+   * there, so a build never writes a \`node_modules/.vite\` into the project.
+   */
+  private get cacheDir(): { cacheDir?: string } {
+    return pathInside(this.dir, this.generated) === undefined ? { cacheDir: join(this.generated, ".vite") } : {}
+  }
+
+  /**
    * Build the pack's script and its families;  returns the files written.
    * - Its families first (`bundleFamilies()`), then the entry into `<pack>.pack.js`, ONE classic script (an IIFE):
    *   the script a page names, which registers the pack at once and imports each family when asked (`loadFamily()`).
    * - In this process, through Vite's API, on `elementBaseConfig()`, as Spell UI's own elements are built;
    *   `configFile: false`:  the pack's own `vite.config.ts` holds only lint / format settings.
    */
-  private async bundle(hash: string): Promise<string[]> {
+  private async bundle(hash: string, forPage: boolean): Promise<string[]> {
     const { build } = await import("vite-plus")
-    const families = await this.bundleFamilies()
+    const families = await this.bundleFamilies(forPage)
+    const minify = !forPage
     const base = elementBaseConfig()
-    const folder = join(this.components, PACK_FOLDER)
+    const folder = this.generated
     const { files } = this
     const result = await build({
       ...base,
       configFile: false,
       root: this.dir,
+      ...this.cacheDir,
       logLevel: "warn",
       publicDir: false,
       build: {
         outDir: folder,
         emptyOutDir: false,
         sourcemap: false,
-        minify: true,
+        minify,
         target: "esnext",
         reportCompressedSize: false,
         lib: {
@@ -471,7 +607,7 @@ else void SpellUI?.loading?.then(register)
    *   (`withPageModules()`), so a page has one Solid, one element layer and one Spell UI core.
    * - Built in a folder of this run's, then swapped in whole:  a page loading a family meanwhile finds every chunk.
    */
-  private async bundleFamilies(): Promise<string[]> {
+  private async bundleFamilies(forPage: boolean): Promise<string[]> {
     const { build } = await import("vite-plus")
     const base = elementBaseConfig()
     const out = this.files.families
@@ -485,6 +621,7 @@ else void SpellUI?.loading?.then(register)
         ...base,
         configFile: false,
         root: this.dir,
+        ...this.cacheDir,
         base: "./",
         logLevel: "warn",
         publicDir: false,
@@ -492,7 +629,7 @@ else void SpellUI?.loading?.then(register)
           outDir: building,
           emptyOutDir: true,
           sourcemap: false,
-          minify: true,
+          minify: !forPage,
           target: "esnext",
           modulePreload: false,
           reportCompressedSize: false,
@@ -504,7 +641,8 @@ else void SpellUI?.loading?.then(register)
               // custom element class names are read by dev-time warnings and the manifest (see ui's `vite.config.ts`)
               keepNames: true,
               entryFileNames: "[name].js",
-              chunkFileNames: "[name]-[hash].js",
+              // for an open page, a name no build had before (see `build()`)
+              chunkFileNames: forPage ? `[name]-${Date.now().toString(36)}-[hash].js` : "[name]-[hash].js",
               // what two families or more share, in ONE chunk:  dozens of small ones were a round trip each on a slow
               // network (an epic page loads nearly every family);  a family's own code stays its own
               codeSplitting: { groups: [{ name: "shared", minShareCount: 2 }] }
@@ -672,7 +810,24 @@ export type ComponentPackProps = {
   components?: string
   /** its package's npm name, from its `package.json` */
   packageName?: string
+  /** where its generated files go;  default `components`' `__pack/` */
+  generated?: string
+  /** whether its build writes its source entry, for a dev server;  default `false` (a project's:  `true`) */
+  devEntry?: boolean
 }
+
+/**
+ * What a pack's `package.json` says (`"spellPack"`), or a Spell project's file (`"componentPack"`):  the same shape.
+ * - `name` / `prefix`:  its files' name and every tag's;  `components`:  its families' folder, from its folder;
+ *   `dir`:  a package's alone (see `ComponentPack.read()`)
+ */
+export type PackDeclared = { prefix?: unknown; name?: unknown; dir?: unknown; components?: unknown }
+
+/**
+ * A Spell project's file, which may declare its pack (`"componentPack"`):  spell-parser's `SP.PROJECT_FILE`, a copy
+ * (the kit imports no folder above it).
+ */
+export const PROJECT_FILE = "__project.json5"
 
 /** A pack's element families' folder, in its `dir`, unless its `spellPack` says `components`. */
 const COMPONENTS_FOLDER = "components"
@@ -695,7 +850,7 @@ const SHARED_IMPORT =
   /^solid-js(\/|$)|^@solidjs\/|^spell-(ui|lang|app|brand|epic)(\/|$)|^spell\/(element|ui|parser|epic|app)(\/|$)/
 
 /** Version of what `build()` writes:  bump it when the generated files change shape, so every pack goes stale. */
-const PACK_FORMAT = "spell-pack 4"
+const PACK_FORMAT = "spell-pack 5"
 
 /** The set's docs data, in the pack's `dir`:  what its pages' side column, search and API tables read. */
 const DOCS_DATA_FOLDER = "docs/__data"
@@ -724,6 +879,6 @@ const HASH_RECORD = /\bsources: {2}([0-9a-f]{16})\b/
 /** The part of a pack's `package.json` read here. */
 type PackPackageJson = {
   name?: unknown
-  spellPack?: { prefix?: unknown; name?: unknown; dir?: unknown; components?: unknown }
+  spellPack?: PackDeclared
   scripts?: Record<string, string>
 }

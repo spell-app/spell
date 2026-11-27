@@ -113,6 +113,8 @@ export type CompileOptions = GlobalOptions & {
   stale?: boolean
   target?: string
   pages?: boolean
+  /** only the project's component pack, unminified:  the page server's rebuild as one of its elements is saved */
+  pack?: boolean
 }
 
 /**

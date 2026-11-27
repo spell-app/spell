@@ -1225,6 +1225,54 @@ describe("<SpellAppRunner>, a program that calls native code (from-console J110)
   })
 })
 
+describe("<SpellAppRunner>, a program drawing with a project's own elements, its component pack", () => {
+  /** A library project with a pack of its own, as spell compiles it:  its pack's import first. */
+  const WIDGETS = "@spell/test/widgets"
+  const WIDGETS_PACK = "@spell/pack/@spell/test/widgets/__pack/widgets.pack.js"
+  const APP_PACK = "@spell/pack/@spell/test/widget-app/__pack/app.pack.js"
+  const LIBRARY = `import {} from "${WIDGETS_PACK}"
+import { core, Thing } from "@spell/core"
+export class Widget extends Thing {}
+`
+  /** A program importing it, with a pack of its own too:  it says whether the packs' tags are defined as it runs. */
+  const PROGRAM = `import {} from "${WIDGETS_PACK}"
+import {} from "${APP_PACK}"
+import { core } from "@spell/core"
+import { Widget } from "@spell/project/${WIDGETS}"
+core.console.log(customElements.get("test-pack-widget") && customElements.get("test-pack-app") ? "packs in" : "packs missing")
+`
+
+  test("each pack loads once through the page's `loadPack`, the imported project's first, before the program runs", async () => {
+    const asked: Array<[string, string]> = []
+    const page = ((globalThis as { SpellUI?: Record<string, unknown> }).SpellUI ??= {})
+    const before = page.loadPack
+    page.loadPack = async (module: string, url: string) => {
+      asked.push([module, url])
+      const tag = module === WIDGETS_PACK ? "test-pack-widget" : "test-pack-app"
+      if (!customElements.get(tag)) customElements.define(tag, class extends HTMLElement {})
+    }
+    try {
+      const library = URL.createObjectURL(new Blob([LIBRARY], { type: "text/javascript" }))
+      await mount(
+        {
+          ...source(PROGRAM, "widget-app"),
+          importUrl: (id) => (id === WIDGETS ? library : `/nowhere/${id}`),
+          packUrl: (module) => `/packs/${module}`
+        },
+        { debug: "console" }
+      )
+      await waitFor(() => testCore && /packs (in|missing)/.test(consoleText()), 10_000)
+      expect(consoleText()).toContain("packs in")
+      expect(asked).toEqual([
+        [WIDGETS_PACK, `/packs/${WIDGETS_PACK}`],
+        [APP_PACK, `/packs/${APP_PACK}`]
+      ])
+    } finally {
+      page.loadPack = before
+    }
+  })
+})
+
 describe("<VSCodeRunner>", () => {
   test("a project that imports another:  it asks the extension for the import's javascript, and runs (counter-app)", async () => {
     const [program, counter] = await Promise.all([fixtureCompiled("counter-app"), fixtureCompiled("counter")])

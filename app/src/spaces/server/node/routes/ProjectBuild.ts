@@ -17,6 +17,7 @@ import { SP } from "spell/parser/spell"
 import { projectFileIn } from "spell/parser/spell/node/projectFile"
 import { appDir } from "spell/app/spaces/server/node/people/localPerson"
 import { SitePagesBuild } from "./SitePagesBuild"
+import { ProjectPack } from "spell/app/spaces/server/node/projects/ProjectPack"
 
 /**
  * Builds spell projects when the API needs what they build:  their compiled output and scope packs are in `build/`
@@ -67,6 +68,8 @@ import { SitePagesBuild } from "./SitePagesBuild"
  * - Its output goes to the server's log, each line prefixed `projects:  ` (`SRV.ServerLog`, `server:projects`):
  *   - shown:  each project compiled, with how many warnings, and every error;  each run a group of its own
  *   - debug (`SPELL_DEBUG=server:projects`):  the command, the projects up to date, each warning, the files written
+ * - `rebuildPack()`:  a project's component pack, built again as one of its elements is saved (the page server's watch
+ *   of the spaces, `appRoutes.ts`):  `spell compile --pack <project>`, one at a time per project
  * - NEVER throws.
  */
 export class ProjectBuild {
@@ -270,6 +273,79 @@ export class ProjectBuild {
     return !!projectFile && importsAny(projectFile, groups)
   }
 
+  /**
+   * Build project `projectId`'s component pack again, as one of its elements was saved:
+   * `spell compile --pack <project>`, unminified, in the same child `spell` it compiles with.
+   * - One at a time per project:  a save while one runs queues ONE more, after it, which every save meanwhile shares.
+   * - Resolves `true` once it built, `false` when it failed (what it said is in the server's log);  NEVER rejects.
+   */
+  rebuildPack(projectId: string): Promise<boolean> {
+    const queue = this.packQueues.get(projectId) ?? {}
+    if (queue.waiting) return queue.waiting
+    const after = queue.running ?? Promise.resolve(true)
+    const waiting = after.then(() => {
+      queue.waiting = undefined
+      const running = this.run(["compile", "--pack", projectId]).then((code) => code === 0)
+      queue.running = running
+      void running.then(() => {
+        if (queue.running === running && !queue.waiting) this.packQueues.delete(projectId)
+      })
+      return running
+    })
+    queue.waiting = waiting
+    this.packQueues.set(projectId, queue)
+    return waiting
+  }
+
+  /**
+   * When `location` is a project's pack's script that's there but built from older sources than its project has now
+   * (`ComponentPack.needsBuild()`):  build it again first (`rebuildPack()`), for at most `timeout` ms.
+   * - NEVER throws:  a pack that can't be read is served as it is.
+   */
+  private async packCurrent(location: SP.SpellLocation): Promise<void> {
+    if (!location.file?.endsWith(PACK_SCRIPT_SUFFIX) || !existsSync(location.serverPath)) return
+    try {
+      const pack = ProjectPack.ofProject(location.projectId)
+      if (pack?.needsBuild()) await within(this.rebuildPack(location.projectId), this.timeout / 1000)
+    } catch {
+      // served as it is
+    }
+  }
+
+  /** Each project's pack rebuild, by project id:  the one running, and the one waiting after it (`rebuildPack()`). */
+  private packQueues = new Map<string, { running?: Promise<boolean>; waiting?: Promise<boolean> }>()
+
+  /**
+   * `GET /api/projects/pack/<project>/__pack/<name>.pack.ts`'s handler:  where a project's pack's SOURCE entry is on
+   * disk, built first when it isn't there (`untilBuilt()`), for Spell's own dev server to serve it from its sources
+   * (the app's `vite.config.ts`, `projectPacksInDev()`).
+   * - Answers `{ entry, components, project }`:  the entry file, its families' folder, the project's folder;  absolute.
+   * - 404 for a project that declares no pack, or one whose entry couldn't be built (what its compile said).
+   * - Only the editor's dev server asks:  it reads these files itself, on this machine.
+   */
+  request_devPack(): SRV.Handler {
+    return responseUtils.respondWithJSON(async (request) => {
+      const path = request.originalUrl.split(/[?#]/)[0]!
+      const address = decodeURI(path.slice(path.indexOf(DEV_PACK_API) + DEV_PACK_API.length))
+      let location: SP.SpellLocation
+      try {
+        location = SP.SpellLocation.getFileLocation(address)
+      } catch (error) {
+        throw new SRV.HttpError(400, `GET ${DEV_PACK_API}:  ${(error as Error).message}`)
+      }
+      const project = SP.SpellLocation.getProjectLocation(location.projectId).serverPath
+      const pack = projectUtils.isPackFile(location) ? ProjectPack.of(project) : undefined
+      if (!pack || location.serverPath !== pack.files.devEntry) {
+        throw new SRV.HttpError(404, `${address}:  no component pack's source entry`)
+      }
+      if (!(await this.untilBuilt(location))) {
+        const failure = this.failures.get(location.projectId)
+        throw new SRV.HttpError(404, `${address}:  not built${failure ? `:  ${failure.join("\n")}` : ""}`)
+      }
+      return { entry: pack.files.devEntry, components: pack.components, project }
+    })
+  }
+
   /** `untilBuilt()`'s work, once it's known the file isn't there and its project is. */
   private async compiledFor(location: SP.SpellLocation): Promise<boolean> {
     const file = location.serverPath
@@ -319,7 +395,11 @@ export class ProjectBuild {
   /**
    * A route's handler, ahead of the one that serves the file:  makes sure the built file it names is there.
    * - The file is the request's URL's, `/spaces/<project>/<file>` (`projectUtils.locationForUrl()`),
-   *   when that's a file spell builds (`projectUtils.isBuiltFile()`), e.g. `Solitaire.spell.js`.
+   *   when that's a file spell builds (`projectUtils.isBuiltFile()`), e.g. `Solitaire.spell.js`;
+   *   or one of its component pack's (`projectUtils.isPackFile()`), `__pack/widgets.pack.js`, which its compile builds
+   *  :  so a fresh checkout, or a page server just deployed, builds it on its first request;
+   *   its script there but built from older sources (an element edited while no page server watched) is built again
+   *   first (`packCurrent()`).
    * - A bad URL goes on to the next handler, which says what's wrong.
    */
   builtFirst(): SRV.Handler {
@@ -330,10 +410,14 @@ export class ProjectBuild {
       } catch {
         return next()
       }
-      if (!projectUtils.isBuiltFile(location)) return next()
-      const page = typeof request.query.page === "string" ? request.query.page : undefined
-      const sitePath = await this.siteFileFor(location, { page, lazy: request.query.pages === "lazy" })
-      if (sitePath) return await responseUtils.sendFile(reply, sitePath, { dotfiles: "allow" })
+      const isPack = projectUtils.isPackFile(location)
+      if (!isPack && !projectUtils.isBuiltFile(location)) return next()
+      if (isPack) await this.packCurrent(location)
+      else {
+        const page = typeof request.query.page === "string" ? request.query.page : undefined
+        const sitePath = await this.siteFileFor(location, { page, lazy: request.query.pages === "lazy" })
+        if (sitePath) return await responseUtils.sendFile(reply, sitePath, { dotfiles: "allow" })
+      }
       if (!(await this.untilBuilt(location))) {
         const failure = this.failures.get(location.projectId)
         if (failure)
@@ -515,6 +599,12 @@ const COMPILED_LINE = /^✓ (\S+) .* · wrote /
 
 /** How a project's compile is coming along:  `progress()`'s answer, see `SP.BuildProgress`. */
 export type BuildProgress = SP.BuildProgress
+
+/** End of a pack's script's name:  `widgets.pack.js`. */
+const PACK_SCRIPT_SUFFIX = ".pack.js"
+
+/** Where Spell's dev server asks for a project pack's source entry:  `request_devPack()`. */
+export const DEV_PACK_API = "/projects/pack/"
 
 /**
  * The built-in projects `start()` compiles:  Spell's libraries, which other projects import and VS Code reads the

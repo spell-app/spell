@@ -199,3 +199,25 @@ describe("saving what a compile wrote", () => {
     }
   })
 })
+
+/** A project's own elements, its component pack :  what its running code loads first. */
+describe("a project's component pack", () => {
+  test("its project file's `componentPack`:  its module, beside its compiled output", () => {
+    const project = new SP.SpellProject("@spell/test/Widgets")
+    project.contents = { manifest: {}, imports: [], componentPack: { name: "widgets", prefix: "widget-" } }
+    expect(project.componentPack).toEqual({ name: "widgets", prefix: "widget-" })
+    expect(project.packModule).toBe("@spell/pack/@spell/test/Widgets/__pack/widgets.pack.js")
+    expect(project.packModules).toEqual([project.packModule])
+    expect(project.withPackImports(`import { core } from "@spell/core"\n`)).toBe(
+      `import {} from "@spell/pack/@spell/test/Widgets/__pack/widgets.pack.js"\nimport { core } from "@spell/core"\n`
+    )
+  })
+
+  test("none declared:  no module, and its code as it was", () => {
+    const project = new SP.SpellProject("@spell/test/Plain")
+    project.contents = { manifest: {}, imports: [] }
+    expect(project.componentPack).toBeUndefined()
+    expect(project.packModules).toEqual([])
+    expect(project.withPackImports("x\n")).toBe("x\n")
+  })
+})

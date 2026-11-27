@@ -414,6 +414,8 @@ describe("HotDefinitions.updateStyle()", () => {
   test.each([
     ["/components/ui-button/UIButton.css?inline", "button"],
     ["/components/ui-tree/UITreeDiagram.css", "tree-diagram"],
+    // a component pack's (a project's own elements):  its whole name
+    ["/components/widget-card/WidgetCard.css?inline", "widget-card"],
     ["UIDimmer.page.css", undefined],
     ["/components/ui-button/button.css", undefined]
   ])("re-registers %s's sheet as %s", async (id, name) => {

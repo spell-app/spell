@@ -26,7 +26,9 @@ import type { PackSwap, PackSwapResult } from "./UIComponents.types"
  *   list) comes in, `SETTLE_MS`
  *   - measured before:  one frame with those missing, the page's top jumping up a block and back
  * - `install()` it as the page's bundle loads, BEFORE any pack defines its tags:  `HotDefinitions` records each
- *   definition as it happens.  The docs bundle (spell-epic's `spell-ui.entry.js`) and the site's (`SitePacks.ts`) do.
+ *   definition as it happens.  The docs bundle (spell-epic's `spell-ui.entry.js`) and the site's (`SitePacks.ts`) do;
+ *   so do spell-app's editor and run page, where a project's own pack is rebuilt as an element is saved (epic
+ *   `netlists` P22).
  * - Its own lib entry, `spell/ui/hot`:  only the pages that swap carry `HotDefinitions`.
  * - STATIC:  one per page.
  ****************/

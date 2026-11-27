@@ -23,6 +23,9 @@ const LATER_PACK = "/src/test-helpers/fixtures/component-packs/later.pack.js"
 /** A pack REBUILT between runs:  `<swap-a>` and `<swap-b>`, what each run holds set on `globalThis.__swapPack`. */
 const SWAP_PACK = "/src/test-helpers/fixtures/component-packs/swap.pack.js"
 
+/** A pack's SOURCE entry, an ES module, as a dev server serves one:  `<mod-card>`. */
+const MOD_PACK = "/src/test-helpers/fixtures/component-packs/mod.pack.ts"
+
 /** A pack script that runs but registers nothing. */
 const SILENT_PACK = "/src/test-helpers/fixtures/component-packs/silent.pack.js"
 
@@ -129,6 +132,26 @@ describe("ComponentPacks.nameFor()", () => {
   it("names a pack by its file:  `epics.pack.js` => `epics`", () => {
     expect(ComponentPacks.nameFor("https://example.com/packages/epics/components/__pack/epics.pack.js")).toBe("epics")
     expect(ComponentPacks.nameFor("file:///docs/x.js?v=2")).toBe("x")
+    // a pack's source entry, for a dev server
+    expect(ComponentPacks.nameFor("http://localhost/@spell-pack/acme/widgets/__pack/widgets.pack.ts")).toBe("widgets")
+  })
+})
+
+describe("ComponentPacks.load(source, { module:  true })", () => {
+  it("imports a pack's source entry, an ES module, once, and resolves once its tags are defined", async () => {
+    const [pack, again] = await Promise.all([
+      ComponentPacks.load(MOD_PACK, { module: true }),
+      ComponentPacks.load(MOD_PACK, { module: true })
+    ])
+    expect(pack.name).toBe("mod")
+    expect(again).toBe(pack)
+    expect(customElements.get("mod-card")).toBeDefined()
+    expect(ComponentPacks.owns("mod-card")).toBe(true)
+  })
+
+  it("rejects a module that registers no pack", async () => {
+    const source = `data:text/javascript,${encodeURIComponent("export const nothing = 1")}`
+    await expect(ComponentPacks.load(source, { module: true })).rejects.toThrow(/registered no pack/)
   })
 })
 

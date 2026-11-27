@@ -58,7 +58,7 @@ The other three are for where your code has to live:  a typed codebase, a librar
 | --- | --- | --- |
 | `js/solid`:  JavaScript on Solid | what the editor, the runners and `spell run` run;  draws into the page;  compiled for every project, whatever its file asks for | no types:  the snapshots and the runs are all that check it |
 | `ts/solid`:  TypeScript on Solid | the same program as a Solid developer writes it:  types where Spell knows them, standard decorators, JSX;  `tsc` checks it | a build before it runs;  a program that draws can't open in a browser from `spell run` yet |
-| `ts/lib`:  a TypeScript library | a project's classes in a single `.lib.ts` file, for code that isn't Spell to import;  the core without Solid | no drawing and no top-level steps:  it never runs on its own |
+| `ts/lib`:  a TypeScript library | a project's classes in a single `.lib.ts` file, for code that isn't Spell to import;  the core without Solid | no drawing and no top-level steps:  it never runs on its own;  a project's files that draw, and its stylesheets, are left out of it |
 | `py`:  Python | Python as a person writes it:  PEP 8's names, `range()`, `elif`, `async def` only where it waits;  a program that draws becomes a web app | Python 3.12 and uv;  thinner type hints than TypeScript's;  107 of the core's names not ported yet |
 
 🌱 WebAssembly is the fifth, and not here yet (below, "Coming").
@@ -280,7 +280,9 @@ The JavaScript starts with a heading and ends by calling `playFizzbuzz()`;  the 
 so importing it plays nothing.
 
 The cost:  a library can't draw, and never runs.
-Ask it to, and it says so (below, "Choosing a target").
+A project's files that draw, e.g. the app that shows its classes, are left out of its library, quietly, and so are
+its stylesheets:  `js/solid` writes them as ever.  A project whose every file draws, or whose library would use a type only a file
+that draws declares, says so (below, "Choosing a target").
 
 <a id="the-python-half"></a>
 
@@ -432,7 +434,8 @@ What it says when you ask for what isn't there:
 | You ask for | Spell says |
 | --- | --- |
 | `spell compile --target wasm` | `There's no target 'wasm':  try js/solid, ts/solid, py, ts/lib.` |
-| a program that draws, as `ts/lib` | `'Solitaire' draws a UI, which target 'ts/lib' can't.` |
+| a program whose every file draws, as `ts/lib` | `'Solitaire' draws a UI in every file, which target 'ts/lib' can't:  it writes only the files that don't draw.` |
+| a file that doesn't draw using a type from one that does, as `ts/lib` | `'Solitaire', for target 'ts/lib':  Game.spell uses 'card', from Card.spell, which draws a UI, so 'ts/lib' leaves it out.` |
 | `spell run --target ts/lib` | `` "ts/lib" doesn't run:  it's compiled for other code to import (`spell compile`) `` |
 
 Every option of `spell compile` and `spell run`:  [the command line](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-parser).

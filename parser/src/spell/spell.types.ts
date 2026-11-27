@@ -252,6 +252,29 @@ export const SPELL_PROJECT_MODULE = "@spell/project/"
  */
 export const SPELL_NATIVE_MODULE = "@spell/native/"
 
+/**
+ * Start of the ES module specifier for a project's COMPONENT PACK, its own elements:
+ * `@spell/pack/acme/widgets/__pack/widgets.pack.js`, the project's address then the pack's script's path in it.
+ * - Written only into the running code (`js/solid`) of a project whose project file declares one (`componentPack`),
+ *   and of every project importing it, at any depth:  `import {} from "@spell/pack/..."`, nothing named.
+ * - A runner loads the pack before the program draws (`runCompiled()`'s `loadPack`), and points the specifier at an
+ *   empty module.
+ * - Its script is built with the project's compiled output, in its build folder (`spell compile`):
+ *   `SpellUrls.packUrl()` is where a page finds it.
+ */
+export const SPELL_PACK_MODULE = "@spell/pack/"
+
+/**
+ * What a project file says of the project's own elements, its COMPONENT PACK:
+ * `"componentPack": { "name": "widgets", "prefix": "widget-" }`, the shape of a package's `"spellPack"`.
+ * - `name`:  its files' (`widgets.pack.js`);  `prefix`:  every tag's (`widget-`);
+ *   `components`:  its families' folder in the project, `components` by default
+ * - Built with the project's compiled output (`spell compile`), and loaded on every page that runs it or a project
+ *   importing it (`SPELL_PACK_MODULE`).
+ * - Read by the kit's `ComponentPack.read()`, which reads a `"spellPack"` too.
+ */
+export type ComponentPackJSON = { name: string; prefix: string; components?: string }
+
 /** JSON5 shape of a project's index file, as read/written by the server. */
 export type ProjectManifestJSON5 = {
   /** All manifest-eligible files in project, keyed by `path`. */
@@ -281,6 +304,8 @@ export type ProjectManifestJSON5 = {
    * from its project file -- default:  Spell UI's, `["spell-ui"]` (`SP.ComponentPacks`, epic `elemental-spell` P7).
    */
   packs?: string[]
+  /** Its own elements, from its project file, built into a component pack:  see `ComponentPackJSON`. */
+  componentPack?: ComponentPackJSON
   /** Where its lists start counting, from its project file:  `1` (the default) or `0` -- see `P.WriterOptions`. */
   listsStartAt?: 0 | 1
   /**
@@ -775,6 +800,11 @@ export type SpellDeclarationsData = {
    * - An importer must import the project it comes from FIRST:  ours extends that one's -- see `SpellDeclarations.load()`.
    */
   subclasses?: string[]
+  /**
+   * The component packs its running code loads, its own and those of the projects it imports, deepest first, by
+   * module (`SPELL_PACK_MODULE`):  so a project importing it loads them too.  Missing when none.
+   */
+  packs?: string[]
   /** What each declaring statement declared, in source order. */
   statements: SpellDeclaration[]
   /**
